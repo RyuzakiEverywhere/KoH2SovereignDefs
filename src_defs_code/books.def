@@ -1,0 +1,21 @@
+def Book
+{
+	text title
+	Skill skill
+	Idea idea
+	int price = 1
+
+	text title_copies = "'{title}' ({copies})"
+
+	skill_titles
+	{
+		text 1 = "The skill of {skill}"
+		text 2 = "The art of {skill}"
+		text 3 = "The secret of {skill}"
+	}
+
+	idea_titles
+	{
+		text 1 = "The idea of {idea}"
+	}
+}

@@ -1,0 +1,74 @@
+﻿def culture_models
+{
+	ship_models
+	{
+		int max_ship_level = 3
+		
+		european
+		{
+			prefab 1 = "Assets/Europe/Ships/European01/WVP_Ship_Europian_01.prefab" //GUID:b7c2a9f76eee3d843a21b1b23bd51f67
+			prefab 2 = "Assets/Europe/Ships/European02/WVP_Ship_Europian_02.prefab" //GUID:55792d58eeb8c4444b5e46e4e8be6430
+			prefab 3 = "Assets/Europe/Ships/European03/WVP_Ship_Europian_03.prefab" //GUID:e4030aa30afd60b468e7a821546b0961
+		}
+		
+		arabic
+		{
+			prefab 1 = "Assets/Europe/Ships/Arabic01/WVP_Ship_Arabic_01.prefab" //GUID:05f7ddc7eebd86d448e4dd2f4a96fadc
+			prefab 2 = "Assets/Europe/Ships/Arabic02/WVP_Ship_Arabic_02.prefab" //GUID:114d92de5510ded4ca14ce951d1a108e
+			prefab 3 = "Assets/Europe/Ships/Arabic03/WVP_Ship_Arabic_03.prefab" //GUID:0a1d3cc42cacc1b4890c47dc8de06311
+		}
+		
+		nordic
+		{
+			prefab 1 = "Assets/Europe/Ships/Nordic01/WVP_Ship_Nordic_01.prefab" //GUID:039070df1751f2945895240f11130dba
+			prefab 2 = "Assets/Europe/Ships/Nordic01/WVP_Ship_Nordic_01.prefab" //GUID:039070df1751f2945895240f11130dba
+			prefab 3 = "Assets/Europe/Ships/Nordic01/WVP_Ship_Nordic_01.prefab" //GUID:039070df1751f2945895240f11130dba
+		}
+		
+		rebel
+		{
+			prefab 1 = "Assets/Europe/Ships/Pirate01/WVP_Ship_Pirate_01.prefab" //GUID:c4e9e4a7125b9b349b1e703796a69d79
+			prefab 2 = "Assets/Europe/Ships/Pirate01/WVP_Ship_Pirate_01.prefab" //GUID:c4e9e4a7125b9b349b1e703796a69d79
+			prefab 3 = "Assets/Europe/Ships/Pirate01/WVP_Ship_Pirate_01.prefab" //GUID:c4e9e4a7125b9b349b1e703796a69d79
+		}
+	}
+
+	cannon_models
+	{
+		prefab army = "Assets/Europe/Ships/ShipCannons.prefab" //GUID:6bb6ad522930a11498df5d7c7842df76
+	}
+	
+	models_per_culture
+	{
+		//cultureOrCultureGroup = "model_name"
+		//culture takes priorty over the culture group
+		
+		African = "arabic"
+		Arab = "arabic"
+		Arabic = "arabic"
+		Berber = "arabic"
+		Iranic = "arabic"
+		Mongolic = "arabic"
+		Turkic = "arabic"
+		
+		Armenian = "european"
+		Arberian = "european"
+		Caucasian = "european"
+		Celtic = "european"
+		Gaelic = "european"
+		HighGermanic = "european"
+		WestGermanic = "european"
+		Greek = "european"
+		Iberian = "european"
+		Latin = "european"
+		Magyar = "european"
+		Romanic = "european"
+		EastSlavic = "european"
+		SouthSlavic = "european"
+		WestSlavic = "european"
+		
+		Baltic = "nordic"
+		FinnoUgric = "nordic"
+		Nordic = "nordic"
+	}
+}

@@ -1,0 +1,11 @@
+﻿def wv_scale
+{
+	float unit_scale = 1.4
+	float marshal_scale = 1.7 //1.2;
+	float settlement_resources = 1.5 //2;
+	float town_nameplate = 1.2 //1.2;
+	
+	float unit_speed_bias = 0.8
+	// how much faster a unit should walk depending on his size - anim speed = logic.speed_mod * (1 + (scale - 1) * wv_scale.def.unit_speed_bias)
+	// unit_scale = 1.2 - unit anim speed = speed * (1 + 0.2 * wv_scale.def.unit_speed_bias) 
+}

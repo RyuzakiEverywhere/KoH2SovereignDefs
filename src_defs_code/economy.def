@@ -1,0 +1,713 @@
+
+def Economy
+{
+
+	cost_round
+	{
+		1
+		{
+			float threshold = 50
+			float round_to = 50
+		}
+		2
+		{
+			float threshold = 50
+			float round_to = 50
+		}
+	}
+
+	gold_from_excess_resources
+	{
+		// rounded up to int
+		// perc from income [/ flat cap]
+		Books = 6000/3
+		Piety = 6000/3
+		Levy = 6000/3
+	}
+
+	resources income_multipliers
+	resources expense_multipliers
+	
+	income
+	{
+		// resource_type / location / bonus_type key [{ [perc;] [mul = ...;] }]
+		// bonus types: stat, kingdom_stat, func
+		// multiplier is usually var name as string
+		// for stats key is the name of the stat
+		// for funcs, key is the function name, the rest is handled in code
+
+		// implicit rules:
+		// - kingdom income is sum of realm incomes + kingdom-wide bonuses
+		//   - realm incomes are modified by tax rate / no-governor penalties before adding
+		// - realm income is sum off all settlements + buildings + custom stuff + realm-wide bonuses
+		// - settlement and buildings productions are not declared here (calculated on their own)
+		// - disorders, wrong-religion settlements, etc. are handled in code
+
+//----------------------------------- GOLD income
+
+		// TODO: These things should be calculated in logic
+		// for consistency's sake.
+		Gold
+		{
+			Kingdom // kingdom-wide bonuses
+			{
+				stat ks_base_gold_income
+				stat ks_tax_rate {perc}
+				stat ks_gold_from_goods
+
+				//func CalculateGoldFromPassiveTrade
+				func CalculateGoldFromMerchants
+				// {
+				// 	stat ks_debug
+				// }
+	            func CalculateGoldFromForeignMerchants
+	            //func CalculateCommerceForTraders
+	            func CalculateUntaxedGoldFromTradeCenters
+	            //func CalculateGoldFromTradeRoutes
+	            func CalcVassalGold { flat }
+	            func CalcImportAndExportGold
+	            func CalculateGoldFromExcessResources
+	            func CalcGoldFromJizya { flat }
+
+	            //!!! old stuff, from ideas, to be removed
+	            //stat ks_gold_per_good  { mul = "num_non_society_goods" }
+	            //stat ks_gold_per_population { mul = "total_population" }
+
+				func CalculateGoldFromGoods
+
+	            //!!! tax_rate and ks_tax_bonus (unused, from ideas)
+
+	            stat ks_prod_gold_perc { perc; category = "Religion" } //!!! from religion and ideas
+	            //func CalcCrownAuthorityGoldPerc { perc } //!!! can be positive, negative! or zero
+	            func CalcCorruptionGoldPerc { perc }
+	            func CalculateGoldFromImportantRelatives
+			}
+
+			// Character
+			// {
+			// 	func GetGoldIncome
+			// }
+
+			// Merchant
+			// {
+			// 	func CalcMerchantGold
+			// }
+
+			Realm // realm-wide bonuses, mostly used for percent modifiers
+			{	
+				stat rs_governor_gold_in_town_per_good { mul = "num_goods" }
+				stat rs_governor_gold_per_good = { mul = "num_goods" }
+				stat rs_governor_prod_gold_flat
+				func CalcPopulationGold { category = "Population"; recalc_on {} }
+
+				//stat rs_gold_income_perc { perc }
+				stat rs_gold_in_orthodox_provinces_perc { perc; mul = "is_orthodox"; recalc_on { religion_changed } }
+			}
+
+			// settlement types
+			Town
+			{
+				func CalcTownGoldFromTradeCenter { category = "TCGoldInTown" }
+				func CalcTradeCenterGoldFromCommerce { category = "TCGoldFromCommerce" }
+				func CalcTradeCenterGoldFromGoods { category = "TCGoldFromGoods" }
+			}
+
+			CoastalTown
+			{
+				kingdom_stat ks_gold_per_coastal_realm
+			}
+
+			AllSettlements
+			{
+				stat rs_governor_gold_per_settlement
+				func CalcSettlementGoldFromTradeCenter { category = "TCGoldInSettlements" }
+			}
+
+			ReligiousSettlement
+			{
+				stat rs_governor_gold_per_religious_settlement
+			}
+
+			Village
+			{
+				//stat rs_gold_per_village
+				stat rs_governor_gold_per_village
+				//kingdom_stat ks_gold_per_village      // usually included in the realm stat
+				//governor_stat cs_gold_per_village     // not needed, governor bonuses use realm stats
+			}
+
+			CoastalSettlement
+			{
+				kingdom_stat ks_gold_in_coastal_settlements 
+			}
+
+			CoastalVillage
+			{
+				kingdom_stat ks_gold_in_coastal_villages	
+			}
+
+			Keep
+			{
+				kingdom_stat ks_gold_in_castles 
+			}
+
+
+			Monastery
+			{
+				kingdom_stat ks_gold_per_monastery
+			}
+
+
+			// custom stuff
+			
+			// Workers
+			// {
+			// 	flat amount = 0
+			// }
+
+			// Goods
+			// {
+			// 	stat rs_governor_gold_in_town_per_good
+			// }
+		}
+
+//----------------------------------- FAITH income
+
+		Piety
+		{
+			Kingdom
+			{
+				//func GetFaithFromMonasteries //!!! faith from governed monasteries calculated separately for some reason
+				//func GetFaithFromTowns
+				
+				func CalcFaithFromClerics
+				//stat ks_piety_per_cleric { mul = "clerics_count"}
+				
+				stat ks_prod_piety_flat
+				stat ks_prod_piety_advantages
+				stat ks_prod_piety_opinions
+				stat ks_prod_piety_traditions
+
+				//func GetFaithFromPatriarch
+
+				stat ks_prod_piety_perc { perc } // from religion only
+				stat ks_prod_piety_religion_perc { perc }
+				
+				//func GetLiegeReinPerc { perc }
+				stat ks_liege_rein_perc { perc }
+
+				// func CalcMissionInRomePietyIncome = "CalcStatusResources" { status = OnMissionInRomeStatus; key = "income" }
+				// func CalcMissionInConstantinoplePietyIncome = "CalcStatusResources" { status = OnMissionInConstantinopleStatus; key = "income" }
+			}
+
+			Realm
+			{
+				// ks_piety_per_society //!!! obsolete
+			}
+
+			Town
+			{
+				stat rs_governor_piety
+			}
+
+			AllSettlements
+			{
+				stat rs_governor_piety_per_settlement
+			}
+
+			ReligiousSettlement
+			{
+				stat rs_governor_piety_per_religous_settlement
+				kingdom_stat ks_piety_per_religous_settlement
+			}
+
+			Shrine
+			{
+				stat rs_governor_piety_per_shrine
+			}
+
+			Monastery
+			{
+				stat rs_governor_piety_per_monastery
+				kingdom_stat ks_piety_per_monastery
+			}
+
+			Cathedral
+			{
+				kingdom_stat ks_piety_cathedrals
+			}
+			GreatMosque
+			{
+				kingdom_stat ks_piety_cathedrals
+			}
+		}
+
+//----------------------------------- BOOKS income
+
+		Books
+		{
+			Kingdom
+			{
+				func CalcBooksPerCleric
+				stat ks_prod_books_flat
+				stat ks_prod_books_goods
+				stat ks_prod_books_traditions
+				stat ks_prod_books_religion
+
+				stat ks_prod_books_perc { perc }
+				stat ks_prod_books_religion_perc { perc }
+				func CalcBooksFromFaith
+
+
+				// func CalcMissionInRomeBooksIncome = "CalcStatusResources" { status = OnMissionInRomeStatus; key = "income" }
+				// func CalcMissionInConstantinopleBooksIncome = "CalcStatusResources" { status = OnMissionInConstantinopleStatus; key = "income" }
+				func CalcStudyBooksIncome = "CalcStatusResources" { status = OnStudyStatus; key = "income" }
+
+				func CalcBooksFromImportantRelatives
+			}
+
+			Realm
+			{
+				// ks_books_per_society //!!! obsolete
+			}
+
+			Town
+			{
+				stat rs_governor_books
+				func CalcTownBooksFromTradeCenter { category = "TCBooksInTown" }
+			}
+
+			AllSettlements
+			{
+				stat rs_governor_books_per_settlement
+			}
+
+			MonasteryOrMosque
+			{
+				kingdom_stat ks_books_per_monastery
+				stat rs_governor_books_per_religious_settlement
+			}
+
+			Village
+			{
+				kingdom_stat ks_books_per_village
+				stat rs_governor_books_per_village
+			}
+
+			// buildings
+
+			Church
+			{
+				stat rs_governor_books_church_or_masjid
+			}
+
+			Masjid
+			{
+				stat rs_governor_books_church_or_masjid
+			}
+
+			Cathedral
+			{
+				stat rs_governor_books_cathedral_or_great_mosque
+			}
+
+			GreatMosque
+			{
+				stat rs_governor_books_cathedral_or_great_mosque
+			}
+
+			University
+			{
+				stat rs_governor_books_university_or_madrasah
+			}
+
+			Madrasah
+			{
+				stat rs_governor_books_university_or_madrasah
+			}
+
+			Keep
+			{
+				stat rs_governor_books_per_castle
+			}
+		}
+
+//----------------------------------- FOOD income
+		
+		Food
+		{
+			Kingdom
+			{
+				func CalcFoodFromImportAndExport
+			}
+
+			Realm
+			{
+				stat rs_governor_prod_food_flat
+				kingdom_stat ks_food_production_perc { perc }
+			}
+
+			Town
+			{
+				stat rs_food_in_towns
+				stat rs_governor_food_in_town_per_good { mul = "num_goods"}
+			}
+
+			AllSettlements
+			{
+				stat rs_governor_food_per_settlement
+			}
+
+			Farm
+			{
+				stat rs_food_in_farms
+				stat rs_governor_food_per_farm
+			}
+
+			CoastalVillage
+			{
+				kingdom_stat ks_food_in_coastal_villages	
+			}
+
+		}
+
+//----------------------------------- WORKER SLOTS income
+
+		WorkerSlots
+		{
+			Town
+			{
+				kingdom_stat ks_max_population
+				stat rs_governor_max_population
+			}
+
+			Village
+			{
+				stat rs_governor_workers_per_village
+			}
+		}
+
+//----------------------------------- TOWN GUARDS income
+
+		TownGuards
+		{
+			Town
+			{
+				kingdom_stat ks_town_guards
+				stat rs_governor_town_guards
+			}
+
+			Keep
+			{
+				stat rs_governor_guards_in_keeps
+			}
+		}
+
+//----------------------------------- LEVY income
+
+		Levy
+		{
+			Kingdom
+			{
+				stat ks_base_levy_income
+			}
+
+			Town
+			{
+				stat rs_governor_levy_in_town 
+			}
+
+			Keep
+			{
+				stat rs_governor_levy_per_keep
+				stat rs_levy_per_keep 
+			}
+
+			Village
+			{
+				stat rs_governor_levy_per_village
+				stat rs_levy_per_village
+			}
+
+			AllSettlements
+			{
+				stat rs_governor_levy_per_settlement
+			}
+		}
+
+//----------------------------------- COMMERCE income
+
+		Trade
+		{
+			Kingdom
+			{
+				//stat ks_commerce // not used directly
+				stat ks_base_commerce
+				stat ks_commerce_religion
+				stat ks_commerce_goods
+				//ks_commerce_ideas
+
+				// func CalcMissionInRomeTradeIncome = "CalcStatusResources" { status = OnMissionInRomeStatus; key = "income" }
+				// func CalcMissionInConstantinopleTradeIncome = "CalcStatusResources" { status = OnMissionInConstantinopleStatus; key = "income" }
+			}
+
+			Realm
+			{
+				stat rs_governor_commerce_flat
+				stat rs_governor_commerce_per_good { mul = "num_goods" }
+			}
+
+			Town
+			{
+				//stat rs_commerce_governor // not used directly
+				stat rs_commerce_town
+			}
+
+			CoastalTown
+			{		
+				kingdom_stat ks_trade_per_coastal_realm
+			}
+
+			AllSettlements
+			{
+				stat rs_commerce_settlements
+				stat rs_governor_commerce_per_settlement
+			}
+
+			Village
+			{
+				stat rs_governor_commerce_per_village
+			}
+
+			CoastalSettlement
+			{
+				stat rs_governor_commerce_per_coastal_settlement
+			}
+
+			ReligiousSettlement
+			{
+				stat rs_governor_commerce_per_monastery
+			}
+		}
+
+//----------------------------------- HAMMERS income
+
+		Hammers
+		{
+			// these are currently only modified by ideas
+
+			Realm
+			{
+				kingdom_stat ks_hammers_in_provinces_perc { perc }
+			}
+
+			// Town
+			// {
+			// 	(ideas only) kingdom_stat ks_production_bonus
+			// }
+		}
+
+//----------------------------------- end of income		
+	}
+
+	upkeep
+	{
+
+//----------------------------------- GOLD upkeep
+
+		Gold
+		{
+			Kingdom
+			{
+				func CalcWagesUpkeep
+				func CalcBuildingsUpkeep
+				func CalcArmiesGoldUpkeep
+				func CalcBribesUpkeep
+				func CalcSupportPretendersUpkeep
+				func CalcRuinRelationsUpkeep
+				func CalcSowDissentUpkeep
+				func CalcBolsterCultureUpkeep
+				func CalcOccupationsUpkeep
+				func CalcDisorderUpkeep
+				func CalcSovereignTax
+				func CalcJihadUpkeep
+				func CalcPaganBeliefsUpkeep
+
+				//action upkeeps
+				func CalcImproveRelationsUpkeep = "CalcStatusResources" { status = ImprovingRelationsStatus }
+				func CalcImrpoveOpinionsUpkeep = "CalcStatusResources" { status = ImprovingOpinionsStatus }
+				func CalcPeaceTalksUpkeep = "CalcStatusResources" { status = PeaceTalksStatus }
+				func CalcDefensivePactsUpkeep = "CalcStatusResources" { status = HoldingADefensivePactStatus }
+				func CalcInvasionPlansUpkeep = "CalcStatusResources" { status = HoldingAnInvasionPlanStatus }
+				// func CalcMissionInRomeUpkeep = "CalcStatusResources" { status = OnMissionInRomeStatus }
+				// func CalcMissionInConstantinopleUpkeep = "CalcStatusResources" { status = OnMissionInConstantinopleStatus }
+				func CalcStudyUpkeep = "CalcStatusResources" { status = OnStudyStatus }
+				func CalcSearchingForSpouseUpkeep = "CalcStatusResources" { status = SearchingForSpouseStatus }
+				func CalcPreachGoldUpkeep = "CalcActionResources" { action = ConvertProvinceReligionAction }
+				func CalcJourneyGoldUpkeep = "CalcActionResources" { action = GoOnAJourneyAction }
+
+				func CalcHelpTheWeakUpkeep
+				func CalcUpkeepGoldFromGoodsImport
+				func CalcUpkeepGoldFromFoodImport
+
+				// inflation may need to be last (not at the moment)
+				func CalcInflationPenalty
+			}
+		}
+
+//----------------------------------- BOOKS upkeep		
+
+		Books
+		{
+			Kingdom
+			{
+				func CalcPreachBooksUpkeep = "CalcActionResources" { action = ConvertProvinceReligionAction }
+			}
+		}
+
+//----------------------------------- FAITH upkeep		
+
+		Piety
+		{
+			Kingdom
+			{
+				func CalcPreachPietyUpkeep = "CalcActionResources" { action = ConvertProvinceReligionAction }
+			}
+		}
+
+//----------------------------------- FOOD upkeep
+		
+		Food
+		{
+			Kingdom
+			{
+				func CalcArmiesFoodUpkeep
+				func CalcFoodExportUpkeep
+			}
+
+			Realm
+			{
+				func CalcGarrisonFoodUpkeep
+			}
+		}
+
+//----------------------------------- COMMERCE upkeep
+		
+		Trade
+		{
+			Kingdom
+			{
+				func CalcAllocattedCommerce
+			}
+		}		
+
+//----------------------------------- end of upkeep		
+	}
+
+	trade
+	{
+		// these can be overriden in level_N
+		// context:
+		//   obj: the merchant
+		//   int trade_level
+		//   Kingdom src_kingdom (same as obj.kingdom)
+		//   Kingdom tgt_kingdom
+		//   float relationship
+		//   int distance
+		
+		trade_level
+		{
+			text name
+			float upgrade_gold_cost
+			float commerce
+			
+			float base_income = 150000
+			float income_modifier
+			float royal_profit_mod = ( (is_king and 1.5) or 1 )
+			float relations_profit = (map_clamp(GetRelationship(src_kingdom, tgt_kingdom), 0, 1000, 0, 15))
+			float profit_from_navigation = (obj.cs_gold_per_coastal_where_trading * tgt_kingdom.coastal_realms_count)
+
+			float with_subordinated = (tgt_kingdom.subordinated * tgt_kingdom.is_orthodox * src_kingdom.ks_trade_income_with_subordinated_perc)
+			float with_constantople = (tgt_kingdom.is_constantinople_kingdom * src_kingdom.ks_trade_income_with_constantinople_perc)
+			float stat_mod = (1 + (cs_trade_income_perc + src_kingdom.ks_trade_income_perc + with_subordinated + with_constantople) / 100)
+			float profit = (ceil( (base_income + cs_base_trading_income + class_level + relations_profit + src_kingdom.kingdom.king_economy_ability) * stat_mod * income_modifier * royal_profit_mod + profit_from_navigation))
+			
+			float foreign_profit = (profit * 0.1)
+			float base_chance = 100
+			float time_needed = 5
+		}
+		
+		level_0 : trade_level
+		{
+			name = "Trade Not Started"
+			commerce = 0
+			profit = 0
+			income_modifier = 5.5
+		}
+		level_1 : trade_level
+		{
+			name = "Small Scale Trade"
+			commerce = 10
+			income_modifier = 5.5
+		}
+		level_2 : trade_level
+		{
+			name = "Medium Scale Trade"
+			upgrade_gold_cost = 1
+			commerce = 20
+			income_modifier = 5.5
+		}
+		level_3 : trade_level
+		{
+			name = "Large Scale Trade"
+			upgrade_gold_cost = 1
+			commerce = 40
+			income_modifier = 5.5
+		}
+		level_4 : trade_level
+		{
+			name = "Exclusive Trade"
+			upgrade_gold_cost = 1
+			commerce = 60
+			income_modifier = 2.5
+		}
+		level_5 : trade_level
+		{
+			name = "Imperial Trade"
+			upgrade_gold_cost = 1
+			commerce = 100
+			income_modifier = 5.5
+		}
+	}
+	
+	float time_spawn_or_despawn_trade_center = 5 //minutes
+	float time_to_refresh_trade_center_realms = 120 //seconds
+	float time_to_recheck_trade_routes = 300
+	float time_to_decay_trade_agreement = 1500
+	float trade_route_capacity_thresholds = [1.0]
+	float trade_route_min_time_before_close = 200
+	float move_appeal_penalty_for_multiple_TC_around = 5
+	
+	int merchant_max_import_goods_count = 70
+}
+
+def TradeCenter
+{
+	int max_move_distance = 10 //in realms, no longer used
+	
+	float income_per_province = 50000
+	float income_per_good = 50000 //temporary no appeal per good
+	float income_commerse_percent = 50000 //temporary no appeal per commerce
+	
+	color map_colors = ["#6b9898", "#a52a2a", "#006400", "#00008b", "#ff0000", "#ffa500", "#ffff00", "#e487c2", "#00ff00", "#00fa9a", "#7474ff", "#b577f0", "#1e90ff", "#f0e68c", "#87ceeb", "#ffb6c1"]
+	int min = 10
+	int max = 16 //make sure there are enough map colors to match this num
+	int min_realm_distance_between = 3
+	// New Zone Appeal = Incoming Appeal * tc_spread_appeal_fade_perc * (tc_spread_relation_base +Rel between Zones owners) / tc_spread_relation_total *
+	// (tc_spread_relation_base + Rel between zone and TC owner) / tc_spread_relation_total – TC Appeal Fade Const
+	float tc_spread_appeal_fade_perc = 90 //percent
+	float tc_spread_appeal_fade_const = 3
+	float tc_spread_appeal_fade_sea_const = 8
+	float tc_spread_relation_base = 1000
+	float tc_spread_relation_total = 2000
+}

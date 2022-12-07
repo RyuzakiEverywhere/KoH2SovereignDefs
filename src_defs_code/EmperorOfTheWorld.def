@@ -1,0 +1,47 @@
+﻿def EmperorOfTheWorld
+{
+	float auto_vote_min_time = 7200
+	float auto_vote_max_time = 10800
+	float auto_vote_battleview_dalay_time = 300
+	int min_great_powers = 5
+	float prepare_duration = 5
+	float player_action_time_out = 90 //vote, accept/reject being emperor, accept/reject AI emperor(SP only)
+	float ai_action_time_out = 15
+	float ai_think_delay = 5
+	float fame_treshold_single_cadidate = 0.5
+	float fame_treshold_multiple_candidates = 0.5
+	
+	float desired_pro_points = 50
+	float desired_con_points = 50
+	float player_fame_perc_bonus = 10
+	float slant_tresholds_perc_from_max_weight = [-50,-10, 0, 10, 50] //very against, against, neutral, for, very for
+	
+	float notify_gained_lost_support_interval_time = 900
+	
+	SlantBackgrounds
+	{
+		GreatPowers
+		{
+			sprite VeryAgainst = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_1_top.psd:Element_EoW_Background_Slant_1_top#2" //GUID:5d070f7cff5bb8949ab701c18ed614ce
+			sprite Against = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_2_top.psd:Element_EoW_Background_Slant_2_top#2" //GUID:91af4302ee080f940b846f470dce414a
+			sprite SlightlyAgainst = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_3_top.psd:Element_EoW_Background_Slant_3_top#2" //GUID:39c83a9220adaaa42975e4dfe8048058
+			sprite SlightlyFor = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_3_top.psd:Element_EoW_Background_Slant_3_top#2" //GUID:39c83a9220adaaa42975e4dfe8048058
+			sprite For = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_4_top.psd:Element_EoW_Background_Slant_4_top#2" //GUID:976a8a975e2cac34aa54f6a0aa1756a1
+			sprite VeryFor = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_5_top.psd:Element_EoW_Background_Slant_5_top#2" //GUID:76a8cdbb070e0c64893dc670511d21dc
+		}
+		Voters
+		{
+			sprite VeryAgainst = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_1.psd:Element_EoW_Background_Slant_1#2" //GUID:840139933c9f75f40a58eb7db64ca094
+			sprite Against = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_2.psd:Element_EoW_Background_Slant_2#2" //GUID:5c5d247efb08d424d930d961ecc02d23
+			sprite SlightlyAgainst = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_3.psd:Element_EoW_Background_Slant_3#2" //GUID:25e6f60816e44094ab9fdfd91ae8653c
+			sprite SlightlyFor = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_3.psd:Element_EoW_Background_Slant_3#2" //GUID:25e6f60816e44094ab9fdfd91ae8653c
+			sprite For = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_4.psd:Element_EoW_Background_Slant_4#2" //GUID:81e632385638fec4c8c629ffce7e0843
+			sprite VeryFor = "Assets/UI/Elements/EmperorOfTheWorldWindow/Element_EoW_Background_Slant_5.psd:Element_EoW_Background_Slant_5#2" //GUID:5f936b6bede845d489342ad13648726e
+		}
+	}
+}
+
+def EmperorOftheWorldSupportNotificator
+{
+	float interval_time = 900
+}

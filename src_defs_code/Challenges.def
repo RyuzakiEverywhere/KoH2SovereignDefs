@@ -1,0 +1,475 @@
+﻿def Challenge
+{
+	text name // used in tooltip/message caption
+	text description // used in tooltip/message body
+	
+	text success_caption = "Challenge succeeded: {name}"
+	success_add_texts // additional text when succeeded, by reason
+	{
+		text success = "We have successfully completed this challenge." 
+	}
+
+	text fail_caption = "Challenge failed: {name}"
+	fail_add_texts // additional text when failed, by reason
+	{
+		text fail = "We have failed in this challenge." 
+		text generations = "We have failed to complete this challenge [in {generations_limit} generations|on time]." //!!! care if generations == 1
+		text minutes = "We have failed to complete this challenge on time."
+	}
+	
+	// named variables / queries, evaluated once when the challenge is generated
+	// these are example ones
+	// args
+	// {
+	// 	var difficulty = (RndI(1,3))
+	// 	random_kingdom tgt_kingdom = (AreEnemies(src_kingdom, obj))
+	// 	var tgt_amount = (RndI(5,10))
+	// }
+
+	// set variables, evaluated once when the challenge is generated
+	set_vars
+	{
+		// these are set from C#, only if relevant
+		//start_generation = (own_kingdom.generations) 
+		//generations_limit
+		//minutes_limit
+		//seconds_limit
+	}
+
+	// override these to set time limits
+	// <= 0 means no time limit of this type
+	// if both generations and minutes are > 0, a random one will be chosen
+	time_limit
+	{
+		generations = (RndI(2,3))
+		minutes = 0
+	}
+
+	int generations_passed = (own_kingdom.generations - start_generation)
+
+	// expression to return whether this challenge can be created / activated, context: own_kingdom
+	bool enabled = true
+
+	// expression to return weight for the chance to be picked, <= 0 to disable, context: own_kingdom
+	float weight = 1
+	
+	int success_prestige = 50 //* difficulty
+	int fail_prestige = 0 //(-success_prestige)
+		
+	rules : GameRule
+	{
+		log = 1
+		timeout = 0
+		target { kingdom own_kingdom }
+		start_triggers { target activate_challenge } // dummy trigger, set up manually
+		stop_triggers { target deactivate_challenge } // dummy trigger, set up manually		
+
+		// override these to provide additional way to prevent activation or fail
+		condition start = true
+		condition stop = false
+		
+		// override these or manually activate them from other rules
+		rule success // when this one activates the challenge will succeed
+		{
+			log = 1
+			timeout = 0
+			triggers
+			{
+				target succeed_challenge
+				{
+					condition = (param == challenge)
+				}
+			}
+			condition execute = true
+		}
+
+		rule fail // when this one activates the challenge will fail
+		{
+			log = 1
+			timeout = 0
+			triggers
+			{
+				target fail_challenge
+				{
+					condition = (param == challenge)
+				}
+				target generations_changed
+				{
+					condition = (generations_limit > 0 && generations_passed >= generations_limit)
+					reason = "generations"
+				}
+				target income_tick // precise enough and easier than using a timer
+				{
+					condition = (seconds_limit > 0 && rules.time_since_start >= seconds_limit)
+					reason = "minutes"
+				}
+			}
+			condition execute = true
+		}
+
+		// insert child game rules here
+	}
+	
+	outcomes
+	{
+		main success = (succeeded and 100 or 0)
+		{
+			message
+			{
+				def = OutcomeMessage
+				sprite icon = "Assets/UI/Elements/Common/Icons/Thumb_green_up.png:Thumb_green_up#2" //GUID:f05ffdf3b41e51641804de2a124fb773
+				text caption = "{success_caption}"
+				text text = "{description}[{p}{p}{clr:green}{success_add_text}{/clr}]"
+			}
+			also prestige = (success_prestige)
+		}
+		option fail
+		{
+			message
+			{
+				def = OutcomeMessage
+				sprite icon = "Assets/UI/Elements/Common/Icons/Thumb_red_down.png:Thumb_red_down#2" //GUID:f6d7b06526449264384deb31ae0d4082
+				text caption = "{fail_caption}"
+				text text = "{description}[{p}{p}{clr:red}{fail_add_text}{/clr}]"
+			}
+			also prestige = (fail_prestige)
+
+			// if custom outomes per fail reason are needed, add them like this:
+			// option reason_key = 0
+			// {
+			// 	also whatever_outcome_you_want
+			// }
+		}
+	}
+	
+	outcome_defaults : OutcomeDefaults
+}
+
+def TestChallenge1 : Challenge
+{
+	name = "Have {tgt_gold}{gold_icon}"
+	description = "Gold: {cur_gold}/{tgt_gold}"
+	
+	args
+	{
+		var difficulty = (RndI(1,3))
+		var tgt_gold = (SSum(own_kingdom, 2.5 + difficulty * 0.5)) // S3 .. S4
+	}
+
+	success_prestige = (difficulty * 25)
+	
+	cur_gold = (own_kingdom.resources.gold)
+
+	enabled = (cur_gold < own_kingdom.S2)
+	
+	rules
+	{
+		rule success
+		{
+			triggers { target resources_changed }
+			condition execute = (cur_gold >= tgt_gold)
+		}
+	}
+}
+
+def TestChallenge2 : Challenge
+{
+	name = "Attack {tgt_kingdom}"
+	description = "Declare war on {tgt_kingdom}."
+
+	fail_add_texts
+	{
+		text they_attacked_us = "{tgt_kingdom} attacked us first."
+		text kingdom_destroyed = "{tgt_kingdom} was destroyed."
+	}
+
+	args
+	{
+		random_kingdom tgt_kingdom = (stance)// && size
+		{
+			stance = (tgt_kingdom != own_kingdom && !AreEnemies(own_kingdom, tgt_kingdom))
+
+			// approach 1: filter target kingdom to match difficulty
+			// size ratios:
+			// < 0.5 - too easy, invalid target
+			// 0.5 .. 0.75 = easy (difficulty 1)
+			// 0.75 .. 1.25 = normal (difficulty 2)
+			// > 1.25 = hard (difficulty 3)
+			//size = (IntervalIdx(tgt_kingdom.num_realms / own_kingdom.num_realms, 0.5, 0.75, 1.25) == difficulty - 1)
+
+		}
+
+		// approach 2: calc difficulty after tgt_kingdom has been chosen
+		var difficulty = (tgt_kingdom.num_realms / own_kingdom.num_realms)		
+	}
+
+	time_limit
+	{
+		generations = (1 + ceil(difficulty))
+		minutes = 2
+	}
+	
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				target war_started
+				{
+					condition = (IsAttackerInWar(own_kingdom, tgt_kingdom))
+				}
+			}
+		}
+		rule fail
+		{
+			triggers
+			{
+				target war_started
+				{
+					condition = (IsDefenderInWar(own_kingdom, tgt_kingdom))
+					reason = "they_attacked_us"
+				}
+				// any_kingdom kingdom_destroyed
+				// {
+				// 	condition = (sender == tgt_kingdom)
+				// }
+				kingdom_destroyed 
+				{ 
+					sender = (tgt_kingdom) 
+				}
+			}
+		}
+	}
+}
+
+def TestChallenge3 : Challenge
+{
+	name = "Kill {tgt_count} rats"
+	description = "Prisoners executed: {cur_count}/{tgt_count}"
+	
+	args
+	{
+		var tgt_count = (RndI(10, 10))
+	}
+
+	set_vars
+	{
+		cur_count = 0
+	}
+
+	rules
+	{
+		rule counter
+		{
+			//log = 1
+			triggers { target prisoner_executed }
+			condition execute = true
+			outcomes
+			{
+				set_var cur_count = (cur_count + 1) { owner = (challenge) }
+				trigger succeed_challenge { param = (challenge) }
+			}
+		}
+		
+		rule success
+		{
+			condition execute = (cur_count >= tgt_count)
+		}
+	}
+}
+
+def RecoverPapacyChallenge : Challenge
+{
+	name = "Help Restore Papacy"
+	description = "Make sure Rome is back in The Pope's hands"
+	enabled = (own_kingdom.is_catholic && !own_kingdom.is_excommunicated && own_kingdom.papacy.defeated)
+
+	time_limit
+	{
+		generations = 2
+		minutes = 30
+	}
+
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				any_kingdom restored_papacy
+			}
+		}
+	}
+}
+
+def RestorePapacyChallenge : RecoverPapacyChallenge
+{
+	name = "Restore Papacy"
+	description = "We must restore the Papal institution"
+
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				target restored_papacy
+				{
+					condition = (sender == own_kingdom)
+				}
+			}
+		}
+		rule fail
+		{
+			triggers
+			{
+				any_kingdom restored_papacy
+				{
+					condition = (sender != own_kingdom)
+				}
+			}
+		}
+	}
+}
+
+def RecoverHolyCityChallenge : Challenge
+{
+	name = "Free {tgt_realm}"
+	description = "{tgt_realm} has fallen in the hands of infidels. We must chase them away by any means necessary."
+
+	args
+	{
+		best_realm tgt_realm = (filter)
+		{
+			filter = (tgt_realm.is_religion_important && tgt_realm.religion_distance > 1 && tgt_realm.religion_family = own_kingdom.religion_family)
+			kingdom = "any"
+		}
+	}
+
+	time_limit
+	{
+		generations = 2
+		minutes = 30
+	}
+
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				realm kingdom_changed
+				{
+					condition = (sender == tgt_realm && tgt_realm.religion_distance <= 1)
+				}
+			}
+		}
+		rule fail
+		{
+			triggers
+			{
+				target religion_changed
+				{
+					condition = (tgt_realm.religion_family != own_kingdom.religion_family)
+				}
+			}
+		}
+	}
+}
+
+def CaptureHolyCityChallenge : RecoverHolyCityChallenge
+{
+	name = "Capture fallen holy city: {tgt_realm}"
+	description = "Infidels have taken control of {tgt_realm}. Now is the time to rise our prestige by securing it."
+
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				realm kingdom_changed
+				{
+					condition = (sender == tgt_realm && tgt_realm.kingdom == own_kingdom)
+				}
+			}
+		}
+		rule fail
+		{
+			triggers
+			{
+				realm kingdom_changed
+				{
+					condition = (sender == tgt_realm && tgt_realm.religion_distance <= 1 && tgt_realm.kingdom != own_kingdom)
+				}
+			}
+		}
+	}
+}
+
+def HelpWithRebellionChallenge : Challenge
+{
+	name = "Help against {tgt_rebellion}"
+	description = "{tgt_rebellion} must be subdued!"
+
+	args
+	{
+		best_rebellion tgt_rebellion = (tgt_rebellion.loyal_to != own_kingdom)
+		{
+			distance = 3
+		}
+	}
+
+	time_limit
+	{
+		generations = 2
+		minutes = 30
+	}
+
+	rules
+	{
+		rule success
+		{
+			triggers
+			{
+				target rebellion_ended
+				{
+					condition = (tgt_rebellion == param.param)
+				}
+			}
+		}
+	}
+}
+
+// TODO: Implement Rebellion.defeated_by
+// def DefeatRebellionChallenge : HelpWithRebellionChallenge
+// {
+// 	name = "Defeat {tgt_rebellion}"
+// 	description = "We must defeat {tgt_rebellion}!"
+
+// 	rules
+// 	{
+// 		rule success
+// 		{
+// 			triggers
+// 			{
+// 				target rebellion_ended
+// 				{
+// 					condition = (tgt_rebellion == param.param && param.param.defeated_by == own_kingdom)
+// 				}
+// 			}
+// 		}
+
+// 		rule fail
+// 		{
+// 			triggers
+// 			{
+// 				target rebellion_ended
+// 				{
+// 					condition = (tgt_rebellion == param.param && param.param.defeated_by != own_kingdom)
+// 				}
+// 			}
+// 		}
+// 	}
+// }

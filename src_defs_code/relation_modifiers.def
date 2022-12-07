@@ -1,0 +1,298 @@
+def FadingModifier
+{
+	string stat
+	float value = 0
+	float fade_in_time = 0
+	float duration
+	float fade_out_time = 0
+	int max_stacks = 0
+	float step = -1
+}
+
+def FadingRelModifier : FadingModifier
+{
+	stat = "relations"
+	float perm_value
+	peak = 0.5
+	value = (perm_value * peak)
+	duration = 300
+	fade_out_time = 600
+}
+
+// def InTradeCenterModifier : FadingModifier
+// {
+// 	stat = "ks_gold_from_trade"
+// 	duration = -1
+// 	fade_in_time = 0
+// 	calc_modifiers {
+// 		float base_calc = 166.0
+// 		float max_income = 60.0
+// 		float max_distance = 10.0
+// 		float knight_level_multiplier = 0.01
+// 	}
+// }
+
+def WarExhaustionModifier : FadingModifier
+{
+	stat = "ks_war_exhaustion"
+
+	float min = 0;
+	float max = 100;
+	float time_period_increase = 240;
+	float increase_base = 1;
+	float increase_per_war = 0.5;
+	float time_period_decrease = 30;
+	float decrease_base = 1;
+
+}
+
+def KingDeathModifier : FadingModifier
+{
+	stat = "ks_king_death"
+	duration = 600 // 10 minutes
+	value = 5
+}
+
+def EstablishOrderModifier : FadingModifier
+{
+	stat = "rs_stability_establish_order"
+	fade_out_time = 1800 // 30 minutes
+	duration_in_minutes = (fade_out_time / 60)
+	value = -30
+}
+
+def RelationUtils
+{
+	float minRelationship = -1000
+	float maxRelationship = 1000
+
+	//trehsolds for: Hostile, Negative, Reserved, Neutral, Sympathetic, Trusting, Friendly
+	float relationship_thresholds = [-1000, -500, -250, -100, 100, 250, 500, 1000]
+
+	def InitialRelationship
+	{
+		float rnd_min = -500
+		float rnd_max = 500
+		float no_relations_distance = 2 //on this distance and above, rel is 0
+		float not_neighbour_modifier = 0.5
+		float war_threshold = -400
+		float chance_join_existing_war = 100
+		float trade_thresold = 1 //minimum relationship for trade agreements at the start of the game (-1000 to turn this check off)
+		float trades_base = 1 // num of initial trades = base + num_provinces/provinces_per_trade
+		float provinces_per_trade = 3
+		float trades_max_distance = 3 //kingdom-kingdom distance in realms
+		float marriage_bonus = 250
+	}
+    
+
+	fade_settings
+	{
+		// fade with time
+		float fade_temp_per_sec = 0.5
+		float fade_near_per_sec = 0 
+		float fade_far_per_sec = 0.1  
+		float fade_with_pope_per_sec_mul = 0.5
+
+		// min relationship, fade to 0 if under this
+		float fade_min_relationship = 10
+
+		// near and far distances
+		float fade_distance_near = 1
+		float fade_distance_far = 3
+
+		// % of relations will fade when king dies (0.1 means 10% when at "near" distance)
+		float fade_on_new_king_near = 0.1
+		float fade_on_new_king_far = 0.25
+
+		// multipliers over the above (i.e. 25% fade * 0.2 because of vassalage will produce 5% fade)
+		// from all valid we use the smallest one (i.e. if ally is more important than having trade)
+		float fade_vassalage = 0.2
+		float fade_nap = 0.5
+		float fade_trade = 0.8
+		float fade_in_war = 0
+		float fade_ally = 0 
+		float fade_marriage = 0.2
+		float fade_papacy_and_catholics = 0.2
+		//float fade_players = 0
+	}
+
+    float max_spread_reaction_kingdom_distance = 2;
+
+}
+
+
+def RelationModifiers
+{
+	//s1 / s2 / s3 / s4 / s5
+	//50 / 130 / 320 / 585 / 900   // +/-50%
+	float donate_gold_rel_amount = 100 / 200 / 400 / 650 / 900
+	float donate_gold_perm_perc = 0.5 / 0.65 / 0.8 / 0.9 / 1
+								 
+	float donate_gold_min_treasury_mul = 0.5
+	float donate_gold_max_treasury_mul = 1.5
+
+	//rel_change = donate_gold_rel_amount[x] * (map3_clamp(treasury_proportions(sender, receiver), 0, 0.5, 1, donate_gold_min_treasury_mul, 1, donate_gold_max_treasury_mul ))
+
+	//------------------------------------------------------------------------------------------//
+
+	// id = [permanent, fading, spread factor, mode]
+	// mode = "max", "min", "set", "add"(default)
+	
+	//negative stances/agreements/wars
+	rel_mod rel_declare_war = [-200, -300, 0.5]
+	rel_mod rel_break_trade = [-50, 0, 0] //for automatic breaks(on expire/auto trade road close/)
+	rel_mod rel_break_trade_manual = [-100, -50] //for manual breaks( and declare war)
+	rel_mod rel_break_nonaggression = [-200, 0]
+	rel_mod rel_break_marriage = [-200, -200, 0.5]
+	rel_mod rel_left_alliance = [-300] //leader <-> supporter left
+	rel_mod rel_they_made_separate_peace = [-200, -100] // other supporters <-> supporter left
+    rel_mod rel_they_left_our_pact = [-50, -100] // supporter or leader left (or dissolved) a pact 
+    rel_mod rel_stop_exporting_food = [-100, -100, 0] // exporter stopped food export with merchant
+    rel_mod rel_ruthless_war_declaration = [-300, 0, 0]
+    rel_mod rel_ruthless_war_declaration_neighbors = [-150, -150, 0]
+	rel_mod rel_dishonored_truce = [-300, 0, 0]
+	rel_mod rel_dishonored_truce_neighbors = [-150, -150, 0]
+	rel_mod rel_attacked_friend = [-300, 0, 0]
+	rel_mod rel_attacked_friend_friends = [-50, -100, 0]
+	rel_mod rel_destroyed_friend  = [-200, 0, 0]
+	
+	//positive stances/agreements
+	rel_mod rel_sign_peace = [100, 100, (1 * !leader_signed_peace)]
+	rel_mod rel_sign_trade = [100, 0, 0] //better not give fading bonus, it should feel more valuable as it lasts, not vice versa; can't be bigger than break trade penalty
+	rel_mod rel_sign_exclusive_trade = [200, 0, 0]
+	rel_mod rel_sign_nonagression = [100, 100] //shouldn't be too big, as it is easy to spam
+	rel_mod rel_sign_alliance = [10, 10] //!!! this must be obsolete and is possibly rel_they_agreed_to_support_us_in_war
+	rel_mod rel_marriage = [200, 100, 0.25]
+	rel_mod rel_they_agreed_to_support_us_in_war = [50, 100] // leader invited someone and he agreed
+
+	//give and take
+	rel_mod rel_offer_gold = [#RelOfferGoldPerm, #RelOfferGoldTemp, 0.5]
+	rel_mod rel_demand_gold = [(ceil(arg * 500 / relations_treasury_divider * (1 - 2 * src_kingdom.is_player))), (ceil(arg * 500 / relations_treasury_divider * (1 - 2 * src_kingdom.is_player))), 0.5] // recheck formula: do we want it to be 10g for 1 relationship point?
+	rel_mod rel_offer_land = [200, 0, 0]
+	rel_mod rel_demand_land = (250 * (1 - 2 * src_kingdom.is_player)) //positive for ai->player, ai->ai, negative for player->ai
+    rel_mod rel_abstain_from_claiming_inheritence = [300, 100, 0.5]
+    rel_mod rel_decline_claim_inheritence = [-100, -100, 0.5]
+    rel_mod rel_accept_give_inheritence = [(300 * (1 - 2 * src_kingdom.is_player)), (200 * (1 - 2 * src_kingdom.is_player)), 0.5]
+	
+	//battles
+	rel_mod rel_battle_siege = [-50, -50, 0.2]
+	rel_mod rel_battle_siege_keep = [-20, -50]
+	rel_mod rel_battle_siege_defended = [-50]
+	rel_mod rel_battle_pillage = [-20, -50]
+	rel_mod rel_battle_defended_settlement = [-10]
+	rel_mod rel_battle_field = [0,-20]
+	rel_mod rel_battle_retook_keep = [10]
+	rel_mod rel_battle_join_neutral = [10,50] // supporting a neutral kingdom in a battle
+	rel_mod rel_battle_join_ally = [20,50]	// supporting an allied kingdom in battle
+	rel_mod rel_battle_help_enemy = [-10] // supporting an enemy kingdom in battle against us
+	rel_mod rel_bordercross_enter_enemy = [-20, -50, 0]
+	rel_mod rel_bordercross_enter_neutral = [-50, -50, 0]
+	rel_mod rel_bordercross_leave = [(-perm_cache_value), (-temp_cache_value), 0]
+	
+	//prison
+	rel_mod rel_executed_prisoner = [1, 0, 0] // multiplied in the action
+	rel_mod rel_released_prisoner = [1, 0, 0] // multiplied in the action
+	rel_mod rel_ransomed_prisoner = (RoyalDungeon.successful_ransom_relationship_bonus)
+	rel_mod rel_decline_ransome_prisoner = (RoyalDungeon.unsuccessful_ransom_relationship_penalty)
+	rel_mod rel_torture_innocent = [-40, 0, 0]
+	rel_mod rel_torture_killed = [-80, -100, 0]
+	
+	//rebels
+	rel_mod rel_bounty_fulfilled = [30, 0, 0]
+	rel_mod rel_denounced_rebels = [50] //obsolete
+	rel_mod rel_change_kill_foreign_rebel_army = [50]
+	rel_mod rel_change_end_foreign_rebellion = [100]
+	rel_mod rel_loyalists_field_battle = [-50, 0, 0]
+	rel_mod rel_loyalists_pillage = [-50, 0, 0]
+	rel_mod rel_loyalists_siege_initiated = [-100, 0, 0]
+	rel_mod rel_loyalists_town_taken = [-100, 0, 0]
+	rel_mod rel_loyalists_spawned = [-100, 0, 0]
+
+	//espionage and other hostile character actions
+	rel_mod rel_espionage_revealed = [-100, -100]
+	rel_mod rel_spy_ruin_relations = [-100, -100]
+	rel_mod rel_spy_revealed_low = [-100]
+	rel_mod rel_spy_revealed_mid = [-200]
+	rel_mod rel_spy_revealed_high = [-300]
+	rel_mod rel_merchant_shunned = [-100]
+	rel_mod rel_puppet_declare_independence = [500]
+
+	//liege - sovereign 
+	rel_mod rel_independence_granted =  [300, 200, 0.5]
+    rel_mod rel_claimed_independence_granted = [(500 * (1 - 2 * src_kingdom.is_player))]
+    rel_mod rel_kingdom_became_vassal = [-200, 100, 0, "max"] // kingdom became vassal of other kingdom - setting min relation values
+    rel_mod rel_liege_declared_war_on_vassal = [-200, -100, 0] // dont spread as it applies to all other vassals
+    rel_mod rel_liege_declined_protection = [(-200 * (1 - src_kingdom.is_player) * tgt_kingdom.is_player), (-100 * (1 - src_kingdom.is_player) * tgt_kingdom.is_player), 0.25]
+    rel_mod rel_liege_declined_protection_other_vassals  = [(-150 * (1 - src_kingdom.is_player) * tgt_kingdom.is_player), (-150 * (1 - src_kingdom.is_player) * tgt_kingdom.is_player), 0]
+
+    //EOW
+    rel_mod rel_emperor_of_the_world_support_candidate = [100]
+    rel_mod rel_emperor_of_the_world_dont_support_candidate = [-100]
+    rel_mod rel_emperor_of_the_world_refuse_title = [-200,0,0]
+
+	//religious
+	rel_mod rel_change_religion_with_new_religion = [100,100,0]
+    rel_mod rel_change_religion_with_new_religion_liege = [100,0,0] //culminative with the above
+    rel_mod rel_change_religion_with_previous_religion = [-100,0,0]
+    rel_mod rel_change_religion_with_previous_religion_papacy = [-200,0,0]
+    rel_mod rel_change_religion_with_previous_religion_constantinople = [-200,0,0]
+    rel_mod rel_change_with_orthodox_constantinople = [1] //multiplied by religion action outcome
+	rel_mod rel_change_with_independent_orthodox = [1,0,0] //multiplied by religion action outcome
+	rel_mod rel_change_with_muslim = [1,0,0] //multiplied by religion action outcome
+	rel_mod rel_change_with_muslim_friends = [1,0,0] //multiplied by religion action outcome
+	rel_mod rel_change_with_muslim_enemies = [1,0,0] //multiplied by religion action outcome
+    rel_mod rel_new_jihad_with_target = [-200]
+    rel_mod rel_new_jihad_with_other_jihad_leaders = [-50,0,0] //multiplied by number of existing jihads
+	rel_mod rel_new_jihad_with_muslim_target_enemies = [200,0,0]
+    rel_mod rel_new_jihad_with_other_muslim = [50,0,0]
+    rel_mod rel_new_jihad_with_other_christian = [-50,0,0]
+    rel_mod rel_with_muslim_end_jihad = [-100, 0, 0]
+    rel_mod rel_with_caliphate_join_jihad_muslim = [100,0,0]
+    rel_mod rel_with_supporters_join_jihad_muslim = [50]
+    rel_mod rel_accept_lead_crusade = [300, 200, 0]
+	rel_mod rel_decline_lead_crusade = [-150, -150, 0.5]
+	rel_mod rel_new_crusade_kingdom = [1000, 0, 0.25] // this is applied twice (to papacy and source kingdom, so lower spread)
+    rel_mod rel_accept_papacy_cleric = [50, 50, 0] //cleric, sent to our court accepted
+    rel_mod rel_decline_papacy_cleric = [-200, -200, 0]  //cleric, sent to our court declined
+    rel_mod rel_accept_fund_crusade = [200, 200, 0] //we funded a crusade
+    rel_mod rel_decline_fund_crusade = [-100, -100, 0] //we refused to fund a crusade
+    rel_mod rel_lead_crusade_against_target = [-300, -200, 0.5] //we lead crusade against a kingdom
+    rel_mod rel_attacked_pope = [-200, 0, 0]
+	rel_mod rel_destroyed_papacy = [-500, 0, 0]
+	rel_mod rel_restored_papacy = [300, 0, 0]
+	rel_mod rel_conquered_muslim_holy_city = [-300, 0, 0]
+	rel_mod rel_declare_war_papacys_controller = [-150, -150, 0] 
+
+    //possibly obsolete
+    rel_mod rel_diplomat_gift = [DiplomacySendGiftAction.rel_change_amount, 0, 0]
+	rel_mod rel_decline = [0, 0, 0] //[-10, -40, 0]
+	rel_mod rel_negotiations_idea_relation_bonus = [0]
+	rel_mod rel_adopt_imperialism_idea = [0, 0, 0]
+	rel_mod rel_abandon_imperialism_idea = [0, 0, 0]
+	rel_mod rel_crown_authority_change = [0,0,0] //multiplied by the crown authority modifiers //for now removed - CA change does not lead to rel. change
+	rel_mod rel_realm_annex_owner = [-200, 0, 0]
+	rel_mod rel_realm_annex_everyone_else = [-50, 0, 0] //with the whole world, except the owner
+    rel_mod rel_realm_recent_occupator_with_owner = [-150, 0, 0] //also summed with the one below
+    rel_mod rel_realm_recent_occupator_with_everyone_else = [-50, 0, 0]
+    rel_mod rel_establish_order_owner = [-150, -200, 0.5]
+    rel_mod rel_establish_order_rest = [-100, -150, 0]
+
+    rel_mod rel_unite_kingdom_to_other_eligible = [-50, 0, 0]
+	//not implemented - upon implementation notify Alex to add texts and move to proper place
+    rel_mod rel_with_papacy_cleric_exiled_abandoned = [-100, -100, 0] //we exiled or abandoned our cleric !!! to implement
+
+    //newly implemented
+
+
+
+
+
+	def EducateMod : FadingModifier
+	{
+		stat = "character_opinion"
+		value = 0.2
+		duration = 12
+		fade_out_time = 12
+		max_stacks = 2
+	}
+}

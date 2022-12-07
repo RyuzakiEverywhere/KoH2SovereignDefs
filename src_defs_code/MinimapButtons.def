@@ -1,0 +1,328 @@
+﻿def MinimapButton
+{
+	
+	text label
+	//text tooltip_caption
+	text tooltip_text
+	text rebind = "{p}{blt}Left click to see this view on full screen{p}{blt}Ctrl + left click to set this view for the minimap{p}"
+	color clr = 255,255,255,255
+	color text_color = 255,255,255,255
+	prefab text_button = "Assets/UI/Elements/Minimap/UIP_MIniMapViewButton.prefab" //GUID:ce0356dc6d3cd0c4fa14a25170d66eb3
+	prefab image_button = "Assets/UI/Elements/Minimap/UIP_MIniMapViewButton.prefab" //GUID:ce0356dc6d3cd0c4fa14a25170d66eb3
+	
+	string keybind = "" //either a def Settings.keybind_name or a unty KeyCode
+	int cheat_level = 0
+	icon
+	{
+		sprite normal
+		sprite over
+		sprite selected
+		sprite disabled
+	}
+	background
+	{
+		sprite normal = "Assets/UI/Elements/Minimap/Button_MiniMap_PoliticalView_Normal.psd:Button_MiniMap_PoliticalView_Normal#1" //GUID:757e817ed072603479d02ce70b3fdc3c
+		sprite over = "Assets/UI/Elements/Minimap/Button_MiniMap_PoliticalView_Hover.psd:Button_MiniMap_PoliticalView_Hover#2" //GUID:10f04eeab93e722478a5526c70b70aae
+		sprite selected = "Assets/UI/Elements/Minimap/Button_MiniMap_PoliticalView_Selected.psd:Button_MiniMap_PoliticalView_Selected#2" //GUID:2763c0c5cdfb81c4a92fc2fd05badd5f
+		sprite secondary_seleced = "Assets/UI/Elements/Minimap/Button_MiniMap_PoliticalView_Selected_Secondary.psd:Button_MiniMap_PoliticalView_Selected_Secondary#2" //GUID:57b7c7941730aec4c92fe2aefd796ff2
+		sprite disabled = "Assets/UI/Elements/Minimap/Button_MiniMap_PoliticalView_Normal.png:Button_MiniMap_PoliticalView_Normal#1"
+	}
+}
+
+def MinimapButtons
+{
+	Kingdoms : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Kingdoms.png:Icon_MiniMap_ViewMode_Kingdoms#2" //GUID:6c8bf6601f2889847975b6432e424a5d
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Kingdoms_Over.png:Icon_MiniMap_ViewMode_Kingdoms_Over#2" //GUID:206266b10da6af1478ffb87e107ee865
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Kingdoms_Over.png:Icon_MiniMap_ViewMode_Kingdoms_Over#2" //GUID:206266b10da6af1478ffb87e107ee865
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Kingdoms.png:Icon_MiniMap_ViewMode_Kingdoms#2" //GUID:6c8bf6601f2889847975b6432e424a5d
+		}
+		color clr = 89,89,251
+		label = "KNG"
+		tooltip_text = $[
+		"Kingdoms [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_kingdoms"
+	}
+	Stances : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Stances.png:Icon_MiniMap_ViewMode_Stances#2" //GUID:271ed6a54e3418d4ab44b54b892bf835
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Stances_Over.png:Icon_MiniMap_ViewMode_Stances_Over#2" //GUID:dfd06bb16a0d1c447aa012a6784cb4a8
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Stances_Over.png:Icon_MiniMap_ViewMode_Stances_Over#2" //GUID:dfd06bb16a0d1c447aa012a6784cb4a8
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Stances.png:Icon_MiniMap_ViewMode_Stances#2" //GUID:271ed6a54e3418d4ab44b54b892bf835
+		}
+		color clr = 221,34,34
+		label = "STA"
+		tooltip_text = $[
+		"Stances [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_stances"
+	}
+	Relations : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Relations.png:Icon_MiniMap_ViewMode_Relations#2" //GUID:1b97a63bdded2424ba763013c78a6ccc
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Relations_Over.png:Icon_MiniMap_ViewMode_Relations_Over#2" //GUID:93e7c71f682aa5c45ac205094dd98d53
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Relations_Over.png:Icon_MiniMap_ViewMode_Relations_Over#2" //GUID:93e7c71f682aa5c45ac205094dd98d53
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Relations.png:Icon_MiniMap_ViewMode_Relations#2" //GUID:1b97a63bdded2424ba763013c78a6ccc
+		}
+		color clr = "186,133,37" //BA8526FF
+		label = "REL"
+		tooltip_text = $[
+		"Relations [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_relations"
+	}
+	Marriages : MinimapButton
+	{
+        label = "MRG"
+		tooltip_text = $[
+		"Marriages [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_marriages"
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Marriages.psd:Icon_MiniMap_ViewMode_Marriages#2" //GUID:76265fa39c0130e428d7a5a24f74329e
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Marriages_Over.psd:Icon_MiniMap_ViewMode_Marriages_Over#2" //GUID:fbf0226022d03b94291f07a233e0b9a8
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Marriages_Over.psd:Icon_MiniMap_ViewMode_Marriages_Over#2" //GUID:fbf0226022d03b94291f07a233e0b9a8
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Marriages.psd:Icon_MiniMap_ViewMode_Marriages#2" //GUID:76265fa39c0130e428d7a5a24f74329e
+		}
+	}
+	
+	RebellionRisk : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_RebellionRisk.png:Icon_MiniMap_ViewMode_RebellionRisk#2" //GUID:0c56c0712ab294f469be7a52d0a6ed8d
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_RebellionRisk_Over.png:Icon_MiniMap_ViewMode_RebellionRisk_Over#2" //GUID:35a67fa10e32d854c92825a04955d05e
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_RebellionRisk_Over.png:Icon_MiniMap_ViewMode_RebellionRisk_Over#2" //GUID:35a67fa10e32d854c92825a04955d05e
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_RebellionRisk.png:Icon_MiniMap_ViewMode_RebellionRisk#2" //GUID:0c56c0712ab294f469be7a52d0a6ed8d
+		}
+		label = "RR"
+		tooltip_text = $[
+		"Stability [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		color clr = 126,200,75
+		keybind = "political_view_stability"
+	}
+	TradeZones : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_TradeZones.png:Icon_MiniMap_ViewMode_TradeZones#2" //GUID:79bd4f96d2f20054e813bdc5ccd45a8e
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_TradeZones_Over.png:Icon_MiniMap_ViewMode_TradeZones_Over#2" //GUID:14ed8f5c440c2c6489f761ed8334b546
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_TradeZones_Over.png:Icon_MiniMap_ViewMode_TradeZones_Over#2" //GUID:14ed8f5c440c2c6489f761ed8334b546
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_TradeZones.png:Icon_MiniMap_ViewMode_TradeZones#2" //GUID:79bd4f96d2f20054e813bdc5ccd45a8e
+		}
+		label = "TZ"
+		tooltip_text = $[
+		"Trade Zones [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		color clr = 150,125,100
+		keybind = "political_view_trade_centers"
+	}
+	Religion : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Religions.png:Icon_MiniMap_ViewMode_Religions#2" //GUID:d4702490eebd97b46b6d95a627f3c863
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Religions_Over.png:Icon_MiniMap_ViewMode_Religions_Over#2" //GUID:c9ced15eb878e9d4494cdd780be0de70
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Religions_Over.png:Icon_MiniMap_ViewMode_Religions_Over#2" //GUID:c9ced15eb878e9d4494cdd780be0de70
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Religions.png:Icon_MiniMap_ViewMode_Religions#2" //GUID:d4702490eebd97b46b6d95a627f3c863
+		}
+		color clr = 95,241,255 //60F2FFFF
+		label = "RLG"
+		tooltip_text = $[
+		"Religions [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_religion"
+	}
+	Cultures : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Culture.png:Icon_MiniMap_ViewMode_Culture#2" //GUID:b835c25a5eae332478e09a07d211912b
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Culture_Over.png:Icon_MiniMap_ViewMode_Culture_Over#2" //GUID:1d66a5deaf655b7479d96cddc0368b91
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Culture_Over.png:Icon_MiniMap_ViewMode_Culture_Over#2" //GUID:1d66a5deaf655b7479d96cddc0368b91
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Culture.png:Icon_MiniMap_ViewMode_Culture#2" //GUID:b835c25a5eae332478e09a07d211912b
+		}
+		label = "CUL"
+		tooltip_text = $[
+		"Cultures [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_cultures"
+		color clr = 100,164,100
+	}
+	CulturePower : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_CulturePower.png:Icon_MiniMap_ViewMode_CulturePower#2" //GUID:af2ca777f6f27e945abd5a3419a188f5
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_CulturePower_Over.png:Icon_MiniMap_ViewMode_CulturePower_Over#2" //GUID:b1aa83444113d024ca080dbf8eef66a5
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_CulturePower_Over.png:Icon_MiniMap_ViewMode_CulturePower_Over#2" //GUID:b1aa83444113d024ca080dbf8eef66a5
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_CulturePower.png:Icon_MiniMap_ViewMode_CulturePower#2" //GUID:af2ca777f6f27e945abd5a3419a188f5
+		}
+		label = "CP"
+		tooltip_text = $[
+		"Loyalty [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_loyalty"
+		color clr = 100,164,50
+	}
+	
+	ProvinceFeatures : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProvinceFeatures.png:Icon_MiniMap_ViewMode_ProvinceFeatures#2" //GUID:214ff81abfce23c4db5d2163ac238eab
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProvinceFeatures_Over.png:Icon_MiniMap_ViewMode_ProvinceFeatures_Over#2" //GUID:c5d9ab40ad9c3f44eb59cabd7a4d328f
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProvinceFeatures_Over.png:Icon_MiniMap_ViewMode_ProvinceFeatures_Over#2" //GUID:c5d9ab40ad9c3f44eb59cabd7a4d328f
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProvinceFeatures.png:Icon_MiniMap_ViewMode_ProvinceFeatures#2" //GUID:214ff81abfce23c4db5d2163ac238eab
+		}
+		label = "PF"
+		tooltip_text = $[
+		"Province Features [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		color clr = 200,75,75
+		keybind = "political_view_province_features"
+	}
+	ProducedResources : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProducedResources.png:Icon_MiniMap_ViewMode_ProducedResources#2" //GUID:152e8da8c9a9bdc4196ae6167906a730
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProducedResources_Over.png:Icon_MiniMap_ViewMode_ProducedResources_Over#2" //GUID:55c371609f7f7654389f2fb5faf40d43
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProducedResources_Over.png:Icon_MiniMap_ViewMode_ProducedResources_Over#2" //GUID:55c371609f7f7654389f2fb5faf40d43
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_ProducedResources.png:Icon_MiniMap_ViewMode_ProducedResources#2" //GUID:152e8da8c9a9bdc4196ae6167906a730
+		}
+		label = "PR"
+		tooltip_text = $[
+		"Goods [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		color clr = 50,164,50
+		keybind = "political_view_goods"
+	}
+	Buildings : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Buildings.png:Icon_MiniMap_ViewMode_Buildings#1" //GUID:ff98aa826433b3f45b594f7b1a28fabd
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Buildings_Over.png:Icon_MiniMap_ViewMode_Buildings_Over#2" //GUID:aeb99dfa30ed03a428cab27885381101
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Buildings_Over.png:Icon_MiniMap_ViewMode_Buildings_Over#2" //GUID:aeb99dfa30ed03a428cab27885381101
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Buildings.png:Icon_MiniMap_ViewMode_Buildings#1" //GUID:ff98aa826433b3f45b594f7b1a28fabd
+		}
+		label = "BLD"
+		tooltip_text = $[
+		"Buildings [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		color clr = 50,150,100
+		keybind = "political_view_buildings"
+	}
+	
+	
+	Realms : MinimapButton
+	{
+		icon
+		{
+			normal = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Realms.png:Icon_MiniMap_ViewMode_Realms#1" //GUID:a4f78389b8b373a4784b4bb8e54c9e90
+			over = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Realms_Over.png:Icon_MiniMap_ViewMode_Realms_Over#2" //GUID:ccfa82894f738db43966e083aefa83bf
+			selected = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Realms_Over.png:Icon_MiniMap_ViewMode_Realms_Over#2" //GUID:ccfa82894f738db43966e083aefa83bf
+			disabled = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Realms.png:Icon_MiniMap_ViewMode_Realms#1" //GUID:a4f78389b8b373a4784b4bb8e54c9e90
+		}
+		color clr = 25,201,25
+		label = "PRV"
+		tooltip_text = $[
+		"Provinces [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		cheat_level = 2
+	}
+	Authorities : MinimapButton
+	{
+		color clr = 0,128,0
+		label = "INF"
+		tooltip_text = $[
+		"Influence"
+		"{MinimapButton.rebind}"]
+		cheat_level = 2
+	}
+	GoldIncome : MinimapButton
+	{
+		color clr = 255,164,0
+		label = "GLD"
+		tooltip_text = $[
+		"Gold Income [({clr:gold}{keybind}{/clr})]"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_gold" // H
+		cheat_level = 2
+	}
+	TradePower : MinimapButton
+	{
+		label = "TP"
+		tooltip_text = $[
+		"Trade power ({clr:gold}{keybind}{/clr})"
+		"{MinimapButton.rebind}"]
+		color clr = 164,164,0
+		keybind = "political_view_trade_power" // J
+		cheat_level = 2
+	}
+	Neighbors : MinimapButton
+	{
+		label = "NGBR"
+		tooltip_text = $[
+		"Neighboring Realms ({clr:gold}{keybind}{/clr})"
+		"{MinimapButton.rebind}"]
+		color clr = 150,50,100
+		cheat_level = 2
+	}
+	WarPeacePoints : MinimapButton
+	{
+		label = "WP"
+		tooltip_text = $[
+		"War/Peace Points ({clr:gold}{keybind}{/clr})"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_wars" // C
+		color clr = 200,200,75
+		cheat_level = 2
+	}
+	// Mercenaries : MinimapButton
+	// {
+	// 	label = "MRC"
+	// 	tooltip_text = "Mercenaries"
+	// 	color clr = 126,200,75
+	// 	cheat_level = 2
+	// }
+	OfferWeight : MinimapButton
+	{
+		label = "OW"
+		tooltip_text = $[
+		"OfferWeight (Debug)"
+		"{MinimapButton.rebind}"]
+		color clr = 126,200,75
+		cheat_level = 2
+	}
+	Resources : MinimapButton
+	{
+		label = "RSRC"
+		tooltip_text = $[
+		"Resources (Debug)"
+		"{MinimapButton.rebind}"]
+		color clr = 200,200,0
+		cheat_level = 2
+	}
+	DebugPolitical : MinimapButton
+	{
+		label = "DBG"
+		tooltip_text = $[
+		"Debug View ({clr:gold}{keybind}{/clr})"
+		"{MinimapButton.rebind}"]
+		keybind = "political_view_debug" // X
+		color clr = 100,0,100
+		cheat_level = 2
+	}
+}

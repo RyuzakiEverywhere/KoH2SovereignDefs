@@ -1,0 +1,8 @@
+﻿def Map
+{
+	float size_x
+	float size_y
+}
+
+Maps
+Periods

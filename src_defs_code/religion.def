@@ -1,0 +1,1928 @@
+﻿def Religion
+{
+	text name
+	text tooltip
+	full_name
+	{
+		text default = "{name}"
+	}
+	descritpion
+	sprite icon
+	sprite illustration
+	sprite message_icon
+	color map_color
+	bool christian = false
+	bool muslim = false
+	string hq_realm
+	string hq_kingdom
+	string head_names
+	text piety = "Faith"
+	audienceLabel
+	{
+		text default = "Audience"
+	}
+	// bonuses when non-orthodox controls Constantinople
+	// context: Kingdom
+	non_orthodox_ecumenical_patriarch
+	{
+		mod ks_fame_ecumenical_patriarch_bonus = 200
+		mod ks_orthodox_provinces_stability = 5
+		mod ks_orthodox_subordinated_influence = 100
+	}
+	
+	// what happens with clerics when religion is changed
+	religion_change_cleric_outcomes
+	{
+		int num_strongest_clerics = 3
+		float perc_chance_3_rebels = 5
+		float perc_chance_2_rebels = 15
+		float perc_chance_1_rebels = 25
+		
+		option accept = (100 - 3 * cleric.class_level * (1 - cleric.is_king))
+		option rebel = (cleric.class_level) * (1 - cleric.is_king)
+		option exile
+	}
+	mod ks_liege_rein_perc = 0
+	religious_tension // from realm religion to kingdom religion 
+	{
+		float Catholic = 10
+		float Orthodox = 10
+		float Sunni = 10
+		float Shia = 10
+		float Pagan = 10
+	}
+	text effect_label = "Religious Effects:" //" of {kingdom.religion:ism}:" // (Ecumenical Patriarchy)
+	
+	titles
+	{
+		text Cleric = "Cleric"
+		{
+			s = "Clerics"
+		}
+	}
+}
+
+def ReligionMessage : Message
+{
+	separate_stack = true
+	stack_group = "ReligionChanges"
+	stack_priority = 80
+}
+
+//============================================ Christian
+
+template Christian : Religion
+{
+	name = "Christian"
+	tooltip = "Christianity is the most common kingdoms' religion in the game, which branches to Catholicism and Orthodoxy"
+	christian = true
+}
+
+template NotChristian : Religion
+{
+	name = "{Muslim.name} / {Pagan.name}" // "Not Christian"
+	tooltip = "Kingdoms and provinces, following {Muslim.name} and {Pagan.name} religions"
+}
+
+//============================================ Catholic
+
+def Catholic : Christian
+{
+	name = "Catholic"
+	{
+		ism = "Catholicism"
+		ans = "Catholics"
+	}
+	full_name
+	{
+		text default = "Catholic"
+		text excommunicated = "Catholic {clr:red}(Excommunicated){/clr}"
+	}
+	descritpion
+	{
+		text default = "Our chruch is currently led by His Holiness {pope}, Bishop of Rome."
+		text excommunicated = "We’ve been excommunicated by {pope}, Bishop of Rome."
+		//text own_rome = "Sire, we are blessed to currently have control over the Holy City of {clr:red}Rome{/clr}. This brings us the opportunity to shape the future of the {clr:red}World{/clr}."
+		text own_rome = "Out control over Rome has temporarily put an end to the Papacy. We can restore it, or keep our hold and suffer the wrath of all Catholics."
+	}
+	tooltip = "One of the branches of Christianity, most popular in western, northern and central Europe"
+	audienceLabel
+	{
+		text default = "Audience with the Papacy"
+		text excommunicated = "Audience with the Papacy"
+		text usurper = "Audience with the usurper"
+	}
+	text unexcommunicateActionLabel = "Repent and ask for forgiveness!"
+	icon = "Assets/Europe/icons_ui.PNG:catholic#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	{
+		sprite excommunicated = "Assets/Europe/icons_ui.PNG:excommunicated#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	}
+	map_color = "38,92,199" //275DC7FF
+	{
+		color excommunicated = "21,51,110" //15336FFF
+	}
+	piety = "Piety"
+	hq_realm = "Latium"
+	hq_kingdom = "Papal_States"
+	holy_lands_realm = "Palestine"
+	head_names = "PopeNames"
+	//text no_papacy = "{rome_kingdom.king} of the {rome_kingdom} controls the Holy City of Rome. We must fight them to restore the Papacy!"
+	
+	text pope_effect_label = "[{pope}|Pope] effects:"
+	text no_papacy = "{rome_kingdom:s} control over the Holy City of Rome has temporarily put an end to the Papacy. We must fight them in order to restore the Papacy!"
+	text pope_influenced_by = "Influenced by {original_kingdom}"
+	text pope_not_influenced = "Residing in Rome"
+	titles
+	{
+		text Cleric = "Cleric"
+		{
+			s = "Clerics"
+		}
+		text Governor = "Bishop of {governed_castle}"
+		text Crusader = "Crusader"
+		text Cardinal = "Cardinal"
+		text CardinalElect = "Cardinal-Elect"
+		text Pope = "Pope"
+	}
+	
+	// bonuses
+	// context: Kingdom
+	mod ks_commerce_religion = 5
+	mod ks_trade_income_perc = 20
+	mod ks_build_upgrade_cost_discount_perc = 5
+	mod ks_army_morale
+	{
+		text mod_name = "Catholic religion"
+		excommunicated = -3
+	}
+	mod ks_army_morale_restoring_papacy = 5
+	{
+		condition = (rome_kingdom != papacy) && (rome_kingdom != kingdom)
+	}
+	mod ks_liege_rein_perc
+	{
+		hidden
+		Catholic = 0
+		Orthodox = -10
+		Sunni = -25
+		Shia = -25
+		Pagan = -5
+	}
+	mod ks_catholic_influence = 0
+	
+	pope_convert_realms
+	{
+		int min_interval = 90 //seconds
+		int max_interval = 120
+		
+		float chance = (50 - 10 * religion_distance - 5 * culture_distance + 10 * num_neighboring_catholic_realms)
+	}
+	
+	// bonuses given at random to the pope
+	// context: Kingdom
+	random_pope_bonuses = 1 // how many bonuses to give to the pope
+	{
+		
+		1
+		{
+			mod ks_culture_from_pope = 200
+			mod ks_influence_from_pope = 200
+			mod ks_piety_converted_to_books_from_pope_perc = 20
+			mod ks_books_per_monastery = 3
+			mod ks_gold_per_monastery = 1
+			mod ks_piety_per_monastery = 1
+		}
+	}
+	
+	// custom catholic-related parameters	
+	float restore_papacy_timeout = 60
+	float choosing_pope_relationship_factor = 30 // "ranking" = class_level + X * relationship_with_papacy / 1000
+	float excommunicate_cooldown = 120/240 // random interval (min/max) to think about excommunicating
+	float enemy_excommunicate_cooldown = 120/240 //random interval (min/max) to allow excommunicating though pope in court
+	float ask_crusade_funds_cooldown = 120/240 // random interval (min/max) to think about asking about a crusade funding
+	float offer_court_cleric_cooldown = 120/240 // random interval (min/max) to think about asking about a asking to give a cleric
+	float crusade_camp_interval = 300/600
+	float crusade_camp_duration = 60/120
+	int min_cardinals = 2/4 // ensure there are this many (min/max) cardinal-elects
+	int max_cardinals = 8 // max number of cardinal-elects
+	int min_cardinal_relationship_with_papacy = -200/200 // demote if bellow 1st value, 2nd value - required to become cardinal-elect
+	int eval_papacy_cardinal_own_relation = 500 // during evaluation of cardinals, the ones from papacy use this instead of relationship with papacy
+	int min_cardinal_class_level = 5 // cardinal-elects must be at least this class level
+	float cardinals_update_interval = 60/120 // min/max time for periodic cardinal updates (demote/add cardinal-elect)
+	float demote_cardinal_chance = 10 // chance to demote worst cardinal-elect if full (on update tick)
+	float cardinal_piety_per_relationship_with_papacy = 0.02 // 20 at 1000
+	float cardinal_books_per_relationship_with_papacy = 0.02 // 20 at 1000
+	
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Catholic.psd:UI_ReligionWindow_Illustration_Catholic#2" //GUID:2be7db456f5bd664d92ba0a10975e320
+	{
+		sprite excommunicated = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Catholic_Excommunicated.psd:UI_ReligionWindow_Illustration_Catholic_Excommunicated#2" //GUID:a644516bec5a6bc4f955f0eff303324f
+	}
+	religious_tension // from realm religion to kingdom religion
+	{
+		float Catholic = 0
+		float Orthodox = 2
+		float Sunni = 12
+		float Shia = 14
+		float Pagan = 10
+	}
+	message_icon = "Assets/UI/Elements/Religion/Icons/Icon__Religion_Message_Catholic.tga:Icon__Religion_Message_Catholic#2" //GUID:976a7738c2d2c894988250be7c6db224
+}
+
+//============================================ Orthodox
+
+def Orthodox : Christian
+{
+	name = "Orthodox"
+	{
+		ism = "Orthodoxy"
+		they = "Orthodox" //what is this
+		ans = "Orthodox Christians"
+	}
+	
+	full_name
+	{
+		text ecumenical = "Orthodox (Ecumenical)"
+		text independent = "Orthodox (Independent)"
+		text subordinated = "Orthodox (Subordinated)"
+	}
+	audienceLabel
+	{
+		text default = "Audience with {head_kingdom}"
+	}
+	text autocephaly = "Claim Autocephaly"
+	descritpion
+	{
+		text default = "We are primus inter pares and that makes us responsible for the unity of all Eastern Orthodox kingdoms!"
+		text independent = "Our church is independent of the Ecumenical Patriarch in Constantinople."
+		text subordinated = "Our church is ruled by the Patriarch in Constantinople, giving him some influence over us."
+	}
+	piety = "Piety"
+	text patriarch_effect_label = "[{patriarch}|Patriarch] effects:"
+	text patriecth_select_label = "&Choose {title} {name}"
+	tooltip = "One of the branches of Christianity, most popular in eastern Europe"
+	icon = "Assets/Europe/icons_ui.PNG:orthodox#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	{
+		sprite independent = "Assets/Europe/icons_ui.PNG:orthodox_independent#1" //GUID:af589d60a2b25d24884e86173fb3111e
+		sprite subordinated = "Assets/Europe/icons_ui.PNG:orthodox#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	}
+	map_color = "226,88,253" //E259FDFF
+	{
+		color independent = "226,88,253" //E259FDFF
+		color subordinated = "110,43,123" //6F2B7BFF
+	}
+	hq_realm = "Constantinopolis"
+	hq_kingdom = "Byzantium"
+	head_names = "EcumenicalPatriarchNames"
+	float choose_patriarch_timeout = 120
+	
+	titles
+	{
+		text Cleric = "Cleric"
+		{
+			s = "Clerics"
+		}
+		text Governor = "Mitropolit of {governed_castle}"
+		text Patriarch = "Patriarch"
+		text EcumenicalPatriarch = "Ecumenical Patriarch"
+	}
+	
+	// bonuses
+	// context: Kingdom
+	mod ks_prod_books_religion_perc
+	{
+		subordinated = 10
+		independent = 10
+		ecumenical_patriarch = 20
+	}
+	mod ks_prod_gold_perc
+	{
+		category = "Religion"
+		independent = 10
+		ecumenical_patriarch = 10
+	}
+	mod ks_army_morale
+	{
+		text mod_name = "Orthodox"
+		subordinated = -2
+		independent = -1
+		ecumenical_patriarch = 0
+	}
+	mod ks_fame_autocephaly_bonus
+	{
+		independent = 250
+		ecumenical_patriarch = 0
+	}
+	mod ks_fame_ecumenical_patriarch_bonus
+	{
+		ecumenical_patriarch = 500
+	}
+	mod ks_orthodox_influence
+	{
+		ecumenical_patriarch = 0
+	}
+	mod ks_orthodox_subordinated_influence
+	{
+		ecumenical_patriarch = 100
+	}
+	mod ks_orthodox_independent_influence
+	{
+		ecumenical_patriarch = 50
+	}
+	
+	mod ks_liege_rein_perc
+	{
+		hidden
+		Catholic = -10
+		Orthodox = 0
+		Sunni = -25
+		Shia = -25
+		Pagan = -5
+	}
+	//mod ks_influence_from_holy_lands = (20 * holy_lands_count)
+	
+	// bonuses that apply when choosing own clerics for patriarchs
+	// context: Kingdom
+	own_cleric_patriarch_bonuses : random_patriarch_bonuses = 1
+	{
+		o1
+		{
+			instant crown_authority = 2
+			instant gain_gold = (SSum(patriarch.kingdom, 0.5, 50))
+		}
+		o2
+		{
+			instant gain_gold = (SSum(patriarch.kingdom, 1.5, 50))
+		}
+		o3
+		{
+			mod ks_influence_in_constantinople_owner
+			{
+				ecumenical_patriarch = 0
+				independent = 100
+			}
+		}
+	}
+	// bonuses given at random to patriarch candidates
+	// context: Kingdom
+	random_patriarch_bonuses = 1 // how many bonuses to give to the candidate
+	{
+		
+		1
+		{
+			mod ks_prod_gold_perc
+			{
+				category = "Religion"
+				independent = 5
+				ecumenical_patriarch = 10
+				non_orthodox = 5
+			}
+		}
+		2
+		{
+			mod ks_prod_books_religion_perc
+			{
+				independent = 5
+				ecumenical_patriarch = 10
+			}
+		}
+		3
+		{
+			mod ks_prod_books_religion
+			{
+				independent = 5
+				ecumenical_patriarch = 10
+				non_orthodox = 5
+			}
+		}
+		4
+		{
+			mod ks_orthodox_provinces_stability
+			{
+				//independent = 5
+				ecumenical_patriarch = 5
+				non_orthodox = 10
+			}
+		}
+		5
+		{
+			mod ks_prod_piety_religion_perc
+			{
+				category = "Religion"
+				independent = 5
+				ecumenical_patriarch = 10
+			}
+		}
+		6
+		{
+			mod ks_commerce_religion
+			{
+				independent = 5
+				ecumenical_patriarch = 10
+				non_orthodox = 5
+			}
+		}
+		7
+		{
+			mod ks_happines_in_orthodox_provinces
+			{
+				independent = 10
+				ecumenical_patriarch = 20
+				non_orthodox = 10
+			}
+		}
+		8
+		{
+			mod ks_stability_religion
+			{
+				non_orthodox = 5
+			}
+			mod ks_gold_in_orthodox_provinces_perc
+			{
+				non_orthodox = 10
+			}
+		}
+		9
+		{
+			mod ks_orthodox_independent_influence
+			{
+				non_orthodox = 100
+			}
+		}
+		10
+		{
+			instant rel_change_with_papacy
+			{
+				independent = 300
+				ecumenical_patriarch = 500
+				non_orthodox = 300
+			}
+		}
+		11
+		{
+			mod ks_fame_ecumenical_patriarch_bonus
+			{
+				ecumenical_patriarch = 200
+			}
+			mod ks_fame_autocephaly_bonus
+			{
+				independent = 100
+			}
+			mod ks_fame_non_orthodox_bonus
+			{
+				non_orthodox = 100
+			}
+		}
+		12
+		{
+			instant crown_authority
+			{
+				independent = 3
+				ecumenical_patriarch = 3
+				non_orthodox = 3
+			}
+		}
+		13
+		{
+			mod ks_orthodox_subordinated_influence
+			{
+				non_orthodox = 200
+			}
+		}
+		14
+		{
+			instant rel_change_with_all_orthodox
+			{
+				independent = 300
+				ecumenical_patriarch = 300
+				non_orthodox = 200
+			}
+		}
+		15
+		{
+			instant gain_gold
+			{
+				independent = (SSum(patriarch.kingdom, 1, 50))
+				ecumenical_patriarch = (SSum(patriarch.kingdom, 2, 50))
+				non_orthodox = (SSum(patriarch.kingdom, 1, 50))
+			}
+		}
+		16
+		{
+			mod ks_army_morale
+			{
+				text mod_name = "From Patriarch"
+				independent = 2
+				ecumenical_patriarch = 3
+			}
+		}
+		17
+		{
+			mod ks_trade_income_with_constantinople_perc
+			{
+				ecumenical_patriarch = 0 // disables the bonus if ecumenical
+				independent = 20
+			}
+			mod ks_trade_income_with_subordinated_perc
+			{
+				ecumenical_patriarch = 10
+				non_orthodox = 10
+			}
+		}
+		
+		//OBSOLETE
+		// {
+		// 	mod ks_army_morale_vs_other_religion
+		// 	{
+		// 		independent = 3
+		// 		ecumenical_patriarch = 5
+		// 	}
+		// }
+		// {
+		// 	instant rebels_repent_chance_perc
+		// 	{
+		// 		independent = 30
+		// 		ecumenical_patriarch = 50
+		// 		non_orthodox = 30
+		// 	}
+		// }
+		
+		// {
+		// 	instant deepen_orthodox_hostilities_perc
+		// 	{
+		// 		non_orthodox = 20
+		// 	}
+		// }
+	}
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Orthodox.psd:UI_ReligionWindow_Illustration_Orthodox#2" //GUID:b1422cef0c03dc442a72d406e41de8f5
+	{
+		sprite independent = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Orthodox_Independent.psd:UI_ReligionWindow_Illustration_Orthodox_Independent#2" //GUID:66efe082c5c400c4590a28046239629a
+		sprite subordinated = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Orthodox_Subordinated.psd:UI_ReligionWindow_Illustration_Orthodox_Subordinated#2" //GUID:4e08b13f22702cc4c922727b2c474699
+	}
+	
+	religious_tension // from realm religion to kingdom religion
+	{
+		float Catholic = 2
+		float Orthodox = 0
+		float Sunni = 10
+		float Shia = 12
+		float Pagan = 8
+	}
+	message_icon = "Assets/UI/Elements/Religion/Icons/Icon__Religion_Message_Ortodox.tga:Icon__Religion_Message_Ortodox#2" //GUID:e4fc4ea2867661c4fb80e6798e17c694
+}
+
+//============================================ Muslim
+
+template Muslim : Religion
+{
+	name = "Muslim"
+	piety = "Faith"
+	muslim = true
+	tooltip = "Islam is the second most common kingdoms' religion in the game, which branches to Sunnism and Shiism"
+	titles
+	{
+		text Cleric = "Scholar"
+		{
+			s = "Scholars"
+		}
+		text Governor = "Sheikh of {governed_castle}"
+		text Caliph = "Caliph"
+		text Caliphate = "Caliphate"
+	}
+	
+	full_name
+	{
+		text default = "Muslim"
+	}
+	
+	caliph_skills = [ "Leadership", "Piety"]
+	text abandonCaliphate = "Abolish Caliphate"
+	text establishCaliphate = "Claim Caliphate"
+	text callJihad = "Call for Jihad"
+	text endJihad = "End Jihad"
+	
+	map_color
+	{
+		color caliphate = "200, 150,0"
+	}
+	
+	mod ks_influence_in_neighbors
+	{
+		caliphate = 100
+		
+	}
+	mod ks_fame_caliphate_bonus
+	{
+		caliphate = (!!king.LeadershipSkill + !!king.TheologySkill) * 50 + 100
+	}
+	
+	mod ks_caliphate_influence
+	{
+		caliphate = 50
+	}
+	
+	mod ks_caliphate_books_per_piety
+	{
+		caliphate = 20
+	}
+	
+	//	mod ks_influence_from_holy_lands = (10 * holy_lands_count)
+	
+	text jihad_effect_label = "Jihad effects"
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Muslim.psd:UI_ReligionWindow_Illustration_Muslim#2" //GUID:9b3e498596fe5da438e985f2a6d03911
+	message_icon = "Assets/UI/Elements/Religion/Icons/Icon__Religion_Message_Muslim.tga:Icon__Religion_Message_Muslim#2" //GUID:9a76abb34e37d2544becef34f6a8bd46
+}
+
+template NotMuslim : Religion
+{
+	name = "{Christian.name} / {Pagan.name}" //"Not Muslim"
+	tooltip = "Kingdoms and provinces, following {Christian.name} and {Pagan.name} religions"
+}
+
+def Sunni : Muslim
+{
+	name = "Sunni"
+	{
+		ism = "Sunni Islam"
+		ans = "Sunni Muslims"
+	}
+	
+	full_name
+	{
+		text default = "Sunni"
+		text caliphate = "Sunni Islam Caliphate"
+	}
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Muslim.psd:UI_ReligionWindow_Illustration_Muslim#2" //GUID:9b3e498596fe5da438e985f2a6d03911
+	text caliphatesDescription = "Other rulers have claimed the title of Caliph, stating their superiority over all other Islamic nations."
+	text noCaliphatesDescription = "No ruler holds the title of Caliph. Now is the time to act and claim our worthiness before all Islamic nations!"
+	
+	descritpion
+	{
+		text default = "We follow the religion of Sunni Islam."
+		text caliphate = "Our ruler holds the title of Caliph! This elevates our position before the rest of the Islamic world and allows us to lead jihads against infidels."
+	}
+	holy_lands_realms = ["Palestine", "Al_Maqqah", "Yathrib"] //realms to be corrected with new WV MAP
+	tooltip = "The most widespread branch of Islam, most popular in north Africa and western Asia"
+	icon = "Assets/Europe/icons_ui.PNG:sunni#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	map_color = "144,109,23" //906E17FF
+	
+	// bonuses
+	// context: Kingdom
+	mod ks_prod_gold_perc
+	{
+		category = "Religion"
+		caliphate = 15
+	}
+	mod ks_prod_piety_religion_perc = 10
+	{
+		category = "Religion"
+		caliphate = 20
+	}
+	mod ks_stability_religion = 5
+	{
+		caliphate = 15
+	}
+	mod ks_liege_rein_perc
+	{
+		hidden
+		Catholic = -25
+		Orthodox = -15
+		Sunni = 0
+		Shia = -5
+		Pagan = -5
+	}
+	
+	religious_tension // from realm religion to kingdom religion
+	{
+		float Catholic = 12
+		float Orthodox = 10
+		float Sunni = 0
+		float Shia = 3
+		float Pagan = 8
+	}
+}
+
+def Shia : Muslim
+{
+	name = "Shia"
+	{
+		ism = "Shia Islam"
+		ans = "Shia Muslims"
+	}
+	full_name
+	{
+		text default = "Shia Islam"
+		text caliphate = "Shia Islam Caliphate"
+	}
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Muslim.psd:UI_ReligionWindow_Illustration_Muslim#2" //GUID:9b3e498596fe5da438e985f2a6d03911
+	text caliphatesDescription = "Other rulers claimed the title of Caliph, stating their superiority over all other Islamic nations"
+	text noCaliphatesDescription = "No ruler holds the title of Caliph. Now is the time to act and claim our worthiness before all Islamic nations!"
+	
+	descritpion
+	{
+		text default = "We follow the religion of Shia Islam."
+		text caliphate = "Our ruler holds the title of Caliph! This elevates our position before the rest of the Islamic world and allows us to lead jihads against infidels."
+	}
+	tooltip = "The second-largest denomination of Islam, spread most around the Persian Gulf and Arabian Peninsula."
+	icon = "Assets/Europe/icons_ui.PNG:shia#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	map_color = "140,64,21" //8D4016FF
+	holy_lands_realm = "Baghdad"
+	// bonuses
+	// context: Kingdom
+	mod ks_prod_gold_perc = 5
+	{
+		category = "Religion"
+		caliphate = 20
+	}
+	mod ks_prod_piety_religion_perc = 20
+	{
+		category = "Religion"
+		caliphate = 30
+	}
+	mod ks_stability_religion
+	{
+		caliphate = 15
+	}
+	mod ks_liege_rein_perc
+	{
+		hidden
+		Catholic = -25
+		Orthodox = -15
+		Sunni = -5
+		Shia = 0
+		Pagan = -5
+	}
+	
+	religious_tension // from realm religion to kingdom religion
+	{
+		float Catholic = 15
+		float Orthodox = 12
+		float Sunni = 4
+		float Shia = 0
+		float Pagan = 10
+	}
+}
+
+//============================================ Pagan
+
+def PaganBelief
+{
+	text name
+	sprite icon
+	sprite icon_disabled
+	sprite icon_selected
+
+	// mod stat = val
+
+	text belief = "{name}"
+}
+
+def Pagan : Religion
+{
+	name = "Pagan"
+	{
+		ism = "Paganism"
+		ans = "Pagans"
+	}
+	full_name
+	{
+		text default = "Pagan"
+	}
+	tooltip = "Only a few Pagan kingdoms exist in the game, considered heathens by both Christians and Muslims. Each of them can promote different beliefs."
+	icon = "Assets/Europe/icons_ui.PNG:pagan#1" //GUID:af589d60a2b25d24884e86173fb3111e
+	map_color = "58,112,48" //3A7030FF
+	descritpion
+	{
+		text default = "We follow the ways of our ancestors and praise the old gods." //shoudn't be shown anywhere
+	}
+	piety = "Tradition"
+	text change_traditions_button_label = "Change our traditions"
+	text adopting_traditions_button_label = "Adopting tradition [{clr:red}{tradition}{/clr}|...]"
+	text traditon_selection_caption = "What should we honor?"
+	text traditon_apply_button_label = "Honor [{tradition}|...]"
+	text no_adopted_beliefs = "Our people praise the Old Gods, yet seek further guidance. We should appoint some shamans and order them to spread beliefs."
+	text adopted_beliefs = "As proud pagans, our people live according to the ways of the Old Gods. The few beliefs that are spread by our shamans further strengthen our nations' spirituality and powers."
+	text beliefs_upkeep = "Beliefs upkeep:"
+	titles
+	{
+		text Cleric = "Shaman"
+		{
+			s = "Shamans"
+		}
+		text Governor = "High Priest of {governed_castle}"
+	}
+	
+	// bonuses
+	// context: Kingdom
+	mod ks_prod_gold_perc = -10
+	{
+		category = "Religion"
+	}
+	mod ks_prod_books_religion_perc = -25
+	mod ks_liege_rein_perc
+	{
+		hidden
+		Catholic = -25
+		Orthodox = -25
+		Sunni = -15
+		Shia = -15
+		Pagan = 0
+	}
+	
+	// beliefs
+	int max_beliefs = 4
+	upkeep_belief_base = [5, 15, 30, 50, 75, 120, 200, 300, 500]
+	upkeep_belief_ssum1_perc = [0.002, 0.005, 0.01, 0.02, 0.04, 0.07, 0.1, 0.15, 0.2]
+
+	def Raids : PaganBelief
+	{
+		text name = "Raids"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Raids.tga:UI_PaganTradition_Raids#2" //GUID:de885960a529cb6429afdad383ca267b
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Raids.tga:UI_PaganTradition_Raids#2" //GUID:de885960a529cb6429afdad383ca267b
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Raids.tga:UI_PaganTradition_Raids#2" //GUID:de885960a529cb6429afdad383ca267b
+		mod ks_pillage_gold_perc = 25
+		mod ks_army_speed_world_perc = 5
+	}
+	def Conquest : PaganBelief
+	{
+		text name = "Conquest"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Conquest.tga:UI_PaganTradition_Conquest#2" //GUID:69b91496add8b8b42a4d8f950df3765e
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Conquest.tga:UI_PaganTradition_Conquest#2" //GUID:69b91496add8b8b42a4d8f950df3765e
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Conquest.tga:UI_PaganTradition_Conquest#2" //GUID:69b91496add8b8b42a4d8f950df3765e
+		mod ks_army_morale = 3 { text mod_name = "Belief: {Pagan.Conquest}" }
+		mod ks_squad_size_perc = 10
+		//mod ks_army_slot_bonus = 3
+		//can make horde?
+	}
+	def Family : PaganBelief
+	{
+		text name = "Family"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Family.tga:UI_PaganTradition_Family#2" //GUID:05efbb53a0ffc114ea7ef943693db66e
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Family.tga:UI_PaganTradition_Family#2" //GUID:05efbb53a0ffc114ea7ef943693db66e
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Family.tga:UI_PaganTradition_Family#2" //GUID:05efbb53a0ffc114ea7ef943693db66e
+		mod ks_max_population = 5
+		mod ks_population_growth_perc = 20
+		mod ks_food_in_farms = 1
+		mod ks_food_in_towns = 3
+	}
+	def Freedom : PaganBelief
+	{
+		text name = "Freedom"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Freedom.tga:UI_PaganTradition_Freedom#2" //GUID:4320a0525295e87439cfb4f7003a7dd9
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Freedom.tga:UI_PaganTradition_Freedom#2" //GUID:4320a0525295e87439cfb4f7003a7dd9
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Freedom.tga:UI_PaganTradition_Freedom#2" //GUID:4320a0525295e87439cfb4f7003a7dd9
+		mod ks_army_morale_at_home = 5
+		mod ks_siege_resilience = 25
+		mod ks_army_defense_perc = 10
+	}
+	def Ocean : PaganBelief
+	{
+		text name = "The Ocean"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Ocean.tga:UI_PaganTradition_Ocean#2" //GUID:e5b326ef1b600ce4abeb51ebe4e9ce3e
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Ocean.tga:UI_PaganTradition_Ocean#2" //GUID:e5b326ef1b600ce4abeb51ebe4e9ce3e
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Ocean.tga:UI_PaganTradition_Ocean#2" //GUID:e5b326ef1b600ce4abeb51ebe4e9ce3e
+		mod ks_gold_per_coastal_realm = 3
+		mod ks_food_in_coastal_villages = 3
+		mod ks_gold_in_coastal_villages = 3
+		mod ks_ships_speed_perc = 10
+		//mod ks_embark_speed_perc = 50
+	}
+	def Battles : PaganBelief
+	{
+		text name = "Battles"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Battles.tga:UI_PaganTradition_Battles#2" //GUID:f68ed662ce7a0894fa9a2765c372398e
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Battles.tga:UI_PaganTradition_Battles#2" //GUID:f68ed662ce7a0894fa9a2765c372398e
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Battles.tga:UI_PaganTradition_Battles#2" //GUID:f68ed662ce7a0894fa9a2765c372398e
+		mod ks_recruit_cost_bonus_perc = 25
+		mod ks_troop_experience_gain_rate_perc = 15
+		mod ks_pillage_gold_perc = 25
+	}
+	def Gods : PaganBelief
+	{
+		text name = "Gods"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Gods.tga:UI_PaganTradition_Gods#2" //GUID:623d3550b557fd64ca1f8e732beebeba
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Gods.tga:UI_PaganTradition_Gods#2" //GUID:623d3550b557fd64ca1f8e732beebeba
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Gods.tga:UI_PaganTradition_Gods#2" //GUID:623d3550b557fd64ca1f8e732beebeba
+		mod ks_prod_piety_religion_perc = 20
+		{
+			category = "Religion"
+		}
+		mod ks_army_morale_vs_other_religion = 3
+		mod ks_prod_books_religion = 10
+		// spreading heresy?
+	}
+	def Heroes : PaganBelief
+	{
+		text name = "Heroes"
+		sprite icon = "Assets/UI/Elements/Religion/UI_PaganTradition_Heroes.tga:UI_PaganTradition_Heroes#2" //GUID:7aeed74d3b38d814dbb710c37828c40b
+		sprite icon_disabled = "Assets/UI/Elements/Religion/UI_PaganTradition_Heroes.tga:UI_PaganTradition_Heroes#2" //GUID:7aeed74d3b38d814dbb710c37828c40b
+		sprite icon_selected = "Assets/UI/Elements/Religion/UI_PaganTradition_Heroes.tga:UI_PaganTradition_Heroes#2" //GUID:7aeed74d3b38d814dbb710c37828c40b
+		mod ks_stability_religion = 10
+		//mod ks_army_morale = 3 { text mod_name = "Belief: {Pagan.Heroes}" }
+		mod ks_prod_books_religion = 5
+		mod ks_troops_shock = 10 //!!! this probably needs to be reduced, high value is set for initial testing
+	}
+
+	illustration = "Assets/UI/Elements/Religion/Illustrations/UI_ReligionWindow_Illustration_Pagan.psd:UI_ReligionWindow_Illustration_Pagan#2" //GUID:7337f5ea2eff8314ba9019d97882ec20
+	
+	religious_tension // from realm religion to kingdom religion
+	{
+		float Catholic = 6
+		float Orthodox = 6
+		float Sunni = 6
+		float Shia = 6
+		float Pagan = 0
+	}
+	message_icon = "Assets/UI/Elements/Religion/Icons/Icon__Religion_Message_Pagan.tga:Icon__Religion_Message_Pagan#1" //GUID:4297b912657cd1e4c8255a7a57bd2e52
+}
+
+template NotPagan : Religion
+{
+	name = "{Christian.name} / {Muslim.name}" // "Not Pagan"
+	tooltip = "Kingdoms and provinces, following {Muslim.name} and {Christian.name} religions"
+}
+
+//============================================ Crusade
+
+def Crusade
+{
+	
+	float cooldown = 900 // cooldown of the crusade action
+	float cooldown_for_players = 600 // cooldown of the crusade action through audience
+	float initial_cooldown_crusade = 1800 //cooldown after the game starts
+	
+	float minTroopsOnGoHome = 2
+	float maxTroopsOnGoHome = 4
+	float skillCopyPercentage = 70
+	float crusadeNumKingdoms = 3
+	float crusadePlayerKingdomsPerc = 30
+	float sackGoldMultiplier = 50
+	
+	int max_peasants = 4 //num guaranteed peasant squads in the army, reduced by 1 for each hour ingame time
+	
+	int supplies_consumption_rate_mod = 0 //0.5
+	
+	cursader_status
+	{
+		text caption = "Crusade:"
+
+		text default = "{leader} is leading a crusade against {target}!"
+		text own = "Our {leader} is leading a crusade against {target}!"
+		text target = "{leader} is leading a crusade against us!"
+	}
+	
+	caption
+	{
+		text helping_kingdom = "Holy Crusade in defense of {helping_kingdom}"
+		text forced = "Holy Crusade against {target}"
+		text holy_lands = "Holy Crusade for freeing {religion.holy_lands_realm}"
+		text attack_infidels = "Holy Crusade against {target}"
+	}
+	
+	body
+	{
+		text helping_kingdom = "{src_kingdom} is leading a Crusade[ against {target}][ to help the catholic kingdom of {helping_kingdom}]."
+		text forced = "{src_kingdom} is leading a Crusade[ against {target}], after managing to convince the Pope of the holiness of such a campaign."
+		text holy_lands = "{src_kingdom} is leading a Crusade against[ {target}][ to free the holy lands of {religion.holy_lands_realm}]."
+		text attack_infidels = "{src_kingdom} is leading a Crusade against the [{target:ians}], enemies of all godly catholic kingdoms."
+	}
+	text fundsValue = "{wealth}{gold_icon}"
+	
+	int giveToKingdomMaxDistance = 2
+	capture_realm_outcomes
+	{
+		main give_to_kingdom = 100
+		{
+			upScaleOptions = true //scale to sum(chances) instead to 100, to prevent no outcomes.
+			
+			option give_to_leader_kingdom = 35
+			{
+				king = 100
+				prince = 75
+			}
+			option give_to_papacy = 15
+			option give_to_helping_kingdom = 10
+			option give_to_established_kingdom = 40
+		}
+		option establish_new_kingdom //happens when it cant be given to any kingdom
+		{
+			main give_to_leader_kingdom_ignore_checks = 0
+			{
+				cant_establish_new_kingdom = 100
+			}
+			option vasal_of_leader_kingdom = 60
+			{
+				king = 100
+				prince = 80
+			}
+			option vasal_of_papacy = 40
+		}
+	}
+	
+	end_crusade_outcomes
+	{
+		main return = 50
+		{
+			crusade_successful = 100
+			leader_kingdom_destroyed = 100
+			papacy_destroyed = 0
+			king = 100
+			prince = 75
+		}
+		option rogue
+		option default // prevent "no outcome"
+	}
+	
+	crusader_death_outcomes
+	{
+		main army_goes_rogue = 50
+		option army_becomes_merc_camp = 50
+		option default // prevent "no outcome"
+	}
+	
+	crusader_exiled_outcomes
+	{
+		main army_becomes_merc_camp = 100
+		option default // prevent "no outcome"
+	}
+}
+
+//============================================ Heresy
+
+def Heresy
+{
+	float land_realm_mul = 1
+	float sea_realm_mul = 0.5
+	float spread_chance_mul = 0.5
+}
+
+def HeresySpread : ReligionMessage
+{
+	icon = Pagan.icon
+	caption = "Paganism is spreading"
+	
+	case we_are_pagan_realm_is_ours = (player.religion.Pagan and player = realm.kingdom)
+	{
+		caption = "We welcome the Sun!"
+		body = "Our people in {realm} finally abandoned their rotten 'god', and turned back to our ancestors' beliefs!"
+		voice_line = "narrator_voice:heresy_spreading_our_realm_pagan"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Positive.png:Icon_Message_Pagans_Positive#2" //GUID:4ed6e9507eb2bc24180cbc6ef7ee7bee
+	}
+	
+	case we_are_pagan_realm_is_in_neighbor = (player.religion.Pagan and player.HasNeighbor(realm.kingdom))
+	{
+		caption = "Welcome the Sun!"
+		body = "The people in our neighbours from {realm.kingdom} are abandoning their rotten 'god', and are turning back to their ancestors' beliefs!"
+		voice_line = "narrator_voice:heresy_spreading_neighbour_pagan"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Neutral.png:Icon_Message_Pagans_Neutral#2" //GUID:23521117cd468fe43b3605ce5f5096b9
+	}
+	
+	case our_catholic_kingdom = (player = realm.kingdom and realm.kingdom.religion.Catholic)
+	{
+		body = "[{param:s} pagan beliefs|Pagan beliefs] are spreading in {realm}, poisoning the minds of our people!" //consider adding rel change with papacy, mentioning that "The Pope is displeased."
+		voice_line = "narrator_voice:heresy_spreading_our_realm_non_pagan"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Negative.png:Icon_Message_Pagans_Negative#2" //GUID:e0d9a9b7d543d2d40b0682877dc9ecc7
+	}
+	
+	case our_kingdom = (player = realm.kingdom)
+	{
+		body = "[{param:s} pagan beliefs|Pagan beliefs] are spreading in {realm}, poisoning the minds of our people!"
+		voice_line = "narrator_voice:heresy_spreading_our_realm_non_pagan"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Negative.png:Icon_Message_Pagans_Negative#2" //GUID:e0d9a9b7d543d2d40b0682877dc9ecc7
+	}
+	
+	case neighbor = (player.HasNeighbor(realm.kingdom))
+	{
+		body = "Pagan beliefs are spreading in our neighbor - {realm.kingdom}, poisoning the minds of their people!"
+		voice_line = "narrator_voice:heresy_spreading_neighbour_non_pagan"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Neutral.png:Icon_Message_Pagans_Neutral#2" //GUID:23521117cd468fe43b3605ce5f5096b9
+	}
+	
+	default
+	{
+		caption = null
+	}
+}
+
+
+//============================================ Messages, Offers
+
+def KingdomExcommunicated : ReligionMessage
+{
+	caption = "{obj} was excommunicated"
+	body = "The blasphemous rulership of {kingdom} could no longer be tolerated and [{pope}|the Pope] has excommunicated them from the Catholic church."
+	radio = "[{pope}|The Pope] has excommunicated {kingdom} from the Catholic church"
+	category = "common"
+	drop_down = (local_player_kingdom.is_catholic)
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+	voice_line = "narrator_voice:kingdom_excommunicated"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Excommunication.tga:UI_Illustration_Excommunication#2" //GUID:37588cd537ce07b4c92f9afba77bca92
+
+	stack_priority = 120
+}
+
+def OwnKingdomExcommunicated : KingdomExcommunicated
+{
+	caption = "We were excommunicated"
+	body = ["Our kingdom has been excommunicated from the Catholic church by [{pope}|The Pope]!",
+			"As we angered the Holy See, we were excluded for heresy from the society of the faithful - [{pope}|the Pope] pronounced a major excommunication of {plr_kingdom.king} and all {plr_kingdom:ians}."]
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Negative.png:Icon_Message_Catholic_Negative#2" //GUID:2cef172317bd25047bf6d8e6520f014e
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Excommunication.tga:UI_Illustration_Excommunication#2" //GUID:37588cd537ce07b4c92f9afba77bca92
+	voice_line = "narrator_voice:kingdom_excommunicated_own"
+	
+	stack_priority = 10
+}
+
+def KingdomUnExcommunicated : ReligionMessage
+{
+	caption = "{obj} is no longer excommunicated"
+	body = "[{pope}|The Pope] has absolved {kingdom} from its sins and accepted it back to the Catholic church."
+	radio = "{kingdom} is no longer excommunicated from the Catholic church"
+	drop_down = (local_player_kingdom.is_catholic)
+	category = "common"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Unexcommunication.tga:UI_Illustration_Unexcommunication#2" //GUID:79a7d59a9c520454c9db8d6429e5e959
+	voice_line = "narrator_voice:kingdom_unexcommunicated"
+	
+	stack_priority = 120
+}
+
+def OwnKingdomUnexcommunicated : KingdomUnExcommunicated
+{
+	caption = "We are no longer excommunicated"
+	body = ["Rejoice, a glorious a day! [{pope} the Merciful|The merciful pope] accepted us back under the wise guidance of the Catholic church and we are no longer excommunicated!",
+			"[{pope}|The Pope] said to {plr_kingdom.king} only four simple words - 'Ego te absolvo. Amen.' - and the whole {plr_kingdom} rejoiced - we are accepted back into the Catholic world!",
+			"With these words [{pope}|the Pope] accepted us back under the guidance of the Holy See:{p}{p}{i}'Deinde, ego te absolvo a peccatis tuis in nomine Patris, et Filii, + et Spiritus Sancti. Amen!{/i}",
+			"[{pope}|The Pope] has absolved us from our sins and accepted us back to the Catholic church!"]
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Positive.png:Icon_Message_Catholic_Positive#2" //GUID:8c1fb46dfa6825f4590d3d7e5cca7741
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Unexcommunication.tga:UI_Illustration_Unexcommunication#2" //GUID:79a7d59a9c520454c9db8d6429e5e959
+	voice_line = "narrator_voice:kingdom_unexcommunicated_own"
+	
+	stack_priority = 10
+}
+
+def NewCrusadeMessage : ReligionMessage
+{
+	caption = "Crusade against {target}"
+	switch_value = (plr_kingdom.religion.key)
+	case Catholic
+	{
+		stack_priority = 120
+		body = "Blessed days are upon us - [{pope}|The Pope] has called for a crusade against {target}! {leader} from {src_kingdom} was chosen to lead the army on its holy path."
+	}
+	case default
+	{
+		body = "Word has spread that the Christians have ordered a Crusade againt {target}, with {leader} of {src_kingdom} leading their armies!"
+		stack_priority = 150
+	}
+	
+	radio = "{src_kingdom:ians} is leading a crusade against {target}"
+	category = "military"
+	important = 2
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_NewCrusade.tga:UI_Illustration_NewCrusade#2" //GUID:2de9815691119614e8bf19bdcfadfecc
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+	voice_line = "narrator_voice:new_crusade"
+}
+
+def WeLeadCrusadeMessage : NewCrusadeMessage
+{
+	caption = "We are leading a crusade!"
+	case Catholic
+	{
+		body = "[{pope}|The Pope] trusted us with the sacred mission to lead a crusade against {target}! {leader} was chosen to lead the army on its holy path."
+	}
+	show_warning = true
+	stack_priority = 20
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Positive.png:Icon_Message_Catholic_Positive#2" //GUID:8c1fb46dfa6825f4590d3d7e5cca7741
+}
+
+def NewCrusadeAgainstUsMessage : NewCrusadeMessage
+{
+	caption = "Crusade against us"
+	body = "[{pope}|The Pope] has called for a crusade against us! {leader} from {src_kingdom} was chosen to lead an army against our kingdom."
+	radio = "{src_kingdom:ians} is leading a crusade against {target}"
+	category = "military"
+	show_warning = true
+	stack_priority = 20
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_NewCrusade.tga:UI_Illustration_NewCrusade#2" //GUID:2de9815691119614e8bf19bdcfadfecc
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Negative.png:Icon_Message_Catholic_Negative#2" //GUID:2cef172317bd25047bf6d8e6520f014e
+	voice_line = "narrator_voice:crusade_against_us"
+}
+
+def CrusadeEndedMessage : ReligionMessage
+{
+	caption = "Crusade ended"
+	body = "[{pope}|The Pope] has called off the crusade[ against {target}]."
+	radio = "The crusade against {target} was called off"
+	important = 2
+	category = "military"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	voice_line = "narrator_voice:crusade_ended"
+}
+
+def CrusadeEndedGoToMessage : CrusadeEndedMessage
+{
+	buttons { goto; ok }
+}
+
+def CrusadeDefeatedMessage : CrusadeEndedMessage
+{
+	caption = "Crusade defeated"
+	body = "The crusade army[ against {target}] was defeated[ near {army.realm_in}]. With no army left to command its forces, the crusade is no more."
+	radio = "The crusade against {target} was defeated"
+	category = "military"
+	voice_line = "narrator_voice:crusade_defeated"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderDeadArmyBecameMercenaryMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade leader died"
+	body = "[{leader}|The crusade leader] is dead! Due to this devastating loss, the crusade was called off. Its army is now nothing more than a band of mercenaries, [stationed near {army.realm_in} and] awaiting its new commander."
+	radio = "The crusaders have become mercenaries after the death of their leader"
+	category = "military"
+	voice_line = "narrator_voice:crusade_defeated_leader_is_dead"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderExiledArmyBecameMercenaryMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade ended"
+	body = "[{leader}|The crusade leader] was exiled by {leader.kingdom}! Struck by this terrible news, the leader decided to end his holy crusade, turning his army into a band or mercenaries."
+	radio = "The crusaders have become mercenaries after their leader was exiled by {leader.kingdom}"
+	category = "military"
+	voice_line = "narrator_voice:crusade_ended_exiled_leader"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderDeadArmyBecameRebelMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade leader died"
+	body = "[{leader}|The crusade leader] died, putting an abrupt end to the crusade. Stripped of its holy purpose, the deceased marshal's army has succumbed to greed and turned rebel."
+	radio = "The crusaders have rebelled after the death of their leader"
+	category = "military"
+	voice_line = "narrator_voice:crusade_defeated_leader_is_dead"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeTargetDefeatedGoHomeMessage : CrusadeEndedMessage
+{
+	caption = "Crusade succeeded"
+	body = "{target:s} lands have been conquered! With its holy purpose fulfilled, the crusade has come to an end."
+	radio = "The crusaders successfully took over {target}"
+	category = "military"
+	voice_line = "narrator_voice:crusade_target_conquered"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeSucceeded.tga:UI_Illustration_CrusadeSucceeded#2" //GUID:ef69e9f3714498b41891d8811a6831e1
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeTargetDefeatedGoRogueMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade succeeded"
+	body = "{target:s} lands have been conquered! Stripped of their holy purpose, the soldiers leading the crusade have gone rogue and formed a rebel army."
+	radio = "The crusaders took over {target} and turned rebel"
+	category = "military"
+	voice_line = "narrator_voice:crusade_target_conquered"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeSucceeded.tga:UI_Illustration_CrusadeSucceeded#2" //GUID:ef69e9f3714498b41891d8811a6831e1
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeFormedNewKingdomMessage : CrusadeEndedMessage
+{
+	caption = "Crusaders formed a new kingdom"
+	body = "{leader} captured the lands of {captured_realm} and proclaimed himself king. Thus the crusade ends, as the former crusaders now follow other goals."
+	radio = "The crusade leader, {leader}, founded a new kingdom in {captured_realm}"
+	category = "common"
+	voice_line = "narrator_voice:crusade_formed_new_kingdom"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeIndependence.tga:UI_Illustration_CrusadeIndependence#2" //GUID:b0f3450dae31cb5448634307d48303eb
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderKingdomDefeatedGoLoyalistMessage : CrusadeEndedGoToMessage
+{
+	//crusaders always go loyalists here
+	caption = "Crusade ended"
+	body = "The current crusade has come to a sudden end, as [{leader_kingdom}|the kingdom of its now former leader] was destroyed. [{leader}|The crusader] has now taken on the task of forming his kingdom anew, albeit in lands far from home."
+	radio = "The crusade against {target} has ended[ with the destruction of {leader_kingdom}]."
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadePapacyDestroyedGoHomeMessage : CrusadeEndedMessage
+{
+	//kings cant rebel until their kingdom is destroyed - they go home
+	caption = "Crusade ended"
+	body = "The crusade against {target} has tragically come to an end, after the sudden fall of {catholic.hq_realm}. It is a truly devastating day for the Catholic world."
+	radio = "The crusade against {target} has ended[ with the fall of {catholic.hq_realm}]"
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadePapacyDestroyedGoRogueMessage : CrusadeEndedGoToMessage
+{
+	//all other go rogue
+	caption = "Crusade ended"
+	body = "The crusade against {target} has tragically come to an end, after the sudden fall of {catholic.hq_realm}. Unable to cope with the tragic event, {leader} and his men have succumbed to darkness and became rebels."
+	radio = "The crusade against {target} has ended[ with the fall of {catholic.hq_realm}]"
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeCrusadeDivertedGoRogueMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade ended"
+	body = "[{leader}|The crusade leader] and his men have abandoned their holy goal and turned rebel, putting an end to the crusade."
+	radio = "The crusade against {target} has ended with its armies rebelling"
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderChangedReligionGoHomeMessage : CrusadeEndedMessage
+{
+	caption = "Crusade ended"
+	body = "As the {leader_kingdom:ians} no longer follow Catholicism, they abandoned their glorious quest to destroy {target} and returned home."
+	radio = "The crusade against {target} has ended[ as {leader_kingdom} are no longer Catholics]"
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeLeaderChangedReligionGoRogueMessage : CrusadeEndedGoToMessage
+{
+	caption = "Crusade ended"
+	body = "The crusade against {target} has come to an end due to the religious tention in {leader_kingdom} and their conversion to {leader_kingdom.religion}.[{leader}|The crusade leader] now leads his men into a rebellion."
+	radio = "The crusade against {target} has ended[ as {leader_kingdom} are no longer Catholics]"
+	category = "military"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_CrusadeDefeated.tga:UI_Illustration_CrusadeDefeated#2" //GUID:0b6d551d385b32e45b667da486d7e577
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+//  --- Crusader Conquered Province Outcome Messages ---
+
+def CrusadeTargetProvinceFormedNewKingdom : OkGotoMessage
+{
+	caption = "Independent kingdom formed"
+	body = "{captured_realm} could not stop {leader:s} forces and fell to his siege. Part of the crusade separated and formed their own kingdom, crowning {captured_realm.kingdom.king} as their new ruler."
+	
+	radio = "The independent {captured_realm.kingdom.KingdomType} of {captured_realm.kingdom} was formed, following {leader:s} successful siege over the town"
+	important = 2
+	category = "military"
+
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Independence_Declared.tga:UI_Illustration_Independence_Declared#2" //GUID:b149be4a64a259c47a5dc5dbc015d439
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeTargetProvinceJoinedOurKingdom : OkGotoMessage
+{
+	caption = "Province joined our kingdom"
+	body = "Sire, {captured_realm} has joined our {src_kingdom.KingdomType}! The province was given to us by {leader}, following his successful siege against the {target:ian} infidels."
+	show_warning = true
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Independence_Declared.tga:UI_Illustration_Independence_Declared#2" //GUID:b149be4a64a259c47a5dc5dbc015d439
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Population_Positive.png:Icon_Message_Population_Positive#2" //GUID:cec01322685fc60459994cbb8e1b06ce
+	voice_line = "narrator_voice:rebellion_independence_loyal_to_us"
+}
+
+def CrusadeTargetProvinceJoinedOtherKingdom : OkGotoMessage
+{
+	caption = "Province joined foreign kingdom"
+	body = ["Sire, {captured_realm} was conquered by {leader}! The crusade leader graciously gifted the province to {captured_realm.kingdom}.",
+	"{captured_realm} was conquered by {leader}! The crusade leader had no claims over the province and passed the rule over it to {captured_realm.kingdom}."]
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Independence_Declared.tga:UI_Illustration_Independence_Declared#2" //GUID:b149be4a64a259c47a5dc5dbc015d439
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Neutral.png:Icon_Message_Catholic_Neutral#2" //GUID:0dfc374353dca324096b90b352efe118
+}
+
+def CrusadeTargetProvinceJoinedKingdomRadioMessage: Message
+{
+	radio = "{captured_realm} fell to the forces of {leader}, joining {captured_realm.kingdom}"
+	important = 2
+	drop_down = false
+	category = "military"
+}
+
+// obsolete by new GD
+// def OngoingCrusade : Message
+// {
+// 	caption = "Crusade against {crusade.target}"
+// 	body = "{leader.status.status_text}"
+// 	illustration = "Assets/UI/Elements/Common/WindowElements/UI_Illustration_Crusade.png:UI_Illustration_Crusade#2" //GUID:572b4b7bf5c3b7a48918adc7083a9281
+// 	icon = Catholic.icon
+// 	buttons { goto; close }
+// 	expire_time = 30
+// 	order = -1000
+// 	icon_prefab = "Assets/UI/Elements/msg_icons/CrusadeIcon.prefab" //GUID:705745f49d6c8ec409532045ea6a30b0
+// 	ui_prefab = "Assets/UI/Religion/UIP_CrusadeWindow.prefab" //GUID:2ea191e599bd72046bad2125149b3e8d
+// }
+
+def LeadCrusadeMessage : DiplomacyOfferMessage
+{
+	caption = "The pope wants us to lead a crusade"
+	body = ["His Holiness, [{pope}|the Pope], has trusted us with one of the most sacred deeds in the history of {plr_kingdom}! He wants {leader} to lead a crusade against {target}!",
+			"By the power of the Papacy and the Catholic church, our noble {leader} was chosen to lead the armies of Christ against the heathens {target}!",
+			"What a glorious day! [{pope}|the Pope] has entrusted {leader} with the leadership of a sacred crusade against the evil {target:ians}!"]
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Positive.png:Icon_Message_Catholic_Positive#2" //GUID:8c1fb46dfa6825f4590d3d7e5cca7741
+	voice_line = "narrator_voice:lead_crusade_message"
+	
+	stack_priority = 20
+}
+
+def LeadCrusadeOffer : Offer
+{
+	from = "Kingdom"
+	to = "Kingdom"
+	args = [ 
+		"Kingdom", // kingdom the crusade will be against
+		"Kingdom?", // kingdom the crusade will be helping (can be null)
+		"string", // crusade reason
+		"Character" // the proposed crusade leader
+	]
+	propose_message = "LeadCrusadeMessage"
+	outcomes
+	{
+		accept { rel_change = "rel_accept_lead_crusade" }
+		decline { rel_change = "rel_decline_lead_crusade" }
+	}
+	
+	
+}
+
+template ReligionCharacterDied : ReligionMessage
+{
+	caption = "[The {title} is dead|New {replacement.title}]"
+	body = $[
+		"[{obj} is dead! ]["
+			"[{old_title} ]{old_name} became the new {replacement.title}. He is now known as {replacement}.|"
+			"[{old_title} ]{replacement.name} became the new {replacement.title}.|"
+			"A new [{title}|{replacement.title}] will be elected soon."
+		"]"]
+	icon = (replacement.religion.icon || kingdom.religion.icon)
+	drop_down = (can_drop_down || true)
+	stack_priority = 110
+}
+
+def NewPopeCreated : ReligionCharacterDied
+{
+	body = ["{obj} is dead! The Roman clergy had no other choice but to elect [{old_title} ]{old_name} as the new Pope. He is now known as {replacement}.",
+			"Alas, {obj} has passed away. After a long and heated debate, the papal conclave has elected [{old_title} ]{old_name} as the new Pope, now known as {replacement}."]
+	radio = "The old Pope passed away and {replacement} was chosen to lead the Catholic church"
+	category = "common"
+	important = 2
+	drop_down = (can_drop_down)
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_NewPope.png:UI_Illustration_NewPope#2" //GUID:d864083a7e3ba414f919fbf835277a15
+	voice_line = "narrator_voice:new_pope_chosen"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Neutral.png:Icon_Message_Papacy_Neutral#2" //GUID:1b90021079a31ed4fa818d054ce911da
+	sound_effect = "event:/sound_effects/notification/character/died_pope"
+	stack_priority = 110
+}
+
+def NewPopeChosen : ReligionCharacterDied
+{
+	body = ["The Papacy has suffered a dire loss - {obj} is dead! After a unanimous vote, it was decided that the new Pope should be [{old_title} ]{old_name} of {replacement.original_kingdom}, now known as {replacement}.",
+			"{obj} has died peacefully in his chambers. The papal conclave has chosen [{old_title} ]{old_name} from {replacement.original_kingdom} to replace him. May {replacement} be a wise and benevolent successor!",
+			"The beloved pope {obj} has sadly perished. The cardinals gathered and after six days, they elected [{old_title} ]{old_name} from {replacement.original_kingdom} to be the new Pope. From now on, he will be known as {replacement}."]
+	radio = "{replacement:link}{old_title} {old_name}{/link} from {replacement.original_kingdom} was chosen as the new Pope, as the old one passed away"
+	category = "common"
+	important = 2
+	drop_down = (can_drop_down)
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_NewPope.png:UI_Illustration_NewPope#2" //GUID:d864083a7e3ba414f919fbf835277a15
+	voice_line = "narrator_voice:new_pope_chosen"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Neutral.png:Icon_Message_Papacy_Neutral#2" //GUID:1b90021079a31ed4fa818d054ce911da
+	sound_effect = "event:/sound_effects/notification/character/died_pope"
+	stack_priority = 110
+}
+
+def OurPopeChosen : ReligionCharacterDied
+{
+	caption = "Our cleric became the Pope"
+	body = ["{obj} is dead! Our [{old_title} ]{old_name} was elected as the new Pope. He is now known as {replacement}.[{p}  • Unfortunatelly his new duties prevent him from governing {governed_castle}]",
+			"{obj} has died! For his humility and virtue, our [{old_title} ]{old_name} was chosen to be the new Pope, now known throughout the Roman clergy as {replacement}.[{p}  • Unfortunatelly his new duties prevent him from governing {governed_castle}]",
+			"His Holiness {obj} has sadly passed away. [{old_title} ]{old_name}, who used to be part of our very own clergy, was chosen to be the next successor, named {replacement}.[{p}  • Unfortunatelly his new duties prevent him from governing {governed_castle}]"]
+	radio = "{replacement:link}{old_title} {old_name}{/link} from {replacement.original_kingdom} was chosen as the new Pope, as the old one passed away"
+	category = "common"
+	show_warning = true
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_NewPope.png:UI_Illustration_NewPope#2" //GUID:d864083a7e3ba414f919fbf835277a15
+	voice_line = "narrator_voice:new_pope_chosen_ours"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Positive.png:Icon_Message_Papacy_Positive#2" //GUID:1a1da5afa360d31489c3ea31d9f612f2
+	sound_effect = "event:/sound_effects/notification/character/died_pope"
+	stack_priority = 20
+}
+
+def PapacyRestored : ReligionCharacterDied
+{
+	caption = "Papacy Restored"
+	body = "{kingdom} restored the Papacy. {old_title} {old_name} from {old_kingdom} was elected as the new Pope. He is now known as {pope}."
+	radio = "The Papacy was restored by {kingdom}"
+	category = "military"
+	important = 2
+	voice_line = "narrator_voice:papacy_restored"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Neutral.png:Icon_Message_Papacy_Neutral#2" //GUID:1b90021079a31ed4fa818d054ce911da
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_PapacyRestored.tga:UI_Illustration_PapacyRestored#2" //GUID:d51c3f649bc04b144bb76d296f17146c
+}
+
+def PapacyRestoredOurPope : PapacyRestored
+{
+	body = "{kingdom} restored the Papacy. Our {old_title} {old_name} was elected as the new Pope. He is now known as {pope}."
+	show_warning = true
+	voice_line = "narrator_voice:we_restored_papacy"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Positive.png:Icon_Message_Papacy_Positive#2" //GUID:1a1da5afa360d31489c3ea31d9f612f2
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_PapacyRestored.tga:UI_Illustration_PapacyRestored#2" //GUID:d51c3f649bc04b144bb76d296f17146c
+}
+
+def PapacyDestroyed : ReligionCharacterDied
+{
+	caption = "Papacy Destroyed"
+	body = "{kingdom} has conquered the Holy City of Rome. The Papacy is no more!"
+	radio = "The Papacy was destroyed by {kingdom}"
+	category = "military"
+	important = 2
+	voice_line = "narrator_voice:papacy_destroyed"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Neutral.png:Icon_Message_Papacy_Neutral#2" //GUID:1b90021079a31ed4fa818d054ce911da
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_PapacyDestroyed.tga:UI_Illustration_PapacyDestroyed#2" //GUID:325bd3f64767f3c408c98bab5eea0c7e
+}
+
+def WeDestroyedPapacy : PapacyDestroyed
+{
+	body = "Our armies have conquered the Holy City of Rome. The Papacy is no more!"
+	voice_line = "narrator_voice:we_destroyed_papacy"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Positive.png:Icon_Message_Papacy_Positive#2" //GUID:1a1da5afa360d31489c3ea31d9f612f2
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_PapacyDestroyed.tga:UI_Illustration_PapacyDestroyed#2" //GUID:325bd3f64767f3c408c98bab5eea0c7e
+}
+
+def WeLostPapacy : PapacyDestroyed
+{
+	body = "Our armies have failed to defend the Holy City of Rome!"
+	voice_line = "narrator_voice:we_lost_rome"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Negative.png:Icon_Message_Papacy_Negative#2" //GUID:f0551ed801c7eea4399d528cf21b09e0
+}
+
+def RestorePapacy : ReligionMessage
+{
+	caption = "Restore Papacy?"
+	body = "We gained control over Rome. Shall we restore the Papacy?"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Neutral.png:Icon_Message_Papacy_Neutral#2" //GUID:1b90021079a31ed4fa818d054ce911da
+	expire_time = Catholic.restore_papacy_timeout
+	buttons
+	{
+		text restore = "&Yes, restore Papacy"
+		//text puppet = "&Yes, but as our puppet"
+		text keep = "{u}&No, keep Rome!{/u}"
+	}
+	show_warning = true
+	voice_line = "narrator_voice:we_can_restore_papacy"
+	stack_priority = 10
+}
+
+//def PontificalLegateDied : ReligionCharacterDied
+
+def ChooseNewPatriarch : ReligionCharacterDied
+{
+	caption = "Choose Patriarch"
+	body = $[
+		"[{obj.is_dead:if}{obj} is dead!|{obj} no longer resides in our kingdom. ] Thus, the time has come to appoint the new head of our church. "
+		"Choose a cleric: "
+	]
+	ui_prefab = "Assets/UI/Religion/UIP_ChooseNewPatriarch.prefab" //GUID:5a172080d9b09da45aa8628d325c48a5
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Patriarch_Neutral.png:Icon_Message_Patriarch_Neutral#2" //GUID:ce5927b332bd96b4ab014f0860f5a815
+	expire_time = Orthodox.choose_patriarch_timeout
+	allow_stack_dismiss = false
+	show_warning = true
+	voice_line = "narrator_voice:our_patriarch_dead_choose_new"
+	stack_priority = 20
+	text button_close = "&Let the fate decide"
+}
+
+def ChooseNewEcumenicalPatriarch : ReligionCharacterDied
+{
+	caption = "Choose Ecumenical Patriarch"
+	body = $[
+		"The time to choose the new head of the Orthodox church has come! "
+		"Choose a cleric to become the new Ecumenical Patriarch:"
+	]
+	ui_prefab = "Assets/UI/Religion/UIP_ChooseNewPatriarch.prefab" //GUID:5a172080d9b09da45aa8628d325c48a5
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_EcumenicalPatriarch_Neutral.png:Icon_Message_EcumenicalPatriarch_Neutral#2" //GUID:3d2a8cbfd7f83c04187657417e982339
+	expire_time = Orthodox.choose_patriarch_timeout
+	allow_stack_dismiss = false
+	voice_line = "narrator_voice:ecumenical_patriarch_dead_choose_new"
+	stack_priority = 20
+	text button_close = "&Let the fate decide"
+}
+
+def PatriarchChosen : ReligionCharacterDied
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Patriarch_Positive.png:Icon_Message_Patriarch_Positive#2" //GUID:b7a6d034e3b11bc47ace1d6c4eee8152
+	//voice_line = ""
+	drop_down = (can_drop_down)
+	stack_priority = 130
+}
+
+def EcumenicalPatriarchChosen : ReligionCharacterDied
+{
+	important = 2
+	caption = "New Ecumenical Patriarch was chosen"
+	body = "{ecumenical_patriarch} was chosen to lead the Patriarchy in Constantinople."
+	radio = "The Orthodox church is headed by a new Ecumenical Patriarch"
+	category = "common"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_EcumenicalPatriarch_Positive.png:Icon_Message_EcumenicalPatriarch_Positive#2" //GUID:fefc63e354be526428f51f03a1901794
+	switch_value = (kingdom.is_local_player)
+	case 0
+	{
+		voice_line = "narrator_voice:ecumenical_patriarch_chosen"
+	}
+	case 1
+	{
+		voice_line = "narrator_voice:new_ecumenical_patriarch_chosen"
+	}
+	drop_down = (can_drop_down)
+	stack_priority = 130
+}
+
+def JihadMessage : Message
+{
+	stack_group = "WarInvolvement"
+	separate_stack = true
+	stack_priority = 120
+}
+
+def NewJihadLostAlly : JihadMessage
+{
+	caption = "Lost ally"
+	body = "It seems {left_kingdom} didn't like our decision to turn our war into a jihad. They are no longer our allies and continue to wage their war separately."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Negative.png:Icon_Message_Jihad_Negative#2" //GUID:cbe1b674737609045a2cf296a7354de2
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Diplomacy_Angry.tga:UI_Illustration_Diplomacy_Angry#2" //GUID:29ecc7241bf12374782bfcb34c81c578
+	
+	stack_priority = 80
+}
+
+def NewJihadLeftWar : JihadMessage
+{
+	caption = "Left jihad"
+	body = "Sire, {caliphate} decided to turn the war against {jihad_target_kingdom} into a jihad! We'll continue our fight against {jihad_target_kingdom} separately."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Diplomacy_Angry.tga:UI_Illustration_Diplomacy_Angry#2" //GUID:29ecc7241bf12374782bfcb34c81c578
+	
+	stack_priority = 80
+}
+
+def NewJihadOwn : JihadMessage
+{
+	caption = "Jihad started"
+	rel_with_target = (RelationModifiers["rel_new_jihad_with_target"])
+	rel_with_muslim_target_enemies = (RelationModifiers["rel_new_jihad_with_muslim_target_enemies"])
+	rel_with_other_muslim = (RelationModifiers["rel_new_jihad_with_other_muslim"])
+	rel_with_other_christian = (RelationModifiers["rel_new_jihad_with_other_christian"])
+	
+	body = $["We turned our war against {tgt_kingdom} into a jihad! Other Islamic nations may now join our righteous campaign.{p}"
+			 "{p}   {blt} {NewJihadClergyOpinionRule.amount:bonus_dark} Scholars opinion"
+			 "{p}   {blt} {rel_with_target:bonus_dark} relations with {tgt_kingdom}"
+			 // "[{p}   {blt} {other_jihads_rel_change:bonus_dark} relations with other jihad leaders]" //!!! multiple jihads can't exist anymore
+			 "{p}   {blt} {rel_with_muslim_target_enemies:bonus_dark} with Islamic kingdoms that are at war with {tgt_kingdom}"
+			 "{p}   {blt} {rel_with_other_muslim:bonus_dark} with the rest of all Islamic kingdoms"
+			 "[{p}   {blt} {tgt_kingdom.is_christian:if}{rel_with_other_christian:bonus_dark} with all Christian kingdoms]"]
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Positive.png:Icon_Message_Jihad_Positive#2" //GUID:381b5ea5dbfa9544683fcbca5d18949b
+	
+	stack_priority = 120
+}
+
+def NewJihadAgainstUs : JihadMessage
+{
+	caption = "Jihad against us"
+	body = "Sire, {src_kingdom} has called for a jihad against us! Trying times are ahead of us, as other Islamic kingdoms might follow the caliph's call and march against us too."
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad_2.tga:UI_Illustration_New_Jihad_2#2" //GUID:b8924fefac6c19c41acbab0efb216653
+	show_warning = true
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Negative.png:Icon_Message_Jihad_Negative#2" //GUID:cbe1b674737609045a2cf296a7354de2
+	voice_line = "narrator_voice:jihad_against_us"
+	
+	stack_priority = 80
+}
+
+def JoinedJihadAgainstUs : JihadMessage
+{
+	caption = "Jihad against us"
+	body = "{src_kingdom} has joined the [{jihad_attacker:ian} ]jihad against us and now we are at war! These fanatics will not stop unless we crush them all."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Negative.png:Icon_Message_Jihad_Negative#2" //GUID:cbe1b674737609045a2cf296a7354de2
+	voice_line = "narrator_voice:jihad_against_us_gained_ally"
+	
+	stack_priority = 70
+}
+
+def EndJihadAgainstUs : JihadMessage
+{
+	caption = "Jihad against us ended"
+	body = "The {src_kingdom:ian} Jihad against us ended - we may finally have some peace with the Muslim world."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Positive.png:Icon_Message_Jihad_Positive#2" //GUID:381b5ea5dbfa9544683fcbca5d18949b
+	voice_line = "narrator_voice:jihad_against_us_ended"
+	
+	stack_priority = 90
+}
+
+def EndJihadAgainstUsCaliphDied : EndJihadAgainstUs
+{
+	body = "The {src_kingdom:ian} jihad against us ended because their caliph died. Let's hope we will have at least some peace, before these fanatics march against us once more."
+	voice_line = "narrator_voice:jihad_against_us_ended_caliph_died"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Positive.png:Icon_Message_Jihad_Positive#2" //GUID:381b5ea5dbfa9544683fcbca5d18949b
+	
+	stack_priority = 90
+}
+
+def OurJihadEnded : JihadMessage
+{
+	caption = "Our jihad has ended"
+	body = "{body}"
+	
+	body_texts
+	{
+		text default = "Our jihad against {tgt_kingdom} has ended."
+		text caliphate_abandoned = "We lost the title of caliph and that ended our jihad against {tgt_kingdom}. We can no longer decide who the real enemies of Islam are."
+		text target_muslim = "{tgt_kingdom} adopted Islam, so our jihad against them ended. We can be proud that we've made them see the one true path!"
+		text not_enemies = "The war with {tgt_kingdom} is over and so is our jihad against them. They would be wise not to cross our path again."
+		text caliph_dead = "The death of our caliph ended the jihad against {tgt_kingdom}, as the Muslim world lost their holy leader."
+		text action = "We decided to spare {tgt_kingdom}, for now."
+		text conclude_all_wars = "The {tgt_kingdom:ians} we called jihad against are utterly destroyed and our holy goal is accomplished."
+		text demand_tribute = "The infidels from {tgt_kingdom} have bowed their heads! We are victorious in our holy war!"
+		text white_peace = "Even though we strived for victory, we couldn't overpower the {tgt_kingdom:ians}. Our jihad didn't bring us glory, but sometimes diplomacy is the only way."
+		text offer_tribute = "We brought shame to ourselves! We kneeled to the {tgt_kingdom:ians} and our jihad is over."
+	}
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Negative.png:Icon_Message_Jihad_Negative#2" //GUID:cbe1b674737609045a2cf296a7354de2
+	voice_line = "narrator_voice:our_jihad_ended"
+	
+	stack_priority = 90
+}
+
+// def JoinedOurJihad : Message
+// {
+// 	caption = "{src_kingdom} joined our Jihad"
+// 	body = "{src_kingdom} followed the one true path and joined our Jihad against the infidels of {tgt_kingdom}."
+// 	sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad_2.png:UI_Illustration_New_Jihad_2#2" //GUID:536732f760316da4ca1b142b4ef26983
+// 	icon = "Assets/UI/Elements/Common/Icons/Squad_Status/Icon_Squad_Status_Attacking.png:Icon_Squad_Status_Attacking#2" //GUID:a7c81f9d42fd1fc4ea93c292dd8b76fe
+// 	voice_line = ""
+// }
+
+def NewJihadMuslimInPeace : JihadMessage
+{
+	caption = "Jihad against {tgt_kingdom}"
+	body = "{src_kingdom} has called for a jihad against {tgt_kingdom}! We are at peace with both kingdoms, for now."
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	
+	buttons
+	{
+		text ok = "Ok"
+	}
+	
+	voice_line = "narrator_voice:jihad_started_muslim_in_peace"
+	
+	stack_priority = 140
+}
+
+def NewJihadMuslimAtWarCaliphateSide : JihadMessage
+{
+	caption = "Jihad against {tgt_kingdom}"
+	body = "{src_kingdom} has publicly proclaimed that our war against {tgt_kingdom} is now considered a jihad! {src_kingdom.king} is truly wise and follows the righteous paths."
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Positive.png:Icon_Message_Jihad_Positive#2" //GUID:381b5ea5dbfa9544683fcbca5d18949b
+	voice_line = "narrator_voice:jihad_started_muslim_at_war_caliph_side"
+}
+
+def NewJihadMuslimAtWar : JihadMessage
+{
+	caption = "Jihad against {tgt_kingdom}"
+	body = "{src_kingdom} has called for a jihad against our bitter enemies, {tgt_kingdom}! They are now one step closer to meeting what they truly deserve – utter annihilation."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+}
+
+def EndJihadMuslimAtWar : JihadMessage
+{
+	caption = "Jihad against {tgt_kingdom} ended"
+	body = "{src_kingdom} has ended the jihad against our enemies, the filthy {tgt_kingdom:ians}."
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	voice_line = "narrator_voice:jihad_ended_muslim_at_war"
+}
+
+
+def NewJihadNonMuslimAtWarJihadTargetSide : JihadMessage
+{
+	caption = "Jihad against us"
+	body = "{src_kingdom} declared that their war against us and {tgt_kingdom} is now a jihad! Fate has pitted our forces against the wrath of all Islamic kingdoms willing to support the {src_kingdom:ian} caliphate."
+	voice_line = "narrator_voice:jihad_against_us_target_side"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad_2.tga:UI_Illustration_New_Jihad_2#2" //GUID:b8924fefac6c19c41acbab0efb216653
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Negative.png:Icon_Message_Jihad_Negative#2" //GUID:cbe1b674737609045a2cf296a7354de2
+}
+
+def NewJihadNonMuslimAtWar : JihadMessage
+{
+	caption = "Jihad against {src_kingdom.jihad_target}"
+	body = "{src_kingdom} has called for a jihad against our enemy, {tgt_kingdom}! This will surely cripple the {tgt_kingdom:ians} forces, giving us a hefty advantage in our war."
+	voice_line = "narrator_voice:jihad_started_non_muslim_at_war"
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+}
+
+def NewJihadNonMuslimInPeace : JihadMessage
+{
+	caption = "Jihad against {src_kingdom.jihad_target}"
+	
+	case we_are_christian = (player.religion = Christian)
+	{
+		body = "{src_kingdom} has called for a jihad against {tgt_kingdom}! As the caliphate struggles for more and more power, the Christian world must stay united to resist their invasion."
+	}
+	case default
+	{
+		body = "{src_kingdom} has called for a jihad against {tgt_kingdom}! Lots of blood will soon be spilled on the battlefields of those who stand against the invading Muslims." //must be shown to pagans
+	}
+	
+	
+	radio = "{src_kingdom} called for a jihad against {tgt_kingdom}"
+	category = "military"
+	important = 2
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_New_Jihad.tga:UI_Illustration_New_Jihad#2" //GUID:3edc5c8083359b94ea92ebf236242344
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	voice_line = "narrator_voice:jihad_started_non_muslim_in_peace"
+}
+
+def EndJihad : JihadMessage
+{
+	caption = "Jihad against {tgt_kingdom} ended"
+	body = "{src_kingdom} has ended the jihad against {tgt_kingdom}. The Muslim world and the enemies they marched against can now both rest from the war, at least for a while."
+	radio = "The jihad against {tgt_kingdom} ended."
+	category = "military"
+	important = 2
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Jihad_Neutral.png:Icon_Message_Jihad_Neutral#2" //GUID:24b3ed3067196004183d275ffbcdc52b
+	voice_line = "narrator_voice:jihad_ended"
+}
+
+def WeConqueredOrthodox : ReligionMessage //!!! what is this and do we need it and use it; why don't we have the same for islamic?
+{
+	caption = "{hq_realm} conquered"
+	body = "Our armies have conquered the Holy City of {hq_realm}!"
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Siege_Positive.png:Icon_Message_Siege_Positive#2" //GUID:7a4538fbfc0905a44a8410edb93588b9
+}
+
+def OrthodoxConquered : ReligionMessage //!!! what is this and do we need it
+{
+	caption = "{hq_realm} conquered"
+	body = $[
+		"The Holy City of {hq_realm} has been conquered by {head_kingdom}!"
+		"[{p}{ecumenical_patriarch} was chosen to lead the Patriarchy in Constantinople]"
+		]
+	radio = "The Holy City of {hq_realm} has been conquered by {head_kingdom}"
+	category = "military"
+	important = 2
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Orthodox_Neutral.png:Icon_Message_Orthodox_Neutral#2" //GUID:964c8d1b68f0dfa47be054e6dc6c6da2
+}
+
+def OrthodoxRestored : ReligionMessage //!!! what is this and do we need it
+{
+	caption = "{hq_realm} restored"
+	body = $[
+		"The Holy City of {hq_realm} has been restored!"
+		"[{p}{ecumenical_patriarch} was chosen to lead the Patriarchy in Constantinople]"
+		]
+	radio = "The Holy City of {hq_realm} has been restored!"
+	category = "military"
+	important = 2
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Orthodox_Neutral.png:Icon_Message_Orthodox_Neutral#2" //GUID:964c8d1b68f0dfa47be054e6dc6c6da2
+	drop_down = (can_drop_down)
+}
+
+def CaliphateClaimed : ReligionMessage
+{
+	caption = "Caliphate claimed"
+	
+	radio = "{kingdom} has become a caliphate"
+	category = "common"
+	important = 2
+	drop_down = (can_drop_down)
+	body = "The people of {kingdom} proclaimed themselves as a caliphate. {kingdom.king} is now considered as a true political and religious leader of the Muslim world."
+	voice_line = "narrator_voice:caliphate_claimed"
+	sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ClaimCaliphateSuccess.tga:UI_Illustration_ClaimCaliphateSuccess#2" //GUID:8c4e737fd5ce1be4c833651791ad1c18
+	
+	// case we_are_muslim = (player.religion = Muslim)
+	// {
+	// 	body = "{kingdom} proclaimed themselves as leaders of the Muslim world a caliphate!" //only variant
+	// }
+	// case default
+	// {
+	// 	body = "{kingdom.king} of {kingdom} has proclaimed himself as caliph, a  religious and political leader of the Muslim world." //never shown
+	// }
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Caliphate_Neutral.png:Icon_Message_Caliphate_Neutral#2" //GUID:7c4bc9eaf4b76d1459a21b150331ff1f
+}
+
+def CaliphateAbandoned : ReligionMessage
+{
+	caption = "Caliphate abandoned"
+	body = "{kingdom} can no longer maintain its significance as a political and religious leader of the Muslim world. Thus, {kingdom.king} no longer bears the title of Caliph."
+	radio = "{kingdom} is no longer a caliphate"
+	category = "military"
+	important = 2
+	drop_down = (can_drop_down)
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Caliphate_Negative.png:Icon_Message_Caliphate_Negative#2" //GUID:2681446bd51c8104bb7e88c62996909a
+}

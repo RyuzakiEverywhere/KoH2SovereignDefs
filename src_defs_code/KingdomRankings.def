@@ -1,0 +1,350 @@
+﻿def KingdomRanking
+{
+	text name
+	sprite icon
+	sprite illustration
+	text tooltip = $[
+				"{description}"
+
+				"{p}{p}{b}Standing:{/b} {b}{rank}{/b} of {ranks} kingdoms"
+				"{p}{b}Fame gained:{/b} {fame}"
+
+				"{p}{p}{b}Score:{/b} {score_description}"
+				"{p}{b}Tiebreakers:{/b} {tiebreaker_description}"
+				"{p}(The minimal score to gain fame in this category is {fame_min_score_treshold})"
+			]
+	text description = "Generic description"
+	text score_description = "Description of the score (placeholder)"
+	text tiebreaker_description = "Description of the tiebreaker (placeholder)"
+	float score // = (expression)
+	bool ascending = false
+	int max_fame = 500 // added to kingdom fame
+	float next_place_fame_penalty = 90 //percent of the fame of the previous place
+	float fame_min_score_treshold = 0 //fame wont apply below this score treshhold (minaml score to get any none zero fame)
+	
+	float enable_notifications = true
+	float min_time_between_any_notifications = 240 //don't override this in the different rankings - its supposed to be the same for all of them
+	float min_time_leading_notification = 7200
+	float max_time_leading_notification = 10800
+	float in_top_perc_X = 20
+	float in_bottom_perc_X = 20
+	
+}
+
+//-------- SPECIAL ------------
+
+def FameRanking : KingdomRanking 
+{
+	name = "Fame"
+	tooltip = "Kingdoms ranked by fame.{p}{p}{kingdom:s} standing: {b}{rank}{/b} of {ranks}"
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_4#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (fame)
+	enable_notifications = false
+	max_fame = 0 // don't want to mess with the kingdom fame
+	int recalc_time = 300 // 5 minutes
+	float min_fame_perc = 25
+	float min_fame_perc_fade_time = 90 //minutes, time for the above variable to fade to zero
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Fame.tga:Illustration KingdomRankings_Fame#2" //GUID:612df5d138e80cd4e84dde285651ccc6
+}
+
+//-------- WEALTH --------------
+
+def RichesRanking : KingdomRanking
+{
+	name = "Finances"
+	description = "Stable income is what fuels every process in a kingdom and drives it towards glory."
+	score_description = "{gold_icon} income"
+	tiebreaker_description = "Least {gold_icon} expences, fullest treasury"
+	
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_4#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (income.gold)
+	tiebreakers = [(- expenses.gold),(resources.gold)]
+	max_fame = 400
+	fame_min_score_treshold = 50
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Riches.tga:Illustration KingdomRankings_Riches#2" //GUID:ab63bc7c03ef6c7479260441ac468168
+}
+
+def TradePowerRanking : KingdomRanking
+{
+	name = "Commercial power"
+	description = "The capacity of a kingdom to trade is not only a financial pillar, but also very helpful for acquiring the much needed goods and food."
+	score_description = "{trade_icon} available"
+	tiebreaker_description = "{trade_icon} used"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (ks_commerce)
+	tiebreakers = (allocated_commerce)
+	max_fame = 400
+	fame_min_score_treshold = 20
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_TradePower.tga:Illustration KingdomRankings_TradePower#2" //GUID:d8b26df9fe168fc43aeaf74c944a7725
+}
+
+def TradeMonopolyRanking : KingdomRanking
+{
+	name = "Trade Monopoly"
+	description = "Controlling the commercial centers of Europe provides stable income, with a potential to grow more and more."
+	score_description = "{gold_icon} from trade centers"
+	tiebreaker_description = "Controlled trade zone, Appeal of trade centers"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (trade_centers_gold)
+	tiebreakers = [(num_trade_centers_zone_realms), (trade_centers_appeal_sum)]
+	max_fame = 400
+	fame_min_score_treshold = 20
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_TradeMonopoly.tga:Illustration KingdomRankings_TradeMonopoly#2" //GUID:7afd8f556e6162e41a3d473695b58571
+}
+
+//-------- CONQUEST --------------
+
+def ExpansionRanking : KingdomRanking
+{
+	name = "Expansion"
+	description = "Territorial growth of a kingdom is the source of all its riches - from population through resources to income."
+	score_description = "Number of provinces in a Kingdom, with a penalty if the kingdom is vassalized"
+	tiebreaker_description = "Least provinces in disorder and occupied by rebels; most settlements"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (num_realms * ((10 * !is_vassal) + (8 * is_vassal)))
+	tiebreakers = [(-num_disorder_realms), (-num_occupied_realms), (num_settlements)]
+	max_fame = 400
+	fame_min_score_treshold = 50
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Expansion.tga:Illustration KingdomRankings_Expansion#2" //GUID:3415c18efc68ad446a1789f4c4df4677
+}
+
+def SupremacyRanking : KingdomRanking
+{
+	name = "Supremacy"
+	description = "Military power and the capability of a kingdom to raise and lead a formidable army is what makes its enemies tremble."
+	score_description = "Army strength and capacity to train more troops"
+	tiebreaker_description = "None"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (ceil(army_strength / 100))
+	max_fame = 400
+	fame_min_score_treshold = 40
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Supremacy.tga:Illustration KingdomRankings_Supremacy#2" //GUID:bae8b934c7e9b3f49919528d8095bbc3
+}
+
+def DominationRanking : KingdomRanking
+{
+	name = "Domination"
+	description = "Every war won forever glorifies the name of those who stand victorious."
+	score_description = "Wars won"
+	tiebreaker_description = "Least wars lost, average war score"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (wars_won)
+	tiebreakers = [(-wars_lost),(average_war_score)]
+	max_fame = 400
+	fame_min_score_treshold = 2
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Domination.tga:Illustration KingdomRankings_Domination#2" //GUID:ea1b0c5f72719cf4480204dd4b1db3bd
+}
+
+//-------- CULTURE --------------
+
+def PietyRanking : KingdomRanking
+{
+	name = "Devotion"
+	description = "Religious power unites the people of a kingdom and guides them to righteous and glorious deeds."
+	score_description = "{piety_icon} income"
+	tiebreaker_description = "Highest percent of provinces following the kingdom's religion; highest current {piety_icon}"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (income.piety)
+	tiebreakers = [(perc_realms_same_religon),(resources.piety)]
+	max_fame = 400
+	fame_min_score_treshold = 10
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Piety.tga:Illustration KingdomRankings_Piety#2" //GUID:8ee3fef174c27b0488acb5cc7cf88ca6
+}
+
+def KnowledgeRanking : KingdomRanking
+{
+	name = "Knowledge"
+	description = "Literacy and enlightenment can result in a significant boost of any aspect of a kingdom's rulership."
+	score_description = "{books_icon} income"
+	tiebreaker_description = "Culture, highest current {books_icon}"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (income.books)
+	tiebreakers = [(ks_culture),(resources.books)]
+	max_fame = 400
+	fame_min_score_treshold = 10
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Knowledge.tga:Illustration KingdomRankings_Knowledge#2" //GUID:784d646e4990e044ba184d492484cae5
+}
+
+def ProficiencyRanking : KingdomRanking
+{
+	name = "Wisdom"
+	description = "Traditions and skillful wise leaders provide great advantages to a kingdom in the selected directions."
+	score_description = "Derives from adopted traditions and ranks of characters"
+	tiebreaker_description = "King's rank, princes ranks"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (sum_court_levels + num_adopted_traditions * 5)
+	tiebreakers = [(king.class_level), (sum_princes_class_level)]
+	max_fame = 400
+	fame_min_score_treshold = 10
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Proficiency.tga:Illustration KingdomRankings_Proficiency#2" //GUID:1629fc5d584039d4b80ef5aa64575e89
+}
+
+// def WisdomRanking : KingdomRanking //!!! currently no such thing
+// {
+// 	name = "Wisdom"
+// 	description = "Famous people in provinces (currently not included in the game)"
+// 	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+// 	score = (famous_people_count + books_count)
+// }
+
+//-------- SOCIETY --------------
+def StabilityRanking : KingdomRanking
+{
+	name = "Stability"
+	description = "A great empire can die from within and internal rebellions can halt any military or economical advance."
+	score_description = "Lowest rebel risk and highest stability"
+	tiebreaker_description = "Least and weakest rebellions, average happiness"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (stability)
+	tiebreakers = [(-num_rebellions),(-rebellions_strength),(avg_happiness)]
+	max_fame = 400
+	fame_min_score_treshold = 5
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Stability.tga:Illustration KingdomRankings_Stability#2" //GUID:5ebc45e980edb2e42935ac2dd459a526
+}
+
+def StatecraftRanking : KingdomRanking
+{
+	name = "Statecraft"
+	description = "Having a healthy and stable workforce is one of the most important traits of any kingdom."
+	score_description = "{workers_icon} (population count)"
+	tiebreaker_description = "Least rebellous population , growth rate"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (kingdom_population)
+	tiebreakers = [(-kingdom_rebel_population),(ks_growth_rate)]
+	max_fame = 400
+	fame_min_score_treshold = 50
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Statecraft.tga:Illustration KingdomRankings_Statecraft#2" //GUID:1bd0b44b345413e4a8e652464d346f54
+}
+
+def AgricultureRanking : KingdomRanking
+{
+	name = "Food Supply"
+	description = "Lack of food supply for the army and the people quickly results in problems; excessive food can always be sold for a good price."
+	score_description = "{food_icon} production"
+	tiebreaker_description = "Least {food_icon} consumption"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (food_produced)
+	tiebreakers = (-food_expenses)
+	max_fame = 400
+	fame_min_score_treshold = 20
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Agriculture.tga:Illustration KingdomRankings_Agriculture#2" //GUID:f9fc8b53acf4f78478f140df1868b3d9
+}
+
+//-------- POLITICS --------------
+
+def LeadershipRanking : KingdomRanking
+{
+	name = "Leadership"
+	description = "A kingdom's importance and power quickly rises, if it has the diplomatic and military capability to rule over and lead others."
+	score_description = "Number of vassals and led allies and pact members"
+	tiebreaker_description = "Size of the led kingdoms, their population count"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (num_vassals + num_war_lead_kingdoms + num_pact_lead_kingdoms)
+	tiebreakers = [(num_vassals_realms + num_war_lead_kingdoms_realms + num_pact_lead_kingdoms_realms),(num_vassals_population + num_pacts_lead_kingdoms_population + num_war_lead_kingdoms_population)]
+	max_fame = 400
+	fame_min_score_treshold = 2
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Leadership.tga:Illustration KingdomRankings_Leadership#2" //GUID:d2554ae32c495d542900c1bf0042d613
+}
+
+def FriendshipRanking : KingdomRanking
+{
+	name = "Friendship"
+	description = "A kingdom that has good diplomatic relations with others will easily find friends and allies, and will be considered as a target for fewer"
+	score_description = "Average relations with kingdoms"
+	tiebreaker_description = "Least wars as leader, least wars as supporter, weakest enemies"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (avg_relationship)
+	tiebreakers = [(-num_wars_as_leader),(-num_wars_as_supporter),(-num_enemy_lands)]
+	max_fame = 400
+	fame_min_score_treshold = 50
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_Friendship.tga:Illustration KingdomRankings_Friendship#2" //GUID:81b46ef6812d95741b73e252c8f6764b
+}
+
+def ForeignAffairsRanking : KingdomRanking
+{
+	name = "Foreign affairs"
+	description = "The more diplomatic ties a kingdom has, the more benefits and support it gets from the friendly kingdoms."
+	score_description = "Number of pacts, alliances and royal marriages"
+	tiebreaker_description = "Number of trade agreements"
+	
+	icon = "Assets/UI/Elements/Minimap/mm btn icons.PNG:mm btn icons_6#1" //GUID:43811488d5b0d8045b537494689f916e
+	score = (non_aggressions_count + alliances_count + marriages_count + pacts_count)
+	tiebreakers = (trade_agreements_count)
+	max_fame = 400
+	fame_min_score_treshold = 5
+	
+	// score = (diplomatic_agreements) //Tracks TAs, NAPs, Alliances
+	illustration = "Assets/UI/Elements/GreatPowersRankings/Illustrations/Illustration KingdomRankings_ForeignAffairs.tga:Illustration KingdomRankings_ForeignAffairs#2" //GUID:e7899517c2fa7874c87b1a7dde9c6c98
+}
+
+def KingdomRankingCategory
+{
+	text name
+	text description
+	text category_fame_gain = "Fame from {name}: {fame}"
+	sprite illustration = "Assets/UI/LoadingScreen/Images/LoadingScreen_SiegeDefense_01.jpg:LoadingScreen_SiegeDefense_01#2" //GUID:4023cd0f418264b4db62fec671be1d48
+	
+	string rankings
+}
+
+def WealthCategory : KingdomRankingCategory
+{
+	name = "Wealth"
+	description = "Develop the kingdom's economical and commercial power to spread its fame to distant lands."
+	sprite illustration = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_Ability_Background_Wealth.tga:UI_KingdomAdvantages_Ability_Background_Wealth#2" //GUID:18ffd5559c1807943a913991a62686dc
+
+	rankings { RichesRanking; TradePowerRanking; TradeMonopolyRanking }
+}
+
+
+def PopulationCategory : KingdomRankingCategory
+{
+	name = "Society"
+	description = "Maintain high levels of stability in all realms, while ensuring your population is plentiful and well-fed."
+	sprite illustration = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_Ability_Background_Population.tga:UI_KingdomAdvantages_Ability_Background_Population#2" //GUID:edde378fd1388594093df22acf7ad7d3
+
+	rankings { StatecraftRanking; StabilityRanking; AgricultureRanking }
+}
+
+def CultureCategory : KingdomRankingCategory
+{
+	name = "Culture"
+	description = "Ensure the spiritual enlightenment of your people by focusing on traditions, books and religion."
+	sprite illustration = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_Ability_Background_Culture.tga:UI_KingdomAdvantages_Ability_Background_Culture#2" //GUID:e33d86e957473a04892201bd1b6ac375
+	
+	rankings { PietyRanking; KnowledgeRanking; ProficiencyRanking  } // !!! WisdomRanking //for now no such thing gameplay wise
+}
+
+
+def PoliticsCategory : KingdomRankingCategory
+{
+	name = "Politics"
+	description = "Maintain good relations and influence over other kingdoms, to be considered a dominant political force."
+	sprite illustration = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_Ability_Background_Politics.tga:UI_KingdomAdvantages_Ability_Background_Politics#2" //GUID:05191880ad86e80428787815543082bd
+	
+	rankings { LeadershipRanking; FriendshipRanking; ForeignAffairsRanking} // !!! SovereigntyRanking } //this ranking is obsolete
+}
+
+
+def ConquestCategory : KingdomRankingCategory
+{
+	name = "Conquest"
+	description = "Amass large armies and put them to use by expanding your territories, even if it leads to the demise of others."
+	sprite illustration = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_Ability_Background_Conquest.tga:UI_KingdomAdvantages_Ability_Background_Conquest#2" //GUID:8c0a6d2144ac3f3488b533faa3829243
+	
+	rankings { ExpansionRanking; SupremacyRanking; DominationRanking }
+}

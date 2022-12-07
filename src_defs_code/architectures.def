@@ -1,0 +1,37 @@
+def Architectures
+{
+	Common
+	European = "Common"
+	Arab = "European"
+	Nordic = "European"
+	Roman = "European"
+	Slavic = "European"
+	West = "European"
+	Spanish = "Roman"
+	Central = "West"
+	Moor = "Arab"
+	Egypt = "Arab"
+}
+
+def ArchitecturesBattleview
+{
+	Common
+	European = "Common"
+	Arab = "European"
+	Nordic = "European"
+	Roman = "European"
+	Slavic = "European"
+	West = "European"
+	Spanish = "Roman"
+	Central = "West"
+	Moor = "Arab"
+	Egypt = "Arab"
+
+	disabled
+	{
+		Spanish
+		Moor
+		Egypt
+		Central
+	}
+}

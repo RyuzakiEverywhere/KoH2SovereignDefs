@@ -1,0 +1,1208 @@
+﻿def Building
+{
+	string type = "Building"
+	
+	text name
+	//text tooltip
+	//text production_tooltip
+	//text mods_tooltip
+	//text produces_tooltip
+	text add_tooltip
+	text flavor
+	
+	sprite icon = "Assets/UI/Elements/Common/Icons/Buildings/UI_Structure_Placeholder_Build.png:UI_Structure_Placeholder_Build#2" //GUID:d534ac326c67f484189818c35a05d2e4
+	sprite illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Placeholder.png:UI_Structure_Illustration_Placeholder#2" //GUID:5607b891cdd12084e8cdb75888e9ca26
+	string requires // = [ X, Y ]
+	string requires_all // = [ X, Y ]
+	int max_stacks = 7 //how many time (a facility) 
+	
+	resources cost
+	{
+		gold = (GoldCost)
+		hammers = (HammersCost)
+		books = (BooksCost)
+		piety = (PietyCost)
+	}
+	
+	float ai_eval = 100
+	string ai_category = "Economy"
+	
+	float progressive_gold_cost_for_building = 1
+	float progressive_gold_cost_for_upgrades = 1
+	float progressive_building_add_cost_ssum = 0 // 0 - no cap
+	float progressive_upgrades_add_cost_ssum = 0 // 0 - no cap
+	int max_num_buildings_for_progressive_upgrades_cost = 10 // 0 - no cap
+	
+	float GoldUpkeep
+	
+	int slots_base = 7
+	int slots_per_tier = 7
+	int max_unlockable_tiers = 7
+	bool hide_upgrades_if_completed = false // global
+	resources slots_expand_cost
+	{
+		gold = (1 + 1 * (realm_tier)) //!!! please make this an array
+	}
+	
+	upgrades : District
+	{
+		buildable = false
+		icon_size = 115,102 // 115 with upgrades //84,79
+		icon_spacing = 16,16
+		
+		panels_spacing = 10 // spacing between districts
+		panel_min_width = 0 // minimum width of district panel
+		panel_padding = 0 // space between border/background and buildings panel (only used if there is border or background)
+		panel_background = 0 // alpha (transparency) of the background, 0 .. 1, <=0 to disable background
+		panel_border = 0,0,0,0 // panel border color, set alpha to 0 to disable
+		panel_shadow = 0,0,0,0 // panel shadow color, alpa 0 to disable (or hide border and frame)
+		
+		// buildings {}
+		// arrows {}
+	}
+	
+	bool soft_resource_requirements = false
+	float add_cost_per_missing_good_perc = 20
+	
+	// production
+	// {
+	// 	resources Town // in the town itself
+	// 	resources All // in all settlements (except town)		
+	// 	// in all settlements of the given type
+	// 	resources Village
+	// 	resources Farm
+	// 	resources Monastery
+	// 	resources Keep
+	// 	resources CoastalSettlement
+	// }
+	
+	// mod stat_name = value
+	// ...
+	
+	// kingdom_mod stat_name = value
+	// ...
+	
+	conditions
+	{
+		Governed
+		{
+			text optional_text = ", when governed"
+		}
+		GovernedChristianKingdom = (castle.governor && kingdom.is_christian)
+		{
+			text optional_text = ", when governed"
+			hide_if_inactive = (!kingdom.is_christian)
+		}
+		GovernedMuslimKingdom = (castle.governor && kingdom.is_muslim)
+		{
+			text optional_text = ", when governed"
+			hide_if_inactive = (!kingdom.is_muslim)
+		}
+		GovernedNotMuslimKingdom = (castle.governor && !kingdom.is_muslim)
+		{
+			text optional_text = ", when governed"
+			hide_if_inactive = (kingdom.is_muslim)
+		}
+		GovernedNotPaganKingdom = (castle.governor && !kingdom.is_pagan)
+		{
+			text optional_text = ", when governed"
+			hide_if_inactive = (kingdom.is_pagan)
+		}
+		ChristianRealmOtherKingdom = (realm.is_christian && !kingdom.is_christian)
+		{
+			text optional_text = " (local population is Christian)"
+			hide_if_inactive = true
+		}
+		MuslimRealmOtherKingdom = (realm.is_muslim && !kingdom.is_muslim)
+		{
+			text optional_text = " (local population is Muslim)"
+			hide_if_inactive = true
+		}
+		PaganRealmOtherKingdom = (realm.is_pagan && !kingdom.is_pagan)
+		{
+			text optional_text = " (local population is Pagan)"
+			hide_if_inactive = true
+		}
+		ChristianKingdom = (kingdom.is_christian)
+		{
+			hide_if_inactive = true
+		}
+		MuslimKingdom = (kingdom.is_muslim)
+		{
+			hide_if_inactive = true
+		}
+		NotMuslimKingdom = (!kingdom.is_muslim)
+		{
+			hide_if_inactive = true
+		}
+		PaganKingdom = (kingdom.is_pagan)
+		{
+			hide_if_inactive = true
+		}
+		NotPaganKingdom = (!kingdom.is_pagan)
+		{
+			hide_if_inactive = true
+		}
+		ClericGovernor = (castle.governor.is_cleric)
+		{
+			text optional_text = ", when governed by [{kingdom.cleric_title}|{Cleric.fallback_name}]"
+		}
+		KingGovernor = (castle.governor.is_king)
+		{
+			text optional_text = ", when governed by King"
+		}
+		MuslimKingGovernor = (castle.governor.is_king && kingdom.is_muslim)
+		{
+			text optional_text = ", when governed by King"
+			hide_if_inactive = (!kingdom.is_muslim)
+		}
+		NotMuslimKingGovernor = (castle.governor.is_king && !kingdom.is_muslim)
+		{
+			text optional_text = ", when governed by King"
+			hide_if_inactive = (kingdom.is_muslim)
+		}
+	}
+	
+	icon_sizes
+	
+	int max_province_features = 4
+	
+	// require text format
+	text requires_text_1 = "{req1}"
+	text requires_text_2 = "{req1} and {req2}"
+	text requires_text_3 = "{req1}, {req2} and {req3}"
+	text requires_text_4 = "{req1}, {req2}, {req3} and {req4}"
+	text requires_text_5 = "{req1}, {req2}, {req3}, {req4} and {req5}"
+	text requires_text_6 = "{req1}, {req2}, {req3}, {req4}, {req5} and {req6}"
+	text requires_or_text_1 = "{req_or1}"
+	text requires_or_text_2 = "{req_or1} / {req_or2}"
+	text requires_or_text_3 = "{req_or1} / {req_or2} / {req_or3}"
+	
+	// require resource text format
+	text res_requires_text_1 = "{res_req1}"
+	text res_requires_text_2 = "{res_req1} and {res_req2}"
+	text res_requires_text_3 = "{res_req1}, {res_req2} and {res_req3}"
+	text res_requires_text_4 = "{res_req1}, {res_req2}, {res_req3} and {res_req4}"
+	text res_requires_text_5 = "{res_req1}, {res_req2}, {res_req3}, {res_req4} and {res_req5}"
+	text res_requires_text_6 = "{res_req1}, {res_req2}, {res_req3}, {res_req4}, {res_req5} and {res_req6}"
+	
+	// prerequisites text format
+	text prerequisites_text_1 = "{preq1}"
+	text prerequisites_text_2 = "{preq1} and {preq2}"
+	text prerequisites_text_3 = "{preq1}, {preq2} and {preq3}"
+	
+	text prerequisites_or_text_1 = "{preq_or_1}"
+	text prerequisites_or_text_2 = "{preq_or_1} / {preq_or_2}"
+	text prerequisites_or_text_3 = "{preq_or_1} / {preq_or_2} / {preq_or_3}"
+	
+	bool alt_tooltips = false
+	
+	// variables
+	// inactive: true if the effect is inactive
+	// bonus: bonus value, e.g. "+1{gold_icon}", "+1 province stability"
+	// bonus_text: per settlement type text with {bonus} expaned, e.g. "+1{gold_icon} in all villages"
+	
+	bonus_texts
+	{
+		realm
+		{
+			text bonus_row = "[{inactive:if}{clr:gray}]{bonus_text}[{optional_text}][{inactive:if}{/clr}]" //[{clr:gray} -> {final_value}{/clr}]"
+			
+			text All = "{bonus} per Settlement[ {clr:gray}(x{smul}){/clr}]"
+			text Town = "{bonus} in Town"
+			text CoastalSettlement = "{bonus} per Coastal Settlement[ {clr:gray}(x{smul}){/clr}]"
+			text CoastalVillage = "{bonus} per Coastal Village[ {clr:gray}(x{smul}){/clr}]"
+			text Village = "{bonus} per Village[ {clr:gray}(x{smul}){/clr}]"
+			text Farm = "{bonus} per Crop Farm[ {clr:gray}(x{smul}){/clr}]"
+			text ReligiousSettlement = "{bonus} per Monastery/Mosque/Shrine[ {clr:gray}(x{smul}){/clr}]"
+			text KingdomReligiousSettlement = "{bonus} per [{kingdom.religious_settlement_name}|Religious Settlement][ {clr:gray}(x{smul}){/clr}]"
+			text MonasteryOrMosque = "{bonus} per Monastery/Mosque[ {clr:gray}(x{smul}){/clr}]"
+			text Monastery = "{bonus} per Monastery[ {clr:gray}(x{smul}){/clr}]"
+			text Mosque = "{bonus} per Mosque[ {clr:gray}(x{smul}){/clr}]"
+			text Shrine = "{bonus} per Shrine[ {clr:gray}(x{smul}){/clr}]"
+			text Keep = "{bonus} per Castle[ {clr:gray}(x{smul}){/clr}]"
+			text Mine = "{bonus} in Mine"
+			text Quarry = "{bonus} in Quarry"
+			text CattleFarm = "{bonus} in Cattle Farm"
+			text SheepFarm = "{bonus} in Sheep Farm"
+			text HorseFarm = "{bonus} in Horse Farm"
+			text Vineyard = "{bonus} in Vineyard"
+			text HerbsGardens = "{bonus} in Herbs Garden"
+			text FlaxField = "{bonus} in Flax Field"
+			text LoggingCamp = "{bonus} in Logging Camp"
+		}
+		
+		region
+		{
+			text bonus_row = "[{inactive:if}{clr:gray}]{bonus_text} in neighboring provinces[ {clr:gray}(x{smul}){/clr}][{optional_text}][{inactive:if}{/clr}]" //[{clr:gray} -> {final_value}{/clr}]"
+			
+			text All = "{bonus} per Settlement"
+			text Town = "{bonus} per Town"
+			text CoastalSettlement = "{bonus} per Coastal Settlement"
+			text CoastalVillage = "{bonus} per Coastal Village"
+			text Village = "{bonus} per Village"
+			text Farm = "{bonus} per Farm"
+			text ReligiousSettlement = "{bonus} per Religious Settlement"
+			text KingdomReligiousSettlement = "{bonus} per [{kingdom.religious_settlement_name}|Religious Settlement]"
+			text MonasteryOrMosque = "{bonus} per Monastery/Mosque"
+			text Monastery = "{bonus} per Monastery"
+			text Mosque = "{bonus} per Mosque"
+			text Shrine = "{bonus} per Shrine"
+			text Keep = "{bonus} per Castle"
+			text Mine = "{bonus} per Mine"
+			text CattleFarm = "{bonus} per Cattle Farm"
+			text SheepFarm = "{bonus} per Sheep Farm"
+			text HorseFarm = "{bonus} per Horse Farm"
+			text Vineyard = "{bonus} per Vineyard"
+			text HerbsGardens = "{bonus} per Herb Garden"
+			text FlaxField = "{bonus} per Flax Field"
+			text LoggingCamp = "{bonus} per Logging Camp"
+		}
+		// To replace tooltip of a parametric bonus, use the following structure: mod ships_level = 1 { text tooltip = "Better ships" }
+		// To suppress its display in tooltip: kingdom_mod ships_CTH_perc = 20 { text tooltip = null }
+	}
+	
+	texts
+	{
+		build_prompts
+		{
+			text Available = "Click to build {building}[ in {castle}| in {other_castle}]."
+			text NoParentNoRequirements = "{availability_color}Requirements and prerequisites are not met.{/availability_color}"
+			text NoRequirements = "{availability_color}Requirements are not met.{/availability_color}"
+			text NoParent = "{availability_color}We don't have the prerequisites for {building.name}.{/availability_color}"
+			text MustExpandTown = "We must expand the town before constructing new buildings."
+			text MaxCountReached = "[{realm}|The town] is fully developed and cannot house more buildings."
+			text AnotherBuildInProgress = "We must first finish constructing[ {castle.current_build}]."
+			text UnderConstruction = "We are currently constructing {building}."
+			text CannotAfford = "We lack the resources to build {building}."
+			//text AlreadyBuilt = "{availability_color}We have built {building}[ in {castle}]{/availability_color}."
+		}
+		
+		// text build_prompt = "Do you want to build {name}?"
+		// cannot_build
+		// {
+		// 	text prompt = "Can not build {name} now[: {cannot_build_reason}]"
+		// 	text UnderConstruction = "Build is in progress"
+		// 	text AlreadyBuilt = "Already built"
+		// 	text CannotAfford = "Insufficient resources"
+		// 	text RequirementsNotMet = "Requirements not met"
+		// 	text MaxCountReached = "Maximum slots reached"
+		// }
+		// text start_build = "Build ({cost})"
+		text building = "Building[ {building}]"
+		text cancel_build = "Cancel"
+		text abandon = "Abandon[ {building}]"
+		text choose_building = "Choose a new building to construct"
+	}
+	
+	availability_texts
+	{
+		text Available_1 = "We have {availability_color}{building.name}{/availability_color} in {availability_castle_1}."
+		text Available_2 = "We have {availability_color}{building.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text Available_3 = "We have {availability_color}{building.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text Available_many = "We have {availability_color}{building.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text Available_all = "We have {availability_color}{building.name}{/availability_color} in all of our our provinces."
+		
+		text DirectlyObtainable_1 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1}."
+		text DirectlyObtainable_2 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text DirectlyObtainable_3 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text DirectlyObtainable_many = "We can build {availability_color}{building.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text DirectlyObtainable_all = "We can build {availability_color}{building.name}{/availability_color} in all of our our provinces."
+		
+		text IndirectlyObtainable_1 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1}, but we need to develop other provinces first."
+		text IndirectlyObtainable_2 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to develop other provinces first."
+		text IndirectlyObtainable_3 = "We can build {availability_color}{building.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to develop other provinces first."
+		text IndirectlyObtainable_many = "We can build {availability_color}{building.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to develop other provinces first."
+		text IndirectlyObtainable_all = "We can build {availability_color}{building.name}{/availability_color} in all of our our provinces, but we need to develop some provinces first."
+		
+		text Impossible_0 = "We cannot build {availability_color}{building.name}{/availability_color} in any of our provinces."
+		text Impossible_1 = "We could build {availability_color}{building.name}{/availability_color} in {availability_castle_1}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_2 = "We could build {availability_color}{building.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_3 = "We could build {availability_color}{building.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_many = "We could build {availability_color}{building.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to gain access to resources outside our kingdom first."
+		text Impossible_all = "We could build {availability_color}{building.name}{/availability_color} in all of our our provinces, but we need to gain access to resources outside our kingdom first."
+	}
+	
+	float refund_percentage = 50 // 50% 
+	string on_activate
+	string on_deactivate
+	
+	string battleview_type // corresponding pg type from architectures to spawn in bv
+}
+
+//-------------------------------------- CommonDistrict (single buildings, that have upgrades in them)
+
+def Housings : Building
+{
+	name = "Housings"
+	flavor = "Large urban areas, providing the necessary infrastructure to support larger population and welcome more residents in the province."
+	
+	upgrades
+	{
+		buildings
+		{
+			Aqueduct
+			Brothels
+			EnclosedGardens = 2, 1
+			
+			PublicBaths = 1, 2 { prerequisites { Aqueduct } }
+			LargeHouses = 2, 1.8
+		}
+	}
+	
+	case Muslim = (kingdom.is_muslim)
+	{
+		icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Housings_Muslim.tga:UI_Structure_Icon_Housings_Muslim#2" //GUID:aa9234025be1fbc4cb163f2cf45040ba
+		illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_HousingsMuslim.tga:UI_Structure_Illustration_HousingsMuslim#2" //GUID:4addc496d82e7a04aa7d7b0f413c5f68
+	}
+	case default
+	{
+		icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Housings_Christian.tga:UI_Structure_Icon_Housings_Christian#2" //GUID:58bd69d30785b134ba0e949b871f2be6
+		illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Housings.tga:UI_Structure_Illustration_Housings#2" //GUID:0cb490dad8ffe054bb00371789cefc23
+	}
+	
+	ai_eval = (2000 + (castle.Barracks or 0) * 5000)
+}
+
+
+def MarketSquare : Building
+{
+	name = "Market Square"
+	flavor = "A commercial hub, important for the regional trade. Often times, the market square is a central hub for exchanging luxurious goods."
+	upgrades
+	{
+		buildings
+		{
+			ScribesOffice
+			Inns
+			
+			TaxCollector = 1,2 { prerequisites { ScribesOffice } }
+			Courthouse = 2, 1.8 { prerequisites { ScribesOffice } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Market.tga:UI_Structure_Icon_Market#2" //GUID:2b7495c4ea8f7e84793cc6a0d2d99d51
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_MarketSquare.tga:UI_Structure_Illustration_MarketSquare#2" //GUID:bdd2483206efb9840be4d4c5886ce379
+	
+	ai_eval = 1000
+}
+
+
+def Church : Building
+{
+	name = "Church"
+	flavor = "A place for pious respite, sermons and holy rituals."
+	piety_type = "Christian"
+	upgrades
+	{
+		buildings
+		{
+			Orphanage_Christian
+			InkMaker_Christian
+			
+			Schools_Christian = 1, 2 { prerequisites { Orphanage_Christian } }
+			SmallLibrary_Christian = 2, 2 { prerequisites { InkMaker_Christian } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Church.tga:UI_Structure_Icon_Church#2" //GUID:6632b16c8c9db3f4fafafd0745bd7643
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Church.tga:UI_Structure_Illustration_Church#2" //GUID:06a737a5e5b3bd948b97d5dd2550f198
+	
+	//ai_eval = 0
+}
+
+def Masjid : Building
+{
+	name = "Masjid"
+	flavor = "A place for pious respite and preachings."
+	piety_type = "Muslim"
+	upgrades
+	{
+		buildings
+		{
+			Orphanage_Muslim
+			InkMaker_Muslim
+			
+			Schools_Muslim = 1, 2 { prerequisites { Orphanage_Muslim } }
+			SmallLibrary_Muslim = 2, 2 { prerequisites { InkMaker_Muslim } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Masjid.tga:UI_Structure_Icon_Masjid#2" //GUID:bd86f71b951a81949b0447e750dd0e43
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Masjid.tga:UI_Structure_Illustration_Masjid#2" //GUID:6ee445fa55782b543acc35cabbe25bc7
+	
+	//ai_eval = 0
+}
+
+def Temple : Building
+{
+	name = "Temple"
+	flavor = "A place for pious respite and holy rituals."
+	piety_type = "Pagan"
+	upgrades
+	{
+		buildings
+		{
+			InkMaker_Pagan
+			Apothecary_Pagan
+			
+			SmallLibrary_Pagan = 1, 2 { prerequisites { InkMaker_Pagan } }
+			PaganCeremonies = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Temple.tga:UI_Structure_Icon_Temple#2" //GUID:647d94da7dfbfec4eb2b89d7eb4bc8ae
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Temple.tga:UI_Structure_Illustration_Temple#2" //GUID:c09cf7ccc6ebe894db1e3e3d72984a5e
+	
+	//ai_eval = 50
+}
+
+def HillFort : Building
+{
+	name = "Hill Forts"
+	flavor = "Fortifications high in the mountains, that make a province very hard for conquering and provide protection for the mountain hamlets."
+	upgrades
+	{
+		buildings
+		{
+			WatchTowers_HillFort
+			Fletcher_HillFort
+			
+			MountainPassGuard = 1, 2 { prerequisites { WatchTowers_HillFort } }
+			MountainHamlet = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Hillfort.tga:UI_Structure_Icon_Hillfort#2" //GUID:c0617dc2c83590c4ba4d910a6050eef9
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_HillFort.tga:UI_Structure_Illustration_HillFort#2" //GUID:36b58ed3b9f544640b9188e7c5105ca3
+	
+	//ai_eval = 200
+}
+
+def FlaxGrowing : Building
+{
+	name = "Flax Growing"
+	flavor = "Large field for growing flax, used for its oil and fibers."
+	upgrades
+	{
+		buildings
+		{
+			OilPress
+			FlaxWeaver
+			
+			CanvasMaker = 1.5,2 { prerequisites { FlaxWeaver } }
+			
+			Ropewalk = 2.5,2 { prerequisites { FlaxWeaver } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FlaxGrowing.tga:UI_Structure_Icon_FlaxGrowing#2" //GUID:a1bf1515456de9947b530909b52bf2ec
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_FlaxGrowing.tga:UI_Structure_Illustration_FlaxGrowing#2" //GUID:d1bb9b8631d40324bb0b8ca3cc0ad650
+}
+
+def HerbGardening : Building
+{
+	name = "Herb Gardening"
+	flavor = "Herbal Gardens where apieries flourish as well. Herbs, spices and wax are produced."
+	upgrades
+	{
+		buildings
+		{
+			HerbalistShacks
+			Apiary
+			
+			SpiceShop = 1,2 { prerequisites { HerbalistShacks } }
+			CandleMaker { prerequisites { Apiary } }
+			
+			DyeWorkshop = 1,2.8 { prerequisites { HerbalistShacks } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HerbGardening.tga:UI_Structure_Icon_HerbGardening#2" //GUID:2da66faef5913c147a4c58bb28f41f3a
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_HerbGardening.tga:UI_Structure_Illustration_HerbGardening#2" //GUID:0549778e48d1a04428fe78588162700c
+}
+
+def Viticulture : Building
+{
+	name = "Viticulture"
+	flavor = "Vineyards, providing rich harvest of grapes, mainly used for production of wine and other spirits."
+	upgrades
+	{
+		buildings
+		{
+			SunDryingGrapes
+			GrapePress
+			
+			Winery = 2,2 { prerequisites { GrapePress } }
+			
+			Distillery = 2,3 { prerequisites { Winery } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Viticulture.tga:UI_Structure_Icon_Viticulture#2" //GUID:e11057de94a7c994da3754d3001ee3ac
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Viticulture.tga:UI_Structure_Illustration_Viticulture#2" //GUID:603956c10d4ba134c96bca629c22afef
+}
+
+def SheepFarming : Building
+{
+	name = "Sheep Farming"
+	flavor = "Sheep stockfarming for production of dairy products, parchment and wool."
+	upgrades
+	{
+		buildings
+		{
+			SpinningMill
+			Butcher_Sheep
+			
+			WoolWeaver = 1,2 { prerequisites { SpinningMill } }
+			Tannery_Sheep = 2,2 { prerequisites { Butcher_Sheep } }
+			
+			ParchmentMaker = 2,3 { prerequisites { Tannery_Sheep } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SheepFarming.tga:UI_Structure_Icon_SheepFarming#2" //GUID:220d56c288bedae4b9ff0a5e27e31042
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_SheepFarming.tga:UI_Structure_Illustration_SheepFarming#2" //GUID:66a12fb817a2a864594fecc79b107ded
+}
+
+def CattleFarming : Building
+{
+	name = "Cattle Farming"
+	flavor = "Cattle farming  for production of meat, leather and for breeding draft oxen."
+	upgrades
+	{
+		buildings
+		{
+			CattleMarket
+			Butcher_Cattle
+			
+			DairyShop = 1,1.8
+			Tannery_Cattle = 2,2 { prerequisites { Butcher_Cattle } }
+			
+			SausageMaker = 2,2.8 { prerequisites { Butcher_Cattle } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CattleFarming.tga:UI_Structure_Icon_CattleFarming#2" //GUID:b4b732eb0fd983b489b88da6a730d480
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_CattleFarming.tga:UI_Structure_Illustration_CattleFarming#2" //GUID:9877f8d8e1b523d47a12071ae4f29972
+}
+
+def HorseBreeding : Building
+{
+	name = "Horse Breeding"
+	flavor = "Horse farming and training, mainly for military purpase but with good trade potential as well."
+	upgrades
+	{
+		buildings
+		{
+			HorseMarket = 1.5,1
+			
+			Farrier = 1,2 { prerequisites { HorseMarket } }
+			SaddlersShop { prerequisites { HorseMarket } }
+			
+			WarhorseBreed = 1.5,3 { prerequisites { Farrier; SaddlersShop } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HorseBreeding.tga:UI_Structure_Icon_HorseBreeding#2" //GUID:ef7a83374df54c54ab493c9f414519a7
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_HorseBreeding.tga:UI_Structure_Illustration_HorseBreeding#2" //GUID:ec4ffe488535acb45b656fb94fdb31c9
+	
+	ai_eval = (!kingdom.HorseBreeding and 10000 * kingdom.Barracks)
+}
+
+
+def Woodworking : Building
+{
+	name = "Woodworking"
+	flavor = "The woodworking industry provides a lot of raw resources like timber and tar, as well as furniture, forest glass and barrels."
+	upgrades
+	{
+		buildings
+		{
+			Sawmill
+			ColliersKiln
+			
+			CoopersShop = 1,2 { prerequisites { Sawmill } }
+			TarPit = 2,2 { prerequisites { ColliersKiln } }
+			
+			MasterJoiner = 1,2.8 { prerequisites { Sawmill } }
+			Glassworks = 2,2.8 { prerequisites { ColliersKiln } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Woodworking.tga:UI_Structure_Icon_Woodworking#2" //GUID:3ac344bae9497844d8631a3c9df5d4d0
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Woodworking.tga:UI_Structure_Illustration_Woodworking#2" //GUID:7e51197314f917b4ba4efe5425868475
+	
+	ai_eval = (kingdom.IronOre and !kingdom.Woodworking and 10000 * kingdom.Barracks)
+}
+
+
+//-------------------------------------- PFDistrict (single buildings which depend on province feature and have no upgrades)
+
+
+def AmberTrade : Building
+{
+	name = "Amber Trade"
+	flavor = "Amber is fossilized tree resinused, mostly used in jewellery and decoration, but also believed to have various healing effects."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_AmberTrade.tga:UI_Structure_Icon_AmberTrade#2" //GUID:94017509f4c4b354bafc7cb3c6150b10
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_AmberTrade.tga:UI_Structure_Illustration_AmberTrade#2" //GUID:75389ca115921b641b30214be45ea34e
+}
+
+def CamelsTrade : Building
+{
+	name = "Camels Trade"
+	flavor = "Trained camels can surpas even horses as mounts in some aspects - they are faster in long runs, they can carry more cargo and withstand horrid conditions."
+	add_tooltip = "Required for recruiting camel riding {clr:enables_color}light cavalry{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CamelsTrade.tga:UI_Structure_Icon_CamelsTrade#2" //GUID:f53dd33454932bb4ebd3a7e5f922dc3f
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_CamelsTrade.tga:UI_Structure_Illustration_CamelsTrade#2" //GUID:7824ffc08d2c5f443a4ee4d436166608
+}
+
+def FurTrade : Building
+{
+	name = "Furs Trade"
+	flavor = "Trade of furs and animal pelts can be quite profitable in regions, where game is abundant and the people have mastered the art of the hunt."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FursTrade.tga:UI_Structure_Icon_FursTrade#2" //GUID:710b522def677a040a86f209b9d80896
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_FursTrade.tga:UI_Structure_Illustration_FursTrade#2" //GUID:c485225d8a520ab4691af084a1147d74
+}
+
+def MineralsTrade : Building //MineralsDeposit
+{
+	name = "Minerals Trade"
+	flavor = "Mining various minerals is profitable due to their large usage in many industries."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MineralsTrade.tga:UI_Structure_Icon_MineralsTrade#2" //GUID:fef49f0d98c41904ca8b62735c1e984c
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_MineralsTrade.tga:UI_Structure_Illustration_MineralsTrade#2" //GUID:ba6cdf8ad4aa55f41952343e4313926c
+}
+
+
+def SaltTrade : Building
+{
+	name = "Salt Trade"
+	flavor = "Development of salt production and trade ensures a great economical and commercial boost to any province, as this white gold is an important part of the human diet and essential for food preservation."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SaltTrade.tga:UI_Structure_Icon_SaltTrade#2" //GUID:c59fd0d60f1fd7e4fa749a3ced9d2657
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_SaltTrade.tga:UI_Structure_Illustration_SaltTrade#2" //GUID:ea19f296042978242b50ff8064a6b887
+}
+
+def SaltpeterTrade : Building
+{
+	name = "Saltpeter Trade"
+	flavor = "Found as a mineral or produced from manure, this chemical compound is used as a fertilizer and, more importantly, needed for production of black powder."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SaltpeterTrade.tga:UI_Structure_Icon_SaltpeterTrade#2" //GUID:8b4d65bc757fa3341b341f4e3bf4097e
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_SaltpeterTrade.tga:UI_Structure_Illustration_SaltpeterTrade#2" //GUID:b54c6bbc23e786c41bc455e21e8c7b98
+}
+
+def SulfurTrade : Building
+{
+	name = "Sulfur Trade"
+	flavor = "Also known as brimstone, sulfur is used in traditional medicine and production of gunpowder, thanks to its flammability."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SulfurTrade.tga:UI_Structure_Icon_SulfurTrade#2" //GUID:eeeb216b6d34bb24a8e8287d025807fa
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_SulfurTrade.tga:UI_Structure_Illustration_SulfurTrade#2" //GUID:dbc44f4544f9f3840bacf9014a4313f0
+}
+
+//-------------------------------------- SeaShoreDistrict
+
+def Harbor : Building
+{
+	name = "Harbor"
+	flavor = "An advanced hub for maritime affairs, both civil and military."
+	upgrades
+	{
+		buildings
+		{
+			Docks_Harbor = 1.5
+			
+			Warehouse_Harbor = 1,2 { prerequisites { Docks_Harbor } }
+			FishMarket { prerequisites { Docks_Harbor } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Harbor.tga:UI_Structure_Icon_Harbor#2" //GUID:d2472b26b6b1ffc479d2afbfe7f50014
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Harbor.tga:UI_Structure_Illustration_Harbor#2" //GUID:9e9f9e03d9fe8934cb6b61de44f1a66a
+}
+
+def PirateHaven : Building
+{
+	name = "Pirate Haven"
+	flavor = "Utilizes the region's alcoves and run-down taverns as gathering havens for pirates and scoundrels."
+	upgrades
+	{
+		buildings
+		{
+			FilthyTavern
+			HostagesTower
+			
+			SlaveMarket = 2,2 { prerequisites { HostagesTower } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_PirateHeaven.tga:UI_Structure_Icon_PirateHeaven#2" //GUID:7c6100134390e9341a6d31a5d89eb571
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_PirateHaven.tga:UI_Structure_Illustration_PirateHaven#2" //GUID:3c63d81cde59ba84f924b51252e0a8c4
+}
+
+def Admiralty : Building
+{
+	name = "Admiralty"
+	flavor = "Well organized local naval fleet provides significant support in the defense of a province."
+	add_tooltip = "Enables 'Expedition' action for all merchants"
+	upgrades
+	{
+		buildings
+		{
+			Cartographer
+			Artillery_Ships
+			
+			CoastalGuards = 2,2 { prerequisites { Artillery_Ships } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Admiralty.tga:UI_Structure_Icon_Admiralty#2" //GUID:fbea120ccdc37cb42be1e9f09f8278ea
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Admiralty.tga:UI_Structure_Illustration_Admiralty#2" //GUID:5502fec1218157147a14a8e7163651fc
+}
+
+def Shipyard : Building
+{
+	name = "Shipyard"
+	flavor = "Large construction yard for commercial and military boats, big and small."
+	upgrades
+	{
+		buildings
+		{
+			ShipJoiner
+			SailMaker
+			
+			WoodenCrane = 1,2 { prerequisites { ShipJoiner } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Shipyard.tga:UI_Structure_Icon_Shipyard#2" //GUID:7b5680c9cffab7e408cddfc3a359c14a
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Shipyard.tga:UI_Structure_Illustration_Shipyard#2" //GUID:989e83ca57386c24eaa63aee33e86d96
+}
+
+def TradePort : Building
+{
+	name = "Trade Port"
+	flavor = "Establishment of stable maritime trade paves the road to stable income in the province and significantly increases the chances of a town to attract foreign merchants and become a trade center."
+	upgrades
+	{
+		buildings
+		{
+			TradeCompanies = 1.5
+			
+			Expeditions = 1,2 { prerequisites { TradeCompanies } }
+			TradeColonies = 2,2 { prerequisites { TradeCompanies } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TradePort.tga:UI_Structure_Icon_TradePort#2" //GUID:36c148167421d69408655bf0a306910d
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_TradePort.tga:UI_Structure_Illustration_TradePort#2" //GUID:649439274b3bff24381d8e11e76fdd37
+}
+
+//-------------------------------------- MilitaryDistrict
+
+def Barracks : Building
+{
+	name = "Barracks"
+	flavor = "A military facility in which troops receive professional combat training and preparation to march against the enemies of the kingdom."
+	add_tooltip = "{blt} Required for recruiting {clr:enables_color}light units{/clr}"
+	upgrades
+	{
+		buildings
+		{
+			TownGuardsQuarters
+			Fletcher_Barracks
+			
+			Swordsmith = 1,1.8
+			Spearmaker = 2,1.8
+			
+			SiegeWorkshop = 1,2.6
+			Stables = 2,2.6
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Barracks.tga:UI_Structure_Icon_Barracks#2" //GUID:cf8924eb2aaee5548a92bdf8f9b0cf45
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Barracks.tga:UI_Structure_Illustration_Barracks#2" //GUID:7957893311b7bab4dae6caf6184038b6
+	
+	ai_eval = (10000 + max(0, min(4, kingdom.realms_count / 2) - (kingdom.Barracks or 0)) * 500000 + (castle.Housings or 0) * 5000)
+	ai_category = "Military"
+	ai_urgent = (!kingdom.Barracks)
+}
+
+def RoyalArmory : Building
+{
+	name = "Royal Armory"
+	flavor = "The finest weaponry and armor is produced, maintained and stored here."
+	add_tooltip = "{blt} Required for recruiting {clr:enables_color}heavy and elite units{/clr}"
+	upgrades
+	{
+		buildings
+		{
+			MasterWeaponsmith
+			HeavyArmorsmith
+			
+			WarStables = 1,1.8
+			MasterArmorer = 2,2 { prerequisites { HeavyArmorsmith } }
+			
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RoyalArmory.tga:UI_Structure_Icon_RoyalArmory#2" //GUID:e40d63bb82456ab4ebc96f7dc52bd467
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_RoyalArmory.tga:UI_Structure_Illustration_RoyalArmory#2" //GUID:0388adf4f8205004098dc58820662846
+	
+	ai_eval = (castle.Barracks and (kingdom.income.levy >= 50) and (10000 + max(0, min(4, kingdom.realms_count / 2) - (kingdom.RoyalArmory or 0)) * 10000 + (kingdom.Iron and 10000 or 0)))
+	ai_category = "Military"
+}
+
+//-------------------------------------- CastlesDistrict
+
+def LordsCastles : Building
+{
+	name = "Lord's Castles"
+	flavor = "This reformation of keeps turns them in impenetrable fortresses with extreme importance for the province's defenses and army training."
+	upgrades
+	{
+		buildings
+		{
+			Fiefs
+			CastleGuards
+			
+			WatchTowers_Castles = 1,1.8
+			LargeKeeps = 2,2 { prerequisites { CastleGuards } }
+			
+			Artillery_Castles = 2, 2.8 { prerequisites { CastleGuards } }
+			
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_LordsCastles.tga:UI_Structure_Icon_LordsCastles#2" //GUID:38b58270c9d29bf45b855c088d2983ee
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_LordsCastles.tga:UI_Structure_Illustration_LordsCastles#2" //GUID:b4ff2606a6e0f8f4dab7d948f71c7e35
+	
+	ai_category = "Military"
+}
+
+def RoyalPalace : Building
+{
+	name = "Royal Palace"
+	flavor = "Marvelously built king's estates, surrounded by beautiful orchards and gardens."
+	//add_tooltip = "{blt} Province guards are improved"
+	upgrades
+	{
+		buildings
+		{
+			QueensChambers = 1,1
+			Harem = 1,1
+			RoyalGuardQuarters = 2,1
+			
+			GreatHall = 1,1.8
+			SeatOfPower = 2,1.8
+		}
+	}
+	
+	case Muslim = (kingdom.is_muslim)
+	{
+		icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RoyalPalace_Muslim.tga:UI_Structure_Icon_RoyalPalace_Muslim#2" //GUID:3f888d839f8c2e24ea47a29041e6f11d
+		illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_RoyalPalaceMuslim.tga:UI_Structure_Illustration_RoyalPalaceMuslim#2" //GUID:9b73d2e23593c5346a6d827ac1d4b08f
+	}
+	case default
+	{
+		icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RoyalPalace.tga:UI_Structure_Icon_RoyalPalace#2" //GUID:b96bd8ea0f735ff47a299e3407499773
+		illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_RoyalPalace.tga:UI_Structure_Illustration_RoyalPalace#2" //GUID:8e00f04d4b3f9ce4f89bacf0fb4b4042
+	}
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_RoyalPalace.tga:UI_Structure_Illustration_RoyalPalace#2" //GUID:8e00f04d4b3f9ce4f89bacf0fb4b4042
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RoyalPalace.tga:UI_Structure_Icon_RoyalPalace#2" //GUID:b96bd8ea0f735ff47a299e3407499773
+}
+
+//-------------------------------------- VillagesDistrict
+
+def VillageMilitia : Building
+{
+	name = "Village Militia"
+	flavor = "Local peasants and citizens, organized and trained to participate in the defense of the province and to be recruited in the army."
+	add_tooltip = "Required for training {clr:enables_color}militia{/clr} and upgrades province peasant defenders"
+	upgrades
+	{
+		buildings
+		{
+			TrainingGrounds
+			
+			TownWatch = 1,2 { prerequisites { TrainingGrounds } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MilitiaQuarter.tga:UI_Structure_Icon_MilitiaQuarter#2" //GUID:40a2bee7da8053144bb5cc07af4d59af
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_VillageMilitia.tga:UI_Structure_Illustration_VillageMilitia#2" //GUID:39350aaefe022564999fe3f2bc747080
+	
+	ai_eval = 0
+}
+
+def RiverTrade : Building
+{
+	name = "River Trade"
+	flavor = "Large rivers offer great possibilities for transportation and trade, especially in densly populated provinces."
+	upgrades
+	{
+		buildings
+		{
+			Docks_RiverTrade
+			AnglersHuts
+			
+			Warehouse_RiverTrade = 1,2 { prerequisites { Docks_RiverTrade } }
+			Boatwright = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RiverTrade.tga:UI_Structure_Icon_RiverTrade#2" //GUID:e360b91b2023e0d4f8b6940ea8f78475
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_RiverTrade.tga:UI_Structure_Illustration_RiverTrade#2" //GUID:816001cd5bda14847ab1f89d079f8ead
+}
+
+def Artisans : Building
+{
+	name = "Artisans"
+	flavor = "An organization of skilled craftsmen, producing items and objects of all kinds by hand."
+	upgrades
+	{
+		buildings
+		{
+			TailorsShop
+			ShoemakersShop
+			
+			RugsWeaver = 1, 1.8
+			JewellersShop = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Artisans.tga:UI_Structure_Icon_Artisans#2" //GUID:950c46e7ec1afb7469a04456bc251f4d
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Artisans.tga:UI_Structure_Illustration_Artisans#2" //GUID:a954b2f07c3ffaa46910e114c6f7ea1c
+}
+
+def MerchantsGuild : Building
+{
+	name = "Merchant's Guild"
+	flavor = "An official organization, representing the local trade elite and caring that most beneficial trade practices will be followed in the province."
+	upgrades
+	{
+		buildings
+		{
+			AuctionMarket_Christian = 1, 1
+			AuctionMarket_Muslim = 1, 1
+			
+			TownsCharter = 1,2 { prerequisites { AuctionMarket_Christian } }
+			Muhtasib = 1,2 { prerequisites { AuctionMarket_Muslim } }
+			
+			Bazaar = 2,1
+			TradeFair = 2,1
+			
+			MerchantBank = 2,2 { prerequisites { TradeFair } }
+			Caravanserai = 2,1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MerchantsGuild.tga:UI_Structure_Icon_MerchantsGuild#2" //GUID:ccbc92d0752d1ba4b9ae208b24c1b7a5
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_MerchantsGuild.tga:UI_Structure_Illustration_MerchantsGuild#2" //GUID:3ffd1f2beec9338489f43666ede6a095
+}
+
+//-------------------------------------- MonasteriesDistrict
+
+
+def Cathedral : Building
+{
+	name = "Cathedral"
+	flavor = "An architectural marvel of great religious and cultural significance."
+	piety_type = "Christian"
+	upgrades
+	{
+		buildings
+		{
+			Apothecary_Christian
+			ChristianCeremonies
+			
+			Hospital_Christian = 1, 2 { prerequisites { Apothecary_Christian } }
+			ChristianDecoration = 2, 1.8
+			
+			ArtsSchool_Christian = 2, 2.8 { prerequisites { ChristianCeremonies; ChristianDecoration } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Cathedral.tga:UI_Structure_Icon_Cathedral#2" //GUID:9188e38f5f200ed4a866df5074d6e472
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Cathedral.tga:UI_Structure_Illustration_Cathedral#2" //GUID:21e15cde3630b334b95513f28e77cc03
+	battleview_type = "Monastery"
+}
+
+def GreatMosque : Building
+{
+	name = "Great Mosque"
+	flavor = "An architectural marvel of great religious and cultural significance."
+	piety_type = "Muslim"
+	upgrades
+	{
+		buildings
+		{
+			Apothecary_Muslim
+			MuslimCeremonies
+			
+			Hospital_Muslim = 1, 2 { prerequisites { Apothecary_Muslim } }
+			MuslimDecoration = 2, 1.8
+			
+			ArtsSchool_Muslim = 2, 2.8 { prerequisites { MuslimCeremonies; MuslimDecoration } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GreatMosque.tga:UI_Structure_Icon_GreatMosque#2" //GUID:b3dfec0ce310445439f83ef4f3b4ba5c
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_GreatMosque.tga:UI_Structure_Illustration_GreatMosque#2" //GUID:31a9869e48615554984de6221874459d
+}
+
+def University : Building
+{
+	name = "University"
+	flavor = "A cultural center of higher education for professions, requiring advanced qualifications and knowledge."
+	upgrades
+	{
+		buildings
+		{
+			TranslatorsChambers_Christian
+			Observatory_Christian
+			
+			GreatLibrary_Christian = 1,2 { prerequisites { TranslatorsChambers_Christian } }
+			AlchemistLab_Christian = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_University.tga:UI_Structure_Icon_University#2" //GUID:794b0d8b3def7c64cbbafef15c888847
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_University.tga:UI_Structure_Illustration_University#2" //GUID:d63fef7a465db7840a177e6fd6158b8c
+}
+
+def Madrasah : Building
+{
+	name = "Madrasah"
+	flavor = "A cultural center of higher education for professions, requiring advanced qualifications and knowledge."
+	upgrades
+	{
+		buildings
+		{
+			TranslatorsChambers_Muslim
+			Observatory_Muslim
+			
+			GreatLibrary_Muslim = 1,2 { prerequisites { TranslatorsChambers_Muslim } }
+			AlchemistLab_Muslim = 2, 1.8
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Madrasah.tga:UI_Structure_Icon_Madrasah#2" //GUID:3c34b847f091e0b48afe4155a08f9500
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Madrasah.tga:UI_Structure_Illustration_Madrasah#2" //GUID:be1912a8159ffa4418c87022f92898bd
+}
+
+
+
+//-------------------------------------- CropFarmsDistrict
+
+def CropFarming : Building
+{
+	name = "Crop Farming"
+	flavor = "Extensive agricultural development of the province, focused on rye, barley, buckwheat, millet and oats."
+	upgrades
+	{
+		buildings
+		{
+			CropsRotation
+			
+			ManurePits = 1,2 { prerequisites { CropsRotation } }
+			
+			HeavyPloughsWorkshop = 1,3 { prerequisites { ManurePits } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CropFarming.tga:UI_Structure_Icon_CropFarming#2" //GUID:98eaabeeb876bd34081eaa7f33e9cb45
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_CropFarming.tga:UI_Structure_Illustration_CropFarming#2" //GUID:4544016cedace27478b15abfda6dcdda
+}
+
+def Irrigation : Building
+{
+	name = "Irrigation"
+	flavor = "A system of canals, redirecting water from the rivers to agricultural lands near by. In result the yield is substantially increased."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Irrigation.tga:UI_Structure_Icon_Irrigation#2" //GUID:a03e55309b2e8c94c9c5a93a8ae7538d
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Irrigation.tga:UI_Structure_Illustration_Irrigation#2" //GUID:a5052d946f1137f4c89c892bba7c801f
+}
+
+def Windmill : Building
+{
+	name = "Windmill"
+	flavor = "Grinding grains and producing flour allows for the preparation of baked goods. Taxes in grain and gold are collected from the farmers."
+	upgrades
+	{
+		buildings
+		{
+			Granary
+			DryingOvens = 1,2 { prerequisites { Granary } }
+			GrainTrade = 1,3 { prerequisites { DryingOvens } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Windmill.tga:UI_Structure_Icon_Windmill#2" //GUID:c1625a79b49054f46a66ececdca83f0a
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Windmill.tga:UI_Structure_Illustration_Windmill#2" //GUID:207928d98b27fb64a84ef9a50bc0aacc
+}
+
+def FoodMarket : Building
+{
+	name = "Food Market"
+	flavor = "A gathering place for all merchants of food and livestock, from local farmers to foreign merchants, looking for profitable deals."
+	upgrades
+	{
+		buildings
+		{
+			Tavern = 1.5, 1
+			
+			Bakery = 1, 2 { prerequisites { Tavern } }
+			Alehouse = 2, 2 { prerequisites { Tavern } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FoodMarket.tga:UI_Structure_Icon_FoodMarket#2" //GUID:d313667a185ba9345b89a218699df6df
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_FoodMarket.tga:UI_Structure_Illustration_FoodMarket#2" //GUID:08264a3b4eeb79749a0cc361bd2330be
+}
+
+
+//-------------------------------------- QuarryDistrict
+def Stoneworking : Building
+{
+	name = "Stoneworking"
+	flavor = "An open pit mine, used for exctraction of marble - a valued trade resource used in sculpting and architecture."
+	upgrades
+	{
+		buildings
+		{
+			Machinery_Quarry
+			MinersShacks_Quarry
+			
+			StoneCutters = 1.5, 2 { prerequisites { Machinery_Quarry; MinersShacks_Quarry } }
+			
+			SculpturesShop = 1,3 { prerequisites { StoneCutters } }
+			
+			MasonsGuild = 2,3 { prerequisites { StoneCutters } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Quarry.tga:UI_Structure_Icon_Quarry#2" //GUID:dcabf81351999e042a55e9eee58f7e5a
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Stoneworking.tga:UI_Structure_Illustration_Stoneworking#2" //GUID:a7e22e2ab43174043b0fa4cf853efed4
+}
+
+def LimeTrade : Building
+{
+	name = "Lime Trade"
+	flavor = "Limestone extraction and trade are profitable, since this sedimentary rock has many usages - from architecture through sculpturing to being important compound in processes like tanning leather."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_LimeTrade.tga:UI_Structure_Icon_LimeTrade#2" //GUID:50efc077c2ca8764da00986f2c496e53
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_LimeTrade.tga:UI_Structure_Illustration_LimeTrade#2" //GUID:307fd976402167249bcf57f3c5c3edf2
+}
+
+//-------------------------------------- MineDistrict
+
+def Metalworking : Building
+{
+	name = "Metalworking"
+	flavor = "The processes and facilities for mining iron ore and smelting it, to produce wrought iron."
+	upgrades
+	{
+		buildings
+		{
+			Machinery_Mine
+			MinersShacks_Mine
+			
+			BlastFurnace = 1.5,2 { prerequisites { Machinery_Mine; MinersShacks_Mine } }
+		}
+	}
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Metalworking.tga:UI_Structure_Icon_Metalworking#2" //GUID:0dc17aa0a54ba844c815ce2c297509f1
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_Metalworking.tga:UI_Structure_Illustration_Metalworking#2" //GUID:529b3cba887fd3b4d9e89a00e3fba367
+	
+	ai_eval = (kingdom.DeepForests and !kingdom.Metalworking and 10000 * kingdom.Barracks)
+}
+
+def SilverSmelting : Building
+{
+	name = "Silver Smelting"
+	flavor = "Silver is used in making luxurious items like silverware, candlebras, jewellery, coins and many others."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SilverSmelting.tga:UI_Structure_Icon_SilverSmelting#2" //GUID:35e81e426b31b984899fb87eba966d16
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_SilverSmelting.tga:UI_Structure_Illustration_SilverSmelting#2" //GUID:b4c6b52e0f73f1b44a039ed49f3ae613
+}
+
+
+def GoldSmelting : Building
+{
+	name = "Gold Smelting"
+	flavor = "Gold is considered to be one of the most luxurious elements and the most precious metal, used in gilding, crafting of jewelry and decorative objects and minting coins."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GoldSmelting.tga:UI_Structure_Icon_GoldSmelting#2" //GUID:0bb3d68adcf4c194b9a8c1936191e901
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_GoldSmelting.tga:UI_Structure_Illustration_GoldSmelting#2" //GUID:7b5b057480e73214ead59a9d56944082
+}
+
+
+def LodestoneTrade : Building
+{
+	name = "Lodestone Trade"
+	flavor = "Also known as way-stone, the magnetic properties of this mineral are highly treasured for it's usage in compasses and navigation at sea."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_LodestoneTrade.tga:UI_Structure_Icon_LodestoneTrade#2" //GUID:74b357560448c4d4990e4619cf91ca6e
+	illustration = "Assets/UI/Elements/Buildings/Illustrations/UI_Structure_Illustration_LodestoneTrade.tga:UI_Structure_Illustration_LodestoneTrade#2" //GUID:c67d26bd8179d544fbe468658dbb6d25
+}

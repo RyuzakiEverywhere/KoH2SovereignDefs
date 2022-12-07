@@ -1,0 +1,612 @@
+﻿def Rumor
+{
+	text caption = "Rumor from {tgt_kingdom}" // for stand-alone (not multiple rumors) message
+	text text
+	text short_text
+	
+	// args {...} // list of queries, see "00 test.def" for example queries
+	
+	bool condition = true
+	float chance = 10 // used both as chance to activate on tick and as a weight when picking from multiple rumors
+	
+	
+	
+	//not implemented: success_fail {...}
+	//not implemented: pros_and_cons : ProsAndCons {...}
+	
+	//SpyPlot opportunity = SomeAction          // this opportunity will always be added (if valid)
+	//SpyPlot opportunities = min/max           // between min and max of these will be added, default: 0 .. count
+	// {
+	// 	AnotherAction = 2/3 // number of targets for this opportunity (how many to try, not guaranteed)
+	// 	YetAnotherAction
+	// }
+}
+
+template FluffRumor : Rumor
+{
+	chance = 1
+}
+
+def RumorMessage : Message
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_NewRumor.png:Icon_Message_NewRumor#2" //GUID:2bd6bb8f37e44e046badf297ab5a66be
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_SpyRumors.tga:UI_Illustration_SpyRumors#2" //GUID:d9eacb331a1416845b9c68d76b504c5a
+	caption = "{caption}"
+	hypertext : MessageHyperText
+	{
+		text body = "{text}"
+		text opportunities_header = "[{opportunities:if}{p}New [{opportunities.single_item:if}plot|plots] available:]"
+		rows opportunities = (opportunities)
+		{
+			padding { top = 8; bottom = 16 }
+			alignment = "center"
+			//sprite icon = (instance.icon)
+			object_icon icon = (instance) { size = 48 }
+			text text = "{name}"
+		}
+	}
+	stack_group = "Rumors"
+}
+
+// multiple rumors in one message
+// available variables: "spy", "src_kingdom", "tgt_kingdom", "rumors" (list), "opportunities" (list)
+def RumorsMessage : Message
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Opportunity_Neutral.png:Icon_Message_Opportunity_Neutral#2" //GUID:0ed9708e874e5da42bb407dd08069edc
+	caption = "Spy report from {tgt_kingdom}"
+	hypertext : MessageHyperText
+	{
+		text rumors_header = "{spy} has collected various rumors:"
+		rows rumors = (rumors)
+		{
+			text text = "{blt} [{short_text}|{text}]"
+		}
+		text opportunities_header = "[{opportunities:if}{p}New [{opportunities.single_item:if}plot|plots] available:]"
+		rows opportunities = (opportunities)
+		{
+			padding { top = 8; bottom = 16 }
+			alignment = "center"
+			//sprite icon = (instance.icon)
+			object_icon icon = (instance) { size = 48 }
+			text text = "{name}"
+		}
+	}
+	stack_group = "Rumors"
+}
+
+def TestRumor2 : Rumor
+{
+	text = "{spy} was left with the impression that the knights in {kingdom} are more interrested in their own wealth than they are loyal to their {kingdom.king.title}"
+	short_text = "The loyalty of the Royal Court of {kingdom} is low"
+	opportunities = 1
+	{
+		BribeNobleAction = 3
+	}
+	chance = 1000
+	condition = false
+}
+
+// --------------- OPPORTUNITY RUMORS ---------------
+def OldKingNoHeirRumor : Rumor
+{
+	text = "Our {spy} heard rumors that the future rulership of {kingdom} is yet undecided, with no true heir and a {kingdom.king.title} of old age!"
+	short_text = "{kingdom.king} is of old age and has no heir"
+	opportunity = PuppetSupportPretenderToTheThroneAction
+	condition = (tgt_kingdom.king.is_venerable && tgt_kingdom.heir = null)
+}
+
+def LastHeirDiedRumor : Rumor
+{
+	text = "Our {spy} heard rumors that {target} of {kingdom} died! He was the last true heir to the crown, making {kingdom:s} future undecided."
+	short_text = "{target}, the last true heir of {kingdom}, died"
+	opportunity = PuppetSupportPretenderToTheThroneAction
+	condition = (tgt_kingdom.king.is_venerable && CheckRecentRule(tgt_kingdom, "LastHeirRecentlyDiedRumorRule"))
+	args
+	{
+		var target = (GetRule(tgt_kingdom, "LastHeirRecentlyDiedRumorRule").prince)
+	}
+}
+
+def TheirTownsAreLoyalRumor : Rumor
+{
+	text = "Our {spy:s} frequent travels across {kingdom:s} lands have shown that many of their provinces are loyal to our kingdom!"
+	short_text = "Many of {kingdom:s} provinces are loyal to us"
+	opportunity = PuppetSupportPretenderToTheThroneAction
+	args
+	{
+		realm_count loyalRealms = (obj.majority_kingdom = src_kingdom)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (loyalRealms = 3)
+}
+
+def WeAreMarriedRumor : Rumor
+{
+	text = "Thanks to our marriage with {kingdom}, our {spy} learned that their kingdom has no valid heir to the throne and their {kingdom.king.title} is of old age."
+	short_text = "{kingdom.king} is of old age and has no heir"
+	opportunity = PuppetSupportPretenderToTheThroneAction
+	condition = (tgt_kingdom.king.is_venerable && tgt_kingdom.heir = null && HaveMarriage(src_kingdom, tgt_kingdom, 1, 2)) //HaveMarriage(k1,k2,husbandSide, husbandType) - k1,k2: mandatory; husbandSide(default 0): 0 either side, 1 is from k1, 2 is from k2; husbandType(default 0): 0 either, 1 is king, 2 is prince
+}
+
+def DynastyNotSupportedRumor : Rumor
+{
+	text = "For the time spent in {kingdom}, our {spy} learned that the crown's authority is plummeting as their {kingdom.king.title} is steadily losing his grasp over the population."
+	short_text = "{kingdom} has little to no authority over its subjects"
+	opportunity = PuppetSupportPretenderToTheThroneAction
+	condition = (tgt_kingdom.crown_authority < 0)
+}
+
+def NewKnightHiredRumor : Rumor
+{
+	text = "Our {spy} learned that {kingdom} just hired {target} as part of their royal court."
+	short_text = "{target} was just hired in their court"
+	opportunity = BribeNobleAction
+	args
+	{
+		var target = (GetRule(tgt_kingdom, "NewKnightHiredRumorRule").knight)
+	}
+	condition = (CheckRecentRule(tgt_kingdom,"NewKnightHiredRumorRule"))
+}
+
+def TheirKnightStoppedGoverningRumor : Rumor
+{
+	text = "Our {spy} overheard that {target} was released from his governing duties in {previously_governed_realm}."
+	short_text = "{target} is no longer governing {previously_governed_realm}"
+	opportunity = BribeNobleAction
+	args
+	{
+		random_court_member target = (obj.governed_castle = null)
+		{
+			kingdom = (tgt_kingdom)
+		}
+		var rule = (GetRule(target, "TheirKnightStoppedGoverningRumorRule"))
+		var previously_governed_realm = (rule.previously_governed_realm)
+	}
+	condition = (previously_governed_realm != null && target.is_alive && CheckRecentRule(target, "TheirKnightStoppedGoverningRumorRule"))
+}
+
+def LosingPowerRumor : Rumor //!!! REVISE
+{
+	text = "Our {spy} heard rumors that {kingdom} is in a rather dire situation - gold is scarce and their {kingdom.king.title} is losing his grip over the court's loyalty."
+	short_text = "{kingdom} has no authority and suffers from low loyalty"
+	opportunities
+	{
+		BribeNobleAction
+		PuppetHandOverTheCrownAction
+	}
+	condition = (tgt_kingdom.crown_authority < 0 ||  tgt_kingdom.is_bankrupt)
+}
+
+def CorruptKingdomRumor : Rumor
+{
+	text = "Our {spy:s} sources tell us that corruption rules over {kingdom:s} lands!"
+	short_text = "{kingdom} is plagued by corrupted noblemen and aristocracy"
+	opportunity = BribeNobleAction
+	condition = (tgt_kingdom.crown_authority < -2)
+}
+
+def LowArmyMoraleRumor : Rumor
+{
+	text = "Our {spy} has been keeping a close eye on {kingdom:s} armies and has come to the conclusion that their overall morale is suffering heavily."
+	short_text = "Many of {kingdom:s} armies have low morale"
+	opportunities
+	{
+		PuppetArmyRevoltAction
+		PuppetSwitchSidesAction
+	}
+	condition = (tgt_kingdom.avarage_army_morale < 10)
+}
+
+def LowKingdomFoodRumor : Rumor
+{
+	text = "Our {spy} has reported that hunger has taken over {kingdom}, due to {kingdom.king:s} inability to manage his kingdom's food demands!"
+	short_text = "Insufficient food is crippling {kingdom}"
+	opportunities
+	{
+		PuppetArmyRevoltAction
+		PuppetSwitchSidesAction
+	}
+	condition = (tgt_kingdom.food < 0)
+}
+
+// --------------- IMPORTANT RUMORS ---------------
+def TheyHaveNegativeGoldRumor : Rumor
+{
+	text = "Our {spy:s} ties to {kingdom.king:s} financial advisors have revealed that {kingdom} is losing gold rapidly!"
+	short_text = "{kingdom:s} treasury is depleting"
+	condition = (tgt_kingdom.resources.gold < 0)
+}
+
+def TheyAreBankruptRumor : Rumor
+{
+	text = "Our {spy} has reported that the financial situation of {kingdom} is rather dire and they have gone bankrupt!"
+	short_text = "{kingdom} is bankrupt!"
+	condition = (tgt_kingdom.is_bankrupt)
+	opportunities
+	{
+		BribeNobleAction
+		PuppetArrangeAnnexationAction
+	}
+}
+
+def TheyHaveManyWarsRumor : Rumor
+{
+	text = "Our {spy} in heard rumors that {kingdom} has its hands full on the military front, waging wars with multiple kingdoms in the same time."
+	short_text = "{kingdom} is waging many wars simultaneously"
+	condition = (tgt_kingdom.num_wars > 3)
+}
+
+def TheyHaveManyRebellionsRumor : Rumor
+{
+	text = "Rumors of multiple rebellions spreading across {kingdom:s} lands and its neighbors have reached our {spy}. Their kingdom is in shambles!"
+	short_text = "{kingdom} is plagued by many rebellions!"
+	opportunity = PuppetFundRebelsAction
+	condition = (tgt_kingdom.num_rebellions >= 3)
+}
+
+def ChangedReligionRumor : Rumor
+{
+	text = "Word has spread that the people of {kingdom} are no longer {previous_religion}! Our {spy} reported they now follow {new_religion} beliefs."
+	short_text = "They recently changed their religion from {previous_religion} to {new_religion}"
+	opportunity = PuppetPreachAction
+	args
+	{
+		var previous_religion = (GetRule(tgt_kingdom, "ChangedReligionRumorRule").religion)
+		var new_religion = (tgt_kingdom.religion)
+	}
+	condition = (CheckRecentRule(tgt_kingdom, "ChangedReligionRumorRule"))
+}
+
+def KingMarriedRumor : Rumor
+{
+	text = "Our {spy} has discovered that {kingdom:s} {kingdom.king} is now married to {kingdom.queen} of {king.spouse.kingdom_before_marriage}! Rumors have it that it was a grand wedding with guests from many kingdoms."
+	short_text = "{kingdom.king} is married to {kingdom.queen} of {king.spouse.kingdom_before_marriage}"
+	condition = (CheckRecentRule(tgt_kingdom, "KingMarriedRumorRule"))
+}
+
+def TheirLandsHaveForeignMajorityRumor : Rumor
+{
+	text = "Our {spy} heard rumors that many of {kingdom:s} provinces are loyal to other kingdoms. It seems their nation is torn from the inside, which may cause loyalist rebellions."
+	short_text = "Foreign loyalty plagues many of {kingdom:s} provinces"
+	args
+	{
+		realm_count foreignRealms = (obj.majority_kingdom != tgt_kingdom)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (100.0 * foreignRealms / tgt_kingdom.num_realms > 40)
+	opportunities
+	{
+		PuppetVassalizeAction
+		PuppetHandOverTheCrownAction
+	}
+}
+
+def EnemySpyCaughtRumor : Rumor
+{
+	text = "A worrying letter just arrived, revealing {kingdom} has supposedly caught an enemy spy! We should be careful in our future acts of espionage there, lest our {spy} meets a similar fate."
+	short_text = "A spy from another kingdom was recently caught there"
+	condition = (CheckRecentRule(tgt_kingdom, "EnemySpyCaughtRumorRule"))
+}
+
+// def HighSpyDefenseRumor : Rumor
+// {
+// 	text = "Our {spy} has sent worrying news from {kingdom} - it seems local security is alarmingly high! He might just be paranoid, but we should be more careful in future acts of espionage."
+// 	short_text = "Their counter-espionage is formidable"
+// 	condition = (tgt_kingdom.spy_defense > 20)
+// }
+
+def DamagedFortificationsRumor : Rumor
+{
+	text = "Our {spy} has gathered rumors that the fortifications in {kingdom:s} {target} are barely holding, perhaps due to a recent siege. This fact might play a decisive role in potential future battles."
+	short_text = "{target:s} fortifications are damaged"
+	args
+	{
+		random_realm target = (obj.fortification_status_perc <= 50)
+	}
+	condition = (target != null)
+}
+
+def NotableDistrictBuiltRumor : Rumor //!!! YELLOW - on hold
+{
+	text = "A letter from our {spy} in {kingdom} arrived, describing in great detail the {district} which was recently built there."
+	short_text = "A {district} was recently built in {realm_built_in}"
+	condition = false
+}
+
+def MarriageAvailableRumor : Rumor
+{
+	text = "Thanks to our {spy:s} close connections in the royal family of {kingdom}, rumors have reached us that there is currently potential for arranging a marriage."
+	short_text = "There is potential for royal marriage"
+	args
+	{
+		random_royal_member ourKingOrPrince = (obj.is_king_orprince && !obj.is_married)
+		{
+			kingdom = (src_kingdom)
+		}
+		random_royal_child ourPrincess = (obj.is_princess && !obj.is_married) //could be royal_member, used just for an eample for royal_child
+		{
+			kingdom = (src_kingdom)
+		}
+		random_royal_member theirKingOrPrince = (obj.is_king_orprince && !obj.is_married)
+		{
+			kingdom = (tgt_kingdom)
+		}
+		random_royal_child theirPrincess = (obj.is_princess && !obj.is_married)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = ((ourKingOrPrince != null && theirPrincess != null) || (theirKingOrPrince && ourPrincess ))
+	
+}
+
+def TheyHaveTradePotentialRumor : Rumor
+{
+	text = "Our {spy} gathered rumors that {kingdom} has a considerable amount of unused commerce, making their kingdom a good candidates for future trading endeavours."
+	short_text = "There is potential for trading due to unused commerce"
+	condition = (tgt_kingdom.ks_commerce - tgt_kingdom.trade_routes_commerse_drain > 10)
+}
+
+def UnusedGoldRumor : Rumor
+{
+	text = "Our {spy} went through {kingdom:s} recent spending records and found out that the kingdom seems to have much of its gold stockpiled and left unused."
+	short_text = "They have a large amount of gold stockpiled"
+	condition = (tgt_kingdom.resources.gold > 1000)
+	opportunity = PuppetStealTreasuryAction
+}
+
+def AboutToDeclareWarRumor : Rumor
+{
+	text = "Our {spy} has heard rumors that {kingdom} is planning to declare war against us!"
+	short_text = "War between our kingdoms is imminent"
+	condition = (!AreEnemies(tgt_kingdom, src_kingdom) && GetProConThresholdRatio(tgt_kingdom, src_kingdom, "PC_War") > 1.2)
+}
+
+def GreatPowerCandidateRumor : Rumor
+{
+	text = "Our {spy} suspects {kingdom} are on their way to becoming a Great Power! This makes them a formidable ally, or threat, depending on the point of view."
+	short_text = "{kingdom} is closer to becoming a Great Power"
+	condition = (tgt_kingdom.great_power_ranking_position > 10 && tgt_kingdom.great_power_ranking_position != 0 && tgt_kingdom.great_power_ranking_position > tgt_kingdom.previous_great_power_ranking_position)
+}
+
+def GreatPowerDecayingRumor : Rumor
+{
+	text = "Our {spy} suspects {kingdom} might soon lose its Great Power status."
+	short_text = "{kingdom} might soon lose its Great Power status"
+	condition = (tgt_kingdom.great_power_ranking_position <= 10 && tgt_kingdom.great_power_ranking_position != 0 && tgt_kingdom.great_power_ranking_position < tgt_kingdom.previous_great_power_ranking_position)
+}
+
+def ArmyHasSiegeEquipmentRumor : Rumor
+{
+	text = "Rumors of {target} carrying siege equipment alongside his army have reached our {spy} in {kingdom}!"
+	short_text = "{target:s} carries siege equipment"
+	args
+	{
+		random_army army = (obj.siege_equipment_count > 0)
+		{
+			kingdom = (tgt_kingdom)
+		}
+		var target = (army.leader)
+	}
+	condition = (army != null)
+}
+
+def OccupiedByRebelsRumor : Rumor
+{
+	text = "Our {spy} is reporting that many of {kingdom:s} provinces are occupied by rebellions!"
+	short_text = "Many of their lands are occupied by rebels"
+	opportunity = PuppetFundRebelsAction
+	args
+	{
+		random_realm target = (obj.is_rebel_occupied)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (target != null)
+}
+
+def TheyHaveMightyArmyRumor : Rumor
+{
+	text = "Our {spy} has gathered intel that {kingdom:s} army strength surpasses ours considerably! We should be careful when engaging them in direct combat."
+	short_text = "Their army strength surpasses ours"
+	condition = (tgt_kingdom.army_strength / src_kingdom.army_strength > 2)
+}
+
+def RecentlyFailedDiplomacyRumor : Rumor
+{
+	text = "Our {spy} learned from {kingdom.king:s} advisor that they recently failed some negotiations with {target}."
+	short_text = "Recent diplomatic negotiations with {target} failed"
+	args
+	{
+		var target = (GetRule(tgt_kingdom, "RecentlyFailedDiplomacyRumorRule").otherKingdom)
+	}
+	condition = (CheckRecentRule(tgt_kingdom, "RecentlyFailedDiplomacyRumorRule"))
+}
+
+def PrisonFullRumor : Rumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} dungeon is full of prisoners. Unexpected riots or rebellions might happen at any moment!"
+	short_text = "{kingdom:s} dungeon is full of prisoners"
+	condition = (kingdom.num_prisoners >= kingdom.ks_prison_capacity)
+}
+
+// --------------- FLUFF RUMORS ---------------
+def FeastHeldRumor : FluffRumor
+{
+	text = "A glorious feast was held in {kingdom}! Judging by {spy:s} report, the celebrations lasted for three days filled with copious amounts of exotic foods and beverages. Rumors have it that the feast was held due to a recent newborn within the court."
+	short_text = "A glorious feast was recently held"
+	condition = true
+}
+
+def TheyAreWarmongersRumor : FluffRumor //!!! TBD
+{
+	text = "Our {spy} in {tgt_kingdom} heard rumors that {short_text}"
+	short_text = "rumor placeholder text"
+	condition = false
+}
+
+def TheirKnightsAreCapturedRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that many of {target:s} knights are captured by other kingdoms."
+	short_text = "They have knights captured by other kingdoms"
+	args
+	{
+		court_member_count count = (obj.is_prisoner)
+	}
+	condition = (count > 2)
+}
+
+def KingLovesFeastsRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} {kingdom.king.title} adores lavish feasts!"
+	short_text = "{kingdom.king} frequently holds lavish feasts"
+	condition = true
+}
+
+def KingLovesDrinkingRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} {kingdom.king.title} is known to enjoy a good spirited beverage, more often than what is regularly considered normal."
+	short_text = "{kingdom.king} is a drunkard"
+	condition = true
+}
+
+def KingLovesHuntingRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} {kingdom.king.title} frequently organizes royal hunts."
+	short_text = "{kingdom.king} enjoys a good hunting trip"
+	condition = true
+}
+
+def KingLovesGamblingRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} {kingdom.king.title} has a habbit of gambling."
+	short_text = "{kingdom.king} has a habit of gambling"
+	condition = true
+}
+
+// def KingLovesWomenRumor : FluffRumor //TBD
+// {
+// 	text = "Our {spy} in {tgt_kingdom} heard rumors that {short_text}"
+// 	short_text = "rumor placeholder text"
+// 	condition = false
+// }
+
+def QueenYearnsCompanyRumor : FluffRumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} {kingdom.queen} has grown tired of her husband's absence and is yearning some company."
+	short_text = "{kingdom.queen} is yearning for some company"
+	condition = (kingdom.queen != null)
+}
+
+def TheyHaveWarExhaustionRumor : Rumor
+{
+	text = "Our {spy} heard rumors that {kingdom} is exhausted by all the prolonged wars it participates in."
+	short_text = "They are exhausted by prolonged wars"
+	condition = (tgt_kingdom.ks_war_exhaustion > 15)
+}
+
+// def HighTaxesRumor : Rumor
+// {
+// 	text = "Our {spy} heard rumors that {kingdom:s} population disgruntled due to the heavy taxation placed upon it."
+// 	short_text = "{kingdom:s} taxes are high"
+// 	condition = (tgt_kingdom.tax_rate > 10)
+// }
+
+// def BadRelationsWithKingdomRumor : Rumor
+// {
+// 	text = "Our {spy} in heard rumors that {kingdom} has bad relations with {target}!"
+// 	short_text = "{kingdom} and {target} have bad relations"
+// 	opportunity = PuppetRuinRelationsAction
+// 	args
+// 	{
+// 		random_kingdom target = (GetRelationship(tgt_kingdom, obj.kingdom) < -400)
+// 	}
+// 	condition = (target != null)
+// }
+
+def PlannedIncomeIncreaseRumor : Rumor //!!! RED
+{
+	text = "Our {spy} has reported that {kingdom} is expected to have an abrupt increase of its gold income rather soon."
+	short_text = "{kingdom} is planning an abrupt increase of its income"
+	condition = false
+}
+
+def MilitaryIsGrowingRumor : Rumor
+{
+	text = "Our {spy} heard rumors that {kingdom:s} armies are growing stronger by the minute, most likely to meet {kingdom.king:s} plans for expansion."
+	short_text = "Their military strength is growing at an alarming rate"
+	args
+	{
+		var rule = (GetRule(tgt_kingdom, "ArmyStrengthRule"))
+	}
+	condition = (rule.current_strength > rule.prev_strength * 1.2)
+}
+
+def QueenIsPaganRumor : FluffRumor
+{
+	text = "Our {spy} in {tgt_kingdom} heard rumors that {kingdom.queen} still practices some ancient pagan rituals! If word of this spreads elsewhere, the consequences may be dire."
+	short_text = "{kingdom.queen} secretly prays to an unnamed ancient god"
+	args
+	{
+		realm_count paganRealms = (obj.is_pagan)
+		{
+			target = (tgt_kingdom)
+		}
+	}
+	condition = (kingdom.queen != null && paganRealms > 1)
+}
+
+def PrincessIsWitchRumor : FluffRumor
+{
+	text = "Our {spy} has heard a rather odd rumor... {kingdom:s} {theirPrincess} might be a witch!"
+	short_text = "{theirPrincess} is rumored to be a witch!" //"One of {kingdom:s} princesses is a witch!"
+	args
+	{
+		royal_child_count num_princesses = (obj.is_princess)
+		{
+			kingdom = (tgt_kingdom)
+		}
+		random_royal_child theirPrincess = (obj.is_princess)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (num_princesses > 0)
+}
+
+def PrinceIsHedonistRumor : FluffRumor
+{
+	text = "Our {spy} in {kingdom} heard rumors that {theirPrince} is a hedonist, known for enjoying all aspects of life to their fullest."
+	short_text = "{theirPrince} is known to be a hedonist"
+	args
+	{
+		royal_child_count num_princes = (obj.is_prince)
+		{
+			kingdom = (tgt_kingdom)
+		}
+		random_royal_child theirPrince = (obj.is_prince)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (num_princes > 0 && theirPrince != null)
+}
+
+def TheyStillHavePaganBeliefsRumor : Rumor //!!! YELLOW
+{
+	text = "Our {spy} heard rumors that {kingdom} still maintains old pagan traditions in some of its provinces."
+	short_text = "{kingdom} still practices some local pagan traditions"
+	args
+	{
+		realm_count paganRealms = (obj.is_pagan)
+		{
+			kingdom = (tgt_kingdom)
+		}
+	}
+	condition = (!scr_kingdom.is_pagan && paganRealms > 1)
+}

@@ -1,0 +1,762 @@
+﻿def Settlement
+{
+	prefab name_prefab = "Assets/Europe/Settlements/SettlementNamePro.prefab" //GUID:d75d85173df06114983c562dad882134
+	{
+		prefab en = "Assets/Europe/Settlements/SettlementNamePro.prefab" //GUID:d75d85173df06114983c562dad882134
+		prefab fr = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		prefab de = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		prefab es = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		prefab pl = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		prefab ru = "Assets/Europe/Settlements/SettlementNamePro_Cyrilic.prefab" //GUID:c60f61f5053d04341801a313c389617a
+		prefab tr = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		prefab ind = "Assets/Europe/Settlements/SettlementNamePro_ExtendedLatin.prefab" //GUID:35fc156de2aab6340b1a9240be4ae21b
+		
+		prefab ko = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+		prefab ja = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+		prefab zh = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+		prefab zh_tw = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+		prefab tz = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+		prefab hi = "Assets/Europe/Settlements/SettlementNamePro_CJK.prefab" //GUID:efb301a8b4feebf448a9513dd5ae6408
+	}
+	prefab shield_prefab = "Assets/Europe/Settlements/SettlementShield.prefab" //GUID:e794f92425d8e1f4a8403ac6f86bd1be
+	material resources_material = "Assets/Europe/icons.mat" //GUID:276013ec1166e434bb29448015ab9791
+	prefab audio_prefab = "Assets/Audio/TownAudio.prefab" //GUID:82e21384c6957b345a2687c42c03fc5e
+	prefab smoke_prefab = "Assets/Europe/Battles/SackedCityFX.prefab" //GUID:d2a37898365403349975c149be6e953e
+	prefab arrows_prefab = "Assets/Units/Arrow/ArrowParticles.prefab" //GUID:de4dc774f32707e45bef2b221ccc4899
+	prefab cannons_prefab = "Assets/Units/Arrow/CannonBallParticle.prefab" //GUID:b07fd227f3436f944bc64410878544e2
+	sprite icon = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Village.png:UI_Settlement_Village#2" //GUID:bd1ae1dddedf51e47bccfa618440b0e3
+	sprite illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Village_Illustration.png:UI_Settlement_Village_Illustration#2" //GUID:d01e15f82b19c60488a434e8574b3967
+	float selection_thickness = 0.5
+	
+	text name
+	text description
+	text caption = "{clr:link_bright}{obj}{/clr} in {clr:link_bright}{realm:link}{realm.province_name}{/link}{/clr}"
+	float repair_hammers = 12000 // in hammers but matches seconds if not boosted with some buildings / upgrades
+	float upgrade_cost = "100g" // { per_level = "500g" }
+	float boost_upgrade_mod = 5
+	
+	float radius = 7
+	
+	//PerLevelValues<Resources> production
+	
+	point position
+	float rotation = 0
+	
+	int attrition = [0,0,0]
+	
+	houses
+	
+	trade_center_gold_coastal = 0 //was 3
+	trade_center_gold_settlement = 0 //was 1
+	trade_center_gold_castle = 0 //was 2
+	trade_center_books_castle = 0 //was 3
+	trade_center_gold_per_good = 1 //was 1
+	trade_center_gold_per_commerce = 1 //was 0.5
+	
+	int max_identical_settlement_per_realm = 4
+	int max_allowed_features_per_settlement_type = 1
+	int max_specal_settlements_per_realm = 3
+	int min_restriction_settlements = 5
+	int max_restriction_settlements = 8
+	float settlement_repeating_chance_mul = 1.8 // relevant only for base settlements
+	bool is_active_settlement = true
+	// map spesific
+	// int area = [0, 0, 9999, 9999] // (east limit,y) bottom left, (x,y) top right for where it can spawn //size  3000, 2100
+	
+	string selection_sound
+	
+	
+	/// TEMPORARY DEFENDERS
+	
+	int max_temporary_defender_squads = 5 // can't get more than 5 squads
+	float siege_defense_max_map = 500
+	float siege_defense_garrison_bonus = 50 // at 500 siege defense, the entire garrison gets a 50% manpower bonus
+	float siege_defense_temp_defender_bonus = 0 // same as the above one, but only for the temporary defenders
+	
+	/// LEVY BONUSES
+	
+	float garrison_levy_manpower_bonus = 0.5 // every garrison unit in the realm gets 0.5 manpower per realm levy
+	// every other bonus that checks levy/town guard/militia checks the settlement income, not the realm
+	float garrison_squad_per_levy = 1 // for 5 levies, you get 5 squads
+	float garrison_levy_excess_manpower_bonus = 5 // if you're over the max, garrison gets bonus manpower
+	
+	/// TOWN GUARD BONUSES
+	
+	float garrison_squad_per_town_guard = 1 // for 5 town guards, you get 5 squads
+	float garrison_town_guard_excess_manpower_bonus = 10 // if you're over the max, garrison gets bonus manpower
+	
+	/// WORKER BONUSES
+	
+	float garrison_squad_per_worker = 1 // for 5 workers, you get 5 squads
+	float garrison_worker_excess_manpower_bonus = 3 // if you're over the max, garrison gets bonus manpower
+	
+	availability_texts
+	{
+		text Available_1 = "We have {availability_color}{name:multiple}{/availability_color} in {availability_castle_1}."
+		text Available_2 = "We have {availability_color}{name:multiple}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text Available_3 = "We have {availability_color}{name:multiple}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text Available_many = "We have {availability_color}{name:multiple}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text Available_all = "We have {availability_color}{name:multiple}{/availability_color} in all of our our provinces."
+		
+		text Impossible_0 = "We don't have {availability_color}{name:multiple}{/availability_color} in any of our provinces."
+	}
+}
+
+def SettlementsRandomizationWeights = 3 //max 3 types in the same realm
+{
+	float Village = 30
+	float Farm = 25
+	float Monastery = 20
+	float Keep = 25
+}
+
+def SpecialSettlementsRandomizationWeights = 2 //max 3 types in the same realm / don't includde special settlements
+{
+	//make it 
+	
+	// float Mine = 4 //!!! mine should not compete with these; make new category
+	// {
+	// 	float has_mountains = 6 // mod 10% in mountains / 4% otherwise
+	// }
+	float Mine = 10 //temporary until we have proper mountain detection
+	float Quarry = 5 //temporary until we have proper mountain detection
+	float HorseFarm = 16
+	float SheepFarm = 7
+	float CattleFarm = 8
+	float HerbsGardens = 8
+	float FlaxField = 8
+	float Vineyard = 8 //we don't have this in pf set
+	float LoggingCamp = 30
+}
+
+def ResourceBarSettings
+{
+	float cell_width = 2.5 // in meters
+	float cell_height = 2.5 // in meters
+	
+	float spacing = 0.1 // between different resource types, in meters
+	
+	// value format: min count / overlap (%) at <= min count / max count / overlap at >= max count
+	float stacks = 3/25/10/60
+	{
+		Gold = 3/25/15/75
+		Workers = 5/10/20/50
+		WorkerSlots = 5/25/10/50
+	}
+}
+
+Settlements
+
+
+def Empty : Settlement
+{
+	name = "Empty"
+	description = ""
+	production = ""
+	is_active_settlement = false
+}
+
+def Village : Settlement
+{
+	name = "Village"
+	{
+		multiple = "Villages"
+	}
+	
+	description = $["Rural establishments nestled outside the town's walls, housing the majority of a province's population."]
+	//"{p}{p}{TailorsShop}, {ShoemakersShop} and various other craft-related upgrades benefit from an abundance of villages, as do more military-oriented buildings like {VillageMilitia} and {TrainingGrounds}."]
+	production = "1g 1WorkerSlots"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Village.tga:UI_Settlement_Village#2" //GUID:227fb709071fd87449eb902c070c87e3
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Village_Illustration.png:UI_Settlement_Village_Illustration#2" //GUID:d01e15f82b19c60488a434e8574b3967
+	selection_sound = "event:/sound_effects/interaction/select/settlement/village"
+	
+	radius = 5
+}
+
+tag CoastalSettlement
+{
+	text name = "Coastal"
+}
+
+tag CoastalVillage
+{
+	text name = "Coastal"
+}
+
+def Citadel
+{
+	text name = "Citadel"
+	text descritpion = "A town's core fortified center. Its size automatically increases as the province develops."
+}
+
+
+def Farm : Settlement
+{
+	name = "Crop Farm"
+	{
+		multiple = "Crop Farms"
+	}
+	
+	description = $[
+	"Large fields where basic grains are grown and harvested, the amount of which often defines a province's prosperity."]
+	//"{p}{p}Crop farms can drastically increase the food output of provinces with {CropsRotation}, {CattleFarming} and {HorseBreeding}, while also providing a stable supply of gold when paired with {Windmill}."]
+	production = "2f"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_CropFarm.tga:UI_Settlement_CropFarm#2" //GUID:7811dfe968c6c5d43a3ae8dda84ed757
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Farm_Illustration.png:UI_Settlement_Farm_Illustration#2" //GUID:83e0d809497975a4299b9d6e378963c5
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/crop_farm"
+	
+	radius = 7
+}
+
+template ReligiousSettlement : Settlement
+{
+	production = "1b 1p"
+	
+	type_per_religion
+	{
+		Catholic = Monastery
+		Orthodox = Monastery
+		Sunni = Mosque
+		Shia = Mosque
+		Pagan = Shrine
+	}
+}
+
+def Monastery : ReligiousSettlement
+{
+	name = "Monastery"
+	{
+		multiple = "Monasteries"
+	}
+	
+	description = $[
+	"Religious havens in which the local clergy resides, writing and storing important holy texts and welcoming any traveler in need."]
+	//"{p}{p}Provinces with many monasteries are very suitable for constructing {Church}, {Cathedral} and {University}, since they increase the book and piety production these buildings and their upgrades provide."]
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Monastery.tga:UI_Settlement_Monastery#2" //GUID:a50bd720c34fd194bbbe79325f76cab2
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Monastery_Illustration.png:UI_Settlement_Monastery_Illustration#2" //GUID:54896740b77c40149be6dc7305b3eb41
+	
+	piety_type = "Christian"
+	
+	selection_sound_catholic = "event:/sound_effects/interaction/select/settlement/religious/monastery_catholic"
+	selection_sound_orhodox = "event:/sound_effects/interaction/select/settlement/religious/monastery_orthodox"
+	selection_sound = (realm.religion.Catholic and selection_sound_catholic or realm.religion.Orthodox and selection_sound_orhodox or null)
+	
+	radius = 6
+	
+	// switch_value = (realm.religion.key)
+	// case Catholic
+	// {
+	// 	selection_sound = "event:/sound_effects/interaction/select/settlement/religious/monastery_catholic"
+	// }
+	// case Orthodox
+	// {
+	// 	selection_sound = "event:/sound_effects/interaction/select/settlement/religious/monastery_orthodox"
+	// }
+}
+
+def Mosque : ReligiousSettlement
+{
+	name = "Mosque"
+	{
+		multiple = "Mosques"
+	}
+	
+	description = $[
+	"Religious establishments in which the local scholars reside, uniting all devout followers of Islam."]
+	//"{p}{p}Provinces with many mosques are very suitable for constructing {Masjid}, {GreatMosque:s} and {Madrasah}, since they increase the book and piety production these buildings and their upgrades provide."
+	//"{p}{p}{i}Interesting fact: Unlike monasteries and shrines, traditionally mosques are not built outside of settlements.{/i}"]
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Mosque.tga:UI_Settlement_Mosque#2" //GUID:3e763aa9238ba6c4ebf25d09d6d9efc5
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Monastery_Illustration.png:UI_Settlement_Monastery_Illustration#2" //GUID:54896740b77c40149be6dc7305b3eb41
+	selection_sound = "event:/sound_effects/interaction/select/settlement/religious/mosque_muslim"
+	
+	piety_type = "Muslim"
+	
+	radius = 6
+	
+	//architecture_type = "Keeps" //!!! temporary
+}
+
+def Shrine : ReligiousSettlement
+{
+	name = "Shrine"
+	{
+		multiple = "Shrines"
+	}
+	
+	description = "Gathering places where shamans perform ancient rituals and sacrificial ceremonies, to please the Old Gods."
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Shrine.tga:UI_Settlement_Shrine#2" //GUID:ca30b45a62814b94eafa35220118070e
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Monastery_Illustration.png:UI_Settlement_Monastery_Illustration#2" //GUID:54896740b77c40149be6dc7305b3eb41
+	selection_sound = "event:/sound_effects/interaction/select/settlement/religious/shrine_pagan"
+	
+	piety_type = "Pagan"
+	
+}
+
+def Keep : Settlement
+{
+	name = "Castle"
+	{
+		multiple = "Castles"
+		lower = "castle"
+	}
+	
+	description = $[
+	"Fortified keeps which can be besieged and taken over by enemy forces. These small strongholds provide defensive forces and are capable of fending off potential invaders."]
+	//"{p}{p}Unlike other settlements, Castles can be sieged and overtaken and while the conquers have armies in the province and retains the control of them, they gain bonuses fighting in that province."
+	//"{p}{p}Provinces with {LordsCastles} benefit greatly from these settlements, as they provide levies and siege defense."
+	//"{p}{p}Lastly, overtaken castles and castles with any attrition damage attack near-by enemies."]
+	production = "2Levy"
+	attrition = [3,3,3]
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Castle.tga:UI_Settlement_Castle#2" //GUID:c53cf14ed9a9ae440a9d5c5cc3b6e491
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Keep_Illustration.png:UI_Settlement_Keep_Illustration#2" //GUID:c1c91f8540cbd9e43baed73ed326b890
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/keep"
+	
+	radius = 5
+	
+	color occupied_enemy = "255,0,0,94" //FF00005E
+	color occupied_enemy_supporter = "120,0,0,150" //780000
+	color occupied_ally = "25,125,0,170" //197d00
+	color occupied_own = "48,255,0,94" //31FF005E
+	color occupied_neutral = "99,153,190,120" //6399be
+	prefab occupied_decal_prefab = "Assets/Europe/Prefabs/KeepOccupationDecal.prefab" //GUID:e2aadf3f574e5d84db4cfe475179171f
+	
+	float food_copy_mod = 0.5
+	bool take_max_food = true
+}
+
+def KeepEffects
+{
+	float refresh_interval = 2.5
+	float refresh_interval_rand = 1 //from 0 to this value added to refresh_interval
+	float min_distance = 1
+	float max_distance = 20
+	float shoot_time = 2 //should be at least refresh_interval
+	float shoot_height = 6.5
+	float keep_attack_const = 90
+	float occupied_attack_const = 20
+	
+	float resilience_base_recovery = 0.15
+	float resilience_rr_penalty = 0.002
+	float siege_defense_base_recovery = 0.025
+	float siege_defense_recover_per_production = 0.0025
+	float siege_defense_recover_boosted = 5
+	float overtaken_siege_resillience = 25
+}
+
+def Mine : Settlement
+{
+	name = "Mine"
+	{
+		multiple = "Mines"
+	}
+	
+	description = $[
+	"Excavation sites which employ the local workforce for extracting iron and other precious metals."]
+	//" Depending on the province's features, mines allow the development of {Metalworking}, {GoldSmelting}, {SilverSmelting} and {LodestoneTrade}."]
+	
+	int max_allowed_features_per_settlement_type = 3
+	
+	enable_feature
+	{
+		default IronOre //default
+		secondary LodestoneDeposits
+		secondary GoldOre
+		secondary SilverOre
+	}
+	
+	production = "1g"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Mine.tga:UI_Settlement_Mine#2" //GUID:08adbf3351c04d14697f57b5fc072782
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Mine_Illustration.png:UI_Settlement_Mine_Illustration#2" //GUID:b1c1ee858db2aa94791bb1b2daf185af
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/mine"
+	
+	radius = 6
+}
+
+def Quarry : Settlement
+{
+	name = "Quarry"
+	{
+		multiple = "Quarries"
+	}
+	
+	description = $[
+	"Excavation sites for valuable rocks that allow the development of {Stoneworking} and {LimeTrade}."]
+	//" Depending on the province's features, quarries may produce {Lime} or {Marble}, with the latter allowing the creation of fine {Sculptures} crafted by skilled {Masons}."]
+	
+	int max_allowed_features_per_settlement_type = 2
+	
+	enable_feature
+	{
+		default MarbleDeposit //default
+		secondary LimestoneDeposit
+	}
+	
+	production = "1g"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Quarry.tga:UI_Settlement_Quarry#2" //GUID:9204d03ea32d9f745b4f0cc2c5e30986
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Mine_Illustration.png:UI_Settlement_Mine_Illustration#2" //GUID:b1c1ee858db2aa94791bb1b2daf185af
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/quarry"
+	
+	radius = 6
+}
+
+def CattleFarm : Settlement
+{
+	name = "Cattle Farm"
+	{
+		multiple = "Cattle Farms"
+	}
+	
+	description = $[
+	"Luscious meadows filled with farmsteads and cattle herds."]
+	//" These settlements enable {CattleFarming}, where basic, yet important goods such as {DraftOxen}, {Leather}, {FineCheese}, {Meat} and {Sausages} can be produced."]
+	
+	enable_feature
+	{
+		default Cattle
+	}
+	
+	production = "1f"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_CattleFarm.tga:UI_Settlement_CattleFarm#2" //GUID:8f80c6040940fe0409a4ac7de99b2255
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_StockFarm_Illustration.png:UI_Settlement_StockFarm_Illustration#2" //GUID:7cbd93846ffbe4343937d26ce99f20f0
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/farm/cattle"
+	
+	radius = 7
+}
+
+def SheepFarm : Settlement
+{
+	name = "Sheep Farm"
+	{
+		multiple = "Sheep Farms"
+	}
+	
+	description = $[
+	"Areas where shepherds guard and herd large flocks of sheep."]
+	//" These settlements allow the development of {SheepFarming}, where {Meat}, {Wool} and {Parchment} can be produced to satisfy the kingdom's various needs."]
+	
+	enable_feature
+	{
+		default Sheep
+	}
+	
+	production = "1f"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_SheepFarm.tga:UI_Settlement_SheepFarm#2" //GUID:da184d25e3cc02a418893c258d5f9a2e
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_StockFarm_Illustration.png:UI_Settlement_StockFarm_Illustration#2" //GUID:7cbd93846ffbe4343937d26ce99f20f0
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/farm/sheep"
+	
+	radius = 6
+}
+
+def HorseFarm : Settlement
+{
+	name = "Horse Farm"
+	{
+		multiple = "Horse Farms"
+	}
+	
+	description = $["Farmsteads where {Horses} are kept and bred, which can be harnessed for various construction purposes."]
+	//" Additional advancements in {HorseBreeding} can also allow {WarHorses} to be trained to become faithful companions to the most elite horsemen."]
+	
+	enable_feature
+	{
+		default Horses
+	}
+	
+	production = "1g"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_HorseFarm.tga:UI_Settlement_HorseFarm#2" //GUID:80e261da0a8cbfa46bd95395b66d734e
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_StockFarm_Illustration.png:UI_Settlement_StockFarm_Illustration#2" //GUID:7cbd93846ffbe4343937d26ce99f20f0
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/farm/horse"
+}
+
+def Vineyard : Settlement
+{
+	name = "Vineyard"
+	{
+		multiple = "Vineyards"
+	}
+	
+	description = $[
+	"Fertile areas where grapes are grown and harvested."]
+	//" When ripe, their succulent juices are pressed and fermented into fine {Wine} or {Spirits}. In sunny regions, grapes can also be dried and turned into {Raisins}."]
+	
+	enable_feature
+	{
+		default Vines
+	}
+	
+	production = "1f"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Vineyard.tga:UI_Settlement_Vineyard#2" //GUID:679a257dac8b65f408c7278a83e668f5
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Farm_Illustration.png:UI_Settlement_Farm_Illustration#2" //GUID:83e0d809497975a4299b9d6e378963c5
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/vineyard"
+}
+
+def HerbsGardens : Settlement
+{
+	name = "Herb Garden"
+	{
+		multiple = "Herb Gardens"
+	}
+	
+	description = $[
+	"Lands which allow for {HerbGardening} to be practiced."]
+	//" Various {Herbs} can be grown and harvested here, in addition to more luxorious goods such as {Dyes} and {Spices}. An abundance of bees can also yield {Wax}."]
+	
+	enable_feature
+	{
+		default Herbage
+	}
+	
+	production = "1f"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_HerbGardens.tga:UI_Settlement_HerbGardens#2" //GUID:5cafdcf0da949514aa8ed71e61b3aa50
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Farm_Illustration.png:UI_Settlement_Farm_Illustration#2" //GUID:83e0d809497975a4299b9d6e378963c5
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/herb_gardens"
+}
+
+def FlaxField : Settlement
+{
+	name = "Flax Field"
+	{
+		multiple = "Flax Fields"
+	}
+	
+	description = $[
+	"Flax is grown for its soft and lustrous fibers, which are refined into fine {Linen} sought not only for practical purposes, but also for its visual appeal."]
+	//" Flaxseeds can also be pressed into fine {Oils}, or used to produce {Ropes} and {Canvas}."]
+	
+	enable_feature
+	{
+		default FlaxFields
+	}
+	
+	production = "1g"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_FlaxField.tga:UI_Settlement_FlaxField#2" //GUID:dc3abe04f989f2a449431c8170d915ab
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Farm_Illustration.png:UI_Settlement_Farm_Illustration#2" //GUID:83e0d809497975a4299b9d6e378963c5
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/flax_field"
+}
+
+def LoggingCamp : Settlement
+{
+	name = "Logging Camp"
+	{
+		multiple = "Logging Camps"
+	}
+	
+	description = $["Lumber camps situated near deep forests, dealing with processing trees into {Timber}."]
+	//" This staple resource can be turned into basic goods such as {Tar} and {Charcoal}, or more intricate ones like fine {Furniture} and {Glass}."]
+	
+	enable_feature
+	{
+		default DeepForests
+	}
+	
+	production = "1g"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_LoggingCamp.tga:UI_Settlement_LoggingCamp#2" //GUID:02ecaa4e00037a94f9adfed417aa625c
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Farm_Illustration.png:UI_Settlement_Farm_Illustration#2" //GUID:83e0d809497975a4299b9d6e378963c5
+	max_identical_settlement_per_realm = 1
+	
+	selection_sound = "event:/sound_effects/interaction/select/settlement/logging_camp"
+	
+	radius = 6
+}
+
+
+def Castle : Settlement
+{
+	name = "Town"
+	{
+		multiple = "Towns"
+		lower = "town"
+	}
+	
+	description = "A well-developed municipality, central for governing and development of the entire region."
+	
+	radius = 9 // rough approximation, used for "move to" range, selection is around the wall
+	
+	//int initial_buildings = [2, 4] // min,max
+	float siege_food_penalty = 3.5
+	float no_governor_penalty = 10 // 10% percent from production if no governor selected
+	
+	float population_growth_base = 10 // (this + food income) * modifiers is accumulated every income tick
+	float population_growth_threshold = 600 // when accumulated population reaches this value it has a chance to grow
+	float starting_food_perc = 100
+	
+	int building_slots_base = 16
+	int building_slots_per_tier = 0
+	int max_unlockable_tiers = 0
+	
+	float food_copy_mod = 1
+	bool take_max_food = false
+	
+	resources expand_cost
+	{
+		gold = (2500 * (2 ^ realm_tier))
+	}
+	resource siege_defence_per_point_cost = "10g" //repair cost per missing siege defense point
+	production_mod Worker
+	{
+		Gold = 0.2 //gold per worker
+		Hammers = 0 //production per worker
+	}
+	
+	// production_mod Levy
+	// {
+	// 	Gold = 0 //gold per levy
+	// 	Hammers = 0 //production per levy
+	// }
+	
+	production_mod Rebel
+	{
+		Gold = 0.1 //gold per Rebel
+		Hammers = 0 //production per rebel
+	}
+	
+	
+	enable_feature
+	{
+		AmberDeposits
+		Camels
+		MineralsDeposit
+		Pirates
+		RareGame
+		SaltDeposit
+		SaltpeterDeposits
+		SulfurDeposits
+	}
+	
+	
+	garrison_worker_excess_manpower_bonus = 1
+	
+	//max_allowed_features_per_settlement_type = 2
+	
+	production = "3g 2f 10h 5WorkerSlots"
+	
+	icon = "Assets/UI/Elements/Settlements/Icons/UI_Settlement_Town.tga:UI_Settlement_Town#2" //GUID:fd7a38d9f83ee80479072ee1deee41d2
+	illustration = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Castle_Illustration.png:UI_Settlement_Castle_Illustration#2" //GUID:d5a14f4a1b0d3054da31d7365b9964ae
+}
+
+def Fortifications
+{
+	int max_level = 3
+	text name = ["Weak Fortifications", "Strong Walls", "Formidable Fortifications", "Impenetrable Fortress"]
+	text description = $["Defensive structures which increase the town's siege defense against potential enemy besiegers. Siege defense also increases the manpower of all town defenders - this includes garrison troops, town guards and peasant/militia squads.{p}"
+	"{section_body}{clr:section_header}"
+	"[{castle.siege_defense_garrison_manpower:if}{p}{blt} Bonus to defending troops' manpower: {castle.siege_defense_garrison_manpower:bonus:%}]"
+	"[{castle.siege_defense_temp_defender_manpower:if}{p}{blt} Bonus to temporary defending troops' manpower: {castle.siege_defense_temp_defender_manpower:bonus:%}]"
+	"[{realm.rs_attrition_damage:if}{p}{blt} Attrition damage: {realm.rs_attrition_damage:bonus}]"
+	"{/section_body}{/clr}"]
+	sprite icon = [
+		"Assets/UI/Elements/Common/Icons/Fortifications/Icon_Fortifications_1.png:Icon_Fortifications_1#1", //GUID:45d3b9c1fd94f854e8b5c7e273708d3e
+		"Assets/UI/Elements/Common/Icons/Fortifications/Icon_Fortifications_2.png:Icon_Fortifications_2#2", //GUID:1aa311c07806a954bac5b03b169a3aaa
+		"Assets/UI/Elements/Common/Icons/Fortifications/Icon_Fortifications_3.png:Icon_Fortifications_3#2", //GUID:e3ee127c0cd5eb946a846857bdc52f16
+		"Assets/UI/Elements/Common/Icons/Fortifications/Icon_Fortifications_4.png:Icon_Fortifications_4#2" //GUID:a8b454a425d76a84a93933d488fcaf09
+	]
+	text flavor = [
+		"Reinforcing the walls is the first significant step to greatly improving the defenses of towns and castles.",
+		"Wall advancements and additional defensive structures will discourage most attackers to even come near this province.",
+		"Massive walls, battlements and countless deadly contraptions will ensure death will rain upon the attackers of the town and castles in this province."
+	]
+	Resources cost = ["1g 1h", "500g 250 Levy 1000h", "1500g 500 Levy 2500h", "5000g 1000 Levy 6000h"]
+	int reqiured_citadel_level = [0,0,0,0] //[0,1,2,3]
+	mod rs_siege_defense = 0/100/200/300
+}
+
+def SettlementType
+{
+	text name
+	text description
+	sprite icon
+	string type
+}
+
+def KeepSettlementType : SettlementType
+{
+	name = "{Keep.name:multiple}"
+	description = $["{Keep.description}"
+	"{p}{p}{Keep.name:multiple} in {realm}: {realm.keeps_count}"]
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Keep.psd:Icon_SettlementType_Keep#2" //GUID:73bd670690212784793b889adeadd7b0
+	type = "Keep"
+}
+
+def VillageSettlementType : SettlementType
+{
+	name = "{Village.name:multiple}"
+	description = $["{Village.description}"
+	"{p}{p}{Village.name:multiple} in {realm}: {realm.villages_count}"]
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Village.psd:Icon_SettlementType_Village#2" //GUID:1856b193684394745899c29c24133537
+	type = "Village"
+}
+
+def ReligiousSettlementType : SettlementType
+{
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Monasteries.psd:Icon_SettlementType_Monasteries#2" //GUID:46b32f758939cfe44b001931aa750929
+	case christian_realm = (realm.is_christian)
+	{
+		name = "{Monastery.name:multiple}"
+		description = $["{Monastery.description}"
+		"{p}{p}{Monastery.name:multiple} in {realm}: {realm.monasteries_count}"]
+		icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Monasteries.psd:Icon_SettlementType_Monasteries#2" //GUID:46b32f758939cfe44b001931aa750929
+	}
+	case muslim_realm = (realm.is_muslim)
+	{
+		name = "{Mosque.name:multiple}"
+		description = $["{Mosque.description}"
+		"{p}{p}{Mosque.name:multiple} in {realm}: {realm.mosques_count}"]
+		icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Mosques.psd:Icon_SettlementType_Mosques#2" //GUID:edb9486db6aa48841b97663ffeb980c2
+	}
+	case pagan_realm = (realm.is_pagan)
+	{
+		name = "{Shrine.name:multiple}"
+		description = $["{Shrine.description}"
+		"{p}{p}{Shrine.name:multiple} in {realm}: {realm.shrines_count}"]
+		icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Shrines.psd:Icon_SettlementType_Shrines#2" //GUID:47f6e5b6e3ce5614c8065ef9507b8f79
+	}
+	type = "ReligiousSettlement"
+}
+
+def FarmSettlementType : SettlementType
+{
+	name = "{Farm.name:multiple}"
+	description = $["{Farm.description}"
+	"{p}{p}{Farm.name:multiple} in {realm}: {realm.farms_count}"]
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Farm.psd:Icon_SettlementType_Farm#2" //GUID:2e0ef4ba92e780845b09988d09a9863b
+	type = "Farm"
+}
+
+def CoastalSettlementType : SettlementType
+{
+	name = "Coastal settlements"
+	description = $["Settlement of all types are considered to be coastal, as long as they're situated near the shoreline. Provinces with well-developed Sea Shore buildings benefit from these establishments greatly."
+	"{p}{p}Coastal settlements in {realm}: {realm.coastal_settlements_count}"]
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/Icon_SettlementType_Coastal.psd:Icon_SettlementType_Coastal#2" //GUID:3b84f59181d4ce548bf8c45d77b55554
+	type = "CoastalSettlement"
+}

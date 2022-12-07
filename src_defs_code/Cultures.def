@@ -1,0 +1,180 @@
+﻿def Cultures
+{
+	pop_majority_convert
+	{
+		update_interval = 300
+		convert_threshold = 50
+		min_attack_strength = 0.1
+		max_local_authority = 0.1 // its actually multiplier of province stability
+		max_influence = 4
+		land_realms_mul = 1
+		sea_realms_mul = 0.5
+		max_realms_mul = 3
+		marriage_mul = 1.5
+		king_cleric_level_mul = 0.1
+		separated_own_mul = 0.5 // diminishes the effect of king_cleric_level_mul
+		bolstering_cleric_base = 0.5 // 1 + base + cleric_level * level_mul
+		bolstering_cleric_level_mul = 0.1
+	}
+
+	groups
+	{
+		African
+		{
+			Nubian
+			Beja
+			Malinke
+			Kanembu
+			Daju
+		}
+		Arabic
+		{
+			Arab
+			Andalusian
+			Maltese
+		}
+		Baltic
+		{
+			Prussian
+			Yotvingian
+			Lithuanian
+			Semigallian
+		}
+		Berber
+		{
+			Sanhaja
+			Zenata
+			Masmuda
+			Siwi
+			Tuareg
+			Kabyle
+		}
+		Arberian
+		{
+			Albanian
+		}
+		Caucasian
+		{
+			Georgian
+			Abkhazian
+			Armenian
+		}
+		Celtic
+		{
+			Welsh
+			Breton
+		}
+		FinnoUgric
+		{
+			Finnish
+			Karelian
+			Estonian
+			Livonian
+			Komi
+			Oeselian
+			Mordvin
+		}
+		Gaelic
+		{
+			Irish
+			Scottish
+		}
+		Germanic
+		{
+			German
+			Bavarian
+			Swiss
+			Austrian
+			Saxon
+		}
+		WestGermanic
+		{
+			English
+			Flemish
+			Frisian
+			Dutch
+		}
+		Greek
+		{
+			Pontic
+			Byzantine
+		}
+		Iranic
+		{
+			Alanian
+			Kurdish
+			Persian
+			Deylamite
+		}
+		Latin
+		{
+			French
+			Norman
+			Occitan
+			Italian
+			Portuguese
+			Spanish
+			Catalan
+			Basque
+		}
+		Magyar
+		{
+			Hungarian
+		}
+		Mongolic
+		{
+			Mongolian
+			Jalayir
+		}
+		Nordic
+		{
+			Norwegian
+			Swedish
+			Danish
+			Norse
+		}
+		Wallachian
+		{
+			Moldavian
+			Vlach
+			Romanian
+		}
+		EastSlavic
+		{
+			Novgorodian
+			Kyivan
+			Muscovite
+			Severian
+			Russian
+		}
+		SouthSlavic
+		{
+			Serbian
+			Bulgarian
+			Croatian
+			Bosnian
+			Dalmatian
+		}
+		WestSlavic
+		{
+			Pomeranian
+			Polish
+			Bohemian
+			Moravian
+			Mazovian
+		}
+		Turkic
+		{
+			Turkmen
+			Cuman
+			Bulgar
+			Turkish
+			Khazar
+		}
+		Semitic
+		{
+			Jewish
+		}
+	}
+}
+

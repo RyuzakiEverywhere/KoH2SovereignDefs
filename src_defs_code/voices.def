@@ -1,0 +1,931 @@
+def Voices
+{
+	int priority_queue_size = 4
+	float weight_default = 100
+	float weight_invalid = -1
+	//int cooldown = 4
+
+
+// - sound A is playing
+// - sound B is attempting to play
+
+// - if B.priority > A.priority
+//   - interrupt A, play B
+//   	? is A is about to finish soon (0.5s) - put B in queue instead
+//   - if a was in the beginning - put A in queue
+// - else
+//   - put B in queue
+
+// - queue
+//   - sorted by priority
+//   - timeout (max time to wait before discarding the voice line)
+
+	group_cooldowns = [
+	]
+
+	types
+	{
+		Character
+		{
+		}
+
+		Narrator
+		{
+		}
+
+		Unit
+		{
+		}
+	}
+
+	roles
+	{
+		Character
+		{
+			own_prisoner_in_foreign_dungeon = (is_prisoner && kingdom == plr_kingdom)
+			{
+				description = "Our noble imprisoned in a foreign kingdom. Can be any class (Marshal, Cleric, Spy, etc.)."
+				old_role = "prisoner"
+			}
+
+			prisoner_in_our_dungeon = (is_prisoner && prison_kingdom == plr_kingdom)
+			{
+				description = "Foreign noble imprisoned in our dungeon. Can be any class (Marshal, Cleric, Spy, etc.)."
+			}
+
+			puppet_pope = (is_pope && is_in_local_player_special_court)
+			{
+				description = "Our Cleric who became The Pope. He is now 'above the kings', no longer serves us, but we still have some influence."
+				old_role = "cleric"
+			}
+
+			marshal = (is_marshal || (army && !disbanding_army)) 
+			{ 
+				description = "An army leader who leads troops and fights in the name of his kingdom."
+				requires = [ own_prisoner_in_foreign_dungeon ]
+			}
+
+			merchant = (is_merchant)
+			{ 
+				description = "A trader. His job is to manage the royal trade with other kingdoms."
+				requires = [ own_prisoner_in_foreign_dungeon ]
+			}
+
+			spy = (is_spy)
+			{ 
+				description = "A spy. His job is to infiltrate foreign kingdoms, gather information, bribe foreign nobles and organize various plots (e.g. ruin relations, steal gold, assasinate someone, etc.)"
+				requires = [ own_prisoner_in_foreign_dungeon ]
+			}
+
+			cleric = (is_cleric)
+			{ 
+				description = "A religious figure. Can be Cleric (Christian), Scholar (Muslim) or Shaman (Pagan). Deals with religious and cultural conversions, convincing people that our faith and culture are right."
+				requires = [ own_prisoner_in_foreign_dungeon, puppet_pope ]
+			}
+
+			diplomat = (is_diplomat)
+			{ 
+				description = "A diplomat. Deals with foreign affairs."
+				requires = [ own_prisoner_in_foreign_dungeon ]
+				old_role = "landlord"
+				{
+					educate = "builder"
+				}
+			}
+		}
+
+		// nothing to describe about the narrator
+
+		// unit roles are taken from the excel sheet
+	}
+
+	conditions
+	{
+		Character
+		{
+			no_condition = true
+			{
+				description = "This can be said in all cases."
+			}
+
+			king = (is_king)
+			{
+				description = "You are the king."
+			}
+
+			not_king = (!is_king)
+			{
+				description = "You are NOT the king - you're talking to a superior."
+			}
+
+			prince = (is_prince)
+			{
+				description = "You are a prince."
+			}
+
+			action_in_progress = (cur_action != null) // speaker is performing action
+			{
+				description = "You are busy performing an action."
+			}
+
+			our_lands = (is_rebel && kingdom_in.is_local_player) // speaker == rebel; param army location == player kingdom
+			{
+				description = "You are a rebel who is roaming the player's lands."
+			}
+			foreign = (is_rebel && !kingdom_in.is_local_player) // speaker == rebel; param army location != player kingdom
+			{
+				description = "You are a rebel who is somewhere off in distant lands, away from the player."
+			}
+			in_court = (is_rebel && special_court_kingdom != null && special_court_kingdom.is_local_player) // speaker == rebel; param is in player court
+			{
+				description = "You are a rebel knight who is in the player's royal court."
+			}
+			our_town = (battle.settlement.kingdom.is_local_player) // target == settlement; target owner == player kingdom; target has ongoing battle (break siege);
+			{
+				description = "You are an army leader who is breaking an enemy siege from the outside, in protection of your province."
+			}
+			ally_town = (battle.settlement.kingdom.is_ally_of_local_player) // target == settlement; target owner == ally towards player (i.e. fighting together in war); target has ongoing battle (break siege);
+			{
+				description = "You are an army leader who is breaking an enemy siege from the outside, in protection of an ally's province."
+			}
+			our_army = (battle.attacker_support.kingdom.is_local_player || battle.defender_support.kingdom.is_local_player) // speaker is in battle; reinforcements kingdom == player kingdom
+			{
+				description = "You are in battle and have received reinforcements from another army from your kingdom."
+			}
+			ally_army = (battle.attacker_support.kingdom.is_ally_of_local_player || battle.defender_support.kingdom.is_ally_of_local_player) // speaker is in battle; reinforcements kingdom == ally towards player (i.e. fighting together in war)
+			{
+				description = "You are in battle and have received reinforcements from an ally kingdom's army."
+			}
+		}
+		
+		Narrator
+		{
+			no_condition = true
+			{
+				description = "This can be said in all cases."
+			}
+
+			king = (is_king) // param is king
+			prince = (is_prince) // param is prince
+			knight = (!is_king && !is_prince) // param is regular knight (not prince or king)
+			king_no_heir = (is_king && kingdom.heir == null) // param is king; upon param's death, there was no successor
+			no_heir = (heir == null) // upon event, there was no valid successor to the throne
+			has_heir = (heir != null) // there was a valid successor to the throne
+			king_has_heir = (is_king && kingdom.heir != null) // param is king; upon param's death, there was a successor
+			white_peace = (name == "WhitePeaceOffer") // incoming diplomacy offer == WhitePeaceOffer
+			help_with_rebels = (name == "OfferHelpWithRebels") // incoming diplomacy offer == OfferHelpWithRebels
+			royal_marriage = (name == "MarriageOffer") // incoming diplomacy offer == MarriageOffer
+			pope = (from.is_papacy) // incoming diplomacy offer is from Papacy
+			requested = (name == "ClaimIndependence" && to.is_local_player && from.vassal_of.is_local_player) // ClaimIndependence offer received by player
+			declared = (name == "ClaimIndependence" && to.is_local_player && answer == "accept") // ClaimIndependence offer accepted by player (!!! backup)
+			requested_by_other = (name == "PrincessClaimInheritanceOffer" && to.is_local_player && answer == null) // PrincessClaimInheritanceOffer received by player
+			claimed_by_us = (name == "PrincessClaimInheritanceOffer" && from.is_local_player && answer == "accept") // PrincessClaimInheritanceOffer offer accepted by the other kingdom (!!! for backup)
+			claimed_by_them = (name == "PrincessClaimInheritanceOffer" && to.is_local_player && answer == "accept") // PrincessClaimInheritanceOffer offer accepted by player (!!! for backup)
+			with_kingdom = (name == "MarriageOffer" && from.is_local_player && answer == "accept") // MarriageOffer accepted by the other kingdom
+			in_kingdom = (is_local_player) // player kingdom stability warning message (!!! for backup, such a message does not exist yet)
+			non_loyalist = (!is_loyalist) // rebellion is not loyalist
+			foreign_loyalist = (is_loyalist && !loyal_to.is_local_player) // rebellion is loyalist, loyalty kingdom != player kingdom
+			our_loyalist = (is_loyalist && loyal_to.is_local_player) // rebellion is loyalist, loyalty kingdom == player kingdom
+			victory = (result == "victory") // EOTW victory outcome
+			defeat = (result == "defeat") // EOTW defeat outcome
+			no_result = (result == "no_result") // EOTW no result outcome
+			claim_refused_yours = (result == "claim_refused" && kingdom.is_local_player) // EOTW no result outcome; claimant kingdom == player kingdom
+			claim_refused_others = (result == "claim_refused" && !kingdom.is_local_player) // EOTW no result outcome; claimant kingdom != player kingdom
+			advantages = (reason == "KingdomAdvantages") // victory reason = advantages
+			domination = (reason == "Conquest") // victory reason = domination (all provinces were conquered by player)
+			kingdom_advantages = (def_id == "KingdomAdvantagesWindow") // victory reason = advantages
+			royal_family = (def_id == "RoyalFamilyWindow") // open UI window (royal family)
+			great_powers = (def_id == "GreatPowersWindow") // open UI window (great powers and rankings)
+			religion_and_books = (def_id == "ReligionWidnow") // open UI window (religion/culture)
+			war_preparation = (def_id == "WarsOverviewWindow") // open UI window (wars)
+			income = (def_id == "KingdomIncomeWindow") // open UI window (treasury)
+			commerce = (def_id == "CommerseWindow") // open UI window (treasury)
+			dungeon = (def_id == "RoyalDungeonWindow") // the royal dungeon top-left UI was opened
+			political_view = (view == "political_view") // political view opened
+			provinces = (def_id == "provinces_view") // open UI window (province overview)
+			preferences = (window == "preferences") // open UI window (in-game preferences)
+			exit = (selection == "exit") // exit to  main menu button was clicked via the pause menu (confirmation)
+		}
+	}
+
+	// Less-than-obvious parameters:
+	// default_condition = (your_condition_here) // no_condition evaluates to your_condition_here instead of true
+	events
+	{
+		Character
+		{
+			greet
+			{
+				description = "A greeting when the character is selected."
+				old_event = "greet"
+				{
+					own_prisoner_in_foreign_dungeon = "own knight in prison"
+				}
+
+				action_in_progress
+				{
+					weight = 500
+					marshal
+					{
+						weight = 50
+						1
+						{
+							weight = 10
+						}
+					}
+				}
+			}
+			greet_at_sea
+			{
+				old_event = "greet"
+				description = "A greeting when the character is selected while he is at sea."
+			}
+			greet_defending_siege
+			{
+				old_event = "greet"
+				description = "A greeting when the character is selected while defending a besieged castle."
+			}
+			greet_besieging
+			{
+				old_event = "greet"
+				description = "A greeting when the character is selected while besieging a castle."
+			}
+			greet_in_battle
+			{
+				old_event = "greet"
+				description = "A greeting when the character is selected while in a battle."	
+			}
+			greet_rebel
+			{
+				//old_event = "greet"
+				description = "A greeting when a rebel is selected."		
+			}
+			greet_rebel_our_loyalist
+			{
+				//old_event = "greet"
+				description = "A greeting when a rebel who is loyal to us is selected."
+			}
+			greet_crusader
+			{
+				old_event = "greet"
+				description = "A greeting when a crusade leader is selected."
+			}
+			exile
+			{
+				description = "The character (a knight in our royal court) was exiled by us."
+			}
+			exile_crusader
+			{
+				old_event = "exile"
+				description = "The character (a knight in our royal court), who is currently leading a crusade, was exiled by us."
+			}
+			renounce
+			{
+				ignore_roles = [ "own_prisoner_in_foreign_dungeon" ]
+				old_event = "exile"
+				description = "The character (a knight in our royal court) was renounced by us."				
+			}
+			imprisoned
+			{
+				description = "A comment made by a character who was imprisoned."
+				old_event = ""
+				{
+					spy = "caught"
+				}
+			}
+			educate
+			{
+				description = "The character has learned a new skill/gained a new rank in it."
+				old_event = "educate"
+				{
+					marshal = "grant skill"
+				}
+			}
+			govern
+			{
+				description = "The character was ordered to govern one of our towns."
+			}
+			stop_governing
+			{
+				description = "The character was ordered to stop governing the town he had been assigend to."
+			}
+			send_abroad
+			{
+				description = "The character was sent on a mission to another kingdom."
+				old_event = ""
+				{
+					merchant = "trade"
+					spy = "infiltrate"
+				}							
+			}
+			arrived_abroad
+			{
+				description = "The character arrived in another kingdom and has started his mission."
+				old_event = ""
+				{					
+					spy = "infiltrate success"
+				}
+			}
+			recall_home
+			{
+				description = "The character was ordered to return to our kingdom and stop his current action."
+			}
+			action_confirmation
+			{
+				description = "A generic confirmation for when the character was ordered to perform some action."
+				old_event = "confirm"
+			}
+			action_confirmation_excommunicate
+			{
+				description = "The character is the Pope, and he was asked to excommunicate another kingdom."
+			}
+			action_confirmation_unexcommunicate
+			{
+				description = "The character is the Pope, and he was asked to unexcommunicate us."
+			}
+			action_confirmation_grandindependence
+			{
+				description = "The character is the Pope, and he was asked to grant our independence from our sovereign."
+			}
+			action_confirmation_crusade
+			{
+				description = "The character is the Pope, and he was asked to lead a crusade."
+			}
+			action_success
+			{
+				description = "The character has successfully performed some action."
+				old_event = ""
+				{
+					spy = "task success"
+				}
+
+			}
+			action_failed
+			{
+				description = "The character has failed to perform some action."
+				old_event = ""
+				{
+					spy = "task failure"
+				}
+			}
+			decline
+			{
+				description = "The character declines the order which was given to him, since it can't be done."
+			}
+			decline_papacy_excommunicated
+			{
+				description = "The character is the Pope and has declined something we've asked, because we are excommunicated."
+			}
+			decline_papacy_leave_court
+			{
+				description = "The character is the Pope and he is frustrated to leave the player's court."
+			}
+			call_to_arms
+			{
+				description = "The character has been called to lead an army."
+			}
+			disband_army
+			{
+				description = "The character was ordered to disband is army and return to court."
+			}
+			embark
+			{
+				description = "The character was orderd board his army and embark in open seas."
+				old_event = ""
+				{
+					marshal = "board"
+				}
+			}
+			disembark
+			{
+				description = "The character was ordered to anchor his ship and order his troops to disembark."
+				old_event = ""
+				{
+					marshal = "land"
+				}
+			}
+			build_ship
+			{
+				description = "The character is an army leader and was ordered to build ships."
+			}
+			attack_army
+			{
+				description = "The character is an army leader and was ordered toattack an enemy army."
+				old_event = ""
+				{
+					marshal = "attack"
+				}
+			}
+			attack_rebel_army
+			{
+				description = "The character is an army leader and was ordered to attack a rebel army."
+				old_event = ""
+				{
+					marshal = "attack"
+				}
+			}
+			move
+			{
+				description = "The character is an army leader and was ordered to move to a location on the world map."
+				old_event = ""
+				{
+					marshal = "walk"
+				}
+			}
+			make_camp 
+			{
+				description = "The character is an army leader and was ordered to set camp."
+				old_event = ""
+				{
+					marshal = "camp"
+				}
+			}
+			fortify_here
+			{
+				description = "The character is an army leader and was ordered to fortify his army's positions."
+				old_event = ""
+				{
+					marshal = "fortify"
+				}
+			}
+			enter_own_castle
+			{
+				description = "The character is an army leader and was ordered to enter a town belonging to his kingdom."
+				old_event = ""
+				{
+					marshal = "deploy"
+				}
+			}
+			leave_castle
+			{
+				description = "The character is an army leader and was ordered to exit a town belonging to his kingdom."
+				old_event = ""
+				{
+					marshal = "leave castle"
+				}
+			}
+			pillage
+			{
+				description = "The character is an army leader and was ordered to pillage an enemy settlement."
+			}
+			lay_siege
+			{
+				description = "The character is an army leader and was ordered to besiege an enemy town/castle."
+				old_event = ""
+				{
+					marshal = "siege"
+				}
+			}
+			break_siege_from_outside
+			{
+				description = "The character is an army leader and was ordered to break the siege of an enemy from the outside."
+			}
+			break_siege_from_inside
+			{
+				description = "The character is an army leader stationed as a defender of a town, and was ordered to break the siege from inside."
+			}
+			reinforce_army
+			{
+				description = "The character is an army leader and was ordered to reinforce another friendly army in battle."
+				old_event = ""
+				{
+					marshal = "com frdl reinforcement"
+				}
+			}
+			lift_siege
+			{
+				description = "The character is an army leader and was ordered to stop besieging an enemy town/castle."
+			}
+			assault_town
+			{
+				description = "The character is an army leader who has been besieging an enemy town for a while, and is now ordered to assault its walls."
+			}
+			visit_mercenaries
+			{
+				description = "The character is an army leader and was ordered to march towards a mercenary camp."
+			}
+			retreat
+			{
+				description = "The character is an army leader in battle, and was ordered to retreat alongside his men."
+				old_event = ""
+				{
+					marshal = "com our army fleeing"
+				}
+			}
+			refuse
+			{
+				description = "The character is an army leader and cannot perform the task he was given. e.g. Can be a battle that he can't join, or an area he can't travel to."
+			}
+			stop
+			{
+				description = "The character is an army leader and was ordered to stop in his tracks, alongside his troops."
+			}
+			enemy_reinforcements
+			{
+				description = "The character is an army leader in battle and comments that enemy reinforcements have arrived."
+				old_event = ""
+				{
+					marshal = "com emy reinforcement"
+				}
+			}
+			player_heavy_losses
+			{
+				description = "The character is an army leader in battle and comments that his army is taking heavy casualties."
+				old_event = ""
+				{
+					marshal = "com frdl heavy losses"
+				}
+			}
+			enemy_heavy_losses
+			{
+				description = "The character is an army leader in battle and comments that the enemy army is taking heavy casualties."
+				old_event = ""
+				{
+					marshal = "com emy heavy losses"
+				}
+			}
+			enemy_army_fled
+			{
+				description = "The character is an army leader in battle and comments that the enemy has retreated."
+				old_event = ""
+				{
+					marshal = "com emy army fleeing"
+				}
+			}
+			enemy_army_shaking
+			{
+				description = "The character is an army leader in battle and comments that the enemy suffers from low morale."
+				old_event = ""
+				{
+					marshal = "com emy army shaking"
+				}
+			}
+			enemy_broke_gate
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy has broken our gates."
+				old_event = ""
+				{
+					marshal = "com emy broke gate"
+				}
+			}
+			enemy_broke_wall
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy has demolished some of our walls."
+				old_event = ""
+				{
+					marshal = "com emy broke wall"
+				}
+			}
+			enemy_captured_tower
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy has captured a tower of ours."
+				old_event = ""
+				{
+					marshal = "com emy captured tower"
+				}
+			}
+			enemy_destroyed_tower
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy has destroyed a tower of ours."
+				old_event = ""
+				{
+					marshal = "com emy destr tower"
+				}
+			}
+			enemy_getting_out
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy lures his army outside."
+				old_event = ""
+				{
+					marshal = "com emy getting out"
+				}
+			}
+			enemy_hiding_walls
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy is hiding behind their walls."
+				old_event = ""
+				{
+					marshal = "com emy hiding walls"
+				}
+			}
+			enemy-ladders_placed
+			{
+				description = "The character is an army leader in a siege battle and comments that the enemy has placed ladders and are climbing our walls."
+				old_event = ""
+				{
+					marshal = "com emy ladders placed"
+				}
+			}
+			enemy_surrenders
+			{
+				description = "The character is an army leader in a battle and comments that the enemy has surrendered."								
+			}
+			our_army_shaking
+			{
+				description = "The character is an army leader in a battle and comments that his army is suffering from low morale."
+				old_event = ""
+				{
+					marshal = "com frdl army shaking"
+				}
+			}
+			our_ladders_placed
+			{
+				description = "The character is an army leader in a battle and comments that his army has placed ladders on the enemy walls."
+				old_event = ""
+				{
+					marshal = "com frdl ladders placed"
+				}
+			}
+			we_destroyed_tower
+			{
+				description = "The character is an army leader in a battle and comments that his army has destroyed an enemy tower."
+				old_event = ""
+				{
+					marshal = "com we destr tower"
+				}
+			}
+			we_surrender
+			{
+				description = "The character is an army leader in a battle and comments that his army has surrendered to the enemy."
+				old_event = ""
+				{
+					marshal = "com we surrender"
+				}
+			}
+			enemy_king_captured
+			{
+				description = "The character is an army leader in battle and comments that his army has captured the enemy king (who led their forces)."
+				old_event = ""
+				{
+					marshal = "com emy king captured"
+				}
+			}
+			enemy_prince_captured
+			{
+				description = "The character is an army leader in battle and comments that his army has captured the enemy prince (who led their forces)."
+				old_event = ""
+				{
+					marshal = "com emy prince captured"
+				}
+			}
+			enemy_leader_captured
+			{
+				description = "The character is an army leader in battle and comments that his army has captured the enemy army leader."
+				old_event = ""
+				{
+					marshal = "com emy leader captured"
+				}
+			}
+			enemy_king_killed
+			{
+				description = "The character is an army leader in battle and comments that his army has eliminated the enemy king (who led their forces)."
+				old_event = ""
+				{
+					marshal = "com emy king killed"
+				}
+			}
+			enemy_prince_killed
+			{
+				description = "The character is an army leader in battle and comments that his army has eliminated the enemy prince (who led their forces)."
+				old_event = ""
+				{
+					marshal = "com emy prince killed"
+				}
+			}
+			enemy_leader_killed
+			{
+				description = "The character is an army leader in battle and comments that his army has eliminated the enemy army leader."
+				old_event = ""
+				{
+					marshal = "com emy leader killed"
+				}
+			}
+			we_broke_gate
+			{
+				description = "The character is an army leader in a battle and comments that his army has breached the enemy's gate."
+				old_event = ""
+				{
+					marshal = "com we broke gate"
+				}
+			}
+			we_broke_wall
+			{
+				description = "The character is an army leader in a battle and comments that his army has broken the enemy's walls."
+				old_event = ""
+				{
+					marshal = "com we broke wall"
+				}
+			}
+			we_captured_tower
+			{
+				description = "The character is an army leader in a battle and comments that his army has captured an enemy's tower."
+				old_event = ""
+				{
+					marshal = "com we captured tower"
+				}
+			}
+			greet_enemy_prisoner
+			{
+				description = "A prisoner in our dungeon says this when you click on it."
+				ignore_roles = [ "prisoner_in_our_dungeon" ]
+			}
+			our_prisoner_ransomed
+			{
+				ignore_roles = [ "own_prisoner_in_foreign_dungeon" ]
+			}
+		}
+
+		Narrator
+		{
+			// there is a "comments" column in the excel sheet, we could use it instead of describing narrator events here
+			// not all of them have comments though
+			// the battle introductions don't have a comment column at all
+
+			//offers 
+			diplomacy_offer
+			{
+				default_condition = (name != "CounterOffer" && name != "SweetenOffer")
+			}
+		}
+
+		Unit
+		{
+			select //missing placeholders
+			{
+				description = "A greeting when the squad is selected."				
+			}
+			melee_attack_ranged
+			{
+				//old_event = "melee"
+				description = "A ranged squad is ordered to attack at melee range."				
+			}
+			melee_attack //old_event = "melee"
+			{
+				description = "A melee squad is ordered to attack at melee range"				
+			}
+			charge
+			{
+				description = "Run fast at the enemy and attack them by charging their ranks."				
+			}
+			hold_fire //old_event = "hold fire"
+			{
+				description = "A ranged squad is ordered to stop shooting, unless commanded to do so."				
+			}
+			allow_fire //old_event = "others"
+			{
+				description = "A ranged squad is ordered to freely shoot at nearby enemies."				
+			}
+			stand_ground //old_event = "stand ground"
+			{
+				description = "The squad is ordered to stop moving, unless commanded to do so."				
+			}
+			at_ease //old_event = "others"
+			{
+				description = "The squad is ordered to move freely on its own."				
+			}
+			face //unused event
+			{
+				description = "Position a squad to face a certain way."
+			}
+			shoot //old_event = "fight"
+			{
+				description = "A ranged squad is ordered to shoot arrows at an enemy."				
+			}
+			line //unused event 
+			{
+				description = "The squad is ordered to assume a line formation."
+			}
+			square
+			{
+				description = "The squad is ordered to assume a square formation."				
+			}
+			triangle
+			{
+				description = "The squad is ordered to assume a triangle formation."				
+			}
+			shrink //old_event = "tight"
+			{
+				description = "Order a squad's individual troops to clump-up together."				
+			}
+			widen
+			{
+				description = "Order a squad's individual troops to create more distance between themselves."				
+			}
+			under_fire //old_event = "misc"
+			{
+				description = "Reaction when a squad is being fired upon by enemy archers."
+				fmod_event = "event:/voice_group/unit_3D_voices"
+			}
+			losing //missing placeholders
+			{
+				description = "Reaction when a squad is losing a direct encounter with a enemy squad."
+				fmod_event = "event:/voice_group/unit_3D_voices"
+			}
+			winning //missing placeholders
+			{
+				description = "Reaction when a squad is winning a direct encounter with a enemy squad."
+				fmod_event = "event:/voice_group/unit_3D_voices"
+			}
+			refuse_order //not implemented
+			{
+				description = "An order given to the squad can't be performed."				
+			}
+			place //unused event
+			{
+				description = "The squad is ordered to position themselves at a certain spot on the terrain."
+			}
+			reload //unused event
+			{
+				description = "A ranged squad is reloading its arrows."
+			}
+			retreat
+			{
+				description = "The squad is fleeing from the enemy."
+				fmod_event = "event:/voice_group/unit_3D_voices"
+			}
+			run
+			{
+				description = "The squad is commanded to run to a location."				
+			}
+			stop
+			{
+				description = "The squad is commanded to stop in its tracks."				
+			}
+			walk
+			{
+				description = "The squad is commanded to walk to a location."				
+			}
+			ram_battering
+			{
+				description = "A battering ram is ordered to smash the enemy's gates."				
+			}
+			ladders //missing placeholders
+			{
+				description = "The squad is ordered to scale the enemy walls by deploying ladders."				
+			}
+			take_capture_point //missing placeholders
+			{
+				description = "The squad is ordered to take hold of a capture point on the battlefield."				
+			}
+			defend_capture_point //missing placeholders
+			{
+				description = "The squad is ordered to defend a capture point on the battlefield from enemy forces."				
+			}
+			attack_gates
+			{
+				description = "The squad is ordered to hit the gates of the enemy. Cavalry squads cannot attack gates."				
+			}
+		}
+	}
+
+	suppress
+	{
+		// Type_role_event_condition
+
+		Character_*_imprisoned_king
+		{			
+			Narrator*king_captured*  //Narrator_narrator_our_king_captured
+		}
+		Narrator*_our_army_leader_captured
+		{
+			Character_*_imprisoned*
+		}
+		Narrator*_trade_center_lost
+		{
+			Narrator*_our_town_lost
+		}
+		Narrator*rebellion_defeated
+		{
+			Narrator*rebels_defeated
+		}
+		Narrator*our_spy_succeeded_imprisoned
+		{
+			Narrator*royal_court_member_imprisoned*
+		}
+		Narrator*our_spy_failed_imprisoned
+		{
+			Narrator*royal_court_member_imprisoned*
+		}
+		Narrator*our_spy_succeeded_killed
+		{
+			Narrator*royal_court_member_died*
+		}
+		Narrator*our_spy_failed_killed
+		{
+			Narrator*royal_court_member_died*
+		}
+		Narrator*imprisoned_royal_court_member_executed*
+		{
+			Narrator*royal_court_member_died*
+		}
+		Narrator*can_claim_advantages_victory*
+		{
+			Narrator*advantage_gained*
+		}
+		Narrator*we_destroyed_papacy
+		{
+			Narrator*war_won
+			Narrator*war_won_battle_over
+		}
+	}
+}

@@ -1,0 +1,225 @@
+﻿def KingdomAdvantage
+{
+	text name
+	text description
+	text category_fame_gain = "Fame from {name}: {fame}"
+	sprite illustration = "Assets/UI/LoadingScreen/Images/LoadingScreen_SiegeDefense_01.jpg:LoadingScreen_SiegeDefense_01#2" //GUID:4023cd0f418264b4db62fec671be1d48
+	
+	string requirements // {}
+	
+	//hard_requires { Muslim}
+	//hard_requires_or { Christian; Pagan}
+	
+	// int num_ideas = 2 // hardcoded in UI, so do not change / override //!!! obsolete
+	// int idea_unlock_thresholds = [3, 6] //!!! obsolete
+	// int initial_ideas = 2/3 //!!! obsolete
+	// int max_ideas = 8 //!!! obsolete
+	
+	// string rankings // {} //!!! obsolete
+	
+	// // do not override
+	// text adopting_label = "Adopting {name}" //!!! obsolete
+}
+
+//----------------------------------------------------//
+def AbundanceAdvantage : KingdomAdvantage
+{
+	name = "Abundance"
+	description = "Maitaining a steady supply of essential, everyday goods improves the well-being of our population across all realms."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Abundance.tga:Illustration_KingdomAdvantage_Abundance#2" //GUID:78983cc63cb067243a4323e1c804fc76
+	
+	soft_requires { Ale; Candles; Glass; Meat; Medicine; Oils; SaltedFish; Wool }
+	
+	
+	//stat modifiers
+	//permanent peasantry opinion bonus +5 (stacks above max, minimum is also increased by 5)
+	//population limit + growth + happiness
+	//gold in town / from taxes
+	
+	mod ks_population_growth_perc = 30
+	mod ks_happiness = 10
+}
+
+def MercantilismAdvantage : KingdomAdvantage
+{
+	name = "Mercantilism"
+	description = "Developing a robust trading infrastructure will enable our [{kingdom.KingdomType}|kingdom] to become a powerful empire, known to all merchants across the world."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Mercantilism.tga:Illustration_KingdomAdvantage_Mercantilism#2" //GUID:effe85c9ccadcd84f8eb017df80e4b22
+	
+	soft_requires {  Barrels; NavigationMaps; Sails; Spices; TrainedHorses; Merchants }
+	
+	//stat modifiers
+	//permanent merchants opinion bonus +5 (stacks above max, minimum is also increased by 5)
+	//TC spread; % income from trade
+	//reduced inflation / increased treasury
+	
+	mod ks_inflation_reduction_perc = 25
+	mod ks_trade_income_perc = 20
+}
+
+def MasonryAdvantage : KingdomAdvantage
+{
+	name = "Masonry"
+	description = "A kingdom which has access to an abundance of rare deposits and tools has the potential to be remembered by all for its architectural ingenuity."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Masonry.tga:Illustration_KingdomAdvantage_Masonry#2" //GUID:2cc5a180f0dd7d442bf27f5a0e4907d7
+	
+	soft_requires { DraftOxen; Lime; Marble; Ropes; TrainedHorses; Masons }
+	
+	//stat modifiers
+	//construction cost and time
+	//siege defense
+	
+	mod ks_siege_defense = 100
+	mod ks_hammers_in_provinces_perc = 25
+	mod ks_build_upgrade_cost_discount_perc = 5
+	
+}
+
+def DevelopmentAdvantage : KingdomAdvantage
+{
+	name = "Progress"
+	description = "By gaining access to cutting-edge resources, our [{kingdom.KingdomType}|kingdom] may develop more efficiently and constuct at a higher rate."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Development.tga:Illustration_KingdomAdvantage_Development#2" //GUID:f22f1e41ef3c4614aa08cfa08bf6db05
+	
+	soft_requires { Canvas; Ink; Iron; Oils; Parchment; Saltpeter; Sulfur; Tar }
+	
+	//stat modifiers
+	//upgrades cheaper and faster
+	//siege engines 50% cheaper, more durable
+	//siege defense
+	
+	mod ks_upgrade_cost_discount_perc = 20
+	mod ks_hammers_in_provinces_perc = 25
+	
+}
+
+def NavalAdvantage : KingdomAdvantage
+{
+	name = "Age of Discovery"
+	description = "Building sturdy ships that are ready for long voyages will enable our people to chart unexplored waters and expand to distant lands, full of riches and wonders."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Naval.tga:Illustration_KingdomAdvantage_Naval#2" //GUID:7a4d35016f4940b4f9d5c001c7b318ba
+	
+	soft_requires { Cannons; Compasses; NavigationMaps; Ropes; Sails; Explorers }
+	
+	//stat modifiers
+	//ship speed and naval CTH
+	//successful expeditions; once established, a colony is never destroyed
+	//opportunity to destroy colonies of other kingdoms (king's action)
+	//Food never drops in coastal towns; defense in coastal town
+	//better TC spread over water
+	
+	mod ks_ships_speed_perc = 10
+	mod ks_naval_CTH = 10
+	mod ks_gold_in_coastal_settlements = 3
+}
+
+def WarfareAdvantage : KingdomAdvantage
+{
+	name = "Age of War"
+	description = "In order to strike fear into the hearts of our enemies, we must put our focus on training fearless steeds and crafting the necessary tools for the battlefield."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Warfare.tga:Illustration_KingdomAdvantage_Warfare#2" //GUID:6c759b30d2e8cf24598659362ed21c19
+	
+	soft_requires { Cannons; Medicine; WarHorses; Noblemen }
+	
+	//stat modifiers
+	//top picks - increase levy capacity x2, -50% war exhaustion - stacks with tradition up to 0 - COLOR THE F MAP
+	//starting and max level of armies increased by 1
+	//siege attack/defense
+	//permanent army opinion bonus +5 (stacks above max, minimum is also increased by 5
+	//mod ks_initial_troops_level = 1
+
+	mod ks_siege_attack_perc = 20
+	mod ks_army_morale = 2 { text mod_name = "Advantage: {WarfareAdvantage}" }
+	mod ks_max_levy = 3000	
+}
+
+def ProsperityAdvantage : KingdomAdvantage
+{
+	name = "Age of Prosperity"
+	description = "Gaining access to a plethora of luxorious good will ensure our nobility is loyal and content."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Prosperity.tga:Illustration_KingdomAdvantage_Prosperity#2" //GUID:ed5b3583fabc6ed419a19b050a9edd08
+	
+	soft_requires { FineBoots; FineCheese; FineClothing; Pastries; Sausages; Wine; Noblemen }
+	
+	//stat modifiers
+	//huge culture bonus
+	//espionage defense
+	//crown authority +3 ABOVE MAX
+	//permanent nobility opinion bonus +5 (stacks above max, minimum is also increased by 5)
+	//prestige bonus
+	
+	mod ks_kingdom_advantages_culture = 50
+	mod ks_kingdom_advantages_influence = 100
+	mod ks_espionage_defense_skills_traditions = 20
+	mod ks_own_knight_bribe_cost_perc = 50
+	
+}
+
+def EnlightenmentAdvantage : KingdomAdvantage
+{
+	name = "Age of Enlightenment"
+	description = "In order to maintain our lands to be pious and devout to God, we must put our efforts on taking care of the clergy and scholars in our [{kingdom.KingdomType}|kingdom]."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Enlightenment.tga:Illustration_KingdomAdvantage_Enlightenment#2" //GUID:afa9f58e7cdc5864c95a63ac68acd1a1
+	
+	soft_requires { IllustratedBooks; Medicine; Artists; Clergy; Scholars }
+	hard_requires { Christian }
+	
+	//stat modifiers
+	//permanent clergy opinion bonus +5 (stacks above max, minimum is also increased by 5)
+	//books capacity
+	//faster convertion
+	//bonus on autocephaly / relations with Rome
+	//culture bonus
+	//mod ks_convert_religion_duration_reduction_perc = 30
+	//ks_convert_religion_duration_reduction_perc
+	//mod ks_reduce_religious_tension_perc = 50
+	mod ks_prod_piety_advantages = 10
+	mod ks_max_books = 1000
+	mod ks_kingdom_advantages_culture = 50
+	mod ks_kingdom_advantages_influence = 100
+}
+
+def GoldenAgeAdvantage : KingdomAdvantage
+{
+	name = "Golden Age"
+	description = "In order to maintain our lands to be pious and devout to God, we must put our efforts on taking care of the clergy and scholars in our [{kingdom.KingdomType}|kingdom]."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_GoldenAge.tga:Illustration_KingdomAdvantage_GoldenAge#2" //GUID:f3613f6684841304d9733850fe88848c
+	
+	soft_requires { IllustratedBooks; Medicine; Artists; Clergy; Scholars }
+	hard_requires { Muslim }
+	
+	//permanent clergy opinion bonus +5 (stacks above max, minimum is also increased by 5)
+	//books capacity
+	//faster convertion
+	//more influential journeys
+	//better chance to claim caliphate
+	//jihad bonus
+	//mod ks_reduce_religious_tension_perc = 50
+	mod ks_prod_piety_advantages = 10
+	mod ks_max_books = 1000
+	mod ks_kingdom_advantages_culture = 100
+	mod ks_kingdom_advantages_influence = 50
+}
+
+def TriumphAdvantage : KingdomAdvantage
+{
+	name = "Age of Triumph"
+	description = "We shall prove the arrogant and disdainful followers of 'true' Gods, that the ways of our [{kingdom.KingdomType}|kingdom] lead to glory and might they can only envy."
+	illustration = "Assets/UI/Elements/KingdomAdvantages/Illustration/Illustration_KingdomAdvantage_Triumph.tga:Illustration_KingdomAdvantage_Triumph#2" //GUID:b2b0973c7e1675a4abad13820d349cf5
+	
+	soft_requires { Carpets; Furs; Ink; Jewellery; Lime; Marble; Parchment; Sculptures }
+	hard_requires { Pagan }
+	
+	//stat modifiers
+	//books capacity
+	//faster convertion
+	//possibility to adopt more beliefs (one more belief - of the king)
+	//permanent clergy bonus +5 (stacks above max, minimum is also increased by 5)
+	//paganism spreads faster around your provinces
+	//ks_convert_religion_duration_reduction_perc
+	//mod ks_reduce_religious_tension_perc = 30
+	mod ks_reduce_religious_tension_perc = 50
+	mod ks_kingdom_advantages_influence = 100
+	mod ks_kingdom_advantages_culture = 100
+	mod ks_convert_chance_after_siege_perc = 20
+}

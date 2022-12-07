@@ -1,0 +1,110 @@
+def RoyalFamily
+{
+	int max_children = 4
+	int max_princes = 4
+	int max_princesses = 4
+	int max_relatives = 12
+
+	child_per_age
+	{
+		Infant
+		{
+			float min = 0
+			float max = 0
+		}
+		Child
+		{
+			float min = 0
+			float max = 0
+		}
+		Juvenile
+		{
+			float min = 0
+			float max = 0
+		}
+		Young
+		{
+			float min = 0
+			float max = 1//1
+		}
+		Adult
+		{
+			float min = 1//1
+			float max = 2//2
+		}
+		Old
+		{
+			float min = 1//1
+			float max = 3//3
+		}
+		Venerable
+		{
+			float min = 1//1
+			float max = 4//4
+		}
+	}
+
+	int child_max_age_mod = -2; // max_child_age = min_parent_age + child_birth_check_rate
+	float child_gender_chance_perc = 52 // 52% male
+
+    int king_royal_blood_power = 4;
+    int prince_royal_blood_power = 3;
+    float royal_blood_weight_base = 5; //weight = (royal_blood_weight_base + class_level) * (blood_power + royal_blood_weight_power_add)
+    float royal_blood_weight_power_add = 5;
+
+    float prince_specialization_default_skill_weight = 1;
+    float prince_specialization_father_skill_weight = 3;
+    float prince_specialization_tradition_skill_weight = 2;
+    float prince_specialization_primary_skill_weight = 2;
+
+    float elder_prince_rebel_chance = (50 + map(kingdom.opinions["NobilityOpinion"].value, -10, 10, 15, -15) + MapCA(kingdom, 25, -25))
+}
+
+/// CharacterProgression
+def CharacterAge
+{
+	float initial_automarriage_cooldown = 1800
+	float marriage_check_interval  = 120 // sec
+	float marriage_chance_perc  = [0,0,0,4,10,15,4] //infant, child, juvenile, young, adult, old, venerable
+
+	float child_birth_min_time_after_marriage_or_birth = 300
+	float child_birth_check_rate = 90
+	float child_birth_chance_perc = 12
+	
+	float die_check_interval = 60/90	// only takes effect when Old or higher
+	float die_chance_perc = 5			// on die_check_interval during "Old" age stage
+	float age_multiplier = 1 			// debug/test multiplayer
+	
+	float age_speed = 1
+
+	int age_infant = (450 * age_speed)
+	int age_child = (900 * age_speed)
+	int age_juvenile = (1200 * age_speed)
+	int age_young = (2400 * age_speed)
+	int age_adult = (3600 * age_speed)
+	int age_old = (1500 * age_speed)
+	int age_venerable = [(450 * age_speed),(1500 * age_speed)]
+
+}
+
+
+def SlowAging : CharacterAge
+{
+	float marriage_check_interval = 240
+	float die_check_interval = 90/150
+	age_speed = 2
+}
+
+def NormalAging : CharacterAge
+{
+	float marrige_check_interval = 180
+	float die_check_interval = 60/120
+	age_speed = 1
+}
+
+def FastAging : CharacterAge
+{
+	float marrige_check_interval = 120
+	float die_check_interval = 30/90
+	age_speed = 0.5
+}

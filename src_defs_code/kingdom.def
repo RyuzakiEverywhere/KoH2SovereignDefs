@@ -1,0 +1,395 @@
+﻿def Kingdom
+{
+	texture colors_texture = "Assets/Europe/kingdom colors.png" //GUID:e7eaf11ae53766a45b288ad529540645
+	texture unit_colors_texture = "Assets/BattleView/Kingdom Colors BV.psd" //GUID:ae288445c9daa9e4f89efeb3725b5f8b
+	
+	//!!! to be removed
+	color map_color
+	color primary_color
+	color secondary_color
+	
+	Religion religion
+	string culture
+	Nobility nobility_key = "CelticNobility"
+	string nobility_level = "Kingdom" { enum { Duchy; Kingdom; Empire } }
+	Names names_key = "EnglishNames"
+	coat_of_arms_index = 0
+	
+	resources starting_resources //= "200g"
+	{
+		gold = (1000 + clamp(200 * num_realms,0,1000))
+		books = 300
+		//trade = (ks_commerce)
+	}
+	int royal_court_slots = 9
+	
+	float wage_thresholds = [5, 15, 40, 85, 150, 250, 350, 450, 550] //!!! should be max 9
+	
+	unit_set
+	
+	text dbg_info = $[
+		"{align:left}"
+		"AI goal ({ai.next_expense.eval}): {ai.next_expense}{p}"
+		"AI prev ({ai.last_expense.eval}): {ai.last_expense}{p}"
+		"{stats.DebugText()}"
+		"{/align}"
+	]
+	float tax_rates = 10//[5,10,15]
+	
+	//Max treasury formula:
+	// base + (mod1/(income/mod2+mod3)) * income
+	// Conditions:
+	// min <= base + (mod1/(income/mod2+mod3)) * income <= max
+	// inner_min < (mod1/(income/mod2+mod3)) < inner_max
+	float treasury_min = 0
+	float treasury_max = 99999
+	float treasury_inner_min = 50
+	float treasury_inner_max = 500
+	float treasury_base = 500
+	float treasury_mod1 = 300
+	float treasury_mod2 = 185.185185
+	float treasury_mod3 = 3
+	
+	// % from max treasury, used to calculate possible gold amounts in diplomatic negotiations, i.e. S1 .. S5
+	float diplomatic_gold_perc = 10/25/50/75/100
+	
+	float treasury_no_penalty = 0.5 //what percentage of the treasury should have 0 inflation
+	float inflation_min_gold_perc = 0.001 //what percentage of the current gold
+	float inflation_above_max_treasury_perc = 10 // lose 10% of the excess gold when above max treasury
+	
+	big_income_ticks = 5 //for books, piety or similar resource every income tick(5 seconds) they recive 1 income. Every big_income_ticks they recieve the full income. I.e. <big_income_ticks = 12> means 12x5s = 60s.
+	
+	// requred fame to unlock 
+	int traditions_slots = ["All","All","All","All","All","All","All","All"]
+	int traditions_slots_tiers = [0,1,1,2,2,2,3,3]
+	
+	//Army Strength Factors
+	
+	// Troops levels strenght, TS = SUM (all Tcost * Texp * Thealth), Tcost mutiplied by ts_garrison_factor if in garrison 
+	ts_lvl_1 = 1
+	ts_lvl_2 = 1.5
+	ts_lvl_3 = 2
+	ts_lvl_peasant = 0.75
+	ts_garrison_factor = 0.5
+	// Wars factor: WF = 1 / (1 + log(1 + NumberOfWars )), cap numwars to wf_wars_cap
+	wf_wars_cap = 20
+	// Gold factor
+	mp_gold_income = 100
+	// Manpower: SUM (all levies * mp_levies_weight + workers + rebels * mp_rebels_weight (0.2)) * mp_population_value default 
+	mp_levies_weight = 2
+	mp_rebels_weight = 0.2
+	mp_population_value = 50
+	
+	
+	diplomat_favorite_multiplier = 2
+	diplomat_facination_value = 20
+	
+	int cleric_can_rule = 0 // !!! not implemented
+	
+	// Profit = commerce capacity * exclusive trade mod * visitors mod * relations mod ^ (relations - offset / divide)
+	
+	trade_route_profit_exclusive_mod = 1.2
+	trade_route_profit_relation_mod = 1.2
+	trade_route_profit_relation_divide = 500
+	trade_route_profit_relation_offset = 500
+	trade_route_profit_visitor_mod = 1.2
+	trade_route_capacity_mod = 0.25 //trade with 4 kingdoms of your size to maximize trade potential
+	
+	//TC profit * (base_perc + merchant_class_level * class_level_mod) * royal_mod
+	merchant_income_class_level_mod = 0.025
+	merchant_income_base_perc = 10 //percent
+	merchant_income_royal_mod = 1.5
+	
+	float sufficient_food_base = 1
+	float sufficient_food_min = 0.25
+	float sufficient_food_max = 1
+	float sufficient_food_mod = 1
+	float sufficient_food_min_provinces = 5
+	float sufficient_food_max_provinces = 10
+	float min_provinces_hunger_stability_penalty_perc = 20
+
+	// realm count
+	int tiny_kingdom_size = 1/2
+	int small_kingdom_size = 3/5
+	int medium_kingdom_size = 6/8
+	int large_kingdom_size = 9/12
+	int empire_kingdom_size = 13/20
+	
+	float corruption_min = 0
+	float corruption_max = 100
+	
+	float prod_gold_perc_min = -100
+	float prod_gold_perc_max = 100
+	
+	float help_the_weak_upkeep = 5
+	
+	float rebel_spawns_per_event_realms_perc = 30
+	float loyalist_spawn_mod = 3 // multiplied by char level 
+	
+	float help_with_rebels_time = 1800 //30 minutes
+	
+	float threats_max_distance = 3
+	float threats_max_relationship = -200
+	float friends_max_distance = 3
+	float friends_min_relationship = 200
+	
+	Stance
+	{
+		War
+		{
+			text name = "War"
+			text tooltip = "We are enemies and can attack each other's armies, towns and settlements."
+			text short_description = "We are enemies and can attack each other's armies, towns and settlements."
+			color color = "red"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_War.psd:UI_Icon_Stance_War#2" //GUID:85bd982e833e5b64e9be7552f9234a03
+		}
+		Peace
+		{
+			text name = "Peace"
+			text tooltip = "We are at peace and we cannot attack each other without an official declaration of war."
+			text short_description = "Our kingdoms are at peace"
+			color color = "red"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Neutral.psd:UI_Icon_Stance_Neutral#2" //GUID:766be491e98e85b47a95eee76cac220b
+		}
+		Truce // NOT A REAL STANCE!!! Though in the ui it behaves like one.
+		{
+			text name = "Truce"
+			text tooltip = "Our kingdoms have recently signed a treaty. Declaring war in this moment will lead to a higher relationship drop with {target_kingdom}, in addition to angering our neighbors."
+			text short_description = "We have signed peace recently and hold a truce"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Truce.psd:UI_Icon_Stance_Truce#2" //GUID:87ca91025dc58d64a94bd0ccf4d653e4
+			
+		}
+		NonAggression
+		{
+			text name = "Non-Aggression"
+			text tooltip = "We've signed a pact of non-aggression and whoever breaks it will suffer serious crown authority and relation drops with many kingdoms."
+			text short_description = "We have signed a pact of non-aggression"
+			color color = "green"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_NonAggresion.psd:UI_Icon_Stance_NonAggresion#2" //GUID:dca0e740b11070845aa936a2dc093d9c
+		}
+		Alliance
+		{
+			text name = "Alliance"
+			text tooltip = "We fight on the same side in at least one war. While this continues, we cannot declare war upon each other."
+			text short_description = "We fight on the same side in a conflict and cannot declare war upon each other."
+			color color = "green"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Alliance.psd:UI_Icon_Stance_Alliance#2" //GUID:fc44b956fab96d2499d8276baefb6b5a
+		}
+		Vassalage
+		{
+			text name = "Vassalage"
+			color color = "yellow"
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Vassal.psd:UI_Icon_Stance_Vassal#2" //GUID:4e20405bcec5bda4bb4566e315e11933
+			
+			Vassal
+			{
+				text name = "Our Vassals"
+				text tooltip = "Unless we benevolently grant their independence, or they unrighteously claim it, we will receive a percentige of their gold income, fame and they will be more willing to support us. However they will expect protection from us as well."
+				text short_description = "They are our vassal"
+				color color = "yellow"
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Vassal.psd:UI_Icon_Stance_Vassal#2" //GUID:4e20405bcec5bda4bb4566e315e11933
+			}
+			Liege
+			{
+				text name = "Our Liege"
+				text tooltip = "Unless we fight for our independence or they benevolently grant it to us, we will pay a percentige of our gold income to them and they will expect military support from us. However they will be more likely to protect us and aid us in other ways as well."
+				text short_description = "They are our sovereign"
+				color color = "yellow"
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Liege.psd:UI_Icon_Stance_Liege#2" //GUID:0441ad91dedf35343a3215178a4036c2
+			}
+		}
+		Own
+		{
+			text name = "Own"
+			text tooltip = "This is our kingdom"
+			text short_description =
+			color color = 0,255,0
+			sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Stance_Neutral.psd:UI_Icon_Stance_Neutral#2" //GUID:766be491e98e85b47a95eee76cac220b
+		}
+		Trade
+		{
+			None
+			{
+				text name = "No Trade Agreement"
+				text tooltip = "Until we sign trade agreement, we cannot send merchants into each other's kingdoms to establish trade."
+				text short_description
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_TradeAgreement_None.psd:UI_Icon_TradeAgreement_None#2" //GUID:f90949aae12c0b64688c6da494b50f96
+				
+			}
+			Trade
+			{
+				text name = "Trade Agreement"
+				text tooltip = "We have agreed that we can send merchants into each other's kingdoms and trade. Trade agreement is lost if we become at war and the agressor loses crown authority."
+				text short_description = "We have a trade agreement"
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_TradeAgreement_Trade.psd:UI_Icon_TradeAgreement_Trade#1" //GUID:4f7cd6e260c00e744a54f43a0e30463c
+			}
+		}
+		Marriage
+		{
+			None
+			{
+				text name = "No Royal Marriage"
+				text tooltip = "We have no royal bonds that strenghten our relations."
+				text short_description 
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Marriage_Disabled.psd:UI_Icon_Marriage_Disabled#1" //GUID:215e9861d962d3b4583a347721cb3c58
+			}
+			Active
+			{
+				text name = "Royal Marriage"	
+				text tooltip = "We have a royal marriage, which strenghtens our bonds and makes it likely to receive their support in times of need. Royal marriage is lost if we become at war and the agressor loses crown authority.{p}{blt}The prince's or king's kingdom receives a territorial inheritance claim in case the princess's father dies.{p}{blt}The princess's kingdom receives part of the fame of the king's or prince's kingdom, as well as espionage bonuses in it and espionage defense against it."
+				text short_description = "Our kingdoms are bonded with a royal marriage"
+				sprite icon = "Assets/UI/Elements/Common/Icons/KingdomStances/UI_Icon_Marriage_Available.psd:UI_Icon_Marriage_Available#1" //GUID:d181e1390ab0f5343b4f1358f8f0ead7			
+			}
+		}
+	}
+
+	kingdom_split
+	{
+		magnitude = 5
+		{
+			float min = 0
+			float max = 10
+
+			float crown_authority = [5, 0, -5]
+			float nobility_opinion = [3, 0, -3]
+			float caliphate = -3
+			float autocephaly = -2
+			float no_king_candidates = 5 //no heir, no court members, noone to inherit the crown one way or another
+			float per_rebellion = 2
+			float per_war = 2
+			float small_kingdom = -3
+			{
+				num_realms = 10
+			}
+		}
+
+		int min_remaining_realms = 7
+		bool governed_provinces_can_split = false
+		float provinces_perc = 50 //how many provinces over min_realmaining_realms to lose
+		float split_chance = (5 * magnitude + map_clamp(stability, -100, 0, 50, 0)) //of the remaining, throw a chance
+	}
+
+	on_forming_new_kingdom
+	{
+		int crown_authority = 3
+		int opinions = 3
+		int gold = 5000
+		int piety = 1000
+		int books = 1000
+	}
+}
+
+def CrownAuthority
+{
+	int min = -5
+	int max = 5
+	float requirementGoldBaseAmounts = [400, 400, 400, 400, 400, 400, 800, 1200, 1600, 2000]
+	float requirementPietyAmounts = [500, 500, 500, 500, 500, 600, 700, 800, 900, 1000]
+	//int requirementGoldRealmThresholds = [0, 5, 10, 20, 50, 100]
+	//float requirementGoldRealmMods = [0, 0.1, 0.2, 0.3, 0.5, 0.7]
+	float incomeMods = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5] // in percent 0-100
+	float corruptionMods = [25, 20, 15, 10, 5, 0, 0, 0, 0, 0, 0] //in percent
+	//int rebelRiskMods = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5] //!!! rebalance needed
+	float ca_positive_stability_multiplier = 2
+	float ca_negative_stability_multiplier = 2
+	int occupationRebelRiskMods = [-5, -4, -3, -2, -1, 0, 0, 0, 0, 0, 0]
+	int rebellionIndependenceInitialTimeInterval = [300, 420, 540, 660, 780, 900, 900, 900, 900, 900, 900]
+	float relationMods = [-200, -100, -100, -50, -50, 0, 50, 50, 100, 100, 200]
+	
+	int warWon = 0
+	int vassalGet = 1
+	int payGold = 1
+	int breakTrade = -1
+	// int BreakExclusiveTrade = -2 // skip for now
+	int breakNAP = -2
+	int breakAlliance = -1
+	int rebelOccupation = -1
+	int kingDeath = 0 //temporary removed
+	int noSuccessor = -3 //reduced from -2
+	int warLost = -2
+	int knightDesertion = -1
+	int vassalBecome = -2
+	int religionChangeSuccess = -2
+	int religionChangeFail = -5
+	int denounced_rebel = -1
+	int denounced_famous_rebel = -2
+	int torture = 0 // this should have heavy relations drop
+	int executePrisoner = -1
+	int ChangePaganTraditionsActionFail = -2
+	int AutocephalyActionFail = -3
+	int ClaimCaliphateActionSuccess = 3
+	int ClaimCaliphateActionFail = -3
+	int AbandonCaliphateActionSuccess = -3
+	int claimThroneFail = -5 // placeholder (if vote for emperor of the world was failed)
+	int restorationQuestCompleted = 3 // Placeholder
+	int uniteQuestCompleted = 5 // Placeholder
+	int failed_spawn_loyalist = -1 //obsolete - we might want to use this later?
+	int realm_annex = -1
+	int establish_order = 0
+	int reject_being_emperor_of_the_world = -5
+	int reject_ai_emperor_of_the_world = -5 //SP only
+	int pretender_emperor_of_the_world = -5
+	int end_jihad = -1
+	int stopPromotingPaganBelief = -2
+	int release_non_court_rebel = -1
+	int forgive_court_rebel = (round(map(target.class_level, 0, 15, -1, -3)))
+	int execute_rebel = 1
+	int change_heir = -1
+	int bankruptcy = -3
+}
+
+def KingdomBankruptcy
+{
+	float min_time = 60
+	float max_time = 300
+	float penalties_cooldown = 1800
+}
+
+def Inheritance
+{
+	float kingdom_provinces_divider = 3
+	int min_provinces = 1
+	int max_provinces = 3
+	float timeout_after = 300 //seconds
+}
+
+def KingdomAI
+{
+	//Diplomatic importance calculation
+	float dip_imp_recent_rel_change_min_time = 5
+	float dip_imp_recent_rel_change_max_time = 30
+	float dip_imp_player_recent_rel_change = 5000
+	float dip_imp_player_cooldown_power = 2
+	float dip_imp_neighbor = 2000
+	float dip_imp_second_neighbor = 500
+	float dip_imp_second_neighbor_max_dist = 2
+	float dip_imp_second_kin = 2000
+	float dip_imp_crusade_or_jihad = 3000
+	float dip_imp_ally = 2000
+	float dip_imp_have_trade = 250
+	float dip_imp_have_exclusive_trade = 0 // this is obsolete for now
+	float dip_imp_currently_trading_mod = 3
+	float dip_imp_player_boost_mul = 3
+	float dip_imp_player_boost_distance_max = 3
+	float dip_imp_map_distace_min = 1
+	float dip_imp_map_distace_max = 10
+	float dip_imp_war = 5000
+	float dip_imp_liege = 1000
+	float dip_imp_vassal = 500
+	float dip_imp_large_relations_min = 500
+	float dip_imp_large_relations_factor = 1000
+	float dip_imp_ai_offer_min_time = 420
+	float dip_imp_ai_offer_pow = 6
+	float dip_imp_player_cooldown_min = 0
+	float dip_imp_player_cooldown_max = 720
+    float break_siege_estimation_strong = 70
+    float break_siege_strong_army_low_food = 50
+    float break_siege_strong_army_low_food_chance = 25
+    float break_siege_weak_army_no_food_chance = 10
+	float retreat_fight_cooldown = 30 // can't attack if you retreated recently, hacky fix for when you know the target is too strong
+
+	int max_num_mercenaries = (5 - num_armies) // at 4 marshals in court, you get 1 mercenary at most, at 0 marshals you get 5 mercenaries
+	int max_army_equipment = 4
+}
+
+Kingdoms

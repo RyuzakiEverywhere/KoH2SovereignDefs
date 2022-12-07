@@ -1,0 +1,114 @@
+﻿def ObjectWindow
+{
+	prefab prefab
+}
+
+
+def CharacterWindow : ObjectWindow
+{
+	prefab = "Assets/UI/Character/UIP_Character.prefab" //GUID:2245475b9de4e944c930f93f2832a00b
+}
+
+def ArmyWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_ArmyWindow_Own.prefab" //GUID:7ab9022abe5453e4aaa1d71959b9eea7
+	{
+		prefab compact_own = "Assets/UI/ObjectWindows/UIP_ArmyWindow_Own.prefab" //GUID:7ab9022abe5453e4aaa1d71959b9eea7
+		prefab compact_other = "Assets/UI/ObjectWindows/UIP_ArmyWindow_Other.prefab" //GUID:68323025a39ff724e89beb310ea1acac
+		prefab in_castle = "Assets/UI/ObjectWindows/UIP_ArmyWindow_InCastle.prefab" //GUID:810937453785ea04cb1ed36ad472067f
+		prefab in_enemy_castle = "Assets/UI/ObjectWindows/UIP_ArmyWindow_EnemyCastle.prefab" //GUID:6d3d95d1980285f47a73739fff2659a8
+		prefab unit_transfer = "Assets/UI/ObjectWindows/UIP_ArmyWindow_UnitTransfer.prefab" //GUID:9f919ffe6dddcc44a804fda26a97eaee
+	}
+}
+
+def RebelWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_RebelWindow_Minor.prefab" //GUID:3aa5dc14dcd4db741b600c50ee254a8e
+}
+
+def MercenaryWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_Mercenary.prefab" //GUID:2a389089f66b143438b4eed0ef57857d
+	text hire = "Hire" // wars
+	text hire_help_rebels = "Hire" // rebels
+	text dissmiss = "Force out"
+}
+
+def SquadWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_SquadWindow.prefab" //GUID:e51bd052694fa44459da8f9526db765f
+	{
+		prefab compact_own = "Assets/UI/ObjectWindows/UIP_SquadWindow.prefab" //GUID:e51bd052694fa44459da8f9526db765f
+		prefab compact_other = "Assets/UI/ObjectWindows/UIP_SquadWindow.prefab" //GUID:e51bd052694fa44459da8f9526db765f
+	}
+}
+
+def MultipleSquadsWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_MultipleSquadsWindow.prefab" //GUID:6888ccdac52caa5499d60a7abda1e51b
+	{
+		prefab compact_own = "Assets/UI/ObjectWindows/UIP_MultipleSquadsWindow.prefab" //GUID:6888ccdac52caa5499d60a7abda1e51b
+		prefab compact_other = "Assets/UI/ObjectWindows/UIP_MultipleSquadsWindow.prefab" //GUID:6888ccdac52caa5499d60a7abda1e51b
+	}
+}
+
+def BattleWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_BattleWindow.prefab" //GUID:f2aa7f0d39c919447ab2a7eee38b4eca
+	prefab button_lead = "Assets/UI/Elements/Windows/UIP_LeadButton.prefab" //GUID:e31ebd4b1c0b4b344b54f26e41b71469
+	prefab button_tactics = "Assets/UI/Elements/Windows/UIP_TacticsButton.prefab" //GUID:9f1838c60f98cb04da490ec108b919eb
+	prefab button = "Assets/UI/Elements/Windows/TacticsButton.prefab" //GUID:cc106f0529489b54692fe8a1a02ecdea
+}
+
+def KingdomWindow : ObjectWindow
+{
+	prefab = "Assets/UI/ObjectWindows/UIP_KingdomWindow_Other.prefab" //GUID:e775f196109139a4aa2590f419dea913
+	{
+		prefab defeated = "Assets/UI/ObjectWindows/UIP_KingdomWindow_Defeated.prefab" //GUID:3c26f5038c51bae4b9bffb9e856d4b2a
+		prefab non_player = "Assets/UI/ObjectWindows/UIP_KingdomWindow_Other.prefab" //GUID:e775f196109139a4aa2590f419dea913
+		prefab own = "Assets/UI/ObjectWindows/UIP_KingdomWindow_Own.prefab" //GUID:ed0e854dedc446247950e5d225a83729
+	}
+	text family = "Family"
+	text cardinals = "Cardinals"
+	text court = "Court"
+	text traditions = "Traditions"
+	text politics = "Politics"
+	text own_kingdom_description = "Your kingdom's ruler, royal family and politics."
+}
+
+def CastleWindow : ObjectWindow
+{
+	
+	prefab = "Assets/UI/ObjectWindows/UIP_CastleWindow.prefab" //GUID:9153816ef141a4e4ab4d12748e70e232
+	{
+		prefab own = "Assets/UI/ObjectWindows/UIP_CastleWindow.prefab" //GUID:9153816ef141a4e4ab4d12748e70e232
+		prefab other = "Assets/UI/ObjectWindows/UIP_CastleWindowOther.prefab" //GUID:34adf418e82fe3141a0c8f53f6b681e6
+	}
+}
+
+def SettlementWindow : ObjectWindow
+{
+	
+	prefab = "Assets/UI/ObjectWindows/UIP_SettlementWindow.prefab" //GUID:84295b919bb4faa458dbb66b292d521c
+	{
+		prefab extended = "Assets/UI/ObjectWindows/UIP_SettlementWindow.prefab" //GUID:84295b919bb4faa458dbb66b292d521c
+		prefab compact = "Assets/UI/ObjectWindows/UIP_SettlementWindow.prefab" //GUID:84295b919bb4faa458dbb66b292d521c
+		
+	}
+}
+
+def CrusadeWindow : ObjectWindow
+{
+	prefab = "Assets/UI/Religion/UIP_CrusadeWindow.prefab"
+}
+
+// def VillageWindow : ObjectWindow
+// {
+
+// 	prefab = "Assets/UI/ObjectWindows/UIP_VillageWindow.prefab" //GUID:9b9d178867d6d1d4aac160a30b7c3652
+// 	{
+// 		prefab extended = "Assets/UI/ObjectWindows/UIP_VillageWindow.prefab" //GUID:9b9d178867d6d1d4aac160a30b7c3652
+// 		prefab compact = "Assets/UI/ObjectWindows/UIP_VillageWindow.prefab" //GUID:9b9d178867d6d1d4aac160a30b7c3652
+
+// 	}
+// }

@@ -1,0 +1,3790 @@
+def Analytics
+{
+	use_ddna = false    // cannot be inherited, set to false to completely turn off DeltaDNA
+	use_thqgds = true   // cannot be inherited, set to false to completely turn off THQ GDS
+
+	enabled = true // set to false to completely ignore specific (or all) events
+	simulated = false // set to true to not send the event to Unity Analytics
+	int log = 0 // <= 0: no logs, 1 - log sent events, 2+ - log trigger activations
+
+	string event_id
+	int cooldown = 0 // in seconds (real time), <0: only send the 1st time, 0: send every time
+
+	common_parameters
+	{
+		string branchName { optional = true }
+		string gameID { optional = true }
+		string multiplayerType { optional = true }
+		int campaignTime { optional = true }
+		float currentGameSpeed { optional = true }
+		int realTimeInCampaign { optional = true }
+		int realPlayers { optional = true }
+		int aiPlayers { optional = true }
+		int goldBalance { optional = true }
+		int booksBalance { optional = true }
+		int religionBalance { optional = true }
+		int commerceBalance { optional = true }
+		int foodBalance { optional = true }
+		int leviesBalance { optional = true }
+		int goldIncome { optional = true }
+		int booksIncome { optional = true }
+		int bookCap { optional = true }
+		int religionIncome { optional = true }
+		int religionCap { optional = true }
+		int commerceIncome { optional = true }
+		int foodIncome { optional = true }
+		int levyIncome { optional = true }
+		int levyCap { optional = true }
+		int taxRate { optional = true }
+		int baseIncome { optional = true }
+		int provincesIncome { optional = true } 
+		int tradeIncome { optional = true }
+		int vassalTributes { optional = true }
+		float incomeModifiers { optional = true }
+		int goldExpenditure { optional = true } 
+		int militaryExpense { optional = true } 
+		int economyExpense { optional = true }
+		int diplomacyExpense { optional = true }
+		int espionageExpense { optional = true }
+		int religionExpernse { optional = true }
+		int tributeExpense { optional = true }
+		int disorderExpense { optional = true }
+		int inflationExpense { optional = true }
+		int foodConsumption { optional = true }
+		int commerceConsumption { optional = true }
+		int nobilityOpinion { optional = true }
+		int armyOpinion { optional = true }
+		int merchantOpinion { optional = true }
+		int clergyOpinion { optional = true }
+		int peasantryOpinion { optional = true } 
+		int rebellionStatus { optional = true }
+		string kingdomName { optional = true }
+		int kingdomPowerLevel { optional = true }
+		int ranking { optional = true }
+		int provinces { optional = true }
+		int towns { optional = true }
+		int settlements { optional = true }
+		int population { optional = true }
+		int stability { optional = true }
+		int militaryPower { optional = true }
+		int siegeDefense { optional = true }
+		int fame { optional = true }
+		int goodsProduced { optional = true }
+		int goodsImported { optional = true }
+		int totalAdvantages { optional = true }
+		int totalTraditions { optional = true }
+		string monarchName { optional = true }
+		int monarchAge { optional = true }
+		bool Married { optional = true }
+		int Sons { optional = true }
+		int Daughters { optional = true }
+		int Marshals { optional = true }
+		int Merchants { optional = true }
+		int Diplomats { optional = true }
+		int Spies { optional = true }
+		int Clerics { optional = true }
+		int totalCourtLevels { optional = true }
+		int crownAuthority { optional = true }
+		int culturalPower { optional = true }
+		string religionName { optional = true }
+		string religionLeaderStatus { optional = true }
+		string religionLeaderName { optional = true }
+		string kingdomReligiousRelation { optional = true }
+		string crusadeStatus { optional = true }
+		int jihadsCount { optional = true }
+		int activeWarsCount { optional = true }
+		int activeEnemiesCount { optional = true }
+		int defensivePactsCount { optional = true }
+		int offensivePactsCount { optional = true }
+
+  //       string client_type // Game client type (Editor, Single player / Multiplayer server or client)
+  //       int game_time // Elapsed game time in seconds
+  //       int real_time_played // Real time played (pauses excluded)
+  //       int real_time_total // Real time played (pauses included)
+
+		// int activations // number of times the event was fired
+		// { 
+		// 	optional = true
+		// }
+	}
+
+    built_in_events
+    {
+        clientDevice // This event should only be fired at the start of each player session. Preferably just after the gameStarted event. The event should collect a devices information so that it can be used in analysis later.
+        ddnaEventTriggeredAction // Event recorded automaticallyby deltaDNA SDK when a player triggers an Event Triggered Campaign on their device
+        ddnaForgetMe // By sending this event you authorise deltaDNA to delete the previously collected data of this user and stop collecting anymore.
+        engageResponse // This event is automatically generated by the deltaDNA platform and should not be sent in from the game.
+        gameEnded // This event should be launched when the user takes an action to exist the game.
+        gameRunning // Automatically sent by the deltaDNA SDK to indicate an active player.
+        gameStarted // This event should be launched when a player starts to play the game, it should be the first event that is launched within a session.
+        levelUp // The levelUp event works in exactly the same way as the achievement event. It is designed to support awards when the player increases their player level.
+        missionCompleted // The missionCompleted event is triggered if a player successfully completes a mission. If a player succeeds in completing a mission they can be rewarded, this reward can be given as money (either real or virtual), items or a combination of all three.
+        missionFailed // The missionFailed event is triggered if a player fails to complete a mission successfully.
+        missionStarted // The missionStarted event is triggered at the start of each mission and records the mission name and a unique ID for the mission.
+        newPlayer // This event should be launched when a new player registers for the game. If there is no registration involved it should be launched the first time a player opens the game. This must be the first event we receive from a player.
+        notificationOpened // Should be sent by the game when a push notification launched it or a notification was received while the game is in the foreground.
+        notificationServices // Record device ids associated with notification platforms.
+        options // The options event records players entering options/settings screens in a game. The optionsSection should record the part of the options that was updated
+        outOfGameSend // This event is automatically generated by the deltaDNA platform and should not be sent in from the game.
+        transaction // Whenever a player buys, sells or exchanges goods like real currency, virtual currencies or items
+        uiInteraction // The uiInteraction event should be recorded when the player interacts with parts of the interface, specifically as they press buttons or links to view specific features and navigate around. This event is used to track user journeys around the interface to help determine if parts of the interface or features are not obvious enough When a button or link to a specific feature exists in multiple locations it can be valuable to track the location of the button that was used.
+    }
+
+    built_in_parameters
+    {
+        int userLevel // userLevel
+        string sdkVersion // sdkVersion
+        string platform // platform
+        int userXP // The current experience points a user has
+        int userScore // The current score a user has
+        string deviceName // deviceName is the name of the device, such as IPHONE, PS3 etc
+        string hardwareVersion // hardwareVersion is the version number of the device.
+        string browserVersion // browserVersion is the version number of the browser.
+        string deviceType // deviceType is the type of device and must use one of the variables defined in the Enumeration List.
+        string browserName // browserName is the name of the browser the game is running in.
+        string operatingSystem // operatingSystem is the OS used by the device and must use one of the variables defined in the Enumeration List.
+        string manufacturer // manufacturer
+        string operatingSystemVersion // operatingSystemVersion is the version of the OS used by the device. 
+        string timezoneOffset // The timezone as an offset from UTC the device is set to.
+        string userLanguage // Two character language code ISO 639-1
+        string cpuType // The type of CPU
+        string networkType // The type of network connection
+        string ddnaEventTriggeredActionName // The (optional) name of the Action assigned to an Event Triggered Campaign
+        string ddnaEventTriggeredActionType // The type of Engage campaign action triggered by an Event Triggered Campaign on the player's device
+        int ddnaEventTriggeredCampaignID // The ID of the campaign the player triggered in an Event Triggered Campaign
+        string ddnaEventTriggeredCampaignName // The (optional) name of an Event Triggered Campaign
+        int ddnaEventTriggeredCampaignPriority // The priority of an Event Triggered Campign
+        int ddnaEventTriggeredSessionCount // Event Triggered Campaign session counter
+        int ddnaEventTriggeredVariantID // The ID of the Variant the player was assigned to in an Engage Event Triggered Campaign
+        string ddnaEventTriggeredVariantName // The (optional) name of the variant group the player was assigned to in an Event Triggered Campaign
+        string ddnaAdvertisingId // Advertising ID as used for SmartAds. This only applies when SmartAds is implemented. In order to execute the deletion of identifiable data the advertising ID might be required and is therefore sent by the SDK in this parameter.  
+        int responseEngagementID // The internal ID of the engagement that responded.
+        string responseEngagementName // The name of the engagement that responded.
+        string responseEngagementType // The type of the engagement that responded.
+        string responseVariantName // The name of the engagement variant that responded.
+        int responseMessageSequence // The message sequence step included in the response if applicable.
+        string responseDecisionpointName // The name of the decision point at which the response was made.
+        int responseTransactionID // The ID of the engage transaction in which the response was made.
+        string pushNotificationToken // pushNotificationToken
+        string clientVersion // Current version number for the client side game
+        string androidRegistrationID // device registration for Google Cloud Messaging. If set in SDK it will be sent on gameStarted event on Android devices.
+        string userLocale // The Region and Language setting for the user. e.g. en_GB, en_US etc..
+        string ddnaCrossGameUserID // An unique ID that identifies a user as the same player across multiple games.
+        string serverVersion // Current version number for the server side game
+        string dataVersion // Current version number for the game data
+        OBJECT reward // Reward for Level Up
+        string levelUpName // levelUpName is the name of the level up.
+        string missionName // name of the current mission
+        string missionID // The unique ID for the mission
+        bool isTutorial // isTutorial records if the mission is part of the tutorial and must be either true or false only.
+        string terminationReason // Reason for failing the mission
+        string uniqueTracking // Unique tracking tag
+        string campaign // The name of a specific campaign the new player acquisition relates to
+        int birthYear // birthYear is the year players were born.
+        string acquisitionChannel // acquisitionChannel is used to record the name of the specific marketing channel used to drive traffic to the game. This should be a short identifiable string and not a referrer URL, “e.g. Google Ad Campaign”, “Facebook”.
+        string campaignInstance // A specific instance of a campaign that the player was acquired from
+        string userCountry // The two digit country code representing the country the player is in when registering as a newPlayer
+        string referrer // referrer is the URL of the website that is used to deliver the user to the game, the URL must be less that 72 characters long.
+        string gender // gender should either be “MALE” or “FEMALE” if known, if the gender is unknown it should be left blank.
+        string email // The e-mail address of the player
+        int notificationId // The id of the notification that targeted the player.
+        string notificationName // The name of the notification that targeted the player.
+        bool notificationLaunch // Did the push notification launch the game.
+        int campaignId // Unique ID of the out of game campaign.
+        string campaignName // Name of the out of game campaign.
+        string cohortGroup // Group identifier of the cohort within the campaign.
+        int cohortId // ID of the cohort within the campaign.
+        string cohortName // Name of the cohort.
+        string communicationSender // Communication sender used.
+        string communicationState // Communication state that has been reached.
+        string ddnaUrbanAirshipToken // The value of this field will be used by Out Of Game Campaigns as the token for any Urban Airship actions.
+        string option // option
+        string action // Which action was taken. 
+        string actionName // The name of the action used in an outOfGame send
+        string communicationDetails // Provides further details on communication failures
+        int stepId // The Id of the step in the campaign
+        string stepType // Standard or conversion step
+        int ddnaCampaignPriority // Out-of-game campaign priority value
+        int ddnaConversionEventId // The event id in the events table that causes the conversion
+        OBJECT productsSpent // productsSpent
+        string transactorID //  transactorID is the ID of the person or entity that is being transacted with, if this is a trade this would be the other players unique ID.
+        int revenueValidated // This is an internal parameter used by IAP receipt validation services, it will be populated automatically by deltaDNA if you are using revenue validation.
+        string transactionServer // Type of the server of where to go and verify the receipt
+        int engagementID // engagementID is the ID that is passed as part of an engage interaction and is used to link an engagement with a transaction.
+        OBJECT productsReceived
+        string transactionType // transactionType is the type of transaction and must use one of the variables defined in the Enumeration List.
+        string transactionReceipt // Should include the transaction receipt as well as any other information necessary to validate the receipt
+        bool isInitiator // isInitiator
+        string paymentCountry // paymentCountry is the country where the transaction is taking place and must use one of the variables defined in the Enumeration List.
+        string productID // productID
+        string transactionID // transactionID is an ID that uniquely identifies the transaction.
+        string transactionName // transactionName is the name that identifies the transaction, such as buying Gold or purchasing items. 
+        string transactionReceiptSignature // The receipt signature from a Google Play IAP, used by the Google Play transaction receipt validation process.
+        string amazonPurchaseToken // Amazon purchaseToken
+        string amazonUserID // Amazon userID
+        string uiName // uiName is the name that defines the interaction.
+        string uiAction // uiAction is the action taken on the User Interface object.
+        string uiType // uiType is the type of User Interface object.
+        string uiLocation // uiLocation is the position in the game where the User Interface object is.
+    }
+
+}
+
+def NewGameAnalytics : Analytics
+{
+	event_id = "newGame"
+
+	triggers
+	{
+		player_kingdom analytics_new_game_started
+	}
+
+	args
+	{
+		string multiplayer = (trigger.param.multiplayer)
+		string gameType = (trigger.param.gameType)
+		string gameTypeTarget = (trigger.param.gameTypeTarget) { optional = true }
+		string aiDifficulty = (trigger.param.aiDifficulty)
+		string startingPeriod = (trigger.param.startingPeriod)
+		string mapSize = (trigger.param.mapSize)
+		string historicalKingdom = (trigger.param.historicalKingdom)
+		int startingRealmsCount = (trigger.param.startingRealmsCount)
+		string pickRule = (trigger.param.pickRule)
+		string agingSpeed = (trigger.param.agingSpeed)
+		string espionageRole = (trigger.param.espionageRole)
+		int startingGold = (trigger.param.startingGold)
+		string timeLimit = (trigger.param.timeLimit)
+	}
+}
+
+template ChangeGameAnalytics : Analytics
+{
+	event_id = "changeGame"
+
+	args
+	{
+		string gameName = (trigger.param.gameName)
+		string gameAction = (trigger.param.gameAction)
+		string menuLocation = (trigger.param.menuLocation)
+	}
+}
+
+def LoadGameAnalytics : ChangeGameAnalytics
+{
+	triggers { player_kingdom analytics_game_loaded }
+}
+
+def DeleteSaveAnalytics : ChangeGameAnalytics
+{
+	triggers { game analytics_save_deleted }
+}
+
+def QuitGameAnalytics : Analytics
+{
+	event_id = "quitGame"
+	
+	triggers
+	{
+		game analytics_game_quit
+	}
+
+	args
+	{
+		string gameName = (trigger.param.gameName)
+		string quitAction = (trigger.param.quitAction)
+		string menuLocation = (trigger.param.menuLocation)
+	}
+}
+
+def SettingsChangedAnalytics : Analytics
+{
+	event_id = "settings"
+	
+	triggers
+	{
+		game analytics_setting_changed
+	}
+
+	args
+	{
+		string settingName = (trigger.param.settingName)
+		string oldSettingValue = (trigger.param.oldSettingValue)
+		string newSettingValue = (trigger.param.newSettingValue)
+	}
+}
+
+
+def DecisionTakenAnalytics : Analytics
+{
+	event_id = "decisionTaken"
+	
+	triggers
+	{
+		player_kingdom analytics_decision_message
+	}
+
+	args
+	{
+		string targetKingdom = (trigger.param.targetKingdom) { optional = true }
+		int kingdomRelation = (trigger.param.kingdomRelation) { optional = true }
+		string decisionType = (trigger.param.decisionType)
+		string decisionCategory = (trigger.param.decisionCategory)
+		string decisionName = (trigger.param.decisionName)
+		string outcome = (trigger.param.outcome)
+		int timeToRespond = (trigger.param.timeToRespond) { optional = true }
+	}
+}
+
+// TODO:
+def AggregatedActionAnalytics : Analytics
+{
+	event_id = "aggregatedAction"
+	
+	triggers
+	{
+		player_kingdom analytics_dummy_trigger
+	}
+
+	args
+	{
+		string actionType = (trigger.param.actionType)
+		string actionCategory = (trigger.param.actionCategory)
+		string actionName = (trigger.param.actionName)
+		int aggregationPeriod = (trigger.param.aggregationPeriod)
+		int aggregatedCount = (trigger.param.aggregatedCount)
+	}
+}
+
+def SaveGameAnalytics : Analytics
+{
+	event_id = "saveGame"
+
+	triggers { player_kingdom analytics_save_game }
+
+	args
+	{
+		// we already have gameID in common params
+		string gameName = (trigger.param)
+	}
+}
+
+template CampaignEndedAnalytics : Analytics
+{
+	event_id = "campaignEnded"
+
+	args
+	{
+		string outcome = (trigger.name)
+		string endCondition = (trigger.param)
+	}
+}
+
+def CampaignEndedVictoryAnalytics : CampaignEndedAnalytics
+{
+	triggers { player_kingdom victory }
+}
+
+def CampaignEndedDrawAnalytics : CampaignEndedAnalytics
+{
+	triggers { player_kingdom draw }
+}
+
+def CampaignEndedDefeatAnalytics : CampaignEndedAnalytics
+{
+	triggers { player_kingdom defeat }
+}
+
+
+def MonarchDiedAnalytics : Analytics
+{
+	event_id = "monarchDied"
+
+	triggers
+	{
+		player_kingdom generations_changed
+		{
+			condition = (trigger.param != "")
+		}
+	}
+
+	args
+	{
+		string causeOfDeath = (trigger.param)
+		string heirName = (trigger.sender.king_name)
+		string heirAge = (trigger.sender.king_age_str)
+	}
+}
+
+def NpcDiedAnalytics : Analytics
+{
+	event_id = "npcDied"
+	
+	triggers
+	{
+		player_kingdom dying
+		{
+			condition = (trigger.param.reason != "" && trigger.sender.class_name != null && trigger.sender.class_name != "")
+		}
+	}
+
+	args
+	{
+		string targetKingdom = (trigger.sender.kingdom.name)
+		string characterName = (trigger.sender.name_str)
+		string characterClass = (trigger.sender.class_name)
+		string causeOfDeath = (trigger.param.reason)
+	}
+}
+
+def EmperorOfTheWorldAnalytics : Analytics
+{
+	event_id = "emporerVote"
+
+	triggers { player_kingdom analytics_eotw }
+
+	args
+	{
+		string candidate1 = (trigger.param.candidate1)
+		string candidate2 = (trigger.param.candidate2)
+		int candidate1votes = (trigger.param.candidate1votes)
+		int candidate2votes = (trigger.param.candidate2votes)
+		string outcome = (trigger.param.outcome)
+	}
+}
+
+def TutorialStepAnalytics : Analytics
+{
+	event_id = "tutorialStep"
+
+	triggers
+	{
+		player_kingdom analytics_show_tutorial_message
+	}
+
+	args
+	{
+		string tutorialName = (trigger.param.id)
+		string stepName = (trigger.param.cur_message)
+		string stepCategory = (trigger.param.base)
+		float stepOrder = (trigger.param.index)
+	}
+}
+
+def ConstructionStartedAnalytics : Analytics
+{
+	event_id = "constructionStarted"
+
+	triggers
+	{
+		player_kingdom analytics_building_started
+	}
+
+	args
+	{
+		string province = (trigger.param.province)
+		int buildingSlot = (trigger.param.buildingSlot)
+		int buildingSlotsLeft = (trigger.param.buildingSlotsLeft)
+		string buildingName = (trigger.param.buildingName)
+		int hammersCost = (trigger.param.hammersCost)
+		int goldCost = (trigger.param.goldCost)
+		int foodCost = (trigger.param.foodCost) { optional = true }
+		int bookCost = (trigger.param.bookCost) { optional = true }
+		int pietyCost = (trigger.param.pietyCost) { optional = true }
+		int tradeCost = (trigger.param.tradeCost) { optional = true }
+		int levyCost = (trigger.param.levyCost) { optional = true }
+		string requirement1 = (trigger.param.requirement1) { optional = true }
+		string requirement2 = (trigger.param.requirement2) { optional = true }
+		string requirement3 = (trigger.param.requirement3) { optional = true }
+		string requirement4 = (trigger.param.requirement4) { optional = true }
+		string requirement5 = (trigger.param.requirement5) { optional = true }
+		string requirement6 = (trigger.param.requirement6) { optional = true }
+	}
+}
+
+def BuildingRemovedAnalytics : Analytics
+{
+	event_id = "buildingRemoved"
+
+	triggers
+	{
+		player_kingdom analytics_building_removed
+	}
+
+	args
+	{
+		string province = (trigger.sender.realm.province_name_str)
+		int buildingSlot = (trigger.param.slot_index)
+		int buildingSlotsLeft = (trigger.param.slots_left)
+		string buildingName = (trigger.param.building_def.id_key)
+	}
+}
+
+def UpgradeStartedAnalytics : Analytics
+{
+	event_id = "upgradeStarted"
+
+	triggers
+	{
+		player_kingdom analytics_upgrade_started
+	}
+
+	args
+	{
+		int hammersCost = (trigger.param.hammersCost)
+		string upgradeName = (trigger.param.upgradeName)
+		int goldCost = (trigger.param.goldCost)
+		int foodCost = (trigger.param.foodCost) { optional = true }
+		int bookCost = (trigger.param.bookCost) { optional = true }
+		int pietyCost = (trigger.param.pietyCost) { optional = true }
+		int tradeCost = (trigger.param.tradeCost) { optional = true }
+		int levyCost = (trigger.param.levyCost) { optional = true }
+		string requirement1 = (trigger.param.requirement1) { optional = true }
+		string requirement2 = (trigger.param.requirement2) { optional = true }
+		string requirement3 = (trigger.param.requirement3) { optional = true }
+		string requirement4 = (trigger.param.requirement4) { optional = true }
+		string requirement5 = (trigger.param.requirement5) { optional = true }
+		string requirement6 = (trigger.param.requirement6) { optional = true }
+	}
+}
+
+def AssignGovernorAnalytics : Analytics
+{
+	event_id = "assignGovernor"	
+
+	triggers
+	{
+		player_kingdom analytics_governor_changed
+	}
+
+	args
+	{
+		 string province = (trigger.param.province)
+		 string characterClass = (trigger.param.characterClass)
+ 		 string characterName = (trigger.param.characterName)
+		 string assignAction = (trigger.param.assignAction)
+		 int characterLevel = (trigger.param.characterLevel)
+	}
+}
+
+def UnitRecruitedAnalytics : Analytics
+{
+	event_id = "unitRecruited"
+
+	triggers
+	{
+		player_kingdom analytics_unit_hired
+	}
+
+	args
+	{
+		string province	= (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string characterName = (trigger.param.characterName) { optional = true }
+		string unitID = (trigger.param.unitID)
+		string unitName	= (trigger.param.unitName)
+		string unitType	= (trigger.param.unitType)
+		int unitTier = (trigger.param.unitTier)
+		string unitLocation = (trigger.param.unitLocation)
+		int unitQuantity = (trigger.param.unitQuantity)
+		int unitPower = (trigger.param.unitPower)
+		int goldCost = (trigger.param.goldCost)
+		int foodCost = (trigger.param.foodCost) { optional = true }
+		int leviesCost = (trigger.param.leviesCost) { optional = true }
+		int populationCost = (trigger.param.populationCost) { optional = true }
+	}
+}
+
+def UnitAssigneddAnalytics : Analytics
+{
+	event_id = "unitAssigned"
+
+	triggers
+	{
+		player_kingdom analytics_unit_assigned
+	}
+
+	args
+	{
+		string province	= (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string marshalName = (trigger.param.characterName) { optional = true }
+		string unitID = (trigger.param.unitID)
+		string unitName	= (trigger.param.unitName)
+		string unitType	= (trigger.param.unitType)
+		int unitTier = (trigger.param.unitTier)
+		string unitLocation = (trigger.param.unitLocation)
+		int unitQuantity = (trigger.param.unitQuantity)
+		int unitPower = (trigger.param.unitPower)
+		int unitHealth = (trigger.param.unitHealth)
+		int unitLevel = (trigger.param.unitLevel)
+		int unitXP = (trigger.param.unitXP)
+		string assignAction = (trigger.param.assignAction)
+	}
+}
+
+def UnitLevelUpAnalytics : Analytics
+{
+	event_id = "unitLevelUp"
+
+	triggers
+	{
+		player_kingdom analytics_unit_level_up
+	}
+
+	args
+	{
+		string province	= (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string marshalName = (trigger.param.characterName)
+		string unitID = (trigger.param.unitID)
+		string unitName	= (trigger.param.unitName)
+		string unitType	= (trigger.param.unitType)
+		int unitTier = (trigger.param.unitTier)
+		string unitLocation = (trigger.param.unitLocation)
+		int unitQuantity = (trigger.param.unitQuantity)
+		int unitPower = (trigger.param.unitPower)
+		int unitHealth = (trigger.param.unitHealth)
+		int unitLevel = (trigger.param.unitLevel)
+		int unitXP = (trigger.param.unitXP)
+	}
+}
+
+def ArmyMovementAnalytics : Analytics
+{
+	event_id = "armyMoved"
+
+	triggers
+	{
+		player_kingdom analytics_army_entered_castle
+		player_kingdom analytics_army_crossed_realm
+	}
+
+	args
+	{
+		string province	= (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string marshalName = (trigger.param.marshalName) { optional = true }
+		string targetProvince = (trigger.param.targetProvince)
+		string targetType = (trigger.param.targetType)
+		string targetRelation = (trigger.param.targetRelation)
+		string previousProvinceRelation = (trigger.param.previousProvinceRelation)
+		string nextProvinceRelation = (trigger.param.nextProvinceRelation)
+	}
+}
+
+def BattleStartedAnalytics : Analytics
+{
+	event_id = "battleStarted"
+
+	triggers
+	{
+		player_kingdom analytics_battle_started
+	}
+
+	args
+	{
+		string province = (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string battleType = (trigger.param.battleType)
+
+		int playerArmyPower = (trigger.param.playerArmyPower)
+		int playerArmyUnitCount = (trigger.param.playerArmyUnitCount)
+		int playerArmyMorale = (trigger.param.playerArmyMorale)
+		
+		int alliedArmyPower = (trigger.param.alliedArmyPower)
+		int alliedArmyUnitCount = (trigger.param.alliedArmyUnitCount)
+		int alliedArmyMorale = (trigger.param.alliedArmyMorale)
+		
+		int opponentArmyPower = (trigger.param.opponentArmyPower)
+		int opponentArmyUnitCount = (trigger.param.opponentArmyUnitCount)
+		int opponentArmyMorale = (trigger.param.opponentArmyMorale)
+	}
+}
+
+def BattleChangeAnalytics : Analytics
+{
+	event_id = "battleChange"
+
+	triggers
+	{
+		player_kingdom analytics_battle_changed
+	}
+
+	args
+	{
+		string province = (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string battleType = (trigger.param.battleType)
+		string battleAction = (trigger.param.battleAction)
+
+		int playerArmyPower = (trigger.param.playerArmyPower)
+		int playerArmyUnitCount = (trigger.param.playerArmyUnitCount)
+		int playerArmyMorale = (trigger.param.playerArmyMorale)
+		
+		int alliedArmyPower = (trigger.param.alliedArmyPower)
+		int alliedArmyUnitCount = (trigger.param.alliedArmyUnitCount)
+		int alliedArmyMorale = (trigger.param.alliedArmyMorale)
+		
+		int opponentArmyPower = (trigger.param.opponentArmyPower)
+		int opponentArmyUnitCount = (trigger.param.opponentArmyUnitCount)
+		int opponentArmyMorale = (trigger.param.opponentArmyMorale)
+	}
+}
+
+def ReinforcementsAnalytics : Analytics
+{
+	event_id = "reinforcements"
+
+	triggers
+	{
+		player_kingdom analytics_army_reinforced
+	}
+
+	args
+	{
+		string province = (trigger.param.province)
+		string battleType = (trigger.param.battleType)
+		string reinforcedArmyID = (trigger.param.reinforcedArmyID)
+		string reinforcedKingdom = (trigger.param.reinforcedKingdom)
+		int reinforcedArmyPower = (trigger.param.reinforcedArmyPower)
+		int reinforcedArmyUnits = (trigger.param.reinforcedArmyUnits)
+		string reinforcementController = (trigger.param.reinforcementController)
+		string reinforcementStatus = (trigger.param.reinforcementStatus)
+		string reinforcementArmyID = (trigger.param.reinforcementArmyID)
+		int reinforcementArmyPower = (trigger.param.reinforcementArmyPower)
+		int reinforcementArmyUnits = (trigger.param.reinforcementArmyUnits)
+	}
+}
+
+def BattleEndedAnalytics : Analytics
+{
+	event_id = "battleEnded"
+
+	triggers
+	{
+		player_kingdom analytics_battle_ended
+	}
+
+	args
+	{
+		string province = (trigger.param.province)
+		string armyID = (trigger.param.armyID)
+		string battleType = (trigger.param.battleType)
+		string outcome = (trigger.param.outcome)
+		int playerArmies = (trigger.param.playerArmies)
+		int alliedArmies = (trigger.param.alliedArmies)
+		int opponentArmies = (trigger.param.opponentArmies)
+
+		int playerArmyPower = (trigger.param.playerArmyPower)
+		int playerArmyPowerLost = (trigger.param.playerArmyPowerLost)
+		int playerArmyUnitCount = (trigger.param.playerArmyUnitCount)
+		int playerArmyMorale = (trigger.param.playerArmyMorale)
+		
+		int alliedArmyPower = (trigger.param.alliedArmyPower)
+		int alliedArmyPowerLost = (trigger.param.alliedArmyPowerLost)
+		int alliedArmyUnitCount = (trigger.param.alliedArmyUnitCount)
+		int alliedArmyMorale = (trigger.param.alliedArmyMorale)
+		
+		int opponentArmyPower = (trigger.param.opponentArmyPower)
+		int opponentArmyPowerLost = (trigger.param.opponentArmyPowerLost)
+		int opponentArmyUnitCount = (trigger.param.opponentArmyUnitCount)
+		int opponentArmyMorale = (trigger.param.opponentArmyMorale)
+	}
+}
+
+def RealmChangedAnalytics : Analytics
+{
+	event_id = "conquest"
+
+	triggers
+	{
+		player_kingdom analytics_conquest
+	}
+
+	args
+	{
+		string targetKingdom = (trigger.param.targetKingdom)
+		string targetProvince = (trigger.param.targetProvince)
+		string conquestStatus = (trigger.param.conquestStatus)
+		int remainingProvinces = (trigger.param.remainingProvinces)
+		string religionStatus = (trigger.param.religionStatus)
+	}
+}
+
+def WarEndedAnalytics : Analytics
+{
+	event_id = "warEnded"
+
+	triggers { player_kingdom analytics_war_ended }
+
+	args
+	{
+		string warType = (trigger.param.warType)
+		string targetKingdom = (trigger.param.targetKingdom)
+		string peaceType = (trigger.param.peaceType)
+		string peaceRequester = (trigger.param.peaceRequester)
+		int playerWarScore = (trigger.param.playerWarScore)
+		int totalAlliedWarScore = (trigger.param.totalAlliedWarScore)
+		int totalOpposingWarScore = (trigger.param.totalOpposingWarScore)
+		int totalAlliedKingdoms = (trigger.param.totalAlliedKingdoms)
+		int totalOpposingKingdoms = (trigger.param.totalOpposingKingdoms)
+	}
+}
+
+def WarStartedAnalytics : Analytics
+{
+	event_id = "warStarted"
+
+	triggers { player_kingdom analytics_war_started }
+
+	args
+	{
+		string warType = (trigger.param.warType)
+		string warCause = (trigger.param.warCause)
+		string originatingKingdom = (trigger.param.originatingKingdom)
+		string targetKingdom = (trigger.param.targetKingdom)
+		int totalAlliedKingdoms = (trigger.param.totalAlliedKingdoms)
+		int totalOpposingKingdoms = (trigger.param.totalOpposingKingdoms)
+	}
+}
+
+def CharacterActionAnalytics : Analytics
+{
+	event_id = "taskAssigned"
+
+	triggers { player_kingdom analytics_on_action_prepare }
+
+	args
+	{
+		string characterName = (trigger.param.characterName)
+		string characterClass = (trigger.param.characterClass)
+		int characterLevel = (trigger.param.characterLevel)
+		string taskChosen = (trigger.param.taskChosen)
+		int upkeep = (trigger.param.upkeep) { optional = true }
+		string targetKingdom = (trigger.param.targetKingdom)
+		int kingdomRelation = (trigger.param.kingdomRelation) { optional = true }
+		int goldCost = (trigger.param.goldCost)
+		string actionArgument1 = (trigger.param.actionArgument1) { optional = true }
+		string actionArgument2 = (trigger.param.actionArgument2) { optional = true }
+		string actionArgument3 = (trigger.param.actionArgument3) { optional = true }
+		string actionTarget = (trigger.param.actionTarget) { optional = true }
+	}
+}
+
+def CharacterLevelUpAnalytics : Analytics
+{
+	event_id = "levelledUp"
+
+	triggers { player_kingdom analytics_character_level_up }
+
+	args
+	{
+		string characterName = (trigger.param.characterName)
+		string characterClass = (trigger.param.characterClass)
+		int characterLevel = (trigger.param.characterLevel)
+		string learningChosen = (trigger.param.learningChosen)
+		int bookCost = (trigger.param.bookCost)
+		int goldCost = (trigger.param.goldCost)
+	}
+}
+
+def RoyalFamilyChangeAnalytics : Analytics
+{
+	event_id = "familyChange"
+
+	triggers { player_kingdom analytics_royal_family_change }
+
+	args
+	{
+		string characterName = (trigger.param.characterName)
+		string relationGender = (trigger.param.relationGender)
+		string relationPosition = (trigger.param.relationPosition)
+		int relationAge = (trigger.param.relationAge)
+		string familyEvent = (trigger.param.familyEvent)
+	}
+}
+
+def MarriageAnalytics : Analytics
+{
+	event_id = "marriage"
+
+	triggers { player_kingdom analytics_marriage }
+
+	args
+	{
+		string characterName = (trigger.param.characterName)
+		string relationGender = (trigger.param.relationGender)
+		string relationPosition = (trigger.param.relationPosition)
+		int relationAge = (trigger.param.relationAge)
+		string targetKingdom = (trigger.param.targetKingdom)
+		int kingdomRelation = (trigger.param.kingdomRelation)
+		string spousePosition = (trigger.param.spousePosition)
+		int spouseSeniorSiblings = (trigger.param.spouseSeniorSiblings)
+
+	}
+}
+
+def AddCourtAnalytics : Analytics
+{	
+	event_id = "courtChange"
+
+	triggers
+	{
+		player_kingdom analytics_court_add
+	}
+
+	args
+	{
+		string characterName  = (trigger.param.name_str)
+		string characterClass = (trigger.param.class_name)
+		int goldCost = (trigger.param.hire_cost_int)
+		string courtAction = "Add"
+		string outcome = "New knight added"
+	}
+}
+
+def SwapCourtAnalytics : Analytics
+{	
+	event_id = "courtChange"
+
+	triggers
+	{
+		player_kingdom analytics_court_swap
+	}
+
+	args
+	{
+		string characterName  = (trigger.param.name_str)
+		string characterClass = (trigger.param.class_name)
+		int goldCost = 0
+		string courtAction = "Swap"
+		string outcome = "Swapped to another slot"
+	}
+}
+
+def DeleteCourtAnalytics : Analytics
+{	
+	event_id = "courtChange"
+
+	triggers
+	{
+		player_kingdom analytics_court_delete
+	}
+
+	args
+	{
+		string characterName  = (trigger.param.name_str)
+		string characterClass = (trigger.param.class_name)
+		int goldCost = 0
+		string courtAction = "Remove"
+		string outcome = "Removed from court"
+	}
+}
+
+def AddSpecialCourtAnalytics : Analytics
+{	
+	event_id = "courtChange"
+
+	triggers
+	{
+		player_kingdom analytics_special_court_add
+	}
+
+	args
+	{
+		string characterName  = (trigger.param.name_str)
+		string characterClass = (trigger.param.class_name)
+		int goldCost = 0
+		string courtAction = "SpecialAdd"
+		string outcome = "Added to special characters court"
+	}
+}
+
+def DeleteSpecialCourtAnalytics : Analytics
+{	
+	event_id = "courtChange"
+
+	triggers
+	{
+		player_kingdom analytics_special_court_delete
+	}
+
+	args
+	{
+		string characterName  = (trigger.param.name_str)
+		string characterClass = (trigger.param.class_name)
+		int goldCost = 0
+		string courtAction = "SpecialRemove"
+		string outcome = "Removed from special characters court"
+	}
+}
+
+def PrisonerChangeAnalytics : Analytics
+{
+	event_id = "prisonerChange"
+
+	triggers
+	{
+		player_kingdom analytics_prisoner_change
+	}
+
+	args
+	{
+		string prisonerKingdom = (trigger.param.prisonerKingdom)
+		string imprisonerKingdom = (trigger.param.imprisonerKingdom)
+		string prisonerAction = (trigger.param.prisonerAction)
+		int goldCost = (trigger.param.goldCost) { optional = true }
+		int goldReceived = (trigger.param.goldReceived) { optional = true }
+	}
+}
+
+def TraditionSelected : Analytics
+{
+	event_id = "traditionSelected"
+
+	triggers
+	{
+		player_kingdom analytics_tradition_added
+	}
+
+	args
+	{
+		string traditionName = (trigger.param.traditionName)
+		string traditionSource = (trigger.param.traditionSource)
+		int goldCost = (trigger.param.goldCost)
+		int bookCost = (trigger.param.bookCost) { optional = true }
+	}
+}
+
+def CharacterMissionAnalytics : Analytics
+{
+	event_id = "courtAction"	
+
+	triggers { player_kingdom analytics_on_mission_changed }
+
+	args
+	{
+		string originatingKingdom = (trigger.param.originatingKingdom)
+		string targetKingdom = (trigger.param.targetKingdom)
+		int kingdomRelation = (trigger.param.kingdomRelation)
+		string characterName = (trigger.param.characterName)
+		string characterClass = (trigger.param.characterClass)
+		int characterLevel = (trigger.param.characterLevel)
+		float successChance = (trigger.param.successChance) { optional = true }
+		int revealChance = (trigger.param.revealChance) { optional = true }
+		int goldCost = (trigger.param.goldCost)
+		string actionName = (trigger.param.actionName)
+	}
+}
+
+def RebellionChangeAnalytics : Analytics
+{
+	event_id = "rebellionChange"
+
+	triggers { player_kingdom analytics_rebellion_changed }
+
+	args
+	{
+		string rebellionEvent = (trigger.param.rebellionEvent)
+		int rebellionSize = (trigger.param.rebellionSize)
+		int rebelArmyPower = (trigger.param.rebelArmyPower)
+		string eventTarget = (trigger.param.eventTarget) { optional = true }
+	}
+}
+
+def KingdomChangeAnalytics : Analytics
+{
+	event_id = "kingdomChange"
+
+	triggers { player_kingdom analytics_kingdom_changed }
+
+	args
+	{
+		string kingdomEvent	= (trigger.param.kingdomEvent)
+		string previousValue	= (trigger.param.previousValue)
+		string newValue	= (trigger.param.newValue)
+	}
+}
+
+def RelationshipChangeAnalytics : Analytics
+{
+	event_id = "relationshipChange"
+
+	triggers { player_kingdom analytics_relationship_change }
+
+	args
+	{
+		string targetKingdom = (trigger.param.targetKingdom)
+		int kingdomRelation = (trigger.param.kingdomRelation)
+		string relationshipChangeType = (trigger.param.relationshipChangeType) { optional = true }
+	}
+}
+
+def UnlockAdvantageAnalytics : Analytics
+{
+	event_id = "unlock"
+
+	triggers { player_kingdom gained_advantage }
+	args
+	{
+		string unlockType = "advantage"
+		string unlockName = (trigger.param.def_id)
+		string associatedAdvantage = (trigger.param.def_id) { optional = true }
+		int associatedAdvantageGoodsRemaining = 0 { optional = true }
+	}
+}
+
+def NewOpportunityAnalytics : Analytics
+{
+	event_id = "unlock"
+
+	triggers
+	{
+		player_kingdom new_opportunity
+		{
+			condition = (trigger.sender.kingdom.is_local_player)
+		}
+	}
+	args
+	{
+		string unlockType = "opportunity"
+		string unlockName = (trigger.param.def_id)
+	}
+}
+
+def AudienceLogAnalytics : Analytics
+{
+	event_id = "audienceTaken"
+
+	triggers { player_kingdom analytics_offer }
+
+	args
+	{
+		string targetKingdom = (trigger.param.targetKingdom)
+		int kingdomRelation = (trigger.param.kingdomRelation)
+		string offerMade = (trigger.param.offerMade) { optional = true }
+		string demandMade = (trigger.param.demandMade) { optional = true }
+		string warChange = (trigger.param.warChange) { optional = true }
+		int goldCost = (trigger.param.goldCost) { optional = true }
+		int goldReceived = (trigger.param.goldReceived) { optional = true }
+		string landGiven = (trigger.param.landGiven) { optional = true }
+		string landReceived = (trigger.param.landReceived) { optional = true }
+		string targetKingdomGiven = (trigger.param.targetKingdomGiven) { optional = true }
+		string targetKingdomReceived = (trigger.param.targetKingdomReceived) { optional = true }
+	}
+}
+
+//----------------------------------------------- UI
+
+// this is a debug event to log the path of the clicked UI element
+// set log = 1 to enable it
+def LogUIClickAnalytics : Analytics
+{
+	log = 0 // set to 1 to get a log every time an UI element is clicked
+
+	simulated = true
+	event_id = "mouse_click"
+	cooldown = 0
+
+	triggers
+	{
+		ui_element mouse_click
+	}
+
+	args
+	{
+		string path = (trigger.param)
+	}
+}
+
+// this is a debug event to log the path of the shown UI window
+// set log = 1 to enable it
+def LogUIWindowShownAnalytics : Analytics
+{
+	log = 0 // set to 1 to get a log every time a window is shown
+
+	simulated = true
+	event_id = "ui_window_shown"
+	cooldown = 0
+
+	triggers
+	{
+		ui_element ui_window_shown
+	}
+
+	args
+	{
+		string path = (trigger.param)
+	}
+}
+
+template UIClickAnalytics : Analytics
+{
+	//log = 1
+
+	//simulated = true
+
+	cooldown = -1 // only send once per session by default
+
+	string path // pattern to match the path in hierarchy	
+
+	triggers
+	{
+		ui_element mouse_click
+		{
+			condition = (Match(param,path,true))
+		}
+	}
+}
+
+template UIWindowShownAnalytics : Analytics
+{
+	//log = 1
+
+	//simulated = true
+
+	cooldown = -1 // only send once per session by default
+
+	string path // pattern to match the path in hierarchy	
+	string screen_name // the screen name
+
+	triggers
+	{
+		ui_element ui_window_shown
+		{
+			condition = (Match(param,path,true))
+		}
+	}
+
+	event_id = "screen_visit"
+
+	args
+	{
+		string screen = (screen_name)
+	}
+}
+
+//------------------ Click events
+
+template UIFirstButtonClickAnalytics : UIClickAnalytics
+{
+	event_id = "firstUse"
+
+	args
+	{
+		string uiType = "button"
+		string uiAction = "click"
+	}
+}
+
+// Economy bar
+template UIEconomyBarButtonClickAnalytics : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "economy_bar"
+	}
+}
+
+def UIGoldIncomeClick : UIEconomyBarButtonClickAnalytics
+{
+	path = "*Top Area/Economy/Resource_Income*"
+
+	args
+	{
+		string uiName = "gold_income"
+	}
+}
+
+def UIBooksIncomeClick : UIEconomyBarButtonClickAnalytics
+{
+	path = "*Top Area/Economy/Resource_Books*"
+
+	args
+	{
+		string uiName = "books_income"
+	}
+}
+
+def UIPietyIncomeClick : UIEconomyBarButtonClickAnalytics
+{
+	path = "*Top Area/Economy/Resource_Piety*"
+
+	args
+	{
+		string uiName = "piety_income"
+	}
+}
+
+
+// Royal court
+template UIRoyalCourtClickAnalytics : UIFirstButtonClickAnalytics
+{
+	event_id = "firstUse"
+
+	args
+	{
+		string uiLocation = "royal_court"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIRoyalCourtKingSlotClick : UIRoyalCourtClickAnalytics
+{
+	path = "*RoyalCourt/id_CourtContainer/id_KingSlot/id_CharacterGroup*"
+
+	args
+	{
+		string uiName = "king_slot"
+	}
+}
+
+def UIRoyalCourtOccupiedSlotClick : UIRoyalCourtClickAnalytics
+{
+	path = "*RoyalCourt/id_CourtContainer/id_CourSlot/id_CharacterGroup*"
+
+	args
+	{
+		string uiName = "character_slot"
+	}
+}
+
+def UIRoyalCourtEmptySlotClick : UIRoyalCourtClickAnalytics
+{
+	path = "*RoyalCourt/id_CourtContainer/id_CourSlot/id_HireGroup*"
+
+	args
+	{
+		string uiName = "empty_slot"
+	}
+}
+
+// Character actions (court)
+template UICharacterActionButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "character_action_bar"
+		string uiCategory = "decision"
+	}
+}
+
+def UICharacterRankActionClick : UICharacterActionButtonClick
+{
+	path = "*UIP_CourtMemberRankActionIcon*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiName = "rank"
+	}
+}
+
+def UICharacterStatusClick : UICharacterActionButtonClick
+{
+	path = "*UIP_CharacterStatusIcon*"
+
+	args
+	{
+		string uiName = "status"
+	}
+}
+
+def UICharacterNewSkillClick : UICharacterActionButtonClick
+{
+	path = "*UIP_CharacterSkill_RoyalCourt*"
+
+	args
+	{
+		string uiName = "add_skill"
+	}
+}
+
+def UICharacterActionClick : UICharacterActionButtonClick
+{
+	path = "*UIP_CharacterActionIcon*"
+
+	args
+	{
+		string uiName = "action"
+	}
+}
+
+def UIFameBarClick : UIFirstButtonClickAnalytics
+{
+	path = "*KingdomFame/id_FameBarContainer*"
+
+	args
+	{
+		string uiName = "fame_bar"
+		string uiLocation = "royal_court"
+		string uiCategory = "more_info"
+	}
+}
+
+// Important events
+
+template UIImportantEventIconClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "important_events"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIIERebelIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_RebelsContainer*"
+
+	args
+	{
+		string uiName = "rebellion"
+	}
+}
+
+def UIIEPrisonerIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_PrisonersContainer*"
+
+	args
+	{
+		string uiName = "foreign_prisoner"
+	}
+}
+
+def UIIEPatriarchIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_PatriarchContianer*"
+
+	args
+	{
+		string uiName = "patriarch"
+	}
+}
+
+def UIIECrusadeIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_CrusadeContainer*"
+
+	args
+	{
+		string uiName = "crusade"
+	}
+}
+
+def UIIEMercenariesIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_LoyalMercenaries*"
+
+	args
+	{
+		string uiName = "mercenary"
+	}
+}
+
+def UIIEQuestsIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_QuestsContainer*"
+
+	args
+	{
+		string uiName = "quest"
+	}
+}
+
+def UIIEJihadsIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_ThirdPartyJihadsContainer*"
+
+	args
+	{
+		string uiName = "quest"
+	}
+}
+
+def UIIEPactIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_PactsContainer/UIP_PactIcon*"
+
+	args
+	{
+		string uiName = "pact"
+	}
+}
+
+def UIIEWarIconClick : UIImportantEventIconClick
+{
+	path = "*id_ImportantEvents/id_WarsContainer*"
+
+	args
+	{
+		string uiName = "war"
+	}
+}
+
+// Kingdom crests
+template UIKingdomCrestClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "more_info"
+	}
+}
+
+def UILeftPrimaryKingdomCrestClick : UIKingdomCrestClick
+{
+	path = "*id_King_Left/id_KingdomCrest/id_Primary*"
+
+	args
+	{
+		string uiName = "left_primary_kingdom_crest"
+		string uiLocation = "top_left"
+	}
+}
+
+def UIRightPrimaryKingdomCrestClick : UIKingdomCrestClick
+{
+	path = "*id_King_Right/id_KingdomCrest/id_Primary*"
+
+	args
+	{
+		string uiName = "right_primary_kingdom_crest"
+		string uiLocation = "top_right"
+	}
+}
+
+def UIOwnerCrestClick : UIKingdomCrestClick
+{
+	path = "*Group_Crest_Owner*id_Primary*"
+
+	args
+	{
+		string uiName = "owner_crest"
+		string uiLocation = "castle_window"
+	}
+}
+
+def UIOccupierCrestClick : UIKingdomCrestClick
+{
+	path = "*Group_Crest_Occupier*id_Primary*"
+
+	args
+	{
+		string uiName = "occupier_crest"
+		string uiLocation = "castle_window"
+	}
+}
+
+def UISettlementWindowCrestClick : UIKingdomCrestClick
+{
+	path = "*UIP_SettlementWindow(Clone)/id_KingdomIcon/id_Primary*"
+
+	args
+	{
+		string uiName = "settlement_window_crest"
+		string uiLocation = "settlement_window"
+	}
+}
+
+// Objectives and rules
+template UIObjectivesButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "more_info"
+	}
+}
+
+def UIObjectivesIconClick : UIObjectivesButtonClick
+{
+	path = "*id_ToggleObjectivesAndRules*"
+
+	args
+	{
+		string uiName = "objectives_icon"
+		string uiLocation = "kingdom_ui"
+	}
+}
+
+def UIObjectivesLabelClick : UIObjectivesButtonClick
+{
+	path = "*id_ToggleObjectiveLabel*"
+
+	args
+	{
+		string uiName = "objectives_label"
+		string uiLocation = "objectives_window"
+	}
+}
+
+def UIObjectiveClick : UIObjectivesButtonClick
+{
+	path = "*id_ObjectivePrototype*"
+
+	args
+	{
+		string uiName = "objective"
+		string uiLocation = "objectives_window"
+	}
+}
+
+def UIRulesLabelClick : UIObjectivesButtonClick
+{
+	path = "*id_ToggleRulesLabel*"
+
+	args
+	{
+		string uiName = "rules_label"
+		string uiLocation = "objectives_window"
+	}
+}
+
+// Income windows
+def UITaxButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_TaxButton*"
+
+	args
+	{
+		string uiName = "tax_button"
+		string uiLocation = "income_window"
+		string uiCategory = "decision"
+	}
+}
+
+// def UIWarTaxButtonClick : UIFirstButtonClickAnalytics
+// {
+// 	path = "*id_Button_Wartaxes*"
+
+// 	args
+// 	{
+// 		string uiName = "collect_war_taxes"
+// 		string uiLocation = "income_window"
+// 		string uiCategory = "decision"
+// 	}
+// }
+
+def UIChangeReligionButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_ActionIcon_ChangeReligion*"
+
+	args
+	{
+		string uiName = "change_religion"
+		string uiLocation = "religion_window"
+		string uiCategory = "decision"
+	}
+}
+
+// Crown authority and oppinions
+def UICrownAuthorityButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*CrownAuthority/id_Icon*"
+
+	args
+	{
+		string uiName = "crown_authority"
+		string uiLocation = "crown_authority"
+		string uiCategory = "decision"
+	}
+}
+
+// Bottom left kingdom buttons
+template UIBottomLeftKingdomButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "bottom_left"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIProvincesButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonProvinces*"
+
+	args
+	{
+		string uiName = "provinces"
+	}
+}
+
+def UIRoyalFamilyButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonRoyalFamily*"
+
+	args
+	{
+		string uiName = "royal_family"
+	}
+}
+
+def UIGamepediaButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonGamepedia*"
+
+	args
+	{
+		string uiName = "gamepedia"
+	}
+}
+
+def UIWarsButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonWars*"
+
+	args
+	{
+		string uiName = "wars"
+	}
+}
+
+def UIRankingsButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_PrestigeVictory*"
+
+	args
+	{
+		string uiName = "rankings"
+	}
+}
+
+def UIAdvantagesButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_EconomyVictory*"
+
+	args
+	{
+		string uiName = "advantages"
+	}
+}
+
+def UISettingsButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonSettings*"
+
+	args
+	{
+		string uiName = "settings"
+	}
+}
+
+def UIDecreaseSpeedButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonDecreaseSpeed*"
+
+	args
+	{
+		string uiName = "decrease_speed"
+	}
+}
+
+def UIPauseButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonPause*"
+
+	args
+	{
+		string uiName = "pause"
+	}
+}
+
+def UIPlayButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonPlay*"
+
+	args
+	{
+		string uiName = "play"
+	}
+}
+
+def UIPlayFastButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonPlayFast*"
+
+	args
+	{
+		string uiName = "play_fast"
+	}
+}
+
+def UIPlayFasterButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonPlayFaster*"
+
+	args
+	{
+		string uiName = "play_faster"
+	}
+}
+
+def UIIncreaseSpeedButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_ButtonIncreaseSpeed*"
+
+	args
+	{
+		string uiName = "increase_speed"
+	}
+}
+
+def UIMuteButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_MuteButton*"
+
+	args
+	{
+		string uiName = "mute"
+	}
+}
+
+def UIUnmuteButtonClick : UIBottomLeftKingdomButtonClick
+{
+	path = "*Minimap_Left/id_UnmuteButton*"
+
+	args
+	{
+		string uiName = "unmute"
+	}
+}
+
+// Rankings window
+def UICheckRankingButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*RankingPrototype(Clone)/Rank_Btn*"
+
+	args
+	{
+		string uiName = "check_ranking"
+		string uiLocation = "rankings_window"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIClaimFameVictoryButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_GreatPowersRankingsWindow(Clone)/id_Victory/id_ButtonVictory*"
+
+	args
+	{
+		string uiName = "claim_victory"
+		string uiLocation = "rankings_window"
+		string uiCategory = "decision"
+	}
+}
+
+// Family and traditions window
+def UIAppointHeirButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_HairSelectionButtonsContainer/id_HairIcon*"
+
+	args
+	{
+		string uiName = "choose_heir"
+		string uiLocation = "family_window"
+		string uiCategory = "decision"
+	}
+}
+
+template UITraditionButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "family_window"
+		string uiCategory = "decision"
+	}
+}
+
+def UITraditionSlotButtonClick : UITraditionButtonClick
+{
+	path = "*id_TraditionSlotPrototype/id_TraditionIcon*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiName = "tradition_slot"
+	}
+}
+
+def UISelectTraditionButtonClick : UITraditionButtonClick
+{
+	path = "*UIP_DynastyTradition_Big*"
+
+	args
+	{
+		string uiName = "select_tradition"
+	}
+}
+
+def UITraditionsBackButtonClick : UITraditionButtonClick
+{
+	path = "*id_TraditionsSelector/Static_Group/id_Back*"
+
+	args
+	{
+		string uiName = "traditions_back"
+	}
+}
+
+def UITraditionsAdoptButtonClick : UITraditionButtonClick
+{
+	path = "*id_TraditionsSelector/Static_Group/id_Adopt*"
+
+	args
+	{
+		string uiName = "traditions_adopt"
+	}
+}
+
+def UITraditionsAbandonButtonClick : UITraditionButtonClick
+{
+	path = "*id_TraditionsSelector/Static_Group/id_Abandon*"
+
+	args
+	{
+		string uiName = "traditions_abandon"
+	}
+}
+
+// Wiki
+template UIGamepediaWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "gamepedia_window"
+	}
+}
+
+def UIGamepediaTOCButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/id_ShortcutButtons/TOC*"
+
+	args
+	{
+		string uiName = "toc"
+	}
+}
+
+def UIGamepediaWhatIsButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/id_ShortcutButtons/WhatIs*"
+
+	args
+	{
+		string uiName = "whatis"
+	}
+}
+
+def UIGamepediaHowToButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/id_ShortcutButtons/HowTo*"
+
+	args
+	{
+		string uiName = "howto"
+	}
+}
+
+def UIGamepediaBackButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/HistoryButtons/id_Button_Back*"
+
+	args
+	{
+		string uiName = "nav_back"
+	}
+}
+
+def UIGamepediaForwardButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/HistoryButtons/id_Button_Forward*"
+
+	args
+	{
+		string uiName = "nav_forward"
+	}
+}
+
+def UIGamepediaHistoryButtonClick : UIGamepediaWindowButtonClick
+{
+	path = "*UIP_WikiWindow(Clone)/HistoryButtons/id_Button_History*"
+	args
+	{
+		string uiName = "nav_history"
+	}
+}
+
+// Advantages window
+def UIAdvantagesFilterDropdownClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_KingdomAdvantagesWindow(Clone)/GroupDynamic/id_Filter*"
+
+	args
+	{
+		string uiLocation = "advantages_window"
+		string uiCategory = "more_info"
+		string uiName = "filter"
+		string uiType = "dropdown"
+	}
+}
+
+def UIAdvantagesClaimVictoryButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_KingdomAdvantagesWindow(Clone)/GroupStatic/id_Victory/id_ButtonVictory*"
+
+	args
+	{
+		string uiLocation = "advantages_window"
+		string uiCategory = "decision"
+		string uiName = "claim_victory"
+	}
+}
+
+// Wars and pacts window
+
+template UIWarsWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "war_window"
+	}
+}
+
+def UIWarsWindowPactButtonClick : UIWarsWindowButtonClick
+{
+	path = "*UIP_WarsOverviewWindow(Clone)/id_Overview/Pacts/*/UIP_PactIcon"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiName = "pact"
+	}
+}
+
+def UIWarsWindowLeavePactButtonClick : UIWarsWindowButtonClick
+{
+	path = "*id_SelectedPact/id_PactMembers/Member/id_Self/id_LeavePact*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiName = "leave_pact"
+	}
+}
+
+// Emperor of the World window
+template UIEmperorWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "emperor_window"
+		string uiCategory = "decision"
+	}
+}
+
+def UIEmperorWindowSkipAIVoterButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Button_SkipAIVoter*"
+
+	args
+	{
+		string uiName = "skip_ai_voter"
+	}
+}
+
+def UIEmperorWindowSingleCandidateForButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Group_VoterButtonsSinglecandidate/id_Button_For*"
+
+	args
+	{
+		string uiName = "for"
+	}
+}
+
+def UIEmperorWindowSingleCandidateAgainstButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Group_VoterButtonsSinglecandidate/id_Button_Against*"
+
+	args
+	{
+		string uiName = "against"
+	}
+}
+
+def UIEmperorWindowForC1ButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Group_VoterButtonsMultipleCandidates/id_Button_ForC1*"
+
+	args
+	{
+		string uiName = "for1"
+	}
+}
+
+def UIEmperorWindowForC2ButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Group_VoterButtonsMultipleCandidates/id_Button_ForC2*"
+
+	args
+	{
+		string uiName = "for2"
+	}
+}
+
+def UIEmperorWindowAbstainButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_Voter/id_Group_VoterButtonsMultipleCandidates/id_Button_Abstain*"
+
+	args
+	{
+		string uiName = "abstain"
+	}
+}
+
+def UIEmperorWindowAcceptEmperorButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_WaitEmperorResponse/id_EmperorResponsePlayer/id_Button_AcceptBeingEmperor*"
+
+	args
+	{
+		string uiName = "accept"
+	}
+}
+
+def UIEmperorWindowRejectEmperorButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_WaitEmperorResponse/id_EmperorResponsePlayer/id_Button_RejectBeingEmperor*"
+
+	args
+	{
+		string uiName = "reject"
+	}
+}
+
+def UIEmperorWindowAcceptAIEmperorButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_RejectAIEmperor/id_Button_AcceptAIEmperor*"
+
+	args
+	{
+		string uiName = "accept_ai"
+	}
+}
+
+def UIEmperorWindowRejectAIEmperorButtonClick : UIEmperorWindowButtonClick
+{
+	path = "*UIP_EmperorOfTheWorldWindow(Clone)/id_Group_RejectAIEmperor/id_Button_RejectAIEmperor*"
+
+	args
+	{
+		string uiName = "reject_ai"
+	}
+}
+
+// Target window
+
+template UITargetSelectWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "target_select_window"
+		string uiCategory = "decision"
+	}
+}
+
+def UITargetListItemButtonClick : UITargetSelectWindowButtonClick
+{
+	path = "*UIP_TargetListItem(Clone)*"
+
+	args
+	{
+		string uiName = "list_item"
+	}
+}
+
+def UITargetSelectWindowOKButtonClick : UITargetSelectWindowButtonClick
+{
+	path = "*UIP_TargetSelectWindow(Clone)/GroupStatic/OK*"
+
+	args
+	{
+		string uiName = "ok"
+	}
+}
+
+def UITargetSelectWindowCancelButtonClick : UITargetSelectWindowButtonClick
+{
+	path = "*UIP_TargetSelectWindow(Clone)/GroupStatic/Cancel*"
+
+	args
+	{
+		string uiName = "cancel"
+	}
+}
+
+// Audience
+template UIAudienceButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "audience_window"
+	}
+}
+
+def UIAudienceOfferButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Offer*"
+
+	args
+	{
+		string uiName = "Offer"
+	}
+}
+
+def UIAudienceDemandButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Demand*"
+
+	args
+	{
+		string uiName = "Demand"
+	}
+}
+
+def UIAudienceContinueMainButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ContinueMain*"
+
+	args
+	{
+		string uiName = "ContinueMain"
+	}
+}
+
+def UIAudienceOfferGoldButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferGold*"
+
+	args
+	{
+		string uiName = "OfferGold"
+	}
+}
+
+def UIAudienceOfferGoldCompleteButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferGoldComplete*"
+
+	args
+	{
+		string uiName = "OfferGoldComplete"
+	}
+}
+
+def UIAudienceDemandGoldButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandGold*"
+
+	args
+	{
+		string uiName = "DemandGold"
+	}
+}
+
+def UIAudienceDemandGoldCompleteButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandGoldComplete*"
+
+	args
+	{
+		string uiName = "DemandGoldComplete"
+	}
+}
+
+def UIAudienceOfferRealmButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferRealm*"
+
+	args
+	{
+		string uiName = "OfferRealm"
+	}
+}
+
+def UIAudienceOfferSupportInWarButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferSupportInWar*"
+
+	args
+	{
+		string uiName = "OfferSupportInWar"
+	}
+}
+
+def UIAudienceDemandRealmButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandRealm*"
+
+	args
+	{
+		string uiName = "DemandRealm"
+	}
+}
+
+def UIAudienceDemandAttackKingdomButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandAttackKingdom*"
+
+	args
+	{
+		string uiName = "DemandAttackKingdom"
+	}
+}
+
+def UIAudienceDemandReleasePrisonersButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandReleasePrisoners*"
+
+	args
+	{
+		string uiName = "DemandReleasePrisoners"
+	}
+}
+
+def UIAudienceOfferMarriageButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferMarriage*"
+
+	args
+	{
+		string uiName = "OfferMarriage"
+	}
+}
+
+def UIAudienceDemandJoinInDefensivePactButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandJoinInDefensivePact*"
+
+	args
+	{
+		string uiName = "DemandJoinInDefensivePact"
+	}
+}
+
+def UIAudienceOfferJoinInDefensivePactButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferJoinInDefensivePact*"
+
+	args
+	{
+		string uiName = "OfferJoinInDefensivePact"
+	}
+}
+
+def UIAudienceDemandJoinInOffensivePactButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandJoinInOffensivePact*"
+
+	args
+	{
+		string uiName = "DemandJoinInOffensivePact"
+	}
+}
+
+def UIAudienceOfferJoinInOffensivePactButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferJoinInOffensivePact*"
+
+	args
+	{
+		string uiName = "OfferJoinInOffensivePact"
+	}
+}
+
+def UIAudienceDeclareWarButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DeclareWar*"
+
+	args
+	{
+		string uiName = "DeclareWar"
+	}
+}
+
+def UIAudienceConfirmDeclareWarButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ConfirmDeclareWar*"
+
+	args
+	{
+		string uiName = "ConfirmDeclareWar"
+	}
+}
+
+def UIAudienceDynastyButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Dynasty*"
+
+	args
+	{
+		string uiName = "Dynasty"
+	}
+}
+
+def UIAudienceAskForLoanButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AskForLoan*"
+
+	args
+	{
+		string uiName = "AskForLoan"
+	}
+}
+
+def UIAudienceAskForLoanCompleteButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AskForLoanComplete*"
+
+	args
+	{
+		string uiName = "AskForLoanComplete"
+	}
+}
+
+def UIAudienceRepayLoanButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/RepayLoan*"
+
+	args
+	{
+		string uiName = "RepayLoan"
+	}
+}
+
+def UIAudienceRepayLoanCompleteButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/RepayLoanComplete*"
+
+	args
+	{
+		string uiName = "RepayLoanComplete"
+	}
+}
+
+def UIAudienceDemandHelpWithRebelsButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandHelpWithRebels*"
+
+	args
+	{
+		string uiName = "DemandHelpWithRebels"
+	}
+}
+
+def UIAudienceBreakRoyalTiesButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/BreakRoyalTies*"
+
+	args
+	{
+		string uiName = "BreakRoyalTies"
+	}
+}
+
+def UIAudienceAllianceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Alliance*"
+
+	args
+	{
+		string uiName = "Alliance"
+	}
+}
+
+def UIAudienceLordshipButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Lordship*"
+
+	args
+	{
+		string uiName = "Lordship"
+	}
+}
+
+def UIAudienceInvokeAllianceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/InvokeAlliance*"
+
+	args
+	{
+		string uiName = "InvokeAlliance"
+	}
+}
+
+def UIAudienceAskForProtectionButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AskForProtection*"
+
+	args
+	{
+		string uiName = "AskForProtection"
+	}
+}
+
+def UIAudienceDemandSupportInWarButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandSupportInWar*"
+
+	args
+	{
+		string uiName = "DemandSupportInWar"
+	}
+}
+
+def UIAudienceJoinVassalButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/JoinVassal*"
+
+	args
+	{
+		string uiName = "JoinVassal"
+	}
+}
+
+def UIAudienceGrantIndependenceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/GrantIndependence*"
+
+	args
+	{
+		string uiName = "GrantIndependence"
+	}
+}
+
+def UIAudienceClaimIndependenceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ClaimIndependence*"
+
+	args
+	{
+		string uiName = "ClaimIndependence"
+	}
+}
+
+def UIAudienceSignPeaceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/SignPeace*"
+
+	args
+	{
+		string uiName = "SignPeace"
+	}
+}
+
+def UIAudienceDemandTributeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandTribute*"
+
+	args
+	{
+		string uiName = "DemandTribute"
+	}
+}
+
+def UIAudienceDemandWhitePeaceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandWhitePeace*"
+
+	args
+	{
+		string uiName = "DemandWhitePeace"
+	}
+}
+
+def UIAudienceOfferTributeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/OfferTribute*"
+
+	args
+	{
+		string uiName = "OfferTribute"
+	}
+}
+
+def UIAudienceDemandOfferTributeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DemandOfferTribute*"
+
+	args
+	{
+		string uiName = "DemandOfferTribute"
+	}
+}
+
+def UIAudienceProposeTributeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ProposeTribute*"
+
+	args
+	{
+		string uiName = "ProposeTribute"
+	}
+}
+
+def UIAudienceTributeGoldButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeGold*"
+
+	args
+	{
+		string uiName = "TributeGold"
+	}
+}
+
+def UIAudienceTributeGoldCompleteButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeGoldComplete*"
+
+	args
+	{
+		string uiName = "TributeGoldComplete"
+	}
+}
+
+def UIAudienceTributeLandButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeLand*"
+
+	args
+	{
+		string uiName = "TributeLand"
+	}
+}
+
+def UIAudienceTributeFullButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_ScrollableContent/id_Scrollable/Viewport/id_ScrollableRowsContainer/def/id_GroupFull/id_BtnFull*"
+
+	args
+	{
+		string uiName = "TributeBtnFull"
+	}
+}
+
+def UIAudienceTributeEmptyButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_ScrollableContent/id_Scrollable/Viewport/id_ScrollableRowsContainer/def/id_GroupEmpty/id_BtnEmpty*"
+
+	args
+	{
+		string uiName = "TributeBtnEmpty"
+	}
+}
+
+def UIAudienceTributeFullResetButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_ScrollableContent/id_Scrollable/Viewport/id_ScrollableRowsContainer/def/id_GroupFull/id_BtnFull/Empty/id_ResetButton*"
+
+	args
+	{
+		string uiName = "TributeBtnFullReset"
+	}
+}
+
+def UIAudienceTributeMarriageButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeMarriage*"
+
+	args
+	{
+		string uiName = "TributeMarriage"
+	}
+}
+
+def UIAudienceTributeVassalageButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeVassalage*"
+
+	args
+	{
+		string uiName = "TributeVassalage"
+	}
+}
+
+def UIAudienceTributeAbandonCaliphateButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeAbandonCaliphate*"
+
+	args
+	{
+		string uiName = "TributeAbandonCaliphate"
+	}
+}
+
+def UIAudienceTributeBookButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeBook*"
+
+	args
+	{
+		string uiName = "TributeBook"
+	}
+}
+
+def UIAudienceTributeReleasePrisonersButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeReleasePrisoners*"
+
+	args
+	{
+		string uiName = "TributeReleasePrisoners"
+	}
+}
+
+def UIAudienceTributeTradeAgreementButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeTradeAgreement*"
+
+	args
+	{
+		string uiName = "TributeTradeAgreement"
+	}
+}
+
+def UIAudienceTributeReleaseVassalageButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeReleaseVassalage*"
+
+	args
+	{
+		string uiName = "TributeReleaseVassalage"
+	}
+}
+
+def UIAudienceTributeChangeReligionButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeChangeReligion*"
+
+	args
+	{
+		string uiName = "TributeChangeReligion"
+	}
+}
+
+def UIAudienceTributeAttackKingdomButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/TributeAttackKingdom*"
+
+	args
+	{
+		string uiName = "TributeAttackKingdom"
+	}
+}
+
+def UIAudienceSignTradeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/SignTrade*"
+
+	args
+	{
+		string uiName = "SignTrade"
+	}
+}
+
+def UIAudienceExclusiveDealButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ExclusiveDeal*"
+
+	args
+	{
+		string uiName = "ExclusiveDeal"
+	}
+}
+
+def UIAudienceSignNonAgressionButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/SignNonAgression*"
+
+	args
+	{
+		string uiName = "SignNonAgression"
+	}
+}
+
+def UIAudienceSignAllianceButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/SignAlliance*"
+
+	args
+	{
+		string uiName = "SignAlliance"
+	}
+}
+
+def UIAudienceAcceptOfferButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AcceptOffer*"
+
+	args
+	{
+		string uiName = "AcceptOffer"
+	}
+}
+
+def UIAudienceDeclineOfferButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/DeclineOffer*"
+
+	args
+	{
+		string uiName = "DeclineOffer"
+	}
+}
+
+def UIAudienceCustomCounterOfferAnswerButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/CustomCounterOfferAnswer*"
+
+	args
+	{
+		string uiName = "CustomCounterOfferAnswer"
+	}
+}
+
+def UIAudienceAskForCrusadeButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AskForCrusade*"
+
+	args
+	{
+		string uiName = "AskForCrusade"
+	}
+}
+
+def UIAudienceAskForExcommunicationButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/AskForExcommunication*"
+
+	args
+	{
+		string uiName = "AskForExcommunication"
+	}
+}
+
+def UIAudienceCloseButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/Close*"
+
+	args
+	{
+		string uiName = "Close"
+	}
+}
+
+def UIAudienceCancelOfferButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/CancelOffer*"
+
+	args
+	{
+		string uiName = "CancelOffer"
+	}
+}
+
+def UIAudienceContinueOfferButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ContinueOffer*"
+
+	args
+	{
+		string uiName = "ContinueOffer"
+	}
+}
+
+def UIAudienceContinueDemandButtonClick : UIAudienceButtonClick
+{
+	path = "*Audience(Clone)/Group_Iteraciton/id_MenuButtons/ContinueDemand*"
+
+	args
+	{
+		string uiName = "ContinueDemand"
+	}
+}
+
+// Castle window
+template UICastleWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "castle_window"
+	}
+}
+
+def UICWBuildingSlotButtonClick : UICastleWindowButtonClick
+{
+	path = "*id_BuildingSlots*id_BuildingSlot*"
+
+	args
+	{
+		string uiName = "building_slot"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWRemoveBuildingButtonClick : UICastleWindowButtonClick
+{
+	path = "*id_BuildingSlot/Group_Icon/id_RemoveBuilding*"
+
+	args
+	{
+		string uiName = "remove_building"
+		string uiCategory = "decision"
+	}
+}
+
+def UICWGovernorButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_CastleWindow(Clone)/Group_Center/id_Governer*"
+
+	args
+	{
+		string uiName = "governor"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWFortificationsButtonClick : UICastleWindowButtonClick
+{
+	path = "*id_Fortifications/id_Citadel*"
+
+	args
+	{
+		string uiName = "fortifications"
+		string uiCategory = "decision"
+	}
+}
+
+def UICWGarrisonSlotButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_GarrisonSlot_Round*"
+
+	args
+	{
+		string uiName = "garrison_slot"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWUnitSlotButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_ArmyWindow_InCastle(Clone)/id_GorupUnits/UIP_UnitSlot_Round*"
+
+	args
+	{
+		string uiName = "unit_slot"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWOpenHireButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_ArmyWindow_InCastle(Clone)/id_OpenHire*"
+
+	args
+	{
+		string uiName = "open_hire"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWCloseHireButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_ArmyWindow_InCastle(Clone)/id_CloseHire*"
+
+	args
+	{
+		string uiName = "close_hire"
+		string uiCategory = "close"
+	}
+}
+
+def UICWBuyEquipmentButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_ArmyWindow_InCastle(Clone)/id_GroupEquipment/UIP_ArmyItemSlot_Round(Clone)*"
+
+	args
+	{
+		string uiName = "buy_equipment"
+		string uiCategory = "more_info"
+	}
+}
+
+def UICWHealArmyButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_ArmyWindow_InCastle(Clone)/id_Manpower/id_Heal*"
+
+	args
+	{
+		string uiName = "heal"
+		string uiCategory = "decision"
+	}
+}
+
+def UICWHealUnitButtonClick : UICastleWindowButtonClick
+{
+	path = "*UIP_UnitSlot_Round/id_ButtonHeal*"
+
+	args
+	{
+		string uiName = "heal_unit"
+		string uiCategory = "decision"
+	}
+}
+
+def UICWResupplyArmyButtonClick : UICastleWindowButtonClick
+{
+	path = "*id_ArmyFoodContaner/id_Resupply*"
+
+	args
+	{
+		string uiName = "resupply"
+		string uiCategory = "decision"
+	}
+}
+
+// Building window
+def UIBuildingsWindowSlotClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BuildingsPanel/buildings*"
+
+	args
+	{
+		string uiLocation = "buildings_window"
+		string uiName = "building"
+		string uiCategory = "more_info"
+	}
+}
+
+// Upgrade window
+def UIBuildingWindowBuildButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BuildingInfo/InfoRect/id_BuildButton*"
+
+	args
+	{
+		string uiLocation = "building_window"
+		string uiName = "build_building"
+		string uiCategory = "decision"
+	}
+}
+
+def UIBuildingWindowUpgradeButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_Upgrades/buildings*"
+
+	args
+	{
+		string uiLocation = "building_window"
+		string uiName = "research_upgrade"
+		string uiCategory = "decision"
+	}
+}
+
+// Garrison recruitment window
+def UIRecruitWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_GarrisonRecrutmentWindow(Clone)*UIP_GarrisonSlot(Clone)*"
+	args
+	{
+		string uiLocation = "recruitment_window"
+		string uiName = "recruit"
+		string uiCategory = "decision"
+	}
+}
+
+// Equipment purchase window
+def UIPurchaseEquipmentButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_EquipmentPurchaseWindow(Clone)/id_Container/UIP_ArmyItemSlot_Round*"
+	args
+	{
+		string uiLocation = "purchase_equipment_window"
+		string uiName = "purchase"
+		string uiCategory = "decision"
+	}
+}
+
+// Equipment purchase window
+template UIMercenaryWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "mercenary_window"
+	}
+}
+
+def UIMercWindowVisitingArmySlotClick : UIMercenaryWindowButtonClick
+{
+	path = "*UIP_Mercenary(Clone)/Group_Visitors/Group_VisitingUnits/id_VisitingArmyContainer/UIP_UnitSlot_Round*"
+	args
+	{
+		string uiName = "visiting_unit"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIMercWindowVisitingArmySlotDisbandClick : UIMercenaryWindowButtonClick
+{
+	path = "*UIP_Mercenary(Clone)/Group_Visitors/Group_VisitingUnits/id_VisitingArmyContainer/UIP_UnitSlot_Round(Clone)/id_Button_Disband*"
+	args
+	{
+		string uiName = "disband_visiting_unit"
+		string uiCategory = "decision"
+	}
+}
+
+def UIMercWindowHireUnitClick : UIMercenaryWindowButtonClick
+{
+	path = "*UIP_Mercenary(Clone)/id_Group_MercUnits/id_MercUnitsContainer/UIP_UnitSlot_Round*"
+	args
+	{
+		string uiName = "hire_merc_unit"
+		string uiCategory = "decision"
+	}
+}
+
+def UIMercWindowHireArmyClick : UIMercenaryWindowButtonClick
+{
+	path = "*UIP_Mercenary(Clone)/Group_Visitors/id_HireKingdom*"
+	args
+	{
+		string uiName = "hire_army"
+		string uiCategory = "decision"
+	}
+}
+
+def UIMercWindowDismissArmyClick : UIMercenaryWindowButtonClick
+{
+	path = "*UIP_Mercenary(Clone)/Group_Visitors/id_Dismiss*"
+	args
+	{
+		string uiName = "dismiss_army"
+		string uiCategory = "decision"
+	}
+}
+
+// Radio
+template UIRadioClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "radio"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIRadioHideClick : UIRadioClick
+{
+	path = "*id_EventLogger/id_DataContainer/Group_Static/id_HideBtn*"
+	args
+	{
+		string uiName = "hide"
+	}
+}
+
+def UIRadioFilterClick : UIRadioClick
+{
+	path = "*id_EventLogger/id_DataContainer/Group_Static/id_FiltersContainer*"
+	args
+	{
+		string uiName = "filter"
+	}
+}
+
+def UIRadioShrinkClick : UIRadioClick
+{
+	path = "*id_EventLogger/id_DataContainer/Group_Static/id_ShrinkBtn*"
+	args
+	{
+		string uiName = "shrink"
+	}
+}
+
+def UIRadioExpandClick : UIRadioClick
+{
+	path = "*id_EventLogger/id_DataContainer/Group_Static/id_ExpandBtn*"
+	args
+	{
+		string uiName = "expand"
+	}
+}
+
+def UIRadioShowClick : UIRadioClick
+{
+	path = "*id_EventLogger/id_ShowBtn*"
+	args
+	{
+		string uiName = "show"
+	}
+}
+
+// Minimap buttons
+template UIMinimapButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiLocation = "minimap"
+		string uiCategory = "more_info"
+	}
+}
+
+def UIMinimapRealmsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Provinces*"
+
+	args
+	{
+		string uiName = "Provinces"
+	}
+}
+
+def UIMinimapKingdomsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Kingdoms*"
+
+	args
+	{
+		string uiName = "Kingdoms"
+	}
+}
+
+def UIMinimapStancesViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Stances*"
+
+	args
+	{
+		string uiName = "Stances"
+	}
+}
+
+def UIMinimapRelationsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Relations*"
+
+	args
+	{
+		string uiName = "Relations"
+	}
+}
+
+def UIMinimapReligionsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Religions*"
+
+	args
+	{
+		string uiName = "Religions"
+	}
+}
+
+def UIMinimapStabilityViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Stability*"
+
+	args
+	{
+		string uiName = "Stability"
+	}
+}
+
+def UIMinimapTradeZonesViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/TradeZones*"
+
+	args
+	{
+		string uiName = "TradeZones"
+	}
+}
+
+def UIMinimapProvinceFeaturesViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/ProvinceFeatures*"
+
+	args
+	{
+		string uiName = "ProvinceFeatures"
+	}
+}
+
+def UIMinimapBuildingsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Buildings*"
+
+	args
+	{
+		string uiName = "Buildings"
+	}
+}
+
+def UIMinimapCulturesViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Cultures*"
+
+	args
+	{
+		string uiName = "Cultures"
+	}
+}
+
+def UIMinimapLoyaltyViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Loyalty*"
+
+	args
+	{
+		string uiName = "Loyalty"
+	}
+}
+
+def UIMinimapGoodsViewClick : UIMinimapButtonClick
+{
+	path = "*id_ViewModeButtons/Goods*"
+
+	args
+	{
+		string uiName = "Goods"
+	}
+}
+
+def UIMinimapToggleTownsClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_FilterPopulation/id_ToggleTowns*"
+
+	args
+	{
+		string uiName = "toggle_towns"
+	}
+}
+
+def UIMinimapToggleArmiesClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_FilterPopulation/id_ToggleArmies*"
+
+	args
+	{
+		string uiName = "toggle_armies"
+	}
+}
+
+def UIMinimapToggleBattlesClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_FilterPopulation/id_ToggleBattles*"
+
+	args
+	{
+		string uiName = "toggle_battles"
+	}
+}
+
+def UIMinimapToggleRealmsClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_RealmKingdomToggle/id_ToggleRealm*"
+
+	args
+	{
+		string uiName = "toggle_realms"
+	}
+}
+
+def UIMinimapToggleKingdomsClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_RealmKingdomToggle/id_ToggleKingdom*"
+
+	args
+	{
+		string uiName = "toggle_kingdoms"
+	}
+}
+
+def UIMinimapBackButtonClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_BackButton*"
+
+	args
+	{
+		string uiName = "back"
+	}
+}
+
+def UIMinimapHomeButtonClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_HomeButton*"
+
+	args
+	{
+		string uiName = "home"
+	}
+}
+
+def UIMinimapLegendButtonClick : UIMinimapButtonClick
+{
+	path = "*id_Group_PoliticalView/id_Legend*"
+
+	args
+	{
+		string uiName = "legend"
+	}
+}
+
+// Choose new patriarch
+def UIChooseNewPatriarchIconClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_ChooseNewPatriarch(Close)/Group_Expandable/id_ContainerCandidates/UIP_PatriarchSelectSlot(Clone)*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "choose_patriarch_window"
+		string uiName = "patriarch_of_choice"
+	}
+}
+
+def UIChooseNewPatriarchConfirmClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_ChooseNewPatriarch(Close)/Group_Expandable/Buttons/id_Button_Choose*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "choose_patriarch_window"
+		string uiName = "confirm"
+	}
+}
+
+def UIChooseNewPatriarchAbstainClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_ChooseNewPatriarch(Close)/Group_Expandable/Buttons/id_Button_Choose*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "choose_patriarch_window"
+		string uiName = "abstain"
+	}
+}
+
+// Message icons
+def UIMessageIconClick : UIFirstButtonClickAnalytics
+{
+	path = "*Left/id_MessageIcons/MessageIcon(Clone)*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "messages_left"
+		string uiName = "message_icon"
+	}
+}
+
+def UIBuildingInProgressIconClick : UIFirstButtonClickAnalytics
+{
+	path = "*Right/id_OngoingIcons/MessageIconCastleBuilding(Clone)*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "messages_right"
+		string uiName = "building_in_progress"
+	}
+}
+
+def UIBattleInProgressIconClick : UIFirstButtonClickAnalytics
+{
+	path = "*Right/id_OngoingIcons/OngoingBattleIcon(Clone)*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "messages_right"
+		string uiName = "battle_in_progress"
+	}
+}
+
+// Important messages
+def UIImportantMessagesClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_ImportantMessages/id_Dynamic/id_IOIcons/PendingIcon*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "important_messages"
+		string uiName = "incoming_offer"
+	}
+}
+
+// Battle window
+template UIBattleWindowButtonClick : UIFirstButtonClickAnalytics
+{
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_window"
+	}
+}
+
+def UIBWRetreatClick : UIBattleWindowButtonClick
+{
+	path = "*UIP_BattleWindow(Clone)/id_Preparation/Group_PlayerActions/id_Retreat*"
+
+	args
+	{
+		string uiName = "retreat"
+	}
+}
+
+def UIBWRefuseSupportClick : UIBattleWindowButtonClick
+{
+	path = "*UIP_BattleWindow(Clone)/id_Preparation/Group_PlayerActions/id_RefuseSupport*"
+
+	args
+	{
+		string uiName = "refuse_support"
+	}
+}
+
+def UIBWAllInClick : UIBattleWindowButtonClick
+{
+	path = "*UIP_BattleWindow(Clone)/id_Preparation/id_Buttons/all_in*"
+
+	args
+	{
+		string uiName = "all_in"
+	}
+}
+
+def UIBWLeadClick : UIBattleWindowButtonClick
+{
+	path = "*UIP_BattleWindow(Clone)/id_Preparation/id_Buttons/lead*"
+
+	args
+	{
+		string uiName = "lead"
+	}
+}
+
+def UIBWCounterattackClick : UIBattleWindowButtonClick
+{
+	path = "*UIP_BattleWindow(Clone)/id_Preparation/id_Buttons/counterattack*"
+
+	args
+	{
+		string uiName = "counterattack"
+	}
+}
+
+// Battle view
+def UIBVRetreatButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BattleHud/id_BattleQuitOptions/id_btn_Rereat*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "retreat"
+	}
+}
+
+def UIBVExitButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BattleHud/id_BattleQuitOptions/id_btn_Exit*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "exit"
+	}
+}
+
+def UIBVArmyCommandsButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BattleHud/id_HelpersContainer/id_ArmyCommandsButton*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_commands"
+	}
+}
+
+def UIBVFiltersButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*id_BattleHud/id_HelpersContainer/id_FiltersButton*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "battle_view_ui"
+		string uiName = "filters"
+	}
+}
+
+def UIBVSquadFrameNormalButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_BattleView_SquadFrame_Normal(Clone)*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "battle_view_ui"
+		string uiName = "leader_squad_icon"
+	}
+}
+
+def UIBVSquadFrameSmallButtonClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_BattleView_SquadFrame_Small(Clone)*"
+
+	args
+	{
+		string uiCategory = "more_info"
+		string uiLocation = "battle_view_ui"
+		string uiName = "squad_icon"
+	}
+}
+
+def UIBVArmyActionStopClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Stop*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_stop"
+	}
+}
+
+def UIBVArmyActionShrinkClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Shrink*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_shrink"
+	}
+}
+
+def UIBVArmyActionResetFormationClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_ResetFormation*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_reset_formation"
+	}
+}
+
+def UIBVArmyActionExpandClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Expand*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_expand"
+	}
+}
+
+def UIBVArmyActionLineClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Line*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_line"
+	}
+}
+
+def UIBVArmyActionTriangleClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Triangle*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_triangle"
+	}
+}
+
+def UIBVArmyActionHoldFireClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_HoldFire*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_hold_fire"
+	}
+}
+
+def UIBVArmyActionHoldGroundClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_HoldGround*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_hold_ground"
+	}
+}
+
+def UIBVArmyActionDeployClick : UIFirstButtonClickAnalytics
+{
+	path = "*UIP_SquadWindow(Clone)/id_ArmyActions/id_Deploy*"
+
+	args
+	{
+		string uiCategory = "decision"
+		string uiLocation = "battle_view_ui"
+		string uiName = "army_deploy"
+	}
+}
+
+
+
+
+//------------------ Window Open events
+
+// def UIBuildingsWindowAnalytics : UIWindowShownAnalytics
+// {
+// 	path = "*UIP_CastleBuildWindow*"
+// 	screen_name = "Buildings"
+// }
+
+// def UIUpgradesWindowAnalytics : UIWindowShownAnalytics
+// {
+// 	path = "*UIP_BuildingWindow*"
+// 	screen_name = "Upgrades"
+// }

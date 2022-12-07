@@ -1,0 +1,1404 @@
+﻿
+def Battle
+{
+	prefab prefab = "Assets/Europe/Battles/Battle.prefab" //GUID:9cd706e619c350242928e19b3721d938
+	prefab particles = "Assets/Europe/VFX/WV_BattleSmoke.prefab" //GUID:36dc38fa6eb1b1e4fa740076df3ad7d9
+	
+	float attack_range = 5
+	float tents_range = 4.5 //3.25
+	float fight_range = 4.5 //2.75
+	float trebuchet_range = 8.65
+	float min_survival_health = 0.05
+	
+	bool debug = false
+	
+	bool AI = true
+	
+	bool AI_retreat = true
+	{
+		float estimation_threshold = 0.2 // 0 - losing completely .. 1 - winning completely, 0.2 = losing_badly
+		int min_lost_units = 1 // have at least N units defeated (killed/fled)
+		float min_lost_perc = 30 // have at least X% of initial units defeated (nobles not included), 3/8 = 0.375
+	}
+	
+	float preparation_time = (preparation_time_base / preparation_time_modifier)
+	{
+		vars
+		{
+			case is_stronger = ((stronger_army_manpower > 2 * weaker_army_manpower) && (weaker_army_manpower < 100))
+			{
+				float preparation_time_modifier = (min(3, (stronger_army_manpower / weaker_army_manpower) - 1))
+			}
+			case default
+			{
+				float preparation_time_modifier = 1
+			}
+		}
+	}
+	float preparation_time_base = 45
+	float duration = 0
+	
+	// grid size in terrain type tiles
+	int tt_grid_width = 5
+	int tt_grid_height = 5
+	
+	float base_experience = 0
+	float experience_retreat_mod = 0.2
+	float experience_per_squad_mod = 0.1
+	float experience_gain_speed = 150
+	
+	float distance_between_armies = 50
+	float distance_between_squads = 2
+	
+	
+	// random voice lines that used to be in messages, too many to remember why/how they're in the code, so we're just moving them here but the messages are still the ones that do the actual sound
+	string LostThirdPartyCastleOccupiedByEnemy = "narrator_voice:open_field_battle_lost"
+	string WonThirdPartyCastleOccupiedByEnemy = "narrator_voice:freeing_ally_town"
+	string WonThirdPartyKeepOccupiedByEnemy = "narrator_voice:freeing_ally_castle"
+	string WonOwnKeepOccupiedByEnemy = "narrator_voice:freeing_our_castle"
+	string CounterBattleWonOwnCastle = "narrator_voice:our_town_defended_outside_army_interrupted"
+	string CounterBattleWonOwnKeep = "narrator_voice:own_castle_defended_outside_army_interrupted"
+	string AssaultOurs = "narrator_voice:our_town_under_assault"
+	string BreakSiegeTheirs = "narrator_voice:enemies_breaking_our_siege"
+	string BreakSiegeTheirsJoin = "narrator_voice:they_received_reinforcements"
+	string BreakSiegeOursJoin = "narrator_voice:we_received_reinforcements"
+	string JoinedBattleTheirsPlunder = "narrator_voice:pillage_interrupted"
+	string JoinedBattleTheirs = "narrator_voice:they_received_reinforcements"
+	string DefendersRetreatedIntoCastle = "character_voice:enemy_army_fled"
+	string JoinedBattleOursAlly = "narrator_voice:we_received_reinforcements"
+	string WonBattleSurrender = "character_voice:enemy_surrenders"
+	string LostBattleSurrender = "character_voice:we_surrender"
+	string LostEnemyCastleOccupiedByOwn = "narrator_voice:trade_center_lost"
+	string WonEnemyCastleOccupiedByOwn = "narrator_voice:our_town_defended"
+	string WonEnemyCastleTradeCenter = "narrator_voice:trade_center_conquered"
+	string WonEnemyCastle = "narrator_voice:enemy_province_conquered"
+	string ThirdEnemyWonOwnCastleOccupiedByEnemy = "narrator_voice:our_town_lost"
+	string LostEnemyPlunder = "narrator_voice:we_failed_to_pillage_enemy_settlement"
+	string LostOwnPlunder = "narrator_voice:our_settlement_pillaged"
+	string WonOwnPlunder = "narrator_voice:enemy_failed_to_pillage_our_settlement"
+	string OngoingSiegeCastleDefender = "narrator_voice:our_town_under_siege"
+	string OngoingPlunderDefender = "narrator_voice:pillage_started"
+	string OurMoraleBelowHalf = "narrator_voice:our_morale_is_low"
+	string EnemyMoraleBelowHalf = "narrator_voice:enemy_morale_is_low"
+	
+	// generic
+	string WonBattle = "narrator_voice:open_field_battle_won" // won generic battle
+	string LostBattle = "narrator_voice:open_field_battle_lost" // lost generic battle
+	
+	/// narrator battle commentary 
+	string KilledOwnKing = "narrator_voice:our_king_killed"
+	string KilledOwnPrince = "narrator_voice:our_prince_killed"
+	string KilledOwnKnight = "narrator_voice:our_army_leader_killed"
+	
+	string ImprisonedOwnKing = "narrator_voice:our_king_captured"
+	string ImprisonedOwnPrince = "narrator_voice:our_prince_captured"
+	string ImprisonedOwnKnight = "narrator_voice:our_army_leader_captured"
+	
+	string OurKingFled = "narrator_voice:our_king_fled"
+	string OurPrinceFled = "narrator_voice:our_prince_fled"
+	string OurKnightFled = "narrator_voice:our_army_leader_fled"
+	
+	
+	string KilledEnemyWeHaveNoLeader = "narrator_voice:enemy_knight_killed"
+	
+	/// army leader battle commentary 
+	string KilledEnemyKing = "character_voice:enemy_king_killed"
+	string KilledEnemyPrince = "character_voice:enemy_prince_killed"
+	string KilledEnemyKnight = "character_voice:enemy_leader_killed"
+	
+	string ImprisonedEnemyKing = "character_voice:enemy_king_captured"
+	string ImprisonedEnemyPrince = "character_voice:enemy_prince_captured"
+	string ImprisonedEnemyKnight = "character_voice:enemy_leader_captured"
+	
+	string HeavyLosses = "character_voice:player_heavy_losses"
+	string HeavyLossesEnemy = "character_voice:enemy_heavy_losses"
+	
+	string WonRetreated = "character_voice:enemy_army_fled"
+	
+	string OurArmyRetreatedVoice = "character_voice:retreat" //Retreating via action //only if we retreat and the battle continues
+	
+	
+	/// SIEGE voice lines 	
+	//narrator_voice:siege_interrupted //"A siege was interrupted by a foreign army!"
+	
+	/// town siege 
+	// Unused, because we already use narrator_voice:enemies_lifted_siege:
+	//string LiftSiegeDefender = "narrator_voice:our_town_defended" //Message when the enemy has stopped (lifted) the siege of your town	
+	string LiftSiegeAttacker = "character_voice:lift_siege"
+	
+	string WonOwnCastle = "narrator_voice:our_town_defended" //defended one of our TOWNS from a siege	
+	string LostOwnCastle = "narrator_voice:our_town_lost" //lost one of our town 
+	string WonAllyCastle = "narrator_voice:enemy_invaders_defeated"
+	//string WonEnemyCastle = "narrator_voice:enemy_province_conquered" //won an enemy TOWN 
+	string LostEnemyCastle = "narrator_voice:enemy_town_siege_failed" //failed to occupy enemy castle
+	string LostOwnCastleOccupiedByEnemy = "narrator_voice:open_field_battle_lost" // failed to unoccupy one of our towns //rebels only
+	
+	//string WonEnemyCastleOccupiedByOwn = ""  //unused //defended an enemy town that we've already occupied 
+	//string LostEnemyCastleOccupiedByOwn = "" //unused //enemy has reoccupied one of their towns 
+	
+	
+	
+	/// castle siege 	
+	string WonOwnKeep = "narrator_voice:enemy_invaders_defeated"
+	string LostOwnKeep = "narrator_voice:our_castle_lost"
+	string LostEnemyKeepOccupiedByOwn = "narrator_voice:enemy_castle_lost"
+	
+	string WonEnemyKeep = "narrator_voice:enemy_castle_won" // occupied an enemy keep
+	string LostEnemyKeep = "narrator_voice:enemy_castle_siege_failed" //We failed to besiege an enemy castle.
+	//We failed to besiege a foreign castle because enemies interrupted us and defeated us in battle.	
+	
+	/// rebels 
+	string SackedOwnCastle = "narrator_voice:our_town_sacked_by_rebels" // our TOWN sacked by rebels 
+	string LostOwnCastleToRebels = "narrator_voice:rebels_occupied_our_town"
+	string WonOwnCastleOccupiedByEnemy = "narrator_voice:our_town_liberated_from_rebels" // unoccupied one of our castles	
+	
+	
+	/// plunder 
+	//string LostOwnPlunder = "narrator_voice:our_settlement_pillaged" //our settlement was plundered
+	string WonEnemyPlunder = "narrator_voice:enemy_settlement_pillaged" //plundered an enemy settlement
+	//string WonOwnPlunder = "narrator_voice:enemy_failed_to_pillage_our_settlement" //defended a settlement from being plundered
+	//string LostEnemyPlunder = "narrator_voice:we_failed_to_pillage_enemy_settlement"//failed to plunder an enemy settlement
+	
+	
+	
+	/// SOUND EFFECTS 
+	string WonEnemyPlunderSFX = "event:/sound_effects/notification/battle_won"
+	string WonSiegeSFX = "event:/sound_effects/notification/battle/siege_won"
+	string LostSiegeSFX = "event:/sound_effects/notification/battle/siege_lost"
+	string WonBattleSFX = "event:/sound_effects/notification/battle_won"
+
+	Skirmish
+	{
+		int min_troops = 20
+		int max_troops = 60
+		int min_cavalry = 10
+		int max_cavalry = 25
+		int min_fighting = 10
+		int max_fighting = 40
+	}
+	
+	// Generic, when bv end battle screen appears
+	string WonBattleview = "event:/sound_effects/notification/battle_won"
+	string LostBattleview = ""
+	
+	string WonBattleviewRetreated = "narrator_voice:enemy_army_retreated"//"character_voice:enemy_army_fled"
+	string LostBattleviewRetreated = "narrator_voice:our_army_retreated"
+	string WonBattleviewLeaderDied = "narrator_voice:enemy_leader_died"
+	string LostBattleviewLeaderDied = "narrator_voice:our_leader_died"
+	string WonBattleviewCapturePoints = "narrator_voice:enemy_points_captured"
+	string LostBattleviewCapturePoints = "narrator_voice:our_points_captured"
+	
+	
+	string ImprisonedSFX = "event:/sound_effects/notification/character/imprisoned"
+	
+	string ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+	
+	
+	float min_siege_defense_additional_defender_mod = 0.15
+	int max_guard_squads = 6
+	int liberating_militia_squads = [2, 5]
+	int defense_levy = 1
+	int infantry_levy = 1
+	int ranged_levy = 1
+	
+	float militia_alive_workers_mod = 5
+	float militia_alive_workers_village_mod = 30
+	float militia_max_population_mod = 5
+	float militia_base = 50
+	// var realm = settlement.GetRealm();
+	// int workers = realm.castle.population.workers + realm.castle.population.rebels;
+	// int slots = realm.castle.population.Slots(Population.Type.Worker, false) - workers;
+	// return (int)(workers * def.militia_alive_workers_mod + slots * def.militia_max_population_mod + def.militia_base);
+	
+	
+	tactics
+	{
+		attacker
+		{
+			all_in
+			{
+				text name = "All In" // attack
+				text description = "Order your troops to engage the enemy. You will observe the battle in simulated form."
+			}
+			
+		}
+		defender
+		{
+			counterattack
+			{
+				text name = "Counter Attack" // attack
+				text description = "Order your troops to engage the enemy. You will observe the battle in simulated form."
+			}
+		}
+	}
+	
+	
+	text reinforcement_estimation_text = "{estimation_time}"
+	
+	estimation_texts
+	{
+		text lost = "Defeated"
+		text losing_badly = "Heavily one-sided"
+		text losing = "Slightly one-sided"
+		text balanced = "Balanced"
+		text winning = "Slightly one-sided"
+		text winning_decisively = "Heavily one-sided"
+		text won = "Victorious"
+		
+		text player_lost = "Defeated"
+		text player_losing_badly = "Losing badly"
+		text player_losing = "Losing"
+		text player_balanced = "Balanced"
+		text player_winning = "Winning"
+		text player_winning_decisively = "Winning decisively"
+		text player_won = "Victorious"
+
+		text preparation_losing = "Slightly one-sided"
+		text preparation_losing_badly = "Heavily one-sided"
+		text preparation_balanced = "Balanced"
+		text preparation_winning = "Slightly one-sided"
+		text preparation_winning_decisively = "Heavily one-sided"
+	}
+	
+	color supporter_color_tint = "141,141,141" //8E8E8EFF
+	float nameplate_clamped_alpha = 0.5
+	
+	estimation_colors
+	{
+		color lost = "221,89,85,255" //DD5955
+		color losing_badly = "255,86,81,255" //ff5651
+		color losing = "218,116,113,255" //da7471
+		color balanced = "170,159,68" //AB9F44FF
+		color winning = "87,213,81,255" //57d551
+		color winning_decisively = "22,227,12,255" //22bd5a
+		color won = "126,236,166,255" //7EECA6
+		/// BY STANCES
+		color ally_left = "66,106,49" //426A31FF
+		color ally_right = "57,143,74" //398F4AFF
+		color enemy_left = "152,44,33" //982C21FF
+		color enemy_right = "180,117,26" //b4751aFF
+		color neutral_left = "49,105,153" //316999FF
+		color neutral_right = "57,136,148" //398894FF
+		color player = "69,100,14" //45640EFF
+		color player_enemy = "100,16,14" //64100EFF
+	}
+
+	estimation_bar_colors
+	{
+		color lost = "197,33,28,255" //C5211C
+		color losing_badly = "197,33,28,255" //C5211C
+		color losing = "197,33,28,255" //C5211C
+		color balanced = 0,0,0
+		color winning = "125,180,26,255" //7DB41A
+		color winning_decisively = "125,180,26,255" //7DB41A
+		color won = "125,180,26,255" //7DB41A
+	}
+	
+	morale_colors
+	{
+		color permanent_player = "77,128,185" //4E81B9FF
+		//color permanent_ally = "45,82,122" //2E527BFF
+		color permanent_enemy = "138,82,146" //8A5293FF
+		color temporary_positive = "68,173,0" //45AD00FF
+		color temporary_negative = "189,58,58" //BE3A3AFF
+	}
+	
+	arrows
+	{
+		sprite attack = "Assets/UI/WV Battle Sim/squad arrows2.png:big1#1" //GUID:6e58dda0cc1285340b9915033df4023e
+		sprite retreat_short = "Assets/UI/WV Battle Sim/squad arrows2.png:straight#1" //GUID:6e58dda0cc1285340b9915033df4023e
+		sprite retreat = "Assets/UI/WV Battle Sim/squad arrows2.png:curved1#1" //GUID:6e58dda0cc1285340b9915033df4023e
+		sprite retreat_long = "Assets/UI/WV Battle Sim/squad arrows2.png:curved2#1" //GUID:6e58dda0cc1285340b9915033df4023e
+		sprite army_retreat = "Assets/UI/WV Battle Sim/squad arrows2.png:big2#1" //GUID:6e58dda0cc1285340b9915033df4023e
+	}
+	
+	//status_icons
+	//{
+	//	sprite dead = "Assets/UI/WV Battle Sim/squad arrows2.png:x#1" //GUID:6e58dda0cc1285340b9915033df4023e
+	//	sprite surrendered
+	//	sprite deserted
+	//}
+	
+	float max_initiative = 600
+	float initiative_decay = 1 // around 15 minutes for all initiative to run out
+	float initiative_take_capture_point = 0 //100
+	float initiative_lose_capture_point = 0 //100
+	float initiative_take_tower = 0 //50
+	float initiative_lose_tower = 0 //50
+	float initiative_take_gate = 0 //75
+	float initiative_lose_gate = 0 //75
+	
+	int min_enter_battle_squads_player = 4
+	int min_enter_battle_squads_ai = 4
+	float min_enter_battle_attacker_estimation = 0 //0.25
+	float min_enter_battle_defender_estimation = 0 //0.25
+	float range_estimation_mod = 0.15
+	
+	float supplies_consumed_at_end = (max(0.1, (1 + leader.cs_army_supply_usage_perc / 100) * 2 * their_manpower / (our_manpower + their_manpower))) // per army in the battle
+
+
+	BattleviewGeneration
+	{
+		text GeneratingTerrain = "Drawing the terrain map"
+		text CreatingLogic = "Studying terrain objects"
+
+		Parameters
+		{
+
+		}
+		Steps
+		{
+			MandatoryAtStart
+			{
+				step AddMapBounds
+				{
+					text loading_screen_tip = "Planning the battle area"
+					string func = "GenerateMapBounds"
+				}
+				step LoadUniqueContainer
+				{
+					text loading_screen_tip = "Observing buildings"
+					string func = "LoadUniqueContainer"
+				}
+				step ClearRoads
+				{
+					text loading_screen_tip = "Considering road blockades"
+					string func = "ClearRoads"
+				}
+				step BuildMasks1
+				{
+					text loading_screen_tip = "Planning squads maneuvering around buildings"
+					string func = "BuildMasksWithoutCitadel"
+				}
+				step LoadPathfinding1
+				{
+					text loading_screen_tip = "Even more maneuvering being planned"
+					string func = "LoadPathfinding"
+				}
+			}
+
+			VariableSteps = OpenFieldSteps
+
+			OpenFieldSteps
+			{
+				step LoadArchitecture
+				{
+					text loading_screen_tip =  "Consulting with architects"
+					string func = "LoadArchitecturesOpenfield"
+				}
+				step LoadHouses
+				{
+					text loading_screen_tip = "Checking buildings for spies"
+					string func = "LoadHouses"
+				}
+				step SpawnArmyCamps
+				{
+					text loading_screen_tip = "Preparing army camps"
+					string func = "SpawnOpenFieldCamps"
+				}
+				step CreateRandomRoad
+				{
+					text loading_screen_tip = "Patrolling the roads"
+					string func = "CreateRandomRoad"
+				}
+				step SpawnRandomHouses
+				{
+					text loading_screen_tip = "Barring-up houses"
+					string func = "SpawnRandomHouses"
+				}
+				step Shoreline
+				{
+					text loading_screen_tip = "Training on the shoreline"
+					string func = "GenerateShoreline"
+				}
+				step ConnectRandomHouses
+				{
+					text loading_screen_tip = "Patrolling roads between houses in the province"
+					string func = "ConnectRandomHouses"
+				}
+				step GrowPG
+				{
+					text loading_screen_tip = "Checking houses near roads for ambushers"
+					string func = "GrowPG";
+				}
+				step SetLevel
+				{
+					text loading_screen_tip = "Issuing governor building regulations"
+					string func = "SetLevel";
+				}
+			}
+			MandatoryAtEnd
+			{
+				step ValidatePrefabGrids
+				{
+					text loading_screen_tip =  "Inspection of all sites"
+					string func = "ValidatePrefabGrids"
+				}
+				step Refresh
+				{
+					text loading_screen_tip = "Rechecking the buildings"
+					string func = "Refresh"
+				}
+				step BuildSettlementMasksForFurtherPathfinding
+				{
+					text loading_screen_tip = "Rechecking all city roads for blockades"
+					string func = "BuildMasksAllSettlements"
+				}
+				step LoadPathfinding2
+				{
+					text loading_screen_tip = "Issuing road permits"
+					string func = "LoadPathfinding"
+				}
+				step ConnectHousesSmallRoads
+				{
+					text loading_screen_tip =  "Patrolling small roads between houses and main roads"
+					string func = "ConnectRoadsHouses"
+				}
+				step SpawnRemoveTrees
+				{
+					text loading_screen_tip = "Cutting down trees to build siege engines"
+					string func = "SpawnRemoveTrees"
+				}
+				step SnapHeights
+				{
+					text loading_screen_tip = "Checking buildings' foundations"
+					string func = "SnapHeights"
+				}
+				step AddTerrainSplats
+				{
+					text loading_screen_tip = "Clearing yards"
+					string func = "AddTerrainSplats"
+				}
+				step BuildFinalSettlementMasks
+				{
+					text loading_screen_tip = "Issuing 'no entry' decree"
+					string func = "BuildMasksAllSettlements"
+				}
+				step LoadPathfinding3
+				{
+					text loading_screen_tip = "Issuing even more road permits"
+					string func = "LoadPathfinding"
+				}
+				step CalcTreeGrid
+				{
+					text loading_screen_tip = "Setting traps in woods"
+					string func = "CalcTreeGrid"
+				}
+				step CalcNorthBreakSiegePositions
+				{
+					text loading_screen_tip = "Preparing breaking siege from the north"
+					string func = "CalcNorthBreakSiegePositions"
+				}
+				step CalcSouthReinforcementPositions
+				{
+					text loading_screen_tip = "Calling for reinforcements from the south"
+					string func = "CalcSouthReinforcementPositions"
+				}
+				step CalcNorthReinforcementPositions
+				{
+					text loading_screen_tip = "Calling for reinforcements from the north"
+					string func = "CalcNorthReinforcementPositions"
+				}
+				step ReduceTerrainLayers
+				{
+					text loading_screen_tip = "Clearing debris from the ground"
+					string func = "ReduceTerrainLayers"
+				}
+			}
+		}
+	}
+}
+
+def BattleSimulation
+{
+	float global_move_speed_mod = 1
+	float global_cth_mod = 0.5 //if you change this, change retreat_damage_mod in units.def as well
+	float global_chance_to_shock_mod = 5
+	
+	// thresholds get checked every time we lose temporary morale, 
+	// if it's > 0 we divide the old/new morale by this and only check the thresholds if the difference is bigger than 1
+	float morale_threshold_divider = -1
+	float morale_from_casualties = -10 // permanent, from start of battle till now
+	float morale_drop_from_damage = -10 // temporary, from this tick
+	float max_tick_time = 3
+	float duration_mod = 1.25
+	
+	float dist_between_units_x = 2.15
+	float dist_between_units_y = 2.15
+	
+	float retreat_dist = 3.5 // left/right from marshal
+	float disengage_dist = 2.5 // left/right from marshal
+	
+	float range_loss_per_round = 15
+	int max_archer_rounds = 9999 //1
+	float salvo_per_shot = 1 // how many salvos does a simulated squad lose when shooting - if at 1 they'd always be killed before running out
+	//increase this value if we can compensate it with supply carts, etc
+	float balance_constant_melee = 0.6
+	float balance_constant_ranged = 1.2
+	float balance_constant_trample = 0.6
+	float balance_constant_attrition = 6
+
+	float bonus_defense_per_morale = 25 // 25% bonus defense when you're at max morale, 50 when at half etc.
+	float defense_per_morale_offset = 10 // at 15 morale out of 30, you're getting (15 - 10) / (30 - 10) bonus morale
+	float bonus_flat_defense_per_morale = 0.1 // morale (0 - 30) multiplied by this is added to defense (before percent modifiers)
+
+	float morale_on_reinforce_friend = 0.01 // per manpower, army with manpower 2700 gives 2.7 morale
+	float morale_on_reinforce_enemy = -0.01 // per manpower, army with manpower 2700 gives 2.7 morale
+	float min_morale_on_start = 3 //to avoid armies with 0 morale from immediately fleeing	
+	float bonus_temp_morale_on_start = 5
+	float noble_defense_per_unit_in_army = 20 // noblemen squad gets X% extra defense for each living unit (squad) in the marshal's army
+	float morale_outnumbered = -4/0/8 // attack power = manpower * cth, morale_outnumbered  = our attack power / (our attack power + enemy attack power)
+	{
+		float min_outnumber = 0
+		float max_outnumber = 1
+	}
+	float max_dist_from_battle = 12
+	float unit_max_morale = Morale.max_morale
+	string state_chances_check_order = ["Retreating", "Fled"]
+	float defenders_resilience_bonus_mod = 0.5 //what part of the resilience of the town the defenders get
+	float morale_effects_range_battleview_mod = 3
+	float surrender_overall_morale_chance = -1
+	
+	float bonus_cth_per_max_initiative = 0 //10
+	float bonus_resilience_per_max_initiative = 0 //10
+	float penalty_cth_no_initiative = 0 //-10
+	float penalty_resilience_no_initiative = 0 //-10
+	
+	float morale_recovery_mod = 0.1
+	float morale_decay_mod = 0.1
+	
+	
+	float castle_defenders_mod = 1 //multiplies defenders bonuses (those, provided by siege defense)
+	float castle_defenders_bonus_ranged = 8 //multiplies defenders bonuses against ranged to compensate ranged boost
+	float min_castle_defender_bonus = 0.1
+	float gate_assaulted_defense_mod = 0.5
+
+	States
+	{
+		Disengaging
+		{
+			float duration = 1.5
+			float chance = 30 // checked per tick, if finished attack state
+		}
+		Moving
+		{
+			float duration = 1 // max duration in this case, will move as much as possible during that period
+		}
+		Retreating
+		{
+			float duration = 2
+			// aoe friends
+			float apply_on_friends = 0/2
+			float morale_buff_nearby_friends_range = 0
+			float morale_buff_nearby_friends = -2
+			// aoe enemies
+			float apply_on_enemies = 2/4
+			float morale_buff_nearby_enemies_range = 4
+			float morale_buff_nearby_enemies = 2
+			
+			float morale_on_finish = 2
+			float chance // checked whenever morale is applied
+			{
+				0 = 30
+				1 = 10
+				2 = 5
+				3 = 0
+			}
+		}
+		Fled
+		{
+			// aoe friends
+			float morale_buff_nearby_friends_range = 10
+			float morale_buff_nearby_friends = -3
+			float apply_on_friends = 0/2
+			// aoe enemies
+			float morale_buff_nearby_enemies_range = 5
+			float morale_buff_nearby_enemies = 5
+			float apply_on_enemies = 1/2
+			
+			float chance // checked whenever morale is applied
+			{
+				0 = 10
+				1 = 5
+				2 = 0
+			}
+		}
+		Dead
+		{
+			// aoe friends
+			float morale_buff_nearby_friends_range = 18
+			float morale_buff_nearby_friends = 0
+			// aoe enemies
+			float morale_buff_nearby_enemies_range = 18
+			float morale_buff_nearby_enemies = 5
+		}
+	}
+	
+	morale_factors
+	{
+		float initial = #CalcMoraleInitial
+		{
+			text description = "Initial morale"
+		}
+		float outnumbered = #CalcMoraleOutnumbered
+		{
+			text description = "Strength ratio"
+		}
+		float rebels = #CalcMoraleRebels
+		{
+			text description = "Rebels"
+		}
+		float losses = #CalcMoraleLosses
+		{
+			text description = "Losses since start of battle"
+		}
+		float no_supplies = (army.leader.cs_army_morale.no_supplies) // if army with no supplies
+		{
+			text description = "Run out of supplies"
+			bool initial = true
+		}
+		float no_food = (is_starving * -3) // if garrison or castle defender
+		{
+			text description = "Run out of food"
+		}
+		float fighting_enemy_religion = #CalcMoraleVsOtherReligion //(army.leader.cs_army_morale.fighting_other_religion) // if army with no supplies
+		{
+			text description = "Fighting foreign religion"
+		}
+	}
+}
+
+def BattleViewSimulation : BattleSimulation
+{
+	// float castle_defenders_mod = 0 //multiplies defenders bonuses (those, provided by siege defense)
+	// float castle_defenders_bonus_ranged = 0 //multiplies defenders bonuses against ranged to compensate ranged boost
+	// float min_castle_defender_bonus = 0.1
+	float gate_assaulted_defense_mod = 1
+
+	float noble_defense_per_unit_in_army = 0
+
+	float min_distance_between_camps = 320	//distance is randomized
+	float max_distance_between_camps = 400	//and is between min and max (works only in OpenField)
+	float army_offset_from_camp = 30	//how far from camps should be set formation
+	float break_siege_distance_to_camps = 300	//minimum distance from breaking siege army to besieging side camps, values between 300 and 600 should make sense
+
+	float global_move_speed_mod = 0.7
+	float global_cth_mod = 0.5 //if you change this, change retreat_damage_mod in units.def as well
+	float defense_against_trample_mod = 2	//additional defense against trample 
+	float avoid_trample_tight_formation_mod = 0.5
+	float CTH_against_cav_charge_mod = 2 //additional cth against charging enemy
+	
+	//Initiative Idle settings for battleview
+	float initiative_cooldown = 15 //cooldown for initiative when it should resume
+	float initiative_countdown = 15 //countdown time for initiative when its depleted to leave battle
+	float morale_drop_from_initiative = -3 //Morale penalty for side that had initiative when leaving battle
+
+	float bonus_defense_per_morale = 100 // 100% bonus defense when you're at max morale, 50 when at half etc.
+	float defense_per_morale_offset = 10 // at 15 morale out of 30, you're getting (15 - 10) / (30 - 10) bonus morale
+	float bonus_flat_defense_per_morale = 0.5 // morale (0 - 30) multiplied by this is added to defense (before percent modifiers)
+
+	//Flanking setting for stances
+	float aggressive_base_flank_angle = 45 //base angle for light flanking (if 0 ignore flanking)
+	float aggressive_additional_flank_angle_cavalry = 85 //additional flanking angle for cavalry if base one fails (ignored if lower then base or 0)
+	float aggressive_additional_flank_angle_infantry = 75 //additional flanking angle for infantry if base one fails (ignored if lower then base or 0)
+	float defensive_base_flank_angle = 0 // Preserve formation angle for light flanking (if 0 ignore flanking)
+	float defensive_additional_flank_angle_cavalry = 0 //Preserve formation additional flanking angle for cavalry
+	float defensive_additional_flank_angle_infantry = 0 //Preserve formation additional flanking angle for infantry
+	
+	// if old morale was 19.3 and new morale is 19.2, we divide and ceil/floor both values, so they're 20 and 19 - difference is exactly 1, so no threshold check
+	// if old morale was 19.3 and new morale is 18.9, then we get 20 and 18 - difference is greater than 1, so we perform a threshold check
+	// you could change the threshold divider, so for example at 2, we'd be checking thresholds in intervals of 2, 4, 6 etc. - the bigger the divider, the less checks we do
+	float morale_threshold_divider = 1
+	// flanks
+	float threat_additional_side_dist = 40
+	float morale_flank_map_min = -100
+	float morale_flank_map_max = 100
+	float morale_flank_min = 3 // less threat = more morale
+	float morale_flank_max = -3 // more threat = less morale
+	// rear
+	float threat_additional_rear_dist = 40
+	float morale_flank_rear_map_min = -100
+	float morale_flank_rear_map_max = 100
+	float morale_flank_rear_min = 3
+	float morale_flank_rear_max = -3
+	// if morale falls under this, surrender?
+	// only do it when a squad flees/retreats/dies
+	float surrender_overall_morale_chance
+	{
+		0 = 75
+		1 = 30
+		2 = 12
+		4 = 5
+		5 = 2
+		6 = 0
+	}
+	
+	States
+	{
+		Disengaging
+		{
+			float duration = 1.5
+			float chance = 30 // checked per tick, if finished attack state
+		}
+		Moving
+		{
+			float duration = 1 // max duration in this case, will move as much as possible during that period
+		}
+		Retreating
+		{
+			float duration = 20
+			// aoe friends
+			float apply_on_friends = 0/2
+			float morale_buff_nearby_friends_range = 0
+			float morale_buff_nearby_friends = -2
+			// aoe enemies
+			float apply_on_enemies = 2/4
+			float morale_buff_nearby_enemies_range = 12
+			float morale_buff_nearby_enemies = 2
+			
+			float morale_on_finish = 2
+			float chance // checked whenever morale is applied
+			{
+				0 = 80
+				1 = 50
+				2 = 20
+				4 = 10
+				5 = 5
+				6 = 0
+			}
+			
+			float initiative_my_side = 0 //-50
+			float initiative_enemy_side = 0 //50
+		}
+		Fled
+		{
+			// aoe friends
+			float morale_buff_nearby_friends_range = 18
+			float morale_buff_nearby_friends = -3
+			float apply_on_friends = 0/2
+			// aoe enemies
+			float morale_buff_nearby_enemies_range = 10
+			float morale_buff_nearby_enemies = 5
+			float apply_on_enemies = 1/2
+			
+			float chance // checked whenever morale is applied
+			{
+				0 = 60
+				1 = 50
+				2 = 35
+				3 = 15
+				4 = 0
+			}
+			float initiative_my_side = 0 //-150
+			float initiative_enemy_side = 0 //150
+		}
+		Dead
+		{
+			// aoe friends
+			float morale_buff_nearby_friends_range = 18
+			float morale_buff_nearby_friends = 0
+			// aoe enemies
+			float morale_buff_nearby_enemies_range = 18
+			float morale_buff_nearby_enemies = 5
+			float initiative_my_side = 0 //-150
+			float initiative_enemy_side = 0 //150
+		}
+	}
+	
+	morale_factors
+	{
+		float initial = #CalcMoraleInitial
+		{
+			text description = "Initial morale"
+		}
+		float outnumbered = #CalcMoraleOutnumbered
+		{
+			text description = "Strength ratio"
+		}
+		float rebels = #CalcMoraleRebels
+		{
+			text description = "Rebels"
+		}
+		float losses = #CalcMoraleLosses
+		{
+			text description = "Losses since start of battle"
+		}
+		float no_supplies = (army.leader.cs_army_morale.no_supplies)
+		{
+			text description = "Run out of supplies"
+			bool initial = true
+		}
+		float no_food = (is_starving * -3) // if garrison or castle defender
+		{
+			text description = "Run out of food"
+			bool initial = true
+		}
+		float fighting_enemy_religion = (army.leader.cs_army_morale.fighting_other_religion) // if army with no supplies
+		{
+			text description = "Fighting foreign religion"
+			bool initial = true
+		}
+		float flanked_left = #CalcMoraleFlankedLeft
+		{
+			text description = "Flanked to the left"
+		}
+		float supported_left = #CalcMoraleSupportedLeft
+		{
+			text description = "Supported from the left"
+		}
+		float flanked_right = #CalcMoraleFlankedRight
+		{
+			text description = "Flanked to the right"
+		}
+		float supported_right = #CalcMoraleSupportedRight
+		{
+			text description = "Supported from the right"
+		}
+		float flanked_rear = #CalcMoraleFlankedRear
+		{
+			text description = "Flanked from the rear"
+		}
+		float supported_rear = #CalcMoraleSupportedRear
+		{
+			text description = "Supported from the rear"
+		}
+		float capture_points = (#CalcMoraleCapturePoints * 2)
+		{
+			text description = "Controlled capture points"
+		}
+		float shrink_formation = (#CalcMoraleShrinkFormation * 2)
+		{
+			text description = "Tight formation"
+		} 
+	}
+	morale_recovery_mod = 0.025
+	morale_decay_mod = 0.025
+}
+
+def SackingRepair
+{
+	float sacking_gold_mul = 0.5
+	float sacking_worker_deaths = 0.1
+	float sacking_rebellious_deaths = 0.25
+	float sacking_levy_deaths = 0.5
+	float sacking_burned_structures = 0.25
+	float sacking_repair_coef = 0.5
+	float sacking_recovery_production_mod = 1
+	float quick_recovery_mod = 2
+	float sacked_food_penalty = -5
+}
+
+
+def OpenField : Battle
+{
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+}
+
+def Plunder : Battle
+{
+	preparation_time_base = 0
+	duration = 120
+	float resume_plunder_progress_mod = 0.5 // when defenders die, plunder progress *= resume_plunder_progress_mod
+	float plunder_gold_base = 200
+	float plunder_per_gold_production = 0
+	float plunder_gold_per_gold = 100
+	float plunder_gold_per_book = 50
+	float plunder_books_per_book = 50
+	float plunder_gold_per_piety = 50
+	float plunder_gold_per_levy = 10
+	float plunder_gold_per_hammer = 50
+	float plunder_gold_per_worker = 10
+	float plunder_gold_per_commerce = 75
+	float plunder_supplies_per_food = 30
+	float plunder_supplies_per_levy = 10
+	float plunder_supplies_per_worker = 15
+	float plunder_supplies_base = 10
+	float plunder_per_supporter = 0
+	float plunder_supplies_per_supporter = 0.5
+	
+	float interrupt_province_ratio = 0.01
+	float interrupt_settlement_ratio = 0.05
+	
+	//LostOwnSettlement = "narrator_voice:open_field_battle_lost" // we failed to defend our village
+	//LostEnemySettlement = "narrator_voice:we_failed_to_pillage_enemy_settlement" //we were defeated while plundering a village
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_plundering"
+}
+
+def PlunderInterrupt : Plunder // only while there's someone defending the battle, after that we go back to a regular plunder
+{
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+	preparation_time_base = 45
+}
+
+def Siege : Battle
+{
+	preparation_time_base = 0
+	float attrition_tick = 10
+	int req_melee_attrition_troops = 500 //divides attack of melee - high value = less damage
+	int req_ranged_attrition_troops = 100 //divides attack of ranged - high value = less damage
+	int req_equipment_attrition_troops = 100 //divides attack of siege - high value = less damage
+
+	int efficient_siege_squads = 12
+	float penalty_per_squad = 2
+	float surrender_ratio = 1.5
+	float levy_resilience = 15
+	float resilience_damage_mod = 1.2
+	float keep_initial_resil_mod = 0.5
+	float keep_resil_damage_mod = 1
+	float keep_initial_siege_defense_mod = 0.5
+	float keep_siege_defense_damage_mod = 1
+	float resilience_defense_flat_mod = 0.5
+	float base_siege_damage = 5
+	
+	ongoing_sound = ""
+
+	BattleviewGeneration
+	{
+		Steps
+		{
+			case Town = (is_town)
+			{
+				VariableSteps = TownGenerationSteps
+				TownGenerationSteps
+				{
+					step LoadArchitecture
+					{
+						text loading_screen_tip = "Consulting local architects"
+						string func = "LoadSiegeArchitectures"
+					}
+					step LoadWall
+					{
+						text loading_screen_tip = "Fortifying walls"
+						string func = "LoadWall"
+					}
+					step LoadCitadel
+					{
+						text loading_screen_tip = "Fortifying citadel"
+						string func = "LoadCitadel"
+					}
+					step LoadHouses
+					{
+						text loading_screen_tip = "Fortifying houses"
+						string func = "LoadHouses"
+					}
+					step CalcLevel
+					{
+						text loading_screen_tip = "Checking the progress of the local population"
+						string func = "CalcLevel"
+					}
+					step Scale
+					{
+						text loading_screen_tip = "Estimating battle area"
+						string func = "Scale"
+					}
+					step BuildMasks2
+					{
+						text loading_screen_tip = "Issuing another 'no entry' decree"
+						string func = "BuildMasksWithoutCitadel"
+					}
+					step LoadPathfinding2
+					{
+						text loading_screen_tip = "Building more and more roads"
+						string func = "LoadPathfinding"
+					}
+					step SpawnArmyCamps
+					{
+						text loading_screen_tip = "Preparing attackers' army camp"
+						string func = "SpawnArmyCampOutsideWall"
+					}
+					step SpawnGates
+					{
+						text loading_screen_tip = "Fortifying gates"
+						string func = "SpawnGates"
+					}
+					step SpawnTowers
+					{
+						text loading_screen_tip = "Manning the towers"
+						string func = "SpawnTowers"
+					}
+					step ScaleWallCorners
+					{
+						text loading_screen_tip =  "Checking durability of wall corners"
+						string func = "ScaleWallCorners"
+					}
+					step Refresh
+					{
+						text loading_screen_tip = "Barring-up buildings"
+						string func = "Refresh"
+					}
+					step SpawnUnique
+					{
+						text loading_screen_tip = "Carefully barring-up important buildings"
+						string func = "SpawnUniqueBuildings"
+					}
+					step SpawnCapturePoints
+					{
+						text loading_screen_tip =  "Assigning guards to key town positions"
+						string func = "SpawnCapturePoints"
+					}
+					step ValidatePrefabGrids
+					{
+						text loading_screen_tip =  "Inspecting all important objects"
+						string func = "ValidatePrefabGrids"
+					}
+					step BuildMasks3
+					{
+						text loading_screen_tip = "Planning squad's maneuvering"
+						string func = "BuildMasksWithoutCitadel"
+					}
+					step GenerateRoads
+					{
+						text loading_screen_tip = "Setting townguards on the roads from citadel to gates and around inner side of walls"
+						string func = "GenerateRoads";
+					}
+					step GenerateNeighbourhood
+					{
+						text loading_screen_tip = "Patrolling neighbourhood roads in the town"
+						string func = "GenerateNeighbourhood"
+					}
+					step LoadPathfinding3
+					{
+						text loading_screen_tip = "Even more squad maneuvering planning"
+						string func = "LoadPathfinding"
+					}
+					step SpawnRandomHouses
+					{
+						text loading_screen_tip = "Inspecting random houses for spies"
+						string func = "SpawnRandomHouses"
+					}
+					step Shoreline
+					{
+						text loading_screen_tip = "Training on the shorelines"
+						string func = "GenerateShoreline"
+					}
+					step GrowPG
+					{
+						text loading_screen_tip = "Checking more houses for spies, around roads and other houses"
+						string func = "GrowPG";
+					}
+					step SetLevel
+					{
+						text loading_screen_tip = "Checking noblemen houses for problems"
+						string func = "SetLevel";
+					}
+					step ConnectRandomHouses
+					{
+						text loading_screen_tip = "Walking outer roads to warn residents of the attack"
+						string func = "ConnectRandomHouses"
+					}
+				}
+			}
+			case default
+			{
+				VariableSteps = Battle.BattleviewGeneration.Steps.OpenFieldSteps
+			}
+		}
+	}
+}
+
+def Assault : Siege
+{
+	preparation_time_base = Battle.preparation_time_base
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+	min_enter_battle_attacker_estimation = 0 //0.4
+	min_enter_battle_defender_estimation = 0 //0.2
+	range_estimation_mod = 0.45
+}
+
+def BreakSiege : Siege
+{
+	preparation_time_base = Battle.preparation_time_base
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+}
+
+def Naval : Battle
+{
+	ongoing_sound = "event:/sound_effects/battle/worldview/army_fighting"
+}
+
+def BattleBonus
+{
+	sprite icon
+	text name
+	text description
+}
+
+def TerrainBonus : BattleBonus
+{
+	float spawn_chance = 0
+	//float global_mod = (leader.cs_natural_terrain_bonus_perc)
+}
+
+def Marshland : TerrainBonus
+{
+	name = "Marshland"
+	description = $[
+	"The shallow waters in these regions reduce the fighting capabilities of all heavily armored units."
+	"{p}"
+	"{p}{b}Heavy infantry units{/b}"
+	"{p}Attack: {HeavyInfantry.CTH_perc:bonus}"
+	"{p}Defense: {HeavyInfantry.defense:bonus}" //!!! upr delete
+	// "{p}Defense: {HeavyInfantry.defense:bonus:%}" //!!! upr
+	"{p}{b}Heavy defense units{/b}"
+	"{p}Attack: {HeavyDefense.CTH_perc:bonus}"
+	"{p}Defense: {HeavyDefense.defense:bonus}" //!!! upr delete
+	// "{p}Defense: {HeavyDefense.defense:bonus:%}" //!!! upr
+	"{p}{b}Heavy cavalry units{/b}"
+	"{p}Attack: {HeavyCavalry.CTH_perc:bonus}"
+	"{p}Defense: {HeavyCavalry.defense:bonus}" //!!! upr delete
+	// "{p}Defense: {HeavyCavalry.defense:bonus:%}" //!!! upr
+	"{p}{b}Heavy ranged units{/b}"
+	"{p}Defense: {HeavyRanged.defense:bonus}"] //!!! upr delete
+	// "{p}Defense: {HeavyRanged.defense:bonus:%}"] //!!! upr
+	
+	spawn_chance = #CalcMarshSpawnCondition
+	
+	HeavyInfantry
+	{
+		mod CTH_perc = -25
+		mod defense = -25 { perc = true }
+		text mod_name = "From Marshland"
+	}
+	
+	HeavyDefense
+	{
+		mod CTH_perc = -25
+		mod defense = -25 { perc = true }
+		text mod_name = "From Marshland"
+	}
+	
+	HeavyCavalry
+	{
+		mod CTH_perc = -25
+		mod defense = -25 { perc = true }
+		text mod_name = "From Marshland[ {unit.is_ranged:if}{unit.is_cavalry:if}(Heavy Cavalry)]"
+	}
+	
+	HeavyRanged
+	{
+		mod defense = -25 { perc = true }
+		text mod_name = "From Marshland[ {unit.is_ranged:if}{unit.is_cavalry:if}(Heavy Ranged)]"
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_Marshland.psd:UI_TerrainBonus_Marshland#2" //GUID:fc0803f52f95c734ab6211fcd9eaa5e4
+}
+
+def Woods : TerrainBonus
+{
+	name = "Woods"
+	description = $["Wooded areas reduce visibility and movement, which hinders archers and horsemen."
+	"{p}"
+	"{p}Ranged attack: {Ranged.CTH_perc:bonus}"
+	"{p}Cavalry attack: {Cavalry.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcWoodsSpawnCondition
+	
+	Ranged
+	{
+		mod CTH_perc = -25
+		text mod_name = "From Woods[ {unit.is_ranged:if}{unit.is_cavalry:if}(Ranged)]"
+	}
+	
+	Cavalry
+	{
+		mod CTH_perc = -10
+		text mod_name = "From Woods[ {unit.is_ranged:if}{unit.is_cavalry:if}(Cavalry)]"
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_Woods.psd:UI_TerrainBonus_Woods#2" //GUID:cae3ad28eeff2984782ca0f86cab3c6c
+}
+
+def DeepForest : TerrainBonus
+{
+	name = "Deep forest"
+	description = $[
+	"Dense woods heavily reduce the sight of ranged troops and the maneuverability of horsemen."
+	"{p}"
+	"{p}Ranged attack: {Ranged.CTH_perc:bonus}"
+	"{p}Cavalry attack: {Cavalry.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcDeepForestSpawnCondition
+	
+	Ranged
+	{
+		mod CTH_perc = -50
+		text mod_name = "From Deep forest[ {unit.is_ranged:if}{unit.is_cavalry:if}(Ranged)]"
+	}
+	
+	Cavalry
+	{
+		mod CTH_perc = -20
+		text mod_name = "From Deep forest[ {unit.is_ranged:if}{unit.is_cavalry:if}(Cavalry)]"
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_DeepForest.psd:UI_TerrainBonus_DeepForest#2" //GUID:6dfb192bb7bb83545b2fc430bd47e80d
+}
+
+def Hills : TerrainBonus
+{
+	name = "Hills"
+	description = $[
+	"These elevated landforms provide a significant advantage to defending armies."
+	"{p}"
+	"{p}{b}Defending army effects{/b}"
+	"{p}Defense of all units: {Defenders.defense:bonus}" //!!! upr delete
+	// "{p}Defense of all units: {Defenders.defense:bonus:%}" //!!! upr
+	"{p}Ranged attack: {Defenders.Ranged.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcHillsSpawnCondition
+	
+	Defenders
+	{
+		mod defense = 10 { perc = true }
+		text mod_name = "From Hills (Defender)"
+		
+		Ranged
+		{
+			mod CTH_perc = 10
+			text mod_name = "From Hills (Ranged)"
+		}
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_Hills.psd:UI_TerrainBonus_Hills#2" //GUID:28ea27e50bdb7324c8773e7d09c616f4
+}
+
+def Mountains : TerrainBonus
+{
+	name = "Mountains"
+	description = $[
+	"Defending armies benefit heavily from the natural defenses of steep mountain ranges."
+	"{p}"
+	"{p}{b}Defending army effects{/b}"
+	"{p}Defense of all units: {Defenders.defense:bonus}" //!!! upr delete
+	// "{p}Defense of all units: {Defenders.defense:bonus:%}" //!!! upr
+	"{p}Ranged attack: {Defenders.Ranged.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcMountainsSpawnCondition
+	
+	Defenders
+	{
+		mod defense = 25 { perc = true }
+		text mod_name = "From Mountains (Defender)"
+		
+		Ranged
+		{
+			mod CTH_perc = 25
+			text mod_name = "From Mountains (Ranged)"
+		}
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_Mountains.psd:UI_TerrainBonus_Mountains#2" //GUID:1d29df59978101a46b6f0b177e26019d
+}
+
+def River : TerrainBonus
+{
+	name = "River"
+	description = $[
+	"Fighting alongside river banks makes it harder to retreat and often results in prolonged battles."
+	"{p}"
+	"{p}Damage received when retreating: {retreat_damage_mod:penalty}" //!!! upr delete
+	// "{p}Damage received when retreating: {retreat_damage_mod:penalty:%"}" //!!! upr
+	"{p}Attack of all attacking units: {Attackers.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcRiverSpawnCondition
+	
+	mod retreat_damage_mod = 50 { perc = true }
+	
+	Attackers
+	{
+		mod CTH_perc = 10
+		text mod_name = "From River"
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_River.psd:UI_TerrainBonus_River#2" //GUID:d2d27b56aca680a479b7a408ac05a803
+}
+
+def OceanCoast : TerrainBonus // battle near a coast, outside of the water though
+{
+	name = "Coast"
+	description = $[
+	"Battles fought on coastlines often turn into long-lasting skirmishes, where retreating is rarely a valid option."
+	"{p}"
+	"{p}Damage received when retreating: {retreat_damage_mod:penalty}" //!!! upr delete
+	// "{p}Damage received when retreating: {retreat_damage_mod:penalty:%}" //!!! upr
+	"{p}Attack of all attacking units: {Attackers.CTH_perc:bonus}"]
+	
+	spawn_chance = #CalcOceanCoastSpawnCondition
+	
+	mod retreat_damage_mod = 100 { perc = true }
+	
+	Attackers
+	{
+		mod CTH_perc = 10
+		text mod_name = "From Coast"
+	}
+	icon = "Assets/UI/Elements/TerrainBonuses/UI_TerrainBonus_OceanCoastline.psd:UI_TerrainBonus_OceanCoastline#2" //GUID:a4ae432eb055c0b4a8b8ea09e0d54fd7
+}
+
+// def Ocean : TerrainBonus // naval battle bonuses
+// {
+// 	name = "Ocean"
+// 	description = "Melee units do less damage, ranged units do more."
+
+// 	spawn_chance = #CalcOceanSpawnCondition
+
+// 	//global_mod = 0
+
+// 	//mod CTH = (leader.cs_naval_CTH || kingdom.ks_naval_CTH) {base}
+
+// 	Ranged
+// 	{
+// 		mod CTH = 50
+// 	}
+
+// 	HeavyInfantry
+// 	{
+// 		mod CTH = -10
+// 	}
+
+// 	HeavyDefense
+// 	{
+// 		mod CTH = -10
+// 	}
+
+// 	Cavalry
+// 	{
+// 		mod CTH = -20
+// 	}
+
+// 	HeavyCavalry
+// 	{
+// 		mod CTH = -20
+// 	}
+// 	icon = "Assets/UI/Elements/Common/Icons/Structures/UI_ProvinceFeature_Whales.png:UI_ProvinceFeature_Whales#2" //GUID:da9917f68690b91448c1ad2fd8b4a51c
+// }
+
+// def LeadershipBonuses : BattleBonus // manually looked for, even outside of battles. not a terrain bonus
+// {
+// 	name = "Leadership Bonuses"
+// 	description = "Various bonuses from leader stats"
+// 	spawn_chance = -1
+// 	global_mod = 0
+
+// 	// some of these are either from the leader, or if none present - from the kingdom (so that we don't add the stat twice)
+// 	Infantry
+// 	{
+// 		mod defense = (leader.cs_infantry_defense) {base}
+// 		mod CTH = (leader.cs_melee_CTH_perc)
+// 	}
+// 	Defense
+// 	{
+// 		mod CTH = (leader.cs_melee_CTH_perc)
+// 	}
+// 	Militia
+// 	{
+// 		mod CTH = (leader.cs_melee_CTH_perc)
+// 	}
+// 	Cavalry
+// 	{
+// 		mod CTH = (leader.cs_cavalry_CTH_perc || kingdom.ks_cavalry_CTH_perc)
+// 	}
+// 	Ranged
+// 	{
+// 		mod CTH = (leader.cs_ranged_CTH_perc || kingdom.ks_ranged_CTH_perc)
+// 		mod max_shoot_range = (leader.cs_ranged_range_perc)
+// 		mod salvo_capacity = (leader.cs_salvo_capacity_bonus_perc || kingdom.ks_salvo_capacity_bonus_perc)
+// 		mod friendly_fire_reduction = (leader.cs_friendly_fire_reduction_perc) // flat bonus, 50% ff by default, with this stat it can go down to 0
+// 	}
+// 	mod defense = (leader.cs_army_defense) {base}
+// 	mod stamina = (leader.cs_army_stamina_perc)
+// }

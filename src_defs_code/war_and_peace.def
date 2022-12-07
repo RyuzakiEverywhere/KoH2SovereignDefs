@@ -1,0 +1,131 @@
+/*def WarPeacePoints
+{
+
+// BSGPR1 - War & Peace Points.docx in design folder
+
+// THRESHOLDS:
+	Thresholds
+	{
+		//WP >= treshhold_value
+		WP
+		{
+			declare_war = 1.5
+			declare_independence = 1.0
+		}
+
+		// PP >= treshhold_value
+		PP
+		{
+			offer_peace = 1.5
+			accept_peace = 1.2
+		}
+	}
+
+
+// BASE POINTS & MULs, Final (WP, PP) = Normalize((wp_base + wp) * wp_scale, (pp_base + pp) * pp_scale)) * 2
+// that gives WP and PP in range 0..2, also WP + PP = 2
+	wp_base = 3
+	pp_base = 3
+	wp_scale = 1
+	pp_scale = 1 
+
+// ----------------------------------------------------------------------------------------------
+// RELATIONSHIP:
+// If R < 0 then Wp += wp_bad_relation * Relationship ^ wp_bad_relation_pow
+// If R >= 0 then Pp += pp_good_relation_base + pp_good_relation * Relationship ^ pp_good_relation_pow
+// ----------------------------------------------------------------------------------------------
+	wp_bad_relation = 30
+	wp_bad_relation_pow = 2
+	pp_good_relation_base = 3
+	pp_good_relation = 10
+	pp_good_relation_pow = 0.5
+
+// ------------------------------------------------------------------------------------------
+// TRUCE:
+// Pp += (1 - (time_since_truce / truce_duration)^pow_truce) * pp_truce
+// ------------------------------------------------------------------------------------------
+	truce_duration = 20		// minutes
+	pow_truce = 2
+	pp_truce = 30
+
+// ------------------------------------------------------------------------------------------
+// WAR_HYPE:
+// Pp += (1 - (time_since_war / hype_duration)^pow_hype) * wp_hype
+// ------------------------------------------------------------------------------------------
+	hype_duration = 10		// minutes
+	pow_hype = 2
+	wp_hype = 30
+
+ 
+// ------------------------------------------------------------------------------------------
+// ARMY STRENGHT FACTORS:
+
+// AS = (TroopsStrenght(TS) * MarshalsFactor(MF) + ManPower(MP) * GoldFactor(GF)) * WarsFactor(WF)
+// AF = 1 + sign(AS - 1) * (AS - 1)^2
+
+// If our kingdoms’ AF is > 1, then the final Wp will be:
+// 	FinalWp= WP * AF + (AF - 1) * wp_strong_army (default: 10)
+// If our Kingdoms’ AF is < 1 then we add Pp like:
+// 	Pp += (1 - AF) * pp_weak_army (default: 20)
+// ------------------------------------------------------------------------------------------
+	wp_strong_army = 10
+	pp_weak_army = 20
+
+// Marshals factor, number best marshals
+	mf_num_best = 4
+
+// Troops levels strenght, TS = SUM (all Tcost * Texp * Thealth), Tcost mutiplied by ts_garrison_factor if in garrison 
+	ts_lvl_1 = 1
+	ts_lvl_2 = 1.5 
+	ts_lvl_3 = 2
+	ts_lvl_peasant = 0.75
+	ts_garrison_factor = 0.5
+
+// Wars factor: WF = 1 / (1 + log(1 + NumberOfWars )), cap numwars to wf_wars_cap
+	wf_wars_cap = 20
+
+
+// Gold factor
+	mp_gold_income = 100
+
+// Manpower: SUM (all levies * mp_levies_weight + workers + rebels * mp_rebels_weight (0.2)) * mp_population_value default 
+	mp_levies_weight = 2
+	mp_rebels_weight = 0.2
+	mp_population_value = 50
+
+
+// ----------------------------------------------------------------------------------------------
+//  OTHER FACTORS
+// ----------------------------------------------------------------------------------------------
+
+// WAR POINTS	
+	wp_casus_belli = 30 	// x, depends on the specific casus belli, default 30 
+	wp_liberation = 10 		// points per realm with our culture under their rule, cap to wp_liberation_cap
+	wp_liberation_cap = 30
+	wp_mighty = 10			// if number of our realms is at least wp_mighty_x times larger than them +10
+	wp_mighty_x = 2
+	wp_excommunication = 10 // if other is excommunicated and we are catholics
+	wp_sea_outlet = 10 		// if they have sea shore, but we don’t 
+	wp_small_wars = 5 		// if both kingdoms are under 4 realms
+	wp_loyalists = 20 		// if our loyalists are rebelling there 
+	wp_rebels = 0 			// per rebel they have at their land - Temploary set to 0(was 5) due to rebels not working correctly
+	wp_religion = 5			// if we follow different religions
+	wp_allies = 5			// points per our ally
+
+// PEACE POINTS	
+	pp_agr_trade = 10 		//for trade
+	pp_agr_nap = 20 		// for nap, 
+	pp_agr_ally = 30 		// for alliance 
+	pp_trading = 15 		// if we have trader there
+	pp_family = 20 			// if we are married 
+	pp_no_border = 10 		// if no direct border, 
+	pp_too_far = 30 		// if very far away (min. distance > pp_too_far_dist)
+	pp_too_far_dist = 5 
+	pp_same_religion = 10 	// if of the same religion
+	pp_holy_pope = 50 		// if we are catholics and other is the pope 
+	pp_rebels = 0 			// points per rebel we have at home - Temploary set to 0(was 5) due to rebels not working correctly
+	pp_allies = 5			// points per ally of the other kingdom
+	pp_natural = 10			// innate desire of humans for peace, Pp+=pp_natural
+
+}
+*/

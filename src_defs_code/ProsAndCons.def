@@ -1,0 +1,4269 @@
+def ProsAndCons 
+{	
+// BASE POINTS & MULs, Final (PP, CP) = Normalize((pp_base + pp) * pp_scale, (cp_base + cp) * cp_scale)) * 2
+// that gives PP and CP in range 0..2, also PP + CP = 2
+
+	// // simple factors (can have children with parameters)
+	// pc_no_value  // handled completely in C#
+	// pc_int_value = 10  // handled in C#, result: (C#_value > 0) ? 10 : 0
+	// pc_expr_value = (expr) // may or may not be handled in C#, if it is, "value" variable is defined
+
+	// some_key : ProsAndCons
+	// {
+		// pros
+		// { 
+		// 	// factors defined in ProsAndCons, can have children with parameter overrides
+		// 	pc_factor1 // add this factor with its value
+		// 	pc_factor2 = 10 // (C#_value > 0) ? 10 : 0; same as in factor definition with value override
+		// 	pc_factor3 = (expr) // return expr, where "value" = the value of the factor def, "cs_value" = C# value if defined
+			
+		// 	PC_some_key = 20 // calc PC_some_key, check its ratio and if in given range add 20 points
+		// 	{
+		// 		above = 1.2 // if above 1.2
+		// 		below = "accept" // below PC_some_key.thresholds.accept
+		// 	}
+		//  PC_some_key = (ratio * 5) // calc PC_some_key, use it as context of the expression, treat as pc_expr_value
+		// }
+
+	// 	cons
+	// 	{
+
+	// 	}
+
+	// 	add_pros_and_cons
+	// 	{
+	// 		// calc pros/cons ratio of PC_xxx, add points based on threshold values in children
+	// 		PC_xxx
+	// 		{
+	// 			above = 1.2 / 5 / 10 // if ratio >= 1.2 add 5 PP, else add 10 CP
+	//          below = ["accept", 5, 10] // if ratio < PCxxx.thresholds.accept add 5 PP, else add 10 CP
+	// 		}
+
+	// 		// calc pros/cons ratio of PC_xxx, add PPexpr to pros and CPexpr to cons (if positive)
+	// 		// context: PC_xxx ProsAndCons object, vars: PP, CP, ratio, ...
+	// 		PC_xxx = [ (PPexpr), (CPexpr) ]
+	// 	}
+
+	// 	thresholds
+	// 	{
+	// 		propose { above = 1.5 }
+	// 		accept = 1.1
+	// 		break { below = 0.5 }
+	//      accept_xxx = "accept"
+	//      decline_xxx { below = "accept_xxx" }
+	//      break_xxx { below = (break.below) }
+	// 	}
+	//
+
+	//  base points, non-scaled
+	//	base
+	//	{
+	//		PP = 3
+	//		CP = 3
+	//	}
+
+	//  multipliers for pros and cons before normalization
+	//	scale
+	//	{
+	//		PP = 1
+	//		CP = 1
+	//	}
+	// }
+
+	generic_texts
+	{
+		text reason_to_accept = ["I have a good feeling about this offer.",
+								 "I see no reason for us not to accept.",
+								 "It is not a great offer, but it is still good enough.",
+								 "If it was up to me, I would agree, probably.",
+								 "I would accept, though it is not an offer we cannot say 'no' to.",
+								 "I lean slightly towards accepting this offer.",
+								 "Let's accept, why not?",
+								 "Yes, why not?",
+								 "The terms seem acceptable.",
+								 "My gut feeling says 'accept'!",
+								 "I don't think we will lose anything if we accept."]
+		text reason_to_decline = ["I have a bad feeling about this, we'd better refuse.",
+								  "I see no reason for us to accept.",
+								  "We'd better wait for a better offer on their side.",
+								  "It's tempting, but no.",
+								  "My gut feeling says 'decline'!",
+								  "Why would we accept this?",
+								  "Tempting, but no.",
+								  "We will have no benefit from this.",
+								  "Ask them to offer something more.",
+								  "No, it is not a good time for this.",
+								  "Maybe in time we can accept, but right now we shouldn't.",
+								  "If we accept, how will we benefit from this?"]
+	}
+
+	factors
+	{
+// ----------------------------------------------------------------------------------------------
+// RELATIONSHIP:
+// If R < 0 then Wp += wp_bad_relation * Relationship ^ wp_bad_relation_pow
+// If R >= 0 then Pp += pp_good_relation_base + pp_good_relation * Relationship ^ pp_good_relation_pow
+// ----------------------------------------------------------------------------------------------
+		pc_we_have_bad_relation
+		{
+			max = 40
+			pow = 2
+			
+			text reason_to_decline = ["I've never liked those pitiful maggots.",
+									  "We've seen anything good from their kingdom, nor we ever will.",
+									  "There is tension between our kingdoms and I don't expect things to improve.",
+									  "I just don't trust them.",
+									  "If we accept their offer, our people will not approve that.",
+									  "To be honest, I do not know one {plr_kingdom:ian} that likes them.",
+									  "Anything the {kingdom:ians} offer - we should decline.",
+									  "Why do you even bother talking to {kingdom.king}?",
+									  "Nothing good ever came out from {kingdom:anian}.",
+									  "Any dealing with {kingdom:ians} turned out bad, as far as I can remember.",
+									  "If it was up to me, I wouldn't even speak with the filthy {kingdom:ians}..."]
+			advise_by = [ "Merchant", "Diplomat", "Cleric" ]
+
+			text reason_to_us = "Due to the past conflicts, we dislike each other."
+			text reason_to_them = "Due to the past conflicts, we dislike each other."
+			text eotw_against = ["We cannot stand behind the claims of an unworthy ruler such as {obj.king}.",
+			"{obj:s} claims are preposterous - we will not give our vote!",
+			"What insolence! We deny such a prepostreous claim.",
+			"The petty {obj.king} shouldn't really be called {obj.king.title} in the first place. We refuse!",
+			"We've had our past dealings with {obj}... Given the outcomes, supporting the claim of their {obj.king.title} would make us seem feeble in the eyes of the rest of the Great Powers..."]
+		}
+		pc_we_have_good_relation
+		{
+			base = 3
+			max = 20
+			pow = 0.5
+
+			text reason_to_accept = ["I cannot hide my sympathies towards their kingdom.",
+									 "So far they have proven themselves as a trustworthy kingdom.",
+									 "I've been watching their diplomatic moves and so far I think we have common goals.",
+									 "I trust them, we won't be sorry, if we accept.",
+									 "It is a fair offer, after all.",
+									 "{kingdom:ians} are great people, we should accept.",
+									 "Look at {kingdom.king} - such a great man. How can you not accept?",
+									 "The {kingdom:ians} have good reputation in {plr_kingdom}, we shoud trust them.",
+									 "We can only benefit of closer relations with the {kingdom:ians}.",
+									 "As far as I can remember, the {kingdom:ians} have always had good intentions towards us.",
+									 "{kingdom.king} is such a character... How can one decline his offers?"]
+			advise_by = [ "Merchant", "Diplomat", "Spy" ]
+
+			text reason_to_us = "Our kingdoms so far manage to maintain good relations and cooperate."
+			text reason_to_them = "Our kingdoms so far manage to maintain good relations and cooperate."
+
+			text eotw_support = ["We will gladly vote for {obj}, as one of our most trusted friends!",
+			"{voter} will always support its friends. We vote in favor of {obj.king} of {obj}!",
+			"{obj} has shown its commitment in maintaining stable relations with our kingdom. We vote in favor!"]
+			text eotw_support_kingdom = ["{obj.king} of {obj} is the better candidate. He has earned our vote!",
+			"Given the choice, {obj.king} of {obj} is the better candidate. May he be crowned Emperor of the World!",
+			"{voter} values friendship above all else, and {obj} has been a trustworthy ally in many occasions. This is why {obj.king} will have our vote!"]
+		}
+
+// ------------------------------------------------------------------------------------------
+// TRUCE:
+// Pp += (1 - (time_since_truce / truce_duration)^pow_truce) * pp_truce
+// ------------------------------------------------------------------------------------------
+		pc_we_have_truce
+		{
+			max = 200
+			pow = 4
+		}
+
+// ------------------------------------------------------------------------------------------
+// WAR_HYPE:
+// Pp += (1 - (time_since_war / hype_duration)^pow_hype) * wp_hype
+// ------------------------------------------------------------------------------------------
+		pc_war_just_started
+		{
+			text reason_to_decline = ["We should see how the war goes, before making any diplomatic moves.",
+									  "At this point, we should see how our troops will do in battles.",
+									  "Let's not make so hasty decisions - we don't know what we can yet gain from this war."]
+			advise_by = [ "Marshal", "Spy", "Diplomat" ]
+
+			max = 20
+			minutes = 10		// minutes
+			pow = 2		
+			text reason_to_us = "War between our kingdoms just started."
+			text reason_to_them = "War between our kingdoms just started."
+		}
+ 
+// ------------------------------------------------------------------------------------------
+// ARMY STRENGHT FACTORS:
+
+// AS = (TroopsStrenght(TS) * MarshalsFactor(MF) + ManPower(MP) * GoldFactor(GF)) * WarsFactor(WF)
+// AF = 1 + sign(AS - 1) * (AS - 1)^2
+
+// If our kingdoms’ AF is > 1, then the final Wp will be:
+// 	FinalWp= WP * AF + (AF - 1) * wp_strong_army (default: 10)
+// If our Kingdoms’ AF is < 1 then we add Pp like:
+// 	Pp += (1 - AF) * pp_weak_army (default: 20)
+// ------------------------------------------------------------------------------------------
+
+		//!!! by original design there was a WP/PP multiplier (AF)
+		pc_our_army_is_stronger 
+		{
+			max = 20
+			
+			text reason_to_decline = ["Our armies are far greater, why should we accept?",
+								      "They cannot match our power.",
+								      "We have ten soldiers for each one of theirs!",
+								      "Their army is miserable, compared to ours.",
+								      "I think that they are just afraid of our superior army. Let's drive them into a corner.",
+								      "I've been struggling to find the report about their army - it must be a very small piece of paper somewhere here with their soldiers' names listed...",
+								      "Kingdoms with such pathetic armies should not waste your time, sire!"]
+			advise_by = [ "Marshal", "Spy" ]								  
+
+			text reason_to_us = "We can easily crush their armies."
+			text reason_to_them = "They think we cannot withstand their military power."
+			text eotw_against = ["A ruler who commands a pitiful army such as that of {obj} shouldn't be called Emperor of the World! We shall not support {obj.king}.",
+			"Only a fool would wish to prove his power while his nation is ridiculed for its weak and incompetent army. {obj.king} will not have our vote!",
+			"Our troops could crush {obj.king:s} feeble army in just one swing. Why would we vote in favor?"]
+		}
+
+		pc_our_army_is_weaker 
+		{
+			max = 20
+			
+			text reason_to_accept = ["Sire, they possess great force, how can we decline?",
+								     "We must not anger them, they can destroy us within a year.",
+								     "Well, our spies reports are absolutely clear - their army is much stronger than ours.",
+								     "We should accept while they haven't changed their mind.",
+								     "This is a generous offer, considering how strong their amry is.",
+								     "No disrespect meant, sire, but what do you expect me to say? Have you seen their armies?",
+								     "Can a mouse decline a cat's offer?"]
+			advise_by = [ "Marshal", "Spy", "Diplomat" ]
+
+			text reason_to_us = "Their superior army looks intimidating to us."
+			text reason_to_them = "They are intimidated by our superior army."
+
+			text eotw_support = ["{obj.king} has proven to be a worthy commander, capable of leading his kingdom to greatness. {voter} welcomes such feats and will gladly support this claim!",
+							     "We must be foolish not to admit the advantages of {obj} over us - {obj.king} can just invade our lands, but he is kind enough to follow the diplomatic path.",
+							     "Considering the {obj:ian} forces, we prefer to be their allies, than their enemies."]
+			text eotw_support_kingdom = ["An army as mighty as that of {obj} should be recognized and feared by all. {obj.king} has earned our vote!",
+										 "Only the {obj:ians} have truly impressive military strenght and they are the ones we would follow as leaders."]
+		}
+
+
+// ----------------------------------------------------------------------------------------------
+//  OTHER FACTORS
+// ----------------------------------------------------------------------------------------------
+
+// WAR POINTS	
+
+		pc_they_rule_our_people
+		{
+			// points per realm, population majority must be of the same kingdom, culture or culture_family
+			our_kingdom = 10
+			our_culture = 5
+			our_culture_family = 2 		
+			max = 30 //total max
+
+			text reason_to_decline = ["Should I remind you, that they still rule over our people.",
+								      "No offers are acceptable, until they free our people.",
+								      "They must withdraw from the provinces, where our people live. Then we can talk.",
+								      "What? Why are you speaking with the men, controlling our people, sire?!"]
+			advise_by = [ "Cleric", "Spy", "Marshal" ]
+
+
+			text reason_to_us = "They rule over lands where our people live"
+			text reason_to_them = "We control territories, where people of their ethnicity live."
+			text eotw_against = ["If {obj.king} wishes to have our vote, he must first let go of all the lands which rightfully belong to {voter}!",
+								 "We will never support the usurpers of our lands!",
+								 "The {obj:ians} took our lands and enslaved our people. Anyone who trusts them is foolish!",
+								 "We've seen how the {obj:ians} rule over the lands they took from us - nothing good ever comes out under their rulership."]
+		}
+
+		pc_we_rule_their_people
+		{
+			// points per realm, population majority must be of the same kingdom, culture or culture_family
+			their_kingdom = 10
+			their_culture = 5
+			their_culture_family = 2 	
+
+			max = 30 //total max
+
+		}
+
+		pc_they_rule_our_lands
+		{
+			per_historical_realm = 5
+			per_core_realm = 5
+			max = 30
+
+			text reason_to_decline = ["Before we discuss anything, they should withdraw from our historical lands.",
+								      "They must return our lands and then we can discuss their offer further.",
+								      "Our people will be mad if we accept the terms of the {kingdom:ians}, who now control our lands."]
+			advise_by = [ "Cleric", "Spy", "Marshal" ]
+
+			text reason_to_us = "They control a territories rightfully ours."
+			text reason_to_them = "We control territories they have a claim to."
+		}
+
+		pc_we_rule_their_lands
+		{
+			per_historical_realm = 5
+			per_core_realm = 5
+			max = 30
+		}
+
+
+		pc_we_are_X_times_larger = 10		// if number of our realms is at least threshold times larger than them +10
+		{
+			X = 2
+			added_realms = 3 // adds this number to each kingdom's realm count to not allow the pc to easily trigger for small kingdoms.
+			
+			text reason_to_decline = ["Our great empire cannot accept such an offer.",
+									  "Why do you even bother giving an audience to the insignificant {kingdom:ians}?",
+									  "Frankly, I do not care about {kingdom}.",
+									  "I apologize sire, I couldn't find them on the map.",
+									  "Who, the {kingdom:ians}? Didn't someone conquer them already?"]
+			advise_by = [ "Spy", "Marshal" ]
+
+			text reason_to_us = "They are a small and insignificant kingdom."
+			text reason_to_them = "We are a small kingdom in their perspective and they expect to overwhelm us easily."
+			text eotw_against = ["{voter} will not vote for a kingdom as small and insignificant as {obj}.",
+			"Is this some sort of a joke? Before the start of this session, we didn't even know {obj} existed on the map.",
+			"Very funny, {obj.king}. Get yourself a real kingdom first. {obj} is so small it is not even added to some of the maps yet."]
+		}
+
+		pc_they_are_excommunicated_and_we_are_catholic = 20 // if other is excommunicated and we are catholics
+		{
+			text reason_to_us = "As the Papacy excommunicated them, they fell from grace."
+			text reason_to_them = "We are excommunicated and war against us seems just to them."
+			
+			text reason_to_decline = ["We should not trust those sinners!",
+							          "We might anger the [{pope}|the Pope]!",
+							          "They have bad reputation among the Catholic kingdoms.",
+							          "We can talk with {kingdom.king} once he repents."]
+			advise_by = [ "Cleric", "Marshal" ]
+
+			text eotw_against = ["The very idea of voting in favor of an excommunicated kingdom sickens us.",
+								 "{voter} will not support the claims of a kingdom which was shunned by the Pope!",
+								 "Blasphemer! {obj} must be destroyed, not made a leader.",
+								 "The Catholic world will never follow the {obj:ian} heretics!",
+								 "This very claim is a dire offence to the Christian world!"]
+		}
+
+		pc_we_want_to_liberate_rome = 100 // non-excommunicated catholic against rome usurper
+		{
+			text reason_to_decline = ["How dare they even speak with us?",
+									  "They destroyed the Papacy and now they negotiate with us?",
+									  "We should never speak with the usurpers of Rome!"]
+			advise_by = [ "Cleric", "Marshal" ]
+
+			text reason_to_us = "They dare hold the holy lands of the Papacy."
+			text reason_to_them = "As long as we hold Rome, they will always despise us."
+		}
+
+		pc_we_can_gain_sea_outlet = 10 		// if they have sea shore, but we don’t 
+		{
+			text reason_to_us = "If we overtake their lands, we will gain sea outlet."
+			text reason_to_them = "They want to gain sea outlet by conquering our lands."
+		}
+
+		pc_we_both_have_under_X_towns = 10 		// if both kingdoms are AI and are under X realms
+		{
+			X = 4
+			text reason_to_us = "We can quickly overtake them and increase the size of our kingdom significantly."
+			text reason_to_them = "They believe they can quickly overtake us and increase the size of their small kingdom significantly."
+		}
+
+
+		pc_there_are_our_loyalists = 10 	// if our loyalists are rebelling there 
+		{
+			text reason_to_us = "A rebels, loyal to us, are already fighting against them."
+			text reason_to_them = "Rebels, loyal to them, are marching against us."
+			text eotw_against = ["{voter} will not vote for a kingdom which plagues our lands with its loyalists!",
+								 "Maybe {obj.king} should first consider dealing with his loyalists who plague our lands, before bothering us with his lust for power."]
+		}
+
+		pc_they_have_rebels
+		{
+			max = 20
+			per_rebel = 5 			      // per rebel they have at their land - Temploary set to 0(was 5) due to rebels not working correctly
+			text reason_to_us = "They are weakend by rebels, pillaging their lands."
+			text reason_to_them = "We are weakend by internal struggles with rebels."
+		}
+
+		pc_they_have_different_religion = 10 // if we follow different religions
+		{
+			text reason_to_decline = ["I do not trust {kingdom}, nor any {kingdom.religion} kingdom.",
+									  "Never deal with {kingdom.religion:ans}, that's my advise.",
+									  "It would be better if we try to improve our diplomacy with {plr_kingdom.religion:ans} instead.",
+									  "You know that they defy {plr_kingdom.religion:ism}, don't you, sire?",
+									  "Our clergy might get offended if we deal with {kingdom.religion:ans}.",
+									  "It is against our religion to deal with the likes of them."]
+			advise_by = [ "Cleric" ]
+
+			text reason_to_them = "They see us as heathen and sinners."
+		}
+		pc_they_have_different_culture = 5 // if we have different cultures
+
+		pc_we_have_allies
+		{	
+			per_ally = 3
+			max = 12					  // points per our ally
+			text reason_to_us = "We rely on the support of our allies."
+			text reason_to_them = "They rely on the support of their allies."
+		}
+
+	// PEACE POINTS	
+
+		pc_we_have_nap = 20 	// for nap, 
+		{
+			text reason_to_accept = ["Well, this seems as a good development of our relations, as we already have a non-aggression pact.",
+								     "You trusted them for non-aggression, you should trust them for this, too.",
+								     "Why not, {plr_kingdom.king}? Things are going great between us and the {kingdom:ians}.",
+								     "Naturally, I feel that {kingdom} might become our most loyal ally."]
+
+			text reason_to_decline = ["We have a non-aggression agreement with them, if you do not recall.",
+									  "Might I remind you that you signed a non-aggression pact with them, sire?",
+									  "No no no, considering our pact with them, this will be an ill-advised move.",
+									  "If we do this, after signing a non-aggression pact, it will be disastrous for our reputation."]
+
+			advise_by = [ "Diplomat", "Spy" ]
+
+			text reason_to_us = "We've made a non-aggression pact."
+			text reason_to_them = "We've made a non-aggression pact."
+			text eotw_support = ["{obj.king:s} commitment to maintaining our pact of non-aggression makes us believe that {obj:ians} are trustworthy people. We vote in favor!",
+								 "{obj} has proven to us they prefer peace and diplomacy and these is the kind of a leader we would follow.",
+								 "In our experience, the {obj:ians} prefer to avoid war and bloodshed when they can and this is what we should all strive to. We vote in favor!"]
+			text eotw_support_kingdom = ["{obj:s} commitment to maintaining our pact of non-aggression makes us believe that {obj:ians} are trustworthy people. {obj.king} has our vote!",
+										"{obj} has proven to us they prefer peace and diplomacy and that is the better leader to follow.",
+								 		"In our experience, the {obj:ians} prefer to avoid war and bloodshed when they can and this is what we should all strive to. They are the worthiest candidate."]
+		}
+		pc_we_are_allies = 30 	// for alliance 
+		{
+			text reason_to_accept = ["They fight on our side.",
+									 "We should support our allies.",
+									 "Who are we, if we refuse? {kingdom} are our allies!",
+									 "Right now, what's good for {kingdom} is good for us."]
+			advise_by = [ "Marshal", "Diplomat", "Spy" ]
+
+			text reason_to_us = "We are in a military alliance."
+			text reason_to_them = "We are in a military alliance."
+		}
+		pc_we_have_trade = 10 	// for trade agreement
+		{
+
+			text reason_to_us = "We have a trade agreement with them."
+			text reason_to_them = "We have a trade agreement with them."
+		}
+		pc_we_are_trading = 5 		// either kingdom has a merchant in the other 
+		{
+			text reason_to_accept = ["Trade with them is going well.",
+									 "They are our valuable trade partners.",
+									 "We should support our trade partners.",
+									 "Declining their offer might have bad consequences to our trade relations.",
+									 "Keeping the {kingdom:ians} happy is simply good for our treasury.",
+									 "We should not risk spoiling our trade relations with {kingdom}."]
+			advise_by = [ "Merchant" ]
+
+			text reason_to_us = "We have a beneficial trade routes."
+			text reason_to_them = "We have a beneficial trade routes."
+			text eotw_support = ["{obj} has been a valuable trading partner even in the most trying times. Of course we support {obj.king:s} claim!",
+								 "So far our relations with {obj} bring us benefits and profit, so we would gladly support their claim.",
+								 "The {obj:ians} play great role in the economy and trade and we trust them as a civilized leader."]
+			text eotw_support_kingdom = ["Our past trade dealings with {obj} tips the scales in their favor. We support {obj.king:s} claims!",
+									     "So far our relations with {obj} bring us benefits and profit, so we would gladly support them",
+									     "The {obj:ians} play great role in the economy and trade and we believe they will be the better leader."]
+		}
+		pc_our_trade_level // our merchant's trade level mapped 0-max //copy paste pc_we_have_trade
+		{
+			max = 15
+
+			text reason_to_us = "We have a merchant trading in their kingdom."
+			text reason_to_them = "They benefit from their merchant in our kingdom."
+			text eotw_support = ["{obj} has been a valuable trading partner even in the most trying times. Of course we support {obj.king:s} claim!",
+								 "So far our relations with {obj} bring us benefits and profit, so we would gladly support their claim.",
+								 "The {obj:ians} play great role in the economy and trade and we trust them as a civilized leader."]
+			text eotw_support_kingdom = ["Our past trade dealings with {obj} tips the scales in their favor. We support {obj.king:s} claims!",
+									     "So far our relations with {obj} bring us benefits and profit, so we would gladly support them",
+									     "The {obj:ians} play great role in the economy and trade and we believe they will be the better leader."]
+		}
+		pc_their_trade_level // their merchant's trade level mapped 0-max //copy paste pc_we_have_trade
+		{
+			max = 15
+
+			text reason_to_us = "We benefit from their merchant in our kingdom."
+			text reason_to_them = "They benefit from our merchant in their kingdom"
+			text eotw_support = ["{obj} has been a valuable trading partner even in the most trying times. Of course we support {obj.king:s} claim!",
+								 "So far our relations with {obj} bring us benefits and profit, so we would gladly support their claim.",
+								 "The {obj:ians} play great role in the economy and trade and we trust them as a civilized leader."]
+			text eotw_support_kingdom = ["Our past trade dealings with {obj} tips the scales in their favor. We support {obj.king:s} claims!",
+									     "So far our relations with {obj} bring us benefits and profit, so we would gladly support them",
+									     "The {obj:ians} play great role in the economy and trade and we believe they will be the better leader."]
+		}
+
+		pc_we_are_family // if we are married 
+		{
+			our_prince_or_princess = 20
+			our_king = 40
+
+			text reason_to_accept = ["Well, they are family to you, aren't they. {plr_kingdom.king}?",
+									 "Our royal ties with {kingdom} leaves us no choice.",
+									 "Who will trust us if we don't support even kingdoms we have royal ties with?",
+									 "They would never decline, if we were to ask.",
+									 "Blood bond demands us to accept.",
+									 "Considering our royal ties, it will be dishonorable to decline their request."]
+			advise_by = [ "Cleric", "Diplomat", "Merchant" ]
+
+			//our_prince = 5
+			//our_princess = 20
+			//our_queen = 40
+ 			//base = 10
+
+			text reason_to_us = "We have a royal marriage."
+			text reason_to_them = "We have a royal marriage."
+			text eotw_support = ["Royal marriage binds our nations, hopefully for many generations to come. {obj.king} has our vote!",
+								 "{voter} puts family above all else. May {obj.king} have a long-lasting and successful ruleship as the Emperor of the World!",
+								 "{obj} are a family to us and we support their claim. We will rule together, united!"]
+			text eotw_support_kingdom = ["Royal marriage binds our nations, hopefully for many generations to come. {obj.king} has our vote!",
+								 "{voter} puts family above all else. May {obj.king} have a long-lasting and successful ruleship as the Emperor of the World!",
+								 "{obj} are a family to us and we know they are the right kingdom to support. We will rule together, united!"]
+		} 			
+		pc_we_have_no_border = 10 		// if no direct border,
+		{
+			text reason_to_decline = ["We'd better negotiate with our neighbors.",
+									  "What happens in {kingdom} is no concern of ours.",
+									  "Why should we waste time and effort for kingdoms that are not even our neighbors."]
+			advise_by = [ "Spy" ]
+		}
+
+		
+		pc_they_are_too_far = 30 		// if very far away (min. distance > threshold)
+		{
+			text reason_to_decline = ["I cannot even locate them on the map.",
+									  "I've heard there is such kingdom, but I never knew where it is.",
+									  "Oh no, distance to {kingdom} is too great.",
+									  "We'd better focus on diplomacy with kingdoms within our region.",
+									  "What? How did their diplomats even travel so far to get here?"]
+			advise_by = [ "Diplomat", "Merchant", "Marshal" ]
+			threshold = 3 
+		}
+
+		pc_we_share_same_religion = 5 	// if of the same religion
+		{
+			text reason_to_accept = ["They are {kingdom.religion:ans} after all.",
+									 "{kingdom.religion:ans} should try to support each other.",
+									 "I've always thought we should try having closer relations with the other {kingdom.religion:ans}.",
+									 "At least we follow the same religion.",
+									 "We share the same religion.",
+									 "We'd better trust them, instead of some infidels.",
+									 "It is always better to unite with kingdoms, following our religion."]
+			advise_by = [ "Cleric" ]
+
+			text reason_to_us = "We follow the same religion."
+			text reason_to_them = "We follow the same religion."
+			text eotw_support = ["{voter} will always support those who share the religion of its people. For that, we support {obj.king:s} claim!",
+								 "We believe that {obj} are the ones who can lead the world to the path of the true religion and we support their claim.",
+								 "{obj} is a pious and righteous kingdoms we would gladly follow."]
+			text eotw_support_kingdom = ["{voter.king} will always support those who share the religion of his people. For that, {obj.king} deserves to be named Emperor of the World!",
+										 "We believe that {obj} are the ones who can lead the world to the path of the true religion and we support them.",
+										 "{obj} is a pious and righteous kingdoms we would gladly support."]
+		}
+		
+		pc_we_are_papacy = 5
+		pc_they_are_papacy = 0
+		pc_we_control_the_pope = 5
+		pc_they_control_the_pope = 5
+		{
+			text reason_to_accept = ["They control the Pope, it will be unwise to refuse.",
+									 "We should consider their offer, [{pope}|the Pope] is from {kingdom}.",
+									 "If we refuse, this might displease [{pope}|the Pope]."]
+			advise_by = [ "Cleric" ]
+		}
+		pc_they_control_the_pope_and_we_are_catholic = 5
+		{
+			text eotw_support = ["As the head of the Holy See is from {obj}, it would seem ungodly if we do not support them.",
+								 "We have trusted in a wise leader from {obj} as the head of the Catholic church and now we will do the same here!"]
+			advise_by = [ "Cleric" ]
+
+			text eotw_support_kingdom = ["{obj} has given us the holiest man alive and they truly are the better choice for our leader!",
+			"The rightful Emperor of the World may only come from the same kingdom as our pope - {obj}!"]
+		}
+		pc_we_are_catholic_and_they_are_papacy = 50
+		{
+			text reason_to_accept = ["Do we need arguments why we should not refuse Papacy's offers?",
+									 "Well, they are the Papacy, aren't they?",
+									 "We'd better do what the Pope asks.",
+									 "I fear God will smite us, if we refuse.",
+									 "We must do as His Holiness pleases.",
+									 "This is what god wants us to do!",
+									 "Just ask yourself, {plr_kingdom.king} - what would Jesus do?",
+									 "As much as I dislike [{pope}| the current Pope], it will be unwise to make him angry.",
+									 "Well, it is not really a request, but a demand, isn't it?"]
+			advise_by = [ "Cleric" ]
+		}
+
+		pc_we_have_rebels
+		{
+			text reason_to_accept = ["We need to solve our problems with rebellions right now.",
+									 "Let's accept this and deal with our rebels.",
+									 "Declining is not advisable, as our kingdom is destabilized by internal problems.",
+									 "If we didn't had rebellions, I'd advise you to decline, but now..."]
+
+			text reason_to_decline = ["We need to solve our problems with rebellions first.",
+									  "Let's decline this and deal with our rebels.",
+									  "Accepting is not advisable, as our kingdom is destabilized by internal problems.",
+									  "If we didn't had rebellions, I'd advise you to accept, but now..."]
+			advise_by = [ "Spy", "Marshal" ]
+
+			max = 12
+			per_rebel = 4 			// points per rebel we have at home - Temploary set to 0(was 5) due to rebels not working correctly
+		}
+
+		pc_they_have_allies
+		{
+			max = 12
+			per_ally = 3			// points per ally of the other kingdom
+		}
+
+
+		//Other factors
+		pc_we_have_war_exhaustion
+		{
+			text reason_to_accept = ["Our people are exhausted by long wars, we need to seek more peaceful times.",
+									 "Accept, we are too exhausted by wars.",
+									 "If you refuse, our nobility might get mad. We need some rest from fighting.",
+									 "If we were not so exhausted from war, we could refuse, but now?"]
+
+			text reason_to_decline = ["Our people are exhausted by long wars, we do not need more trouble.",
+									  "Decline, we are too exhausted by endless fighting.",
+									  "If you accept, our nobility might get mad. We need some rest from wars.",
+									  "If we were not so exhausted from war, we could accept, but now?"]
+			advise_by = [ "Spy", "Marshal", "Cleric" ]
+
+			max = 20
+		}
+		pc_they_have_war_exhaustion
+		{
+			max = 20
+		}
+
+		pc_we_have_too_many_wars
+		{
+			at_war_base = 10
+			per_additional_war = 10
+			max = 40
+		}
+		
+		pc_we_have_right_to_expand 
+		{ 
+			max = 80 
+			time = 2400 
+			pow = 4
+			ai_mul = 0.2 
+		}		
+
+		pc_they_have_too_many_wars = 20
+		{
+			at_war_base = 10
+			per_additional_war = 10
+			max = 30
+			text reason_to_us = "They are weakend by wars."
+			text reason_to_them = "We seem weakened by too many wars."
+
+			text eotw_against = ["{obj.king} is a reckless warmonger who is not fit to rule his people, let alone be called Emperor of the World!",
+								 "{voter} cannot stand behind a {obj.king.title} who wishes to fulfil his fantasies of grandeour by declaring war on every kingdom known to man.",
+								 "{obj.king} should first reconsider his reckless plans for expansion, before he asks us to consider him as Emperor of the World.",
+								 "Aggression and greed is all that leads {obj}. We will never support that.",
+								 "If {obj} becomes our leader, they will drown Europe in blood! They are constantly waging war against other kingdoms.",
+								 "Support who, that barbaric {obj.king}, whose armies relentlessly march across Europe? Have you lost your minds, we should unite AGAINST him!",
+								 "Only over my dead body! The {obj:ians} desire only power and destruction. They are not the ones who we must follow.",
+								 "What our great kingdoms need right now is peace. And who will bring it - {obj.king}? That will never happen, he is constantly waging war.",
+								 "If you want chaos and bloodshed, support that warlord, {obj.king}. In the name of {voter}, I abstain!"]
+		}
+
+		pc_too_many_global_wars
+		{
+			num_wars = 15
+			pow = 6
+			max = 30
+		}
+ 
+
+		pc_we_hold_Rome = 30
+		pc_they_hold_Rome = 30
+		{
+			text reason_to_us = "They hold Rome and are a threat to Christianity."
+			text reason_to_them = "They hate us of holding the holy city of Rome"
+
+			text eotw_against = ["The {obj:ians} have violated our holiest city - we will never, NEVER support them!",
+								 "{obj} is the reason the Papacy no longer exists. They can never lead the Catholic world.",
+								 "{obj} has brought shame to all Catholics and this is a wound that will never heal."]
+		}
+		pc_we_hold_Constantinople_and_they_are_Ortodox = 30
+		pc_they_hold_Constantinople_and_we_are_Ortodox = 30 //and they are not orthodox
+		{
+			text reason_to_decline = ["Never! We should fight against them and free Constantinople!",
+								      "Not while they have their filthy hands over the Ecumenical patriarchy."]
+
+			text reason_to_us = "They hold Constantinople and the Ecumenical Patriarch."
+			text reason_to_them = "They despise us for holding Constantinople and the Ecumenical Patriarchy."
+
+			text eotw_against = ["{obj.king} is a corrupt snake which has suffocated the people of Constantinople for too long. He will never have our vote!",
+								 "{voter} will never vote for an unrightful assailant of Constantinople!",
+								 "We will not support the ones who suffocate the Ecumenical Patriarchate!"]
+		}
+		pc_we_have_caliphate = 20
+		pc_they_have_caliphate = 20
+		{
+			text reason_to_us = "We respect their caliph, a leader of the Muslim world."
+			text reason_to_them = "They respect our caliph as a leadr of the Muslim world."
+			text eotw_support = ["We stand behind the {obj.king} and will support his every claim.",
+								 "The caliph was chosen by Allah and we will follow his every footstep!",
+								 "{obj.king}, the true successor of Muhammad is indeed the one, who must lead us all.",
+								 "We've already accepted {obj.king} as the true civil and religious leader - all should do the same."]
+			text eotw_support_kingdom = ["We stand behind the {obj.king} and will support his every claim.",
+								 "The caliph was chosen by Allah and we will follow his every footstep!",
+								 "{obj.king}, the true successor of Muhammad is indeed the one, who must lead us all.",
+								 "We've already accepted {obj.king} as the true civil and religious leader - all should do the same."]
+		}
+
+		pc_we_have_common_enemies
+		{
+			text reason_to_accept = ["We have common enemies, and the enemies of our enemies... you know it...",
+							         "We must support each other with {kingdom}, we have some common enemies.",
+							         "The {kingdom:ians} hate who we hate, so this are good grounds for a beautiful friendship."]
+			advise_by = [ "Marshal", "Spy", "Diplomat" ]
+
+			max = 20
+			per_enemy = 5
+			text reason_to_us = "We have common enemies."
+			text reason_to_them = "We have common enemies."
+			text eotw_support = ["{obj} has shown good taste in choosing who to fight against. Due to our common enemies, we vote in their favor!",
+								 "{obj} commends the way {obj.king} chooses his enemies and would gladly support him as Emperor of the World!",
+								 "We see {obj} as a kingdom, knowing against who to fight and who to support. They will be a wise leaders to us all."]
+			text eotw_support_kingdom = ["{obj} has shown good taste in choosing who to fight against. Due to our common enemies, we vote in their favor!",
+								 		 "{obj} commends the way {obj.king} chooses his enemies and would gladly support him as Emperor of the World!",
+								 		 "We see {obj} as a kingdom, knowing against who to fight and who to support. They will be a wise leaders to us all."]
+		}
+
+		pc_they_are_our_vassal = 20
+		{
+			text reason_to_accept = ["But of course, they are our trustworthy vassals.",
+									 "If we want to keep them as vassals, we should support them.",
+									 "Who are we to trust, if not our vassals?",
+									 "Being their sovereign is not only an advantage, but a responsibility as well.",
+									 "I like them, they are so obidient, so far.",
+									 "Let's give our vassals a hand.",
+									 "Accept and {kingdom.king} will be your most loyal puppet for life."]
+			advise_by = [ "Diplomat" ]
+
+			text reason_to_us = "We are their sovereign and protector."
+			text reason_to_them = "We are their obedient vassals."
+		}
+
+		pc_we_are_their_vassal = 20
+		{
+			text reason_to_accept = ["As their vassals, we are obliged to accept.",
+									 "We should not forget, that they are our sovereign. If we refuse, consequences might follow.",
+									 "We'd better aid our sovereign - tomorrow we might need their help.",
+									 "Frankly, I don't think they are really asking, but more like - giving us orders.",
+									 "I do not like them, but before we are ready to have our sovereignty, we'd better play by their rules.",
+									 "Since we became their vassals, they've given us no reason not to trust them.",
+									 "I will never like those tyrants, but for now, we should play along and wait for our moment."]
+			advise_by = [ "Diplomat" ]
+
+			text reason_to_us = "We are their obedient vassals."
+			text reason_to_them = "We are their sovereign and protector."
+			text eotw_support = ["{obj} is our sovereign and as vassals it is our duty to stand by those who protect our lands. Hail {obj.king}!",
+								 "As vassals, we are bound to support our sovereign. {voter} votes in favor of {obj.king}!",
+								 "We've already accepted the leadership of {obj}. All must do the same, as their power is unmatched!",
+								 "Since {voter} is under the rulership of {obj}, our lives have only improved. All should bow before {obj.king}."]
+			text eotw_support_kingdom = ["{obj} is our sovereign and as vassals it is our duty to stand by those who protect our lands. Hail {obj.king}!",
+								 "As vassals, we are bound to support our sovereign. {voter} votes in favor of {obj.king}!",
+								 "We've already accepted the leadership of {obj}. All must do the same, as their power is unmatched!",
+								 "Since {voter} is under the rulership of {obj}, our lives have only improved. All should bow before {obj.king}."]
+		}
+
+		pc_our_king_is_venerable = 20
+		{
+			text reason_to_decline = ["No offense, {plr_kingdom.king}, but I think that your time for such deeds has passed.",
+								      "Better rest, {plr_kingdom.king}. The next ruler will take care of it all.",
+								      "There is no easy way to say this, {plr_kingdom.king}, but I don't believe they will honor that agreement for long, considering your age."]
+			advise_by = [ "Diplomat", "Spy", "Cleric" ]
+		}
+		pc_their_king_is_venerable = 20
+		{
+			
+			text reason_to_decline = ["Their king is venerable and whatever he promises may not be obeyed once he passes away.",
+									  "{kingdom.king} is so old, that he doesn't even know what he is talking about.",
+									  "I pity {kingdom.king}. At his age, no one respects his word, even in {kingdom}.",
+									  "Oh my, how has {kingdom.king} travelled to {plr_kingdom}? Such journeys are dangerous for such an elderly man!",
+									  "Just decline and make sure {kingdom.king} is quickly escorted out ot {plr_kingdom}. He is old and sick, and you don't want the trouble we'll get if he expires here."]
+			advise_by = [ "Spy", "Diplomat", "Cleric" ]
+
+			text reason_to_us = "No one knows what will happen with their kingdom when their old king dies."
+			text reason_to_them = "They are unsure who will rule our kingdom when our old king dies."
+
+			text eotw_against = ["Voting for a ruler who is nearing the end of his reign seems like an ill-advised move. Perhaps his successor will be deserving of our vote.",
+								 "We've heard rumors that {obj.king} is on his deathbed and Europe will be thrown into chaos and wars over who will succeed what, if we choose him as a leader.",
+								 "What a strange request by {obj.king} - probably his age plays tricks on him.",
+								 "{obj.king} cannot even remember why he summoned us today, let alone rule over Europe.",
+								 "Leading the worild is not something such an old man should do. It is time for you to have some rest, {obj.king}, go fishing or something."]
+		}
+		pc_our_king_is_old = 20
+		pc_their_king_is_old = 20
+
+		pc_we_have_more_gold_than_ransom_price
+		{
+			multiplier = 20
+			max = 10
+		}
+
+		pc_our_dungeon_is_crowded
+		{
+			per_prisoner = 3
+			minimum_prisoners = 5
+			max = 30
+		}
+		
+		pc_their_dungeon_is_crowded
+		{
+			per_prisoner = 3
+			minimum_prisoners = 5
+			max = 30
+		}
+
+		pc_we_have_too_many_captured_knights
+		{
+
+			per_prisoner = 5
+			minimum_prisoners = 0
+			max = 30
+		}	
+
+		pc_they_have_too_many_captured_knights
+		{
+			per_prisoner = 5
+			minimum_prisoners = 0
+			max = 30
+		}		
+
+		pc_we_are_wining
+		{
+			//expected to be used only for their terms of surrender
+			text reason_to_decline = ["Show no mercy!",
+									  "We should fight until we occupy every last province of theirs.",
+									  "We can accept surrender only if they are willing to do everything we ask of them.",
+									  "And now they are here begging... They should have think about that earlier...",
+									  "We are the one, that should state the terms of their surrender!",
+									  "No, no, they are just pitiful. Let's finish them off.",
+									  "One of my dearest friends was killed brutally in their dungeon. They deserve no mercy.",
+									  "Our campaign is going well so far, it is not the time for peace.",
+									  "And why should we accept what they offer, when we can take all that they have?",
+									  "Let them burn...",
+									  "From {kingdom.king} we want nothing less than his head on a plate!",
+									  "Peace might have seemed as a good option earlier on, but not now, when we have the upper hand."]
+			advise_by = [ "Marshal", "Spy" ]
+
+			differenceCap = 5
+			threshold = 0.2
+			max = 30
+		}
+
+		pc_we_are_losing
+		{
+			text reason_to_accept = ["This war has to end!",
+									 "If we do not accept, we might be destroyed.",
+									 "This war is not going well for us, we'd better accept their terms.",
+									 "We can either accept, or face dire consequences.",
+									 "We are losing, {plr_kingdom.king}. We have no choice.",
+									 "I'd suggest that we fight till the end, if it was only my life in question. But I cannot risk those of my countrymen.",
+									 "I think that this is one of that times, in which a man must swallow his pride and kneel.",
+									 "We must face the truth - we are losing this war.",
+									 "Accept now and we shall live to fight another day.",
+									 "Let's have peace today. From tomorrow on, we shall start planning our revenge.",
+									 "Of course we have to accept, sire! Don't you see what is happening?!",
+									 "Their offer is reasonable, not to say generous, considering the circumstances."]
+			advise_by = [ "Marshal", "Spy", "Diplomat", "Cleric" ]
+
+			max = 50
+		}
+			
+		pc_we_have_long_nap
+		{
+			minimal_minutes = 10
+			mapped_amount = 20
+			max_minutes = 20
+		}
+
+		pc_alliance_just_started = 30 //this is currently unused due to no "Break alliance" decission
+		{
+			max_minutes = 10
+		}
+
+		pc_they_are_active_against_our_enemies = 30
+		{
+			percent_active = 70 // must be active against at least X% of the common enemies
+			max_minutes = 10 //maximum time since last activity
+		}
+
+		pc_they_are_passive_against_our_enemies = 30  //this is currently unused due to no "Break alliance" decission; might be used for vassal relations
+		{
+			percent_passive = 70 // must be passive against at least X% of the common enemies
+			max_minutes = 10 //maximum time since last activity
+		}
+
+		pc_we_have_many_trade_centers = 30
+		{
+			realms_per_trade_center = 10  // must have at least 10 realms to have 2 trade centers, 20 realms for 3, 30 for 4...
+		}
+
+		pc_they_have_many_trade_centers = 30
+		{
+			realms_per_trade_center = 10
+		}
+
+		pc_vassal_annex_pc_bonus
+
+		//The values are per city
+
+		pc_they_hold_our_holy_cities_and_we_are_Sunni
+		{
+			shia_control = 10
+			other_religion_control = 50
+			text reason_to_us = "They dare hold our holy lands."
+			text reason_to_them = "As long as we hold their holy lands, they will always despise us."
+			text eotw_against = ["We will never vote for {obj.king} while he holds our holy lands against the will of their people!",
+								 "We will never support the usurpers of our most sacred city in anything, not to mention following their leadership.",
+								 "{obj} are a dire enemy of the whole Muslim world. Choosing them as leaders will throw Europe into chaos.",
+								 "The Muslim world will nerver accept the leadership of the most rotten enemies of Islam!"]
+		}
+
+		pc_they_hold_Baghdad_and_we_are_Shia
+		{
+			sunni_control = 10
+			other_religion_control = 50
+			text reason_to_us = "They dare hold the holy city of Baghdad."
+			text reason_to_them = "As long as we hold Baghdad, their holy city, they will always despise us."
+			text eotw_against = ["{obj.king} should first release Baghdad from his heinous clutches! Only then might we consider voting in favor of the {obj:ians}.",
+								 "We will never support the usurpers of our most sacred city in anything, not to mention following their leadership.",
+								 "The Muslim world will nerver accept the leadership of the most rotten enemies of Islam!",
+								 "{obj} are a dire enemy of the whole Muslim world. Choosing them as leaders will throw Europe into chaos."]
+		}
+
+		pc_they_are_player_and_game_just_began
+		{
+			value = 1200
+			timeout_after = 1800 //seconds
+			linear = true //false = instant drop after timeout, true = slow drop as time passes
+		}
+
+		pc_we_have_common_allies 
+		{
+			max = 20
+			per_ally = 5
+		}
+
+		pc_we_have_merchants_in_their_tc //!!! this should be very obsolete
+		{
+			base = 5
+			per_merchant = 5
+		}
+
+		pc_our_influence_in_their_kingdom
+		{
+			max = 30
+		}
+
+		pc_ask_for_crusade_cooldown = 9999
+
+		pc_they_fight_our_friends 
+		{ 
+			max = 30
+			per_kingdom = 5
+			threshold = 250
+
+			text reason_to_decline = ["I dislike them, they are constantly fighting nicer kingdoms than theirs.",
+									  "We should not support the enemies of our friends.",
+									  "While they continue to wage war against kingdoms, friendly to us, we should not agree to their offers.",
+									  "No, let's ignore those warmongers!",
+									  "Recently I received reports what their armies did in the lands of a friendly kingdom... The {kingdom:ians} are despicable!",
+									  "If we agree to their offer, we will surely anger some of our friends, that are currently fighting against the {kingdom:ians}."]
+			advise_by = [ "Marshal", "Spy", "Diplomat" ]
+
+			text reason_to_us = "They are waging wars against our friends."
+			text reason_to_them = "We are waging wars against their friends."
+			text eotw_against = ["We refuse to vote for a kingdom, which wages wars against the friends and allies of {voter}!",
+								 "We've seen how {obj} attacks our friends. We cannot follow them as our leader.",
+								 "The {obj:ians} are aggressive and attack kingdoms, which do not deserve it. They are not to be trusted!"]
+		}
+
+		pc_they_have_many_trade_agreements
+		{
+			int unpunished_agreements = 5
+			float penalty_per_excessive_agreement = 5
+		}
+
+		pc_we_have_many_trade_agreements
+		{
+			int unpunished_agreements = 5
+			float penalty_per_excessive_agreement = 5
+		}
+
+
+		// max = base + diplomat_level * level_mul
+		// per_tick_real = per_tick + level_normalized(0,1)
+		pc_our_diplomat_is_negotiating_peace
+		{
+			float tick = 30 //seconds
+			float level_mul = 2
+			float per_tick = 1
+			float base = 20				
+		}
+
+
+		pc_their_diplomat_is_negotiating_peace
+		{
+			float tick = 30 //seconds
+			float level_mul = 2
+			float per_tick = 1
+			float base = 20
+
+			text reason_to_accept = ["As you may know, one of their diplomats arrived a while ago and he made some reasonable arguments why we both need peace.",
+								     "One of their diplomats spoke with me... a really nice man, by the way. I think we will benefit from peace.",
+								     "As their diplomat here pointed out, this war brought nothing good to both of our kingdoms.",
+								     "I've read through their peace treaty suggestions their diplomat brought a month ago - it seems quite reasonable."]
+			advise_by = [ "Diplomat" ]
+		}
+
+		//new Jihad PCs
+		pc_we_are_muslim_and_they_want_us_to_support_jihad = 5
+		{
+			text reason_to_accept = ["We should help the caliphate.",
+									 "If {kingdom.king} wants our help, we should respond!",
+									 "How can we not support our brothers!",
+									 "We should fight against everyone, that crosses the path of our caliph."]
+			advise_by = [ "Cleric", "Diplomat" ]
+
+		}
+
+		pc_we_are_muslim_and_they_want_us_to_fight_against_jihad = 5
+		{
+			text reason_to_decline = ["We should not fight against the caliphate!",
+								      "The Muslim world will never forgive our betrayal.",
+								      "Fighting against our borthers is unthinkable.",
+								      "You might want that caliph title for yourself, {plr_kingdom.king}, but this is not the way to take it."]
+			advise_by = [ "Cleric", "Diplomat" ]
+		}
+		pc_we_are_both_christians_and_they_want_us_to_fight_against_jihad = 5
+		{
+			text reason_to_accept = ["The caliphate has to be destroyed!",
+								      "We must support our Christian brothers.",
+								      "Death to the non-believers!",
+								      "The Christian world must stay united to face the hordes of darkness.",
+								      "If we don't unite, the caliphate will assimilate us one by one."]
+			advise_by = [ "Cleric" ]
+		}
+		pc_we_are_muslim_supporting_jihad_and_they_fight_in_the_same_jihad = 5
+		pc_we_are_christian_and_they_lead_the_jihad_we_are_both_in = 5
+		pc_we_lead_jihad_and_they_are_not_muslim = 5
+		
+		pc_we_are_both_christians_and_target_is_caliphate = 5
+		{
+			text reason_to_accept = ["The caliphate has to be destroyed!",
+								      "We must support our Christian brothers.",
+								      "Death to the non-believers!",
+								      "The Christian world must stay united to face the hordes of darkness.",
+								      "If we don't unite, the caliphate will assimilate us one by one."]
+			advise_by = [ "Cleric" ]
+		}
+
+		pc_we_are_both_caliphates = 5
+		{
+			text reason_to_decline = ["{kingdom.king} is not the real caliph. Let's let him fall!",
+									  "Those weaklings dare call themselves caliphate. Let's see how they prove that.",
+									  "No, we should not help them. We must remain the only caliphate in the world.",
+									  "No help for those imposters."]
+			advise_by = [ "Cleric", "Spy" ]
+		}
+		pc_they_are_caliphate_and_we_are_muslim = 5
+
+		pc_we_are_at_war = 50
+		{
+			text reason_to_us = "They are our enemies and we are fighting."
+			text reason_to_them = "We are their enemies and we are fighting."
+
+			text eotw_against = ["These maggots armies are marching against us and soon they will be reduced to rubble. Do not bother to support this claim.",
+								 "That swine {obj.king} dares wage war against our great kingdom and yet - to try to proclaim himself Emperor of the World? Never!",
+								 "The enemies of {voter} deserve no support! Let us all march against those barbarians and crush them.",
+								 "It is good that we've gathered by this pitiful claim of our enemy, so that we can discuss how we can invade {obj} together."]
+		}
+
+		pc_we_produce_that_gold_slowly
+		{
+			max = 50
+			float per_perc_ratio = 200 //12 ticks (1200%) to get the gold with point per 200% = 6 points
+			//example 2 - 2500 cost for 25 income = 50 points; //500 cost on 250 income = 1 point
+			int offer_arg_index = 0 //the index for the offer's gold value. Examples: for OfferGold the index 0, OfferRansomPrisoner its 1.
+		}
+
+		pc_they_hold_our_king = 40
+		{
+			text reason_to_accept = ["But {plr_kingdom.king}, don't you fear that if we decline, they might do something to you.",
+									 "We can't risk the precious life of {plr_kingdom.king} - we must accept.",
+									 "Hopefully that will please them and we will have {plr_kingdom.king} back home soon.",
+									 "They are not asking! If we refuse, who knows what they will do to {plr_kingdom.king}!",
+									 "Only those who want to see {plr_kingdom.king} decapitated would consider refusing."]
+
+			text reason_to_decline = ["Preposterous! We will not consider any of their offers while they hold {plr_kingdom.king} imprisoned.",
+								      "These snakes hold {plr_kingdom.king} in their dungeon and dare making us offers meanwhile! Death to their messengers!",
+								      "Scandalous! We want {plr_kingdom.king} released before their diplomats may even lay foot in {plr_kingdom}!",
+								      "We cannot smile and prentend they are not holding {plr_kingdom.king} as their hostage."]
+			advise_by = [ "Spy", "Diplomat", "Cleric"]
+
+			text reason_to_us = "They hold our king and we must tread lightly."
+			text reason_to_them = "Their king is in our hands, and he is afraid to disobey us."
+
+			text eotw_support = ["I will support {obj.king}. Please, no more torture! PLEASE! Set me free, I beg you!",
+								 "{obj.king} is the worthiest ruller of them all and he treats me really well in his dungeon. Full stop.",
+								 "Even if I wasn't voting from his dungeon, I would still support {obj.king}, I swear! He is the greatest.",
+								 "Sadly, I am forced to support {obj.king}, as right now he has his knife against my throat. We'd better let him have what he wants."]
+			text eotw_support_kingdom = ["I will support {obj.king}. Please, no more torture! PLEASE! Set me free, I beg you!",
+								 "{obj.king} is the worthiest ruller of them all and he treats me really well in his dungeon. Full stop.",
+								 "Even if I wasn't voting from his dungeon, I would still support {obj.king}, I swear! He is the greatest.",
+								 "Sadly, I am forced to support {obj.king}, as right now he has his knife against my throat. We'd better let him have what he wants."]
+		}
+		pc_they_hold_our_prince = 20
+
+		pc_we_will_hate_them_if_we_give_them_gold //amount if the rels will drop to -1000
+		{
+			result_mult = 10
+		}
+
+		pc_too_many_kingdoms_at_war
+		{
+			num_kingdoms = 10
+			pow = 6
+			max = 20
+		}
+
+		pc_we_lead_this_jihad_and_they_are_muslim = 20
+
+		pc_they_want_princess_from_marriage
+		{
+			text reason_to_decline = ["No, we should find more handsome husband for our princess.",
+									  "You know how it goes, {plr_kingdom.king} - you mary your daughter today and a decade later we fight with the {kingdom:ians} for inheritance.",
+									  "They speak of your precious daughter, {plr_kingdom.king} - you cannot give her to those simpletons.",
+									  "This is clearly a diplomatic move, {plr_kingdom.king}, but what about love? Have you even considered that?",
+									  "Oh, our poor adorable princess! Please, do not let her marry that ugly swine.",
+									  "If you had ten daughters, I'd advise you to agree, {plr_kingdom.king}. But now we should wait for marriage proposal by more respectable allies.",
+									  "All I can see is their desire to get some of your lands either as inheritance, or as wedding gift.",
+									  "That is the most beautiful princess in the world. Only the Emperor of the World is suited to marry her!",
+									  "Have you considered marrying the princess to someone from {plr_kingdom} instead? Someone smart, loyal, handsome, you trust for advise and speak often with?",
+									  "All that bothers me is that they will only use the princess to get close to you.",
+									  "According to this old manuscript, since a suitable prince cannot be found, the princess must be wed to a royal adviser!"]
+			advise_by = [ "Spy", "Diplomat" ]
+
+			they_are_player = 20
+			they_are_ai = 0
+		}
+
+		pc_they_want_princess_in_marriage_while_our_king_is_venerable
+		{
+			text reason_to_decline = ["No, Sire, no!",
+									  "With all due respect, {plr_kingdom.king}, considering your age, this is just an attempt by them to gain inheritance over our lands.",
+									  "Have a rest, Sire. It is not the time for royal marriage with you, almost on your death bed.",
+									  "I am not entirely sure, but I think marrying princess with our king that old is illegal in our kingdom.",
+									  "Don't let them fool you, my dear old {plr_kingdom.king}. They want your lands, that is all."]
+			advise_by = [ "Spy", "Diplomat" ]
+
+			they_are_player = 20
+			they_are_ai = 0
+		}
+
+		pc_we_have_high_taxes //!!! no more taxes
+		{
+			tax_level_0 = 0
+			tax_level_1 = 5
+			tax_level_2 = 10
+		}
+		pc_they_have_high_taxes //!!! no more taxes
+		{
+			tax_level_0 = 0
+			tax_level_1 = 5
+			tax_level_2 = 10
+		}
+
+		pc_their_influence_in_our_kingdom
+		{
+			max = 20
+			text reason_to_accept = ["The {kingdom:ians} are great! I have nothing more to add.",
+									 "We've never received such exotic gifts as theirs. They are truly our greatest friends.",
+									 "Our noblemen are very impressed by the {kingdom:ians}. They will hate you if you decline.",
+									 "The {kingdom:ians} are your friends, {plr_kingdom.king}. You must always listen to them.",
+									 "My uncle used to say 'Never say no to a {kingdom:ian}'. Wise man he was...",
+									 "Considering their diplomatic influence over {plr_kingdom}, can we even decline their offer?",
+									 "{kingdom} and {plr_kingdom} - we are like brothers, at least if you ask me!",
+									 "{kingdom} is the greatest kingdom, if you want my totally uninfluenced advice!",
+									 "Trust me, we need to accept their offer!",
+									 "If we refuse, diplomatic consequences will follow.",
+									 "A month ago I was in {kingdom}. A great kingdom, I tell you, they treated me as a king."]
+			advise_by = [ "Diplomat", "Merchant" ]
+
+			text reason_to_us = "They have influence in our kingdom."
+			text reason_to_them = "We have influence in their kingdom."
+
+			text eotw_support = ["The {obj:ians} are truly an influential kingdom that we respect and support for a long time - and today we shall do the same.",
+								 "The {obj:ians} have the influence, so crucially needed to unite all kingdoms and {voter} shall stand behind them."]
+			
+			text eotw_support_kingdom = ["Between these great kingdoms, the {obj} is the more influential one, and we beleive they are the ones the world would follow.",
+										 "Influenced without a doubt by the greatness of {obj}, my noblemen agree that we should all accept {obj.king} as our honorable leader."]
+		}
+
+
+		pc_we_just_had_peace = 20
+		{ 
+			minutes = 20
+		}
+
+		pc_they_lead_a_crusade = 20
+
+		pc_they_recently_disobeyed_papacy
+		{
+			max = 200
+			pow = 4
+		}
+
+		pc_they_recently_aided_papacy
+		{
+			max = 200
+			pow = 4
+		}
+
+		pc_they_are_player = 20
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 10
+			hard = 0
+			very_hard = -10
+		}
+
+		pc_our_stances_with_target_side
+		{
+			trade = 5
+			nap = 20
+			vassal = 20
+			family = 30
+			liege = 50
+			target_mul = 3
+		}
+		pc_groom_not_heir_nor_king_and_both_kindoms_are_AI = 30
+		
+		pc_they_have_no_rebels_near_us = 10
+		{
+			distance = 2
+		}
+	}
+
+	//PP = base + PP * scale.PP
+
+	base
+	{
+		PP = 1
+		CP = 1
+	}
+
+	scale
+	{
+		PP = 1
+		CP = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.5 / 1 / 2
+		CP = 2 / 1 / 0.5
+	}
+
+	float cost = 40000  // gold cost equivalent of threshold 1 ... e.g. to move it from 1 to 2
+	float max_consider_treshold_delta = 0.3; //Used by some offers(AdditionalConditionOffer), if the difference between the calculated ratio and the treshold is bigger than this, dont consider this offer.
+
+	pros
+	{
+		pc_base_pros
+	}
+
+	cons
+	{
+		pc_base_cons
+		{
+			text eotw_against = ["There is simply nothing with which {obj} have impressed us. We shall not support them as leaders.",
+							     "{obj} is just a mediocre kingdom. With all due respect, why should they lead? It makes no sense.",
+							     "{obj.king:s} accomplishments are far from impressive. He is unworthy for the title Emperor of the World.",
+							     "{obj} is not the worst kingdom out there, but they are not the greatest, either. We cannot accept them as our leaders."]
+		}
+	}
+}
+
+def PC_War : ProsAndCons
+{
+	relationship_scale
+	{
+		PP = 1.5 / 1 / 0.75 //-1000 / 0 / +1000
+		CP = 0.75 / 1 / 1.5 
+	}
+
+	pros = 10 // a.k.a. war points
+	{
+		pc_we_have_bad_relation	{ max = 30;	pow = 2 }
+		pc_war_just_started { max = 20; minutes = 20; pow = 2 }
+		pc_our_army_is_stronger { max = 30 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		pc_we_are_X_times_larger = 20 {	X = 2 ; added_realms = 3}
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 100
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 80 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 100 }
+		pc_we_can_gain_sea_outlet = 10
+		pc_we_both_have_under_X_towns = 10 { X = 3 } 
+		pc_there_are_our_loyalists = 10 
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 300 }
+		pc_they_have_rebels	{ max = 6; per_rebel = 3 }
+		pc_they_have_different_religion = 5
+		//pc_we_have_allies {	per_ally = 3; max = 12 }
+
+		//alex testing
+		pc_we_are_wining { differenceCap = 5; threshold = 0.2; max = 20	}
+	}
+
+	cons = 5 // a.k.a. peace points
+	{
+		pc_we_have_good_relation { base = 2; max = 10; pow = 0.5 }
+		pc_we_have_truce {max = 200; pow = 4 }
+		pc_our_army_is_weaker { max = 10 }
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 20
+		pc_we_are_allies = 30
+		
+		pc_we_are_family { our_prince_or_princess = 20;	our_king = 30 } 
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 50 { threshold = 3 }
+		pc_we_share_same_religion = 5
+		pc_we_are_catholic_and_they_are_papacy = 30
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+
+		pc_we_have_war_exhaustion {	max = 100 }
+		pc_we_have_too_many_wars { max = 150; at_war_base = 20; per_additional_war = 30 }
+		pc_too_many_global_wars { max = 30; num_wars = 20 }
+
+		pc_our_authority_is_low { per_negative_point = 10 }
+
+		//alex testing
+		pc_we_are_losing { max = 100 }	
+
+		//PeaceTalks PCs are temporarily here since these do not activate while war is active. Move them to PC_Peace once we have PCs there
+		pc_our_diplomat_is_negotiating_peace 
+		pc_they_control_the_pope = 20 //they can either excommunicate or crusade us
+		pc_they_are_Germany_and_we_are_their_vassals = 50
+
+	}
+
+	thresholds
+	{
+		declare_war = 1.2
+		declare_independence = 1.4
+		accept_peace { below = 0.8 }
+		offer_peace { below = 0.6 }
+	}
+}
+
+def PC_Propose_DeclareWar : ProsAndCons
+{
+	relationship_scale
+	{
+		PP = 2 / 1 / 0.75 //-1000 / 0 / +1000
+		CP = 0.5 / 1 / 2 
+	}
+
+	pros = 20 // a.k.a. war points
+	{
+		pc_we_have_right_to_expand { max = 100; time = 1800; pow = 4; ai_mul = 0.1  }
+		pc_we_have_bad_relation	{ max = 30;	pow = 2 }
+		pc_our_army_is_stronger { max = 30 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		pc_we_are_X_times_larger = 20 {	X = 2; added_realms = 2}
+		pc_they_are_excommunicated_and_we_are_catholic = 30
+		pc_we_want_to_liberate_rome = 100
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+		pc_we_can_gain_sea_outlet = 10
+		pc_we_both_have_under_X_towns = 10 { X = 3 } 
+		pc_there_are_our_loyalists = 20 
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 300 }
+		pc_they_have_rebels	{ max = 10; per_rebel = 2 }
+		pc_they_have_different_religion = 10
+		pc_they_plan_invasion_against_us { max = 50; per_ally_province = 10 }
+		pc_we_plan_invasion_and_allies_are_ready { max = 80; per_ally_province = 3; per_ally = 5; per_ally_war = -10 }
+		pc_they_are_evil_empire { points = 60; min = 10; max = 40; ai_mul = 0.2 }
+		pc_they_hold_our_prince = 40
+	}
+
+	//cons = 10 removed as it now depends to difficulty
+	cons  //a.k.a. peace points 
+	{
+		pc_we_have_good_relation { base = 2; max = 20; pow = 0.7 }
+		pc_we_have_truce {max = 200; pow = 2 }
+		pc_our_army_is_weaker { max = 40 }
+		pc_we_have_trade = 10	
+		pc_our_trade_level { max = 30 }
+		pc_their_trade_level { max = 5 }
+		pc_we_have_nap = 60
+		pc_we_are_allies = 30
+		pc_we_are_family { our_prince_or_princess = 20;	our_king = 30 } 
+		pc_we_have_no_border = 40
+		pc_they_are_too_far = 70 { threshold = 3 }
+		pc_we_share_same_religion = 5
+		pc_they_are_X_times_larger = 40 { X = 2; added_realms = 2; ai_mul = 0.25 }
+		pc_we_are_catholic_and_they_are_papacy = 40
+		pc_we_have_rebels {	max = 60; per_rebel = 10 }
+		pc_we_have_war_exhaustion {	max = 100 }
+		pc_we_have_too_many_wars { max = 120; at_war_base = 30; per_additional_war = 30 }
+		pc_too_many_global_wars { max = 90; num_wars = 40 }
+		pc_our_authority_is_low { per_negative_point = 15 }
+		pc_their_diplomat_skill_level { base = 10; max = 50 }
+		pc_we_are_papacy = 60
+		pc_they_are_player_and_game_just_began
+		pc_we_need_peace_time { max = 120; minutes = 30; pow = 3 }
+		pc_their_defensive_pact_against_us { max = 50; per_ally_province = 3 }	// placeholder, might actually work well	
+		pc_they_are_our_vassal = 40
+		pc_we_share_same_liege = 30
+		pc_they_hold_our_king = 40
+		pc_they_control_the_pope = 30 //they can excommunicate or crusade us
+		pc_they_are_Germany_and_we_are_their_vassals = 50
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 10
+			hard = 5
+			very_hard = 0 
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.4
+		accept = 2 //always accept
+	}
+}
+
+
+def PC_WeCanHaveOurIndependence : PC_Propose_DeclareWar
+{
+	cost = 40000
+	pros 
+	{
+		pc_liege_attacked_other_vassal = 20
+		pc_their_authority_is_low { per_negative_point = 10 }
+		pc_our_authority_is_high { per_positive_point = 5 }
+		pc_they_have_different_religion = 10
+		pc_we_have_no_border = 10
+		pc_we_have_caliphate = 30
+		pc_they_have_too_many_wars { at_war_base = 10; per_additional_war = 20; max = 50 }
+		pc_they_are_too_far = 30 { threshold = 3 }
+		pc_we_have_right_to_expand { max = 0; time = 1200 } // disabling
+		pc_we_are_X_times_larger = 30 {	X = 2 ; added_realms = 2}
+	} 
+
+	cons 
+	{
+		pc_we_have_no_border = 0
+		pc_they_have_caliphate = 20
+		pc_their_authority_is_high { per_positive_point = 20 }
+		pc_they_are_new_liege { max = 100; max_time = 1800; pow = 3 }
+		pc_they_hold_our_king = 40
+		pc_they_hold_our_prince = 20
+		pc_they_are_Germany_and_we_are_their_vassals = 50
+	}
+
+	thresholds
+	{
+		propose = 1.2
+	}
+
+	relationship_scale //copied to those of war
+	{
+		PP = 1.5 / 1 / 0.75 //-1000 / 0 / +1000
+		CP = 0.75 / 1 / 1.5 
+	}
+
+}
+
+def PC_Propose_ClaimIndependence : PC_WeCanHaveOurIndependence
+{
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_IndependenceWarOffer : PC_WeCanHaveOurIndependence
+{
+	thresholds
+	{
+		accept { below = 0.7 }
+		//accept = 1.3 //so we can request independence, but not yet be ready for war
+		//there is no propose to this automatically generated offer
+	}
+}
+
+
+def PC_Peace : ProsAndCons
+{
+	cost = PC_War.cost
+
+	relationship_scale // for peace relationship has lower impact
+	{
+		PP = 1 / 1 / 1 //-1000 / 0 / +1000
+		CP = 1 / 1 / 1 
+	}
+
+	pros = 10 
+	{
+		pc_we_have_good_relation { base = 2; max = 10; pow = 0.5 }
+		pc_we_are_losing { max = 140 }
+		pc_we_have_no_border = 20
+		pc_they_are_too_far = 50 { threshold = 3 }
+		pc_we_share_same_religion = 5
+		pc_we_are_catholic_and_they_are_papacy = 50
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 200 }
+		pc_we_have_too_many_wars { max = 100; at_war_base = 0; per_additional_war = 30 }
+		pc_too_many_global_wars { max = 50; num_wars = 15 }
+		pc_our_authority_is_low { per_negative_point = 10 }
+		pc_their_diplomat_is_negotiating_peace { base = 20; tick = 30; per_tick = 1; level_mul = 2 }
+		pc_they_have_supporters { per_supporter = 5 }
+		pc_we_hate_our_alliance_leader { max = 30 }
+		pc_we_are_leader_and_they_are_big_enemy_supporter { max = 40; per_province = 5 }
+		pc_we_share_same_liege = 30
+		pc_they_hold_our_king = 100
+		pc_they_hold_our_prince = 20
+		pc_they_are_player_and_game_just_began { value = 70 }
+		pc_they_control_the_pope = 30
+	}
+
+	cons = 10
+	{
+		pc_we_love_our_alliance_leader { max = 50 }
+		pc_we_have_bad_relation	{ max = 5;	pow = 2 }
+		pc_we_are_wining { max = 50 }
+		pc_we_are_X_times_larger = 20 {	X = 2 ; added_realms = 2}
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 50
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+		pc_there_are_our_loyalists = 10 
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 300 }
+		pc_they_have_rebels	{ max = 15; per_rebel = 3 }
+		pc_they_have_different_religion = 5
+		pc_war_just_started { max = 120; minutes = 30; pow = 4 }		
+		pc_we_have_supporters { per_supporter = 10 }
+		pc_they_have_too_many_wars { at_war_base = 0; per_additional_war = 10; max = 30}
+		pc_we_didnt_really_fight_yet { max = 80; time_flat = 1200; time_fade_out = 600; points = 10 }
+		pc_we_are_supporting_our_liege = 40
+	}
+
+
+	thresholds
+	{
+		accept_peace = 1.2
+		offer_peace = 1.5
+	}
+}
+
+
+def PC_WhitePeaceOffer : PC_Peace
+{
+	thresholds
+	{
+		accept = "accept_peace"
+		propose = "offer_peace"
+	}
+}
+
+def PC_PeaceDemandTribute : PC_Peace
+{
+	thresholds
+	{
+		accept = "accept_peace"
+		propose = "offer_peace"
+	}
+}
+
+def PC_Propose_PeaceOfferTribute : PC_Peace
+{
+	thresholds
+	{
+		//accept = "accept_peace"
+		propose = "offer_peace"
+	}
+}
+
+def PC_Accept_PeaceOfferTribute : PC_Peace
+{
+	pros
+	{
+		pc_they_are_player_by_difficulty
+		{
+			easy = 30
+			normal = 10
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	thresholds
+	{
+		accept = "accept_peace"
+		//propose = "offer_peace"
+	}
+}
+
+
+
+def PC_BasicTrade : ProsAndCons
+{
+	cost = 5000
+	pros
+	{
+		pc_we_need_more_trade_agreements { per_idle_merchant = 20; reserve = 10; player_mul = 0.25 }
+		pc_we_have_good_relation { base = 3; max = 20; pow = 0.5 }
+		pc_we_have_nap = 5
+		pc_we_are_allies = 10
+		pc_their_influence_in_our_kingdom { max = 30 }
+		pc_we_are_family
+		{
+			our_prince_or_princess = 20
+			our_king = 40
+		} 
+		pc_they_have_more_trade = 10
+		pc_we_are_their_vassal = 20
+		pc_they_are_our_vassal = 10
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 10
+			normal = 5
+			hard = 0
+			very_hard = 0
+		}
+
+	}
+
+	cons = 10
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 10; threshold = 250 }
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 25 {	threshold = 4 }
+		pc_they_have_many_trade_agreements{ unpunished_agreements = 7; penalty_per_excessive_agreement = 5 }
+		pc_we_have_many_trade_agreements{ unpunished_agreements = 7; penalty_per_excessive_agreement = 10 }
+		pc_they_hold_our_king = 40
+		pc_they_hold_our_prince = 20
+
+		//PC_War = ((value - 1) * 200)
+		//PC_War = 40 { above = 1.2 }
+	}
+
+	add_pros_and_cons
+	{
+		//PC_ExclusiveDeals = [ (value - 1) * 100, 0 ] //!!! recursion
+
+		//PC_War = [ (0), ((value) * 200) ]
+
+		//PC_War { above = 1.2 / 0 / 40 } //above = ["accept", 20, 40 ]
+
+		PC_War
+		{ 
+			above = 1.2 / 0 / 40 
+			below = ["accept_peace", 20, 0 ]
+			//accept_peace = 20 / 0
+		}
+	}
+
+	thresholds
+	{
+		break_basic { below = 0.8 } // for testing
+		accept_basic = 1.2		
+		propose_basic = 1.6
+		accept_exclusive = 1.8
+		propose_exclusive = 1.9
+	}
+}
+
+def PC_SignTrade : PC_BasicTrade
+{
+	thresholds
+	{
+		accept = "accept_basic"
+		propose = "propose_basic"
+	}
+}
+
+
+def PC_SignExclusiveTrade : PC_BasicTrade //!!! there is no longer such offer or stance or agreement
+{
+	pros
+	{
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+	}
+
+	cons = 20
+
+	thresholds
+	{
+		break = "break_basic"
+		accept = "accept_exclusive"
+		propose = "propose_exclusive"
+	}
+
+}
+
+def PC_WeWouldGiveThemGold : ProsAndCons
+{
+	cost = -1 //does not scale with pc,multiplied by the amount
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 0 //used only in tributes
+		accept = 1.5
+	}
+}
+
+def PC_Accept_DemandGold : PC_WeWouldGiveThemGold
+{
+	cons
+	{
+		pc_we_will_hate_them_if_we_give_them_gold
+	}
+	thresholds
+	{
+		accept = 1.5
+	}
+}
+
+def PC_Propose_OfferGold : PC_WeWouldGiveThemGold
+{
+
+	thresholds
+	{
+		propose = 0 //used only in tributes
+	}
+}
+
+def PC_WeWantThemToGiveUsGold : ProsAndCons
+{
+	cost = 1 //does not scale with pc,multiplied by the amount
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1 
+	}
+}
+
+def PC_Accept_OfferGold : PC_WeWantThemToGiveUsGold //peace offerred
+{
+	thresholds
+	{
+		accept = 1 //used only in tributes
+	}
+}
+
+def PC_Propose_DemandGold : PC_WeWantThemToGiveUsGold //tributes, counteroffers
+{
+	thresholds
+	{
+		propose = 1 //used only in tributes
+	}
+}
+
+def PC_WeWantLandFromThem : ProsAndCons
+{
+	cost = 1 //does not scale with pc, its the raw price per realm, works as multipler for the RealmCost
+
+	pros = 20
+	{
+		pc_we_are_family
+		{
+			our_prince_or_princess = 10
+			our_king = 20
+		}
+		pc_we_are_their_vassal = 20 //they might want to make us stronger and return our lands
+		pc_they_are_our_vassal = 20
+		pc_we_hold_Constantinople_and_they_are_Ortodox = 20 //we are the boss
+		pc_we_have_caliphate = 20
+		pc_we_are_papacy = 20
+		
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		//the province is important to us - rich - PF, many buildings, settlements, trade or religious center
+		//the province is rightfully ours - historical
+	}
+
+	cons
+	{
+		pc_we_are_X_times_larger = 50 { X = 2; added_realms = 3 } //we don't want more lands from small kingdoms
+		//pc_we_have_no_border = 20  //!!! this cannot happen since the territory must now be neighboring
+		//pc_they_are_too_far = 40 {	threshold = 4 } //!!! this cannot happen since the territory must now be neighboring
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1
+	}
+
+	relationship_scale //it is debatable whether you want land from friends or enemies and we have no PCs
+	{
+		PP = 1 / 1 / 1 //-1000 / 0 / +1000
+		CP = 1 / 1 / 1 
+	}
+}
+
+def PC_Accept_OfferLand : PC_WeWantLandFromThem
+{
+	thresholds
+	{
+		accept = 1 //used only in tributes
+	}
+}
+
+def PC_Propose_DemandLand : PC_WeWantLandFromThem
+{
+	thresholds
+	{
+		propose = 1 //used only in tributes
+	}
+}
+
+def PC_WeWouldGiveThemLand : ProsAndCons
+{
+	cost = -1 //does not scale with pc, its the raw price per realm, multiplier for the RealmCost
+
+	pros
+	{
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_our_army_is_weaker { max = 50 } //we should avoid conflict
+		pc_we_have_war_exhaustion {	max = 20 }
+		pc_we_have_too_many_wars { at_war_base = 20; per_additional_war = 20; max = 60 }
+		pc_we_have_too_many_captured_knights { per_prisoner = 4; minimum_prisoners = 0;	max = 30 }
+
+		pc_they_hold_Constantinople_and_we_are_Ortodox = 20 //they are our boss
+		pc_we_are_catholic_and_they_are_papacy = 20
+		pc_they_have_caliphate = 20 //and we are muslim
+		pc_we_are_their_vassal = 60
+		pc_they_are_our_vassal = 40 //and we want them stronger and obidient
+
+		pc_we_are_family
+		{
+			our_prince_or_princess = 20
+			our_king = 40
+		} 
+		//the province is rightfully theirs
+		//the province is from their and not from our religion
+	}
+
+	cons = 70
+	{
+		pc_we_have_nap = 20 //they will not attack us to get it
+		pc_we_have_allies = 20
+		pc_they_have_war_exhaustion	{ max = 50 }
+		pc_our_army_is_stronger { max = 50 }
+		pc_they_have_too_many_wars { at_war_base = 5; per_additional_war = 5; max = 30 }
+		pc_we_are_X_times_larger = 10 { X = 2; added_realms = 3 }
+
+		pc_we_hold_Constantinople_and_they_are_Ortodox = 30 //we are the boss / below our dignity
+		pc_we_have_caliphate = 50
+		pc_we_are_papacy = 9999
+
+		pc_they_have_different_religion = 10 //why should we give lands to someone very different from us?
+		//pc_we_have_no_border = 10  //!!! this cannot happen since the territory must now be neighboring
+		//pc_they_are_too_far = 30 {	threshold = 4 } //!!! this cannot happen since the territory must now be neighboring
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+
+def PC_Accept_DemandLand : PC_WeWouldGiveThemLand
+{
+	thresholds
+	{
+		accept = 1 
+	}
+}	
+
+def PC_Propose_OfferLand : PC_WeWouldGiveThemLand
+{
+	thresholds
+	{
+		propose = 0 //used only in tributes
+	}
+}
+
+ 
+
+def PC_WeWouldBecomeTheirVassal : ProsAndCons
+{
+	//note - these are on top on accepting peace
+	cost = 40000
+	pros
+	{
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_our_army_is_weaker { max = 40 }
+		pc_we_share_same_religion = 10
+		pc_they_are_caliphate_and_we_are_muslim = 30
+		pc_we_both_have_under_X_towns = 20 { X = 3 } //small kingdom, ok to be a vassal, kind of united
+		pc_they_hold_Constantinople_and_we_are_Ortodox = 30 //they are our boss
+		pc_we_are_losing { max = 30 } //we have to surrender
+		pc_their_influence_in_our_kingdom {max = 30 }
+	}
+
+	cons = 50
+	{
+		//pc_we_have_bad_relation	{ max = 20;	pow = 2 } this is expected to be true and already included in the War signing
+		pc_we_are_wining { max = 30 } //absurd
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 30 {	threshold = 3 }
+		pc_they_have_different_religion = 10 //why should we give lands to someone very different from us?
+		pc_we_have_caliphate = 50 //caliphate is lost in vassalage
+		pc_our_army_is_stronger { max = 30 }
+		pc_we_are_papacy = 30
+		pc_we_are_X_times_larger = 30 {	X = 2; added_realms = 2}
+		pc_they_are_excommunicated_and_we_are_catholic = 30
+		pc_we_want_to_liberate_rome = 50
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+	}
+
+	//NB this is needed as at this stage we hate each other so much pro points will be deminished and cons - multiplied a lot
+	//and we don't want to reduce con points, as we don't want this to happen just because we like each other
+	relationship_scale
+	{
+		PP = 1 / 1 / 1
+		CP = 1 / 1 / 1
+	}
+
+	thresholds
+	{
+		propose = 1.2
+		accept = 1
+	}
+}
+
+def PC_Accept_DemandVassalage : PC_WeWouldBecomeTheirVassal
+{
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_OfferVassalage : PC_WeWouldBecomeTheirVassal
+{
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_WeWantThemAsOurVassal : ProsAndCons
+{
+	cost = 30000
+
+	pros = 50 //because why not?
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 } //this will improve our relations, which is good
+		pc_we_both_have_under_X_towns = 30 { X = 3 }
+		pc_they_hold_Constantinople_and_we_are_Ortodox = 50 //we can gain autocephally
+		pc_they_are_caliphate_and_we_are_muslim = 50 //we can become caliphate easily or be the only one
+	}
+
+	cons
+	{
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 } //we are not done with them
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		pc_they_are_excommunicated_and_we_are_catholic = 10
+		pc_we_want_to_liberate_rome = 50
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }	
+		pc_we_have_no_border = 10 //we will have little use of them
+		pc_they_are_too_far = 20 {	threshold = 3 }
+	}
+
+	relationship_scale //this is needed as at this stage we hate each other so much pro points will be deminished and cons - multiplied a lot
+	{
+		PP = 1 / 1 / 1
+		CP = 1 / 1 / 1
+	}
+
+	thresholds
+	{
+		propose = 1.2
+		accept = 1
+	}
+}
+
+def PC_Propose_DemandVassalage : PC_WeWantThemAsOurVassal
+{
+	pros
+	{
+		pc_we_are_wining { max = 30 } //we deserve this
+	}
+
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_Accept_OfferVassalage : PC_WeWantThemAsOurVassal
+{
+	pros
+	{
+		pc_we_are_losing { max = 30 } //too generous
+		pc_our_army_is_weaker { max = 50 } //an offer we can't refuse
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+
+def PC_OfferAbandonCaliphate : ProsAndCons //!!! this offer can never be sent - it is unused and must be deleted
+{
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_Accept_DemandAbandonCaliphate : ProsAndCons
+{
+	cost = 30000
+
+	pros
+	{
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_our_army_is_weaker { max = 20 }
+		pc_we_share_same_religion = 10
+		pc_they_have_caliphate = 10
+		pc_their_influence_in_our_kingdom {max = 20 }
+	}
+
+	cons = 20
+	{
+		pc_our_army_is_stronger { max = 30 }
+		pc_we_are_X_times_larger = 30 {	X = 2; added_realms = 2}
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+	}
+
+	relationship_scale
+	{
+		PP = 1 / 1 / 1  //-1000 / 0 / +1000
+		CP = 1 / 1 / 1
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_DemandAbandonCaliphate : ProsAndCons
+{
+	cost = 30000
+
+	pros
+	{
+		pc_we_are_X_times_larger = 20 {	X = 2; added_realms = 2}
+		pc_we_have_bad_relation { max = 20;	pow = 2 }
+		pc_we_share_same_religion = 20
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 20; other_religion_control = 50 } //only first values apply
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 30; other_religion_control = 70 }
+	}
+
+	cons
+	{
+		pc_we_have_good_relation{ base = 3;	max = 30; pow = 0.5	}
+	}
+
+	thresholds
+	{
+		propose = 1
+	}
+
+	relationship_scale
+	{
+		PP = 1.5 / 1 / 0.75 //-1000 / 0 / +1000
+		CP = 0.75 / 1 / 1.5 
+	}
+}
+
+def PC_JoinVassalOffer : ProsAndCons
+{
+	pros
+	{
+		pc_vassal_annex_pc_bonus
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_OfferTransferVassalage : ProsAndCons //!!! no longer a valid offer
+{
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_DemandTransferVassalage : ProsAndCons //!!! no longer a valid offer
+{
+	pros
+	{
+		pc_we_have_bad_relation
+	}
+
+	cons
+	{
+		pc_we_have_good_relation	
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_OfferReleaseVassalage : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_DemandReleaseVassalage : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation
+	}
+
+	cons
+	{
+		pc_we_have_good_relation	
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_Accept_ClaimIndependence : ProsAndCons
+{
+	relationship_scale //must have small effect, it is not love you or hate you thing
+	{
+		PP = 0.7 / 1 / 1.2 //-1000 / 0 / +1000
+		CP = 1.3 / 1 / 0.8 
+	}
+
+	pros // a.k.a. peace points
+	{
+		//we have problems
+		pc_their_influence_in_our_kingdom {max = 30 }
+		pc_our_army_is_weaker { max = 100 } //most important
+		pc_we_have_too_many_wars { max = 70; at_war_base = 10; per_additional_war = 20 }
+		pc_too_many_global_wars { max = 50; num_wars = 20 }
+		pc_our_authority_is_low { per_negative_point = 5 }
+		pc_we_need_peace_time { max = 50; minutes = 20; pow = 2 }
+		pc_they_plan_invasion_against_us { max = 60; per_ally_province = 5 }
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 100 }
+
+		//we like them
+		pc_we_have_good_relation { base = 2; max = 20; pow = 0.5 }
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_are_family { our_prince_or_princess = 20;	our_king = 30 } 
+		//pc_we_are_allies = 30 //cannot happen, since claim is disabled
+		pc_we_are_catholic_and_they_are_papacy = 200
+
+		//they are too far for us to care about them and control them with war
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 30 { threshold = 3 }
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 5
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	cons = 100 // a.k.a. war points //we need storng reasons to even consider this
+	{	
+		//we can kick their ass
+		pc_our_army_is_stronger { max = 100 }
+		pc_we_are_X_times_larger = 50 {	X = 2 ; added_realms = 2}
+		pc_they_have_rebels	{ max = 15; per_rebel = 3 }
+		pc_there_are_our_loyalists = 20
+		pc_they_have_war_exhaustion { max = 50 }
+
+		//we would very much like them to suffer
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 100
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+		pc_we_both_have_under_X_towns = 30 { X = 3 } 
+		pc_they_have_different_religion = 5
+	}
+
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+def PC_GrantIndependence : PC_Accept_ClaimIndependence
+{
+	cost = 30000
+
+	thresholds
+	{
+		propose = 1.2
+		accept = 0
+	}
+}
+
+
+def PC_SignNonAggression : ProsAndCons //placeholder
+{
+	cost = 12500
+
+	pros
+	{
+		pc_we_have_good_relation { base = 3; max = 30; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+	  	pc_we_have_common_enemies {	max = 30; per_enemy = 5	}
+	  	pc_we_have_war_exhaustion { max = 20 }
+	  	pc_their_influence_in_our_kingdom { max = 20 } //!!! move only to accept, not propose
+	  	pc_they_control_the_pope = 10 //we don't want to mess with them
+	  	//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 30
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		pc_there_are_our_loyalists = 10
+		pc_our_army_is_stronger = 30
+		pc_we_are_X_times_larger = 20 {	X = 1.5 ; added_realms = 2 }
+		
+		pc_our_king_is_venerable = 2000 //never do it
+		pc_their_king_is_venerable = 2000 //never do it
+		pc_our_king_is_old = 10
+		pc_their_king_is_old = 10
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+
+def PC_SignNonAggressionRenewOurKing : PC_SignNonAggression 
+{
+	pros
+	{
+		pc_nap_recently_broken_because_king_died = 40 //constant during the interval; have in mind the "propose threshold"
+		{
+			max_time = 300
+		}
+	}
+
+	cons
+	{
+		pc_nap_not_recently_broken_because_king_died = 100000 //forbid the AI to send this while the nap hasnt been broken recently due to king's death
+		{
+			max_time = 300
+		}
+	}
+}
+
+def PC_SignNonAggressionRenewTheirKing : PC_SignNonAggression 
+{
+	pros
+	{
+		pc_nap_recently_broken_because_king_died = 40 //constant during the interval; have in mind the "propose threshold"
+		{
+			max_time = 300
+		}
+	}
+
+	cons
+	{
+		pc_nap_not_recently_broken_because_king_died = 100000  //forbid the AI to send this while the nap hasnt been broken recently due to king's death
+		{
+			max_time = 300
+		}
+	}
+}
+
+def PC_WeWantMarriage : ProsAndCons
+{
+	cost = 20000
+
+	pros
+	{
+		//we have common interests
+		pc_we_have_good_relation { base = 3; max = 15; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+	  	pc_we_share_same_religion = 10 
+	  	pc_we_have_nap = 5
+	  	pc_we_are_their_vassal = 20
+	  	pc_they_are_our_vassal = 10
+	  	
+	  	//will appreciate military support
+		pc_we_have_common_enemies {	max = 30; per_enemy = 5	}
+	  	pc_we_have_war_exhaustion { max = 10 }
+	  	pc_we_both_have_under_X_towns = 20 { X = 3 }
+		pc_our_army_is_weaker { max = 20 }
+
+		pc_they_have_caliphate = 20 //and we are muslim
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 0
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	cons = 10
+	{
+		//they want easy land
+		pc_they_want_princess_from_marriage	{ they_are_player = 20;	they_are_ai = 10 } //10 to keep some princesses for the player
+		pc_they_want_princess_in_marriage_while_our_king_is_venerable { they_are_player = 100;	they_are_ai = 30 }
+		
+		//we have not such a great interest in that marriage
+		pc_our_army_is_stronger = 5
+		pc_we_are_X_times_larger = 10 {	X = 2 ; added_realms = 2 }
+		pc_we_are_family //avoid many marriages with the same kingdom
+		{
+			our_prince_or_princess = 30
+			our_king = 30
+		}
+		pc_we_have_no_border = 5
+		pc_they_are_too_far = 20 { threshold = 3 }
+
+		//we hate them
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 15; per_core_realm = 15;	max = 90 }
+		//religious problems
+		pc_they_have_different_religion = 10 
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 100
+		pc_they_hold_our_holy_cities_and_we_are_Sunni { shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 50 }
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 0
+			normal = 0
+			hard = 5
+			very_hard = 10
+		}
+		pc_groom_not_heir_nor_king_and_both_kindoms_are_AI = 30
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_Propose_MarriageOffer : PC_WeWantMarriage
+{
+	thresholds
+	{
+		propose = 1.5
+	}
+}
+
+
+def PC_Accept_MarriageOffer : PC_WeWantMarriage
+{
+	pros
+	{
+	  	pc_their_influence_in_our_kingdom { max = 30 }
+	}
+
+	thresholds
+	{
+		accept = 1.1
+	}
+}
+
+
+// def PC_SignAlliance : ProsAndCons //placeholder
+// {
+// 	pros
+// 	{
+// 		pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	}
+// 		pc_we_have_trade = 5
+// 		pc_we_are_trading = 5 //added to the upper
+// 	  	pc_we_have_common_enemies {	max = 90; per_enemy = 15 }
+// 	  	pc_we_have_long_nap{ mapped_amount = 20; minimal_minutes = 10; max_minutes = 20}
+// 	}
+
+// 	cons = 60
+// 	{
+// 		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+// 		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+// 		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+// 		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+// 		pc_there_are_our_loyalists = 10 
+// 	  	pc_we_have_war_exhaustion { max = 20 }
+// 	  	pc_our_king_is_venerable = 2000 //never do it
+// 		pc_their_king_is_venerable = 2000 //never do it
+// 		pc_our_king_is_old = 10
+// 		pc_their_king_is_old = 10
+// 	}
+
+// 	add_pros_and_cons
+// 	{
+
+// 		PC_War
+// 		{ 
+// 			above = 1.2 / 0 / 30 
+// 			below = ["accept_peace", 20, 0 ]
+// 		}
+// 	}
+
+// 	thresholds
+// 	{
+// 		propose = 1.2
+// 		accept = 1
+// 	}
+
+// 	relationship_scale
+// 	{
+// 		PP = 0.8 / 1 / 1.2
+// 		CP = 1 / 1 / 1
+// 	}
+// }
+
+
+def PC_WeWantOurLandsReturned : ProsAndCons
+{
+	cost = 5000 //per realm, doesnt scale with pc
+
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1.2
+	}
+}
+
+
+def PC_WeWouldReturnTheirLands : ProsAndCons
+{
+	cost = 5000 //per realm, doesnt scale with pc
+
+	pros
+	{
+		pc_we_have_bad_relation
+	}
+
+	cons
+	{
+		pc_we_have_good_relation	
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1.5
+	}
+}
+
+
+
+def PC_OfferChangeReligion : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_good_relation	
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_DemandChangeReligion : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation
+	}
+
+	cons
+	{
+		pc_we_have_good_relation	
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+
+def PC_WeWantSomeoneToAttackThem : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 }
+		pc_our_army_is_weaker { max = 50 } //we can't just attack them on our own
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 50
+		pc_they_have_different_religion = 10
+		pc_they_have_many_trade_centers = 20
+		pc_they_hold_our_holy_cities_and_we_are_Sunni{ shia_control = 10; other_religion_control = 40 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 60 }
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 300 }
+		pc_they_hold_our_king = 50
+		pc_they_hold_our_prince = 30
+		pc_we_are_at_war = 30 //must matter, but better demand support
+	}
+	cons
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5}
+		pc_our_army_is_stronger = 40 //we will rather attack them on our own
+		pc_we_share_same_religion = 5
+		pc_their_influence_in_our_kingdom { max = 30 }
+		pc_we_are_family { our_prince_or_princess = 15; our_king = 30 }
+		pc_they_are_our_vassal = 40
+		pc_we_are_allies = 30
+		pc_we_are_trading = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 30 { threshold = 4 }
+		pc_we_are_catholic_and_they_are_papacy = 50
+		pc_too_many_global_wars { max = 20; num_wars = 20 }
+		pc_they_control_the_pope = 20
+	}
+
+	relationship_scale
+	{
+		PP = 1.5 / 1 / 0.75 //-1000 / 0 / +1000
+		CP = 0.75 / 1 / 1.5 
+	}
+}
+
+def PC_WeWantToAttackThem : PC_War
+
+def PC_WeWouldAttackKingdom : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_good_relation
+		pc_they_hold_our_king = 20
+		pc_they_hold_our_prince = 10
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+		pc_we_have_war_exhaustion { max = 50 }
+		pc_we_need_peace_time { max = 100; minutes = 20; pow = 2 }
+		pc_we_are_papacy = 60 //this is not in PC_War, but in declare war only, so we add it here
+	}
+
+	add_pros_and_cons
+	{
+		PC_WeWantToAttackThem = [ (PP), (CP) ]
+		{
+			their_kingdom = (offer.arg)
+		}
+	}
+
+	thresholds
+	{
+		accept = 1.5
+		propose = 1.5
+	}
+}
+
+def PC_Propose_DemandAttackKingdom : ProsAndCons
+{
+	cost = 15000
+
+	pros
+	{
+		pc_we_have_good_relation { max = 30	}	
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+		pc_we_share_same_religion = 2 
+		pc_we_are_family
+		{
+			our_prince_or_princess = 10
+			our_king = 20
+		} 
+	  	pc_we_have_nap = 5
+
+	  	//pc_we_are_allies = 20 
+	  	pc_they_are_our_vassal = 30 //never true unless the offer is reused; here because of "Friends message of Friends Enemies Wars screen
+	  	pc_we_are_their_vassal = 10 //never true unless the offer is reused; here because of "Friends message of Friends Enemies Wars screen
+	}
+
+	cons = 10
+	{
+		pc_we_have_bad_relation	
+		pc_they_have_different_religion = 5
+		pc_they_fight_our_friends = 20
+		pc_we_have_war_exhaustion { max = 30 }
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 10
+			normal = 0
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	add_pros_and_cons
+	{
+		PC_WeWantSomeoneToAttackThem = [ (PP), (CP) ]
+		{
+			their_kingdom = (offer.arg)
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.5
+	}
+}
+
+def PC_Accept_DemandAttackKingdom : PC_WeWouldAttackKingdom
+{
+	cost = 20000
+
+	pros
+	{
+	  pc_we_are_their_vassal = 30
+	  pc_their_influence_in_our_kingdom = 30
+	}
+
+	thresholds
+	{
+	  accept = 1.5
+	}
+}
+
+def PC_OfferAttackKingdom : PC_WeWouldAttackKingdom //!!! what is this? We have Demand attack kingdom
+{	
+	thresholds
+	{
+		propose = 1.5
+	}
+}
+
+
+// template PC_InvokeAlliance : ProsAndCons //placeholder //!!! obsolete
+// {
+// 	cost = 25000
+
+// 	pros
+// 	{
+// 		pc_we_have_good_relation 
+// 		{
+// 			max = 30
+// 		}	
+// 		pc_we_have_trade = 5
+// 		pc_our_trade_level { max = 10 }
+// 		pc_their_trade_level { max = 10 }
+// 		pc_we_share_same_religion = 2 	
+// 	  	pc_we_are_family 
+// 		{
+// 			our_prince_or_princess = 10
+// 			our_king = 20
+// 		}
+// 	}
+
+// 	cons = 10
+// 	{
+// 		pc_we_have_bad_relation	
+// 		pc_they_have_different_religion = 5
+// 		pc_they_fight_our_friends = 20
+// 		pc_we_have_war_exhaustion { max = 30 }
+// 		pc_we_need_peace_time { max = 100; minutes = 20; pow = 2 }
+
+// 	}
+
+// 	thresholds
+// 	{
+// 		propose = 1.5
+// 		accept = 1.2
+// 	}
+// }
+
+// def PC_SummonVassal : PC_InvokeAlliance //placeholder //!!! obsolete? - if not, work on the PCs
+// {
+
+// }
+
+// def PC_AskForProtection : PC_InvokeAlliance //placeholder //!!! obsolete? - if not, work on the PCs
+// {
+
+// }
+
+
+def PC_WeWouldJoinTheirWar : ProsAndCons
+{
+	cost = 15000
+	relationship_scale
+	{
+		PP = 0.5 / 1 / 1.75
+		CP = 1.75 / 1 / 0.7
+	}
+
+	pros = 10
+	{
+	  	pc_we_share_same_religion = 5
+	  	pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+
+	  	pc_we_have_good_relation { base = 5; max = 30; pow = 0.5	}
+		pc_we_are_their_vassal = 50
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+		pc_they_are_our_vassal = 30
+		// pc_they_are_winning_war_against_target = 20
+		pc_we_are_family { our_prince_or_princess = 40;	our_king = 60 } 
+		//pc_they_have_supporters { per_supporter = 10 }
+		pc_our_relation_with_target_side { rel_loved = 0; per_loved = 0; rel_hated = -300; per_hated = 20; target_mul = 4 }
+		pc_we_are_target_neighbor = 20
+		pc_they_hold_our_king = 30
+		pc_they_hold_our_prince = 15
+		pc_their_target_is_evil_empire { points = 40; min = 10; max = 30; ai_mul = 0.2 }
+
+		//religious
+		pc_we_are_muslim_and_they_want_us_to_support_jihad = 30
+		pc_we_are_both_christians_and_target_is_caliphate = 15
+		pc_we_are_both_christians_and_they_want_us_to_fight_against_jihad = 15 //stacks with pc_we_are_both_christians_and_target_is_caliphate
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 10
+			normal = 0
+			hard = 0
+			very_hard = 0
+		}
+
+	}
+
+	cons = 10
+	{
+		//pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		//pc_there_are_our_loyalists = 10
+		pc_we_have_bad_relation	{ max = 30;	pow = 2 }
+		pc_their_target_has_supporters { per_supporter = 5 }
+		pc_we_have_too_many_wars { at_war_base = 20; per_additional_war = 20; max = 100 }
+		pc_their_side_in_war_is_full = 10000 { max_supporters = 4}
+		pc_our_stances_with_target_side { trade = 5; nap = 20; vassal = 20; family = 30; liege = 40; target_mul = 3}
+		pc_we_have_truce_with_target { max = 500; pow = 4 }
+		pc_our_relation_with_target_side { rel_loved = +300; per_loved = 20; rel_hated = 0; per_hated = 0; target_mul = 4; }
+		pc_we_have_war_exhaustion { max = 200 }
+		pc_we_need_peace_time { max = 150; minutes = 30; pow = 6 }
+		pc_we_are_not_neighbor_to_any_opposing_kingdom_of_their_war = 100
+		pc_too_many_kingdoms_at_war { max = 20; num_kingdoms = 50 }
+		pc_we_are_papacy = 50
+
+		//jihad  
+		pc_we_are_both_caliphates = 20
+		pc_we_are_muslim_and_they_want_us_to_fight_against_jihad = 50
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 0
+			normal = 0
+			hard = 5
+			very_hard = 10
+		}
+
+	}
+
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+}
+
+def PC_Accept_DemandSupportInWar : PC_WeWouldJoinTheirWar
+{
+	pros 
+	{
+		pc_their_influence_in_our_kingdom { max = 40 }
+
+	}
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+def PC_Accept_SummonVassal : PC_WeWouldJoinTheirWar
+{
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+def PC_Accept_AskForProtection : PC_WeWouldJoinTheirWar
+{
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+def PC_Propose_OfferSupportInWar : PC_WeWouldJoinTheirWar
+{
+	thresholds
+	{
+		propose = 1.5
+	}
+}
+
+
+
+def PC_WeWantTheirHelpInOurWar : ProsAndCons
+{
+	cost = 30000
+	relationship_scale
+	{
+		PP = 1 / 1 / 1.5
+		CP = 1 / 1 / 1
+	}
+
+	pros = 15
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5	}
+		pc_we_are_losing_war_against_target = 25 
+		pc_they_are_our_vassal = 20
+		pc_we_are_their_vassal = 40
+		pc_we_are_family { our_prince_or_princess = 20; our_king = 30}
+		pc_we_lead_this_jihad_and_they_are_muslim = 15
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 5
+	{
+		pc_too_many_kingdoms_at_war { max = 30; num_kingdoms = 50 }
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_are_not_target_neighbor = 15
+		pc_they_are_too_far = 15 { threshold = 3 }
+		pc_our_side_in_war_is_full = 1000 { max_supporters = 4 }
+		pc_we_have_supporters { per_supporter = 5 }
+		// pc_we_are_both_caliphates = 10
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1.5
+	}
+}
+
+def PC_Accept_OfferSupportInWar : PC_WeWantTheirHelpInOurWar
+{
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_DemandSupportInWar : PC_WeWantTheirHelpInOurWar
+{
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_Propose_SummonVassal : PC_WeWantTheirHelpInOurWar
+{
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+def PC_Propose_AskForProtection : PC_WeWantTheirHelpInOurWar
+{
+	thresholds
+	{
+		accept = 1.2
+	}
+}
+
+
+def PC_OfferReleasePrisoners : ProsAndCons
+{
+	cost = 10000
+	pros
+	{
+		pc_we_have_good_relation
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 1
+	}
+}
+
+def PC_Accept_DemandReleasePrisoners : ProsAndCons
+{
+	cost = 10000
+	pros
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5	}
+		pc_our_dungeon_is_crowded	{ per_prisoner = 5; minimum_prisoners = 3}
+
+		pc_we_have_truce = 10 //exchange after war
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 10 
+		pc_we_are_allies = 20
+		pc_we_are_family 
+		{
+			our_prince_or_princess = 10
+			our_king = 20
+		}
+		pc_they_are_our_vassal = 20
+		pc_we_are_their_vassal = 20
+		pc_they_are_caliphate_and_we_are_muslim = 15
+	}
+	cons = 25
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+
+def PC_Propose_DemandReleasePrisoners : ProsAndCons //placeholder
+{
+	cost = 10000
+	pros
+	{
+		pc_we_have_good_relation
+	}
+	cons
+	{
+		pc_we_have_bad_relation
+		pc_we_just_had_peace = 1000000000 { minutes = 1}
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 20 
+			below = ["accept_peace", 10, 0 ]
+			//accept_peace = 20 / 0
+		}
+	}
+
+	thresholds
+	{
+		propose = 0.1
+	}
+}
+
+
+def PC_WeWouldHelpWithTheirRebels : ProsAndCons //placeholder
+{
+	cost = 20000
+	pros
+	{
+		pc_we_have_good_relation { max = 20;	pow = 2 }
+		
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+		pc_we_are_allies = 20
+		pc_we_are_family { our_prince_or_princess = 10;	our_king = 20 } 
+		pc_we_are_their_vassal = 30
+		pc_they_are_our_vassal = 30
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+		pc_we_have_common_enemies { max = 20; per_enemy = 5 }
+ 		pc_they_are_active_against_our_enemies = 30 { percent_active = 70; max_minutes = 10 }
+
+ 		//religious benefits
+ 		pc_we_share_same_religion = 5
+ 		pc_we_are_catholic_and_they_are_papacy = 30
+ 		pc_they_are_caliphate_and_we_are_muslim = 30
+ 		//do not add text for this
+
+ 		pc_they_are_player_by_difficulty
+		{
+			easy = 30
+			normal = 20
+			hard = 10
+			very_hard = 0
+		}
+	}
+
+	cons = 20
+	{
+		pc_we_are_at_war = 1000
+
+		//interest
+		pc_they_have_no_rebels_near_us = 1000 //stopper
+		pc_we_have_no_border = 1000 //stopper
+		pc_there_are_our_loyalists = 100 
+		pc_they_rule_our_lands { per_historical_realm = 10;  per_core_realm = 10; max = 50 }
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 250 }
+
+		//capabilities
+		pc_we_have_rebels { max = 50; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 20 }
+		pc_we_have_too_many_wars {	at_war_base = 10; per_additional_war = 10;	max = 40 }
+
+		//religious problems
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_have_different_religion = 5
+		pc_we_are_both_caliphates = 15
+		pc_we_want_to_liberate_rome = 50
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10;	other_religion_control = 50 }
+	}
+
+	thresholds
+	{
+		propose = 1.2
+		accept = 1
+	}
+}
+
+def PC_Accept_DemandHelpWithRebels : PC_WeWouldHelpWithTheirRebels //placeholder
+{
+	thresholds
+	{
+		accept = 1 //but this should never happen, accept only offer
+	}
+}
+
+def PC_Propose_OfferHelpWithRebels : PC_WeWouldHelpWithTheirRebels //placeholder
+{
+	thresholds
+	{
+		propose = 1.2
+		accept = 0 //but this should never happen, accept only offer; if we need pro cons, they should be quite different
+	}
+}
+
+def PC_Propose_DemandHelpWithRebels : ProsAndCons //placeholder //note that at this point AI cannot offer this
+{
+	cost = 30000
+	pros
+	{
+		//real reasons to require help
+		// pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	} //not a reason, but multiplier
+		pc_we_have_rebels {	max = 100; per_rebel = 10 } //100 = total rebel swarm
+		pc_we_have_too_many_wars { max = 50; at_war_base = 10; per_additional_war = 20 }
+		pc_we_have_war_exhaustion {	max = 25 }
+		pc_we_have_too_many_captured_knights {per_prisoner = 10; minimum_prisoners = 1;	max = 50}
+		
+
+		//sympathies and seeing the other as a partner
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+		pc_we_share_same_religion = 5
+
+		pc_we_share_same_liege = 10
+		pc_we_are_their_vassal = 30
+		pc_they_are_our_vassal = 30
+		pc_we_are_family = 30
+		pc_we_are_allies = 20
+
+		pc_our_army_is_weaker { max = 10 } //please help us big one
+		
+	}
+
+	cons = 100
+	{
+		pc_we_are_at_war = 1000
+
+	}
+
+	relationship_scale
+	{
+		PP = 0.5 / 1 / 2
+		CP = 1 / 1 / 1
+	}
+
+	thresholds
+	{
+		propose = 1
+		accept = 1 //should be unnecessary
+	}
+}
+
+def PC_Accept_OfferHelpWithRebels : PC_Propose_DemandHelpWithRebels //placeholder - used for your knights commenting, though
+{
+	thresholds
+	{
+		propose = 1.2
+		accept = 0 //but this should never happen, accept only offer; if we need pro cons, they should be quite different
+	}
+}
+
+def PC_BreakRoyalTies : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation
+	}
+
+	cons
+	{
+		pc_we_have_good_relation	
+	}
+
+	thresholds
+	{
+		propose = 1.5
+		accept = 0
+	}
+
+	relationship_scale //there are no PCs
+	{
+		PP = 1 / 1 / 1
+		CP = 1 / 1 / 1
+	}
+
+}
+
+
+def PC_WeWantGoldToReleaseTheirPrisoner : ProsAndCons
+{
+	cost = 10000
+	pros
+	{
+		pc_we_produce_that_gold_slowly //expected cost to be around 20 times income = 2000% of income = 10 points
+		{
+			max = 50
+			float per_perc_ratio = 100 //e.g. 1250 cost / 25 income  * 100 / 100 = 50 points max
+			int offer_arg_index = 1 //for ransoms
+		}
+		pc_our_dungeon_is_crowded	{ per_prisoner = 5; minimum_prisoners = 3}
+
+		//unlikely or after war
+		pc_we_have_truce = 10 //exchange after war
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 20 
+		pc_we_are_allies = 30
+		pc_we_are_family 
+		{
+			our_prince_or_princess = 10
+			our_king = 20
+		} 
+		pc_they_are_our_vassal = 20
+		pc_we_are_their_vassal = 20
+	}
+
+	cons
+	{
+		pc_we_are_at_war = 25
+		pc_we_have_more_gold_than_ransom_price { multiplier = 5; max = 25;} //do not block too much even if there is too much gold produced
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1.2
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2 //expecting negative effect here - this is usually done in war
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_Accept_OfferRansomPrisoner : PC_WeWantGoldToReleaseTheirPrisoner
+{
+	thresholds
+	{
+		accept = 0
+	}
+}
+
+def PC_Propose_AskForPrisonerRansom : PC_WeWantGoldToReleaseTheirPrisoner
+{
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_WeWouldGiveThemGoldToReleaseOurPrisoner : ProsAndCons
+{
+	cost = 10000
+	pros
+	{
+		pc_we_have_too_many_captured_knights {per_prisoner = 10; minimum_prisoners = 1;	max = 50} //minumum 10
+		pc_we_have_more_gold_than_ransom_price { multiplier = 10; max = 50;} //minimum 10, but they better have some more gold
+
+		//unlikely or after war
+		pc_we_have_truce = 10 //exchange after war
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 20 
+		pc_we_are_allies = 30
+		pc_we_are_family 
+		{
+			our_prince_or_princess = 10
+			our_king = 20
+		} 
+		pc_they_are_our_vassal = 20
+		pc_we_are_their_vassal = 20
+	}
+
+	cons = 10
+	{
+		pc_we_are_at_war = 25
+		pc_we_produce_that_gold_slowly //expected cost to be around 20 times income = 2000% of income = 10 points
+		{
+			max = 50
+			float per_perc_ratio = 100 //e.g. 1250 cost / 25 income  * 100 / 100 = 50 points max
+			int offer_arg_index = 1 //for ransoms
+		}
+	}
+
+	thresholds
+	{
+		accept = 1
+		propose = 1.2
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2 //expecting negative effect here - this is usually done in war
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_Accept_AskForPrisonerRansom : PC_WeWouldGiveThemGoldToReleaseOurPrisoner
+{
+	thresholds
+	{
+		accept = 1
+	}
+}
+def PC_Propose_OfferRansomPrisoner : PC_WeWouldGiveThemGoldToReleaseOurPrisoner
+{
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+
+def PC_CreateDefensivePactAction: ProsAndCons 
+{
+	pros = 1
+	{
+		
+	}
+	cons = 0
+	{
+		pc_they_have_too_many_defensive_pacts_against_them = 100
+		{
+			pacts_num = 4
+		}
+	}
+	thresholds
+	{
+		use = 1
+	}
+}
+
+
+def PC_OfferJoinInDefensivePact : ProsAndCons
+{
+	cost = 20000
+	pros
+	{
+		pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+	  	pc_we_have_common_enemies {	max = 30; per_enemy = 5	} //maybe no longer valid
+//	  	pc_we_are_their_vassal = 10
+	  	pc_they_are_our_vassal = 40
+	  	pc_we_are_family { our_prince_or_princess = 10; our_king = 20}
+	  	pc_we_share_same_religion = 5
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 15
+	{
+		pc_we_have_war_exhaustion { max = 20 }
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		pc_there_are_our_loyalists = 10
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_DemandJoinInDefensivePact : ProsAndCons
+{
+	cost = 20000
+	pros
+	{
+		pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+	  	pc_we_have_common_enemies {	max = 30; per_enemy = 5	} //maybe no longer valid
+//	  	pc_we_are_their_vassal = 20
+	  	pc_they_are_our_vassal = 30
+	  	pc_we_are_family { our_prince_or_princess = 10; our_king = 20}
+	  	pc_we_have_war_exhaustion { max = 20 }
+	  	pc_we_share_same_religion = 5
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 15
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		pc_there_are_our_loyalists = 10
+		pc_we_are_papacy = 20
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_OfferJoinInOffensivePact : ProsAndCons
+{
+	cost = 15000
+	pros
+	{
+		pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+	  	pc_we_have_common_enemies {	max = 30; per_enemy = 5	} //maybe no longer valid
+	  	pc_we_are_their_vassal = 10
+	  	pc_they_are_our_vassal = 10
+	  	pc_we_are_family { our_prince_or_princess = 10; our_king = 20}
+	  	pc_we_share_same_religion = 5
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 25
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+	  	 { max = 20 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		pc_there_are_our_loyalists = 10
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+def PC_DemandJoinInOffensivePact : ProsAndCons
+{
+	cost = 15000
+	pros
+	{
+		pc_we_have_good_relation { base = 3;max = 20; pow = 0.5	}
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+	  	pc_we_have_common_enemies {	max = 30; per_enemy = 5	} //maybe no longer valid
+	  	pc_we_are_their_vassal = 10
+	  	pc_they_are_our_vassal = 10
+	  	pc_we_are_family { our_prince_or_princess = 10; our_king = 20}
+	  	pc_we_share_same_religion = 5
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	cons = 25
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+	  	pc_we_have_war_exhaustion { max = 20 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 5; threshold = 250 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 45 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 45 }
+		pc_there_are_our_loyalists = 10
+		pc_we_are_papacy = 100
+	}
+
+	add_pros_and_cons
+	{
+		PC_War
+		{ 
+			above = 1.2 / 0 / 30 
+			below = ["accept_peace", 20, 0 ]
+		}
+	}
+
+	thresholds
+	{
+		propose = 1.3
+		accept = 1
+	}
+
+	relationship_scale
+	{
+		PP = 0.8 / 1 / 1.2
+		CP = 1 / 1 / 1
+	}
+}
+
+
+def PC_NominateEmperorOfTheWorld : ProsAndCons
+{
+	// ATTENTION - adding new pros and cons here REQUIRES them to have text for reason_for_us, reason_to_them
+
+	pros 
+	{
+		pc_we_have_good_relation { base = 0; max = 20; pow = 2 }
+		pc_our_army_is_weaker { max = 25 }
+		pc_our_trade_level { max = 5 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 10 //relatively easy
+		pc_we_are_family
+		{
+			our_prince_or_princess = 20
+			our_king = 40
+		}
+		pc_we_are_their_vassal = 25
+		//pc_they_are_Germany_and_we_are_their_vassals = 20
+		pc_we_have_common_enemies {	max = 40; per_enemy = 10 } //consider this MUST trump pc_they_have_too_many_wars as well, which is 1,5 * 10 per war
+		pc_we_share_same_religion = 10
+		pc_they_have_caliphate = 30 //and we are muslim
+		pc_they_hold_our_king = 40
+		pc_their_influence_in_our_kingdom { max = 20 }
+		pc_they_control_the_pope_and_we_are_catholic = 10 //in addition to global influence
+	}
+
+	cons = 10
+	{
+		//peace + relations
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_have_too_many_wars { at_war_base = 10; per_additional_war = 10; max = 60}
+		pc_they_fight_our_friends { max = 40; per_kingdom = 5; threshold = 250 }
+
+		//weakness
+		pc_our_army_is_stronger { max = 40 }
+		pc_we_are_X_times_larger = 10 {	X = 2 ; added_realms = 3 }
+		pc_their_king_is_venerable = 20
+
+		//rare
+		pc_there_are_our_loyalists = 10
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+
+		//rediculous claims
+		pc_they_hold_Rome = 40
+		pc_we_are_at_war = 80
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_they_hold_Constantinople_and_we_are_Ortodox = 30
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 15; other_religion_control = 30 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 15; other_religion_control = 30 }
+	}
+
+	thresholds //!!! this probably does nothing at this pount
+	{
+		nominate = 1.5
+	}
+}
+
+def PC_Propose_PrincessClaimInheritanceOffer: ProsAndCons //make claim
+{
+	cost = 40000
+	relationship_scale
+	{
+		PP = 1.2 / 1 / 0.9 //relationship should have small effect here, since we want inheritance from friends
+		CP = 1 / 1 / 1 
+	}
+
+	pros = 50 // a.k.a. war points //if there are no good reasons, we'd like that inheritance, please
+	{
+		pc_we_have_bad_relation	{ max = 30;	pow = 2 }
+		pc_we_have_right_to_expand { max = 100; time = 2400 }
+		pc_our_army_is_stronger { max = 50 }
+		pc_they_rule_our_people { our_kingdom = 30; our_culture = 15; our_culture_family = 5; max = 100 }
+		pc_they_rule_our_lands	{ per_historical_realm = 30; per_core_realm = 30;	max = 90 }
+		pc_we_can_gain_sea_outlet = 10
+		pc_there_are_our_loyalists = 10 
+		pc_they_have_rebels	{ max = 15; per_rebel = 3 }
+		pc_we_share_same_religion = 10 //we prefer lands, that are from our religion
+		pc_they_are_our_vassal = 30
+	}
+
+	cons // a.k.a. peace points
+	{
+		pc_we_have_good_relation { base = 2; max = 30; pow = 0.5 }
+		pc_we_are_X_times_larger = 20 {	X = 2 ; added_realms = 2} // don't bully our small friend
+		pc_we_both_have_under_X_towns = 30 { X = 3 } 
+		pc_they_have_different_religion = 5
+		pc_our_army_is_weaker { max = 20 }
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 20
+		pc_we_are_allies = 30
+		pc_we_have_no_border = 20
+		pc_they_are_too_far = 50 { threshold = 3 }
+		//pc_we_are_catholic_and_they_are_papacy = 50 //cannot marry papacy
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 50 }
+		pc_we_have_too_many_wars { max = 50; at_war_base = 10; per_additional_war = 20 }
+		pc_too_many_global_wars { max = 20; num_wars = 20 }
+		pc_we_need_peace_time { max = 20; minutes = 20; pow = 2 }
+		pc_our_authority_is_low { per_negative_point = 10 }
+		pc_their_defensive_pact_against_us { max = 60; per_ally_province = 3 } //if they decline, we'll get in trouble
+		pc_their_diplomat_skill_level { max = 15 }
+		//pc_we_are_papacy = 50 //cannot marry papacy
+		pc_they_are_player_and_game_just_began
+		pc_they_hold_our_king = 40 //can rarely happen
+		pc_they_hold_our_prince = 20
+		pc_they_are_Germany_and_we_are_their_vassals = 20
+	}
+
+	thresholds
+	{
+		propose = 1
+	}
+}
+
+def PC_Accept_PrincessClaimInheritanceOffer: ProsAndCons //accept claim //placeholder
+{
+	cost = 40000
+	relationship_scale 
+	{
+		// -1000 / 0 / +1000
+		PP = 0.7 / 1 / 1.2 
+		CP = 1.3 / 1 / 0.8 
+	}
+
+	pros = 5 // a.k.a. peace points
+	{
+		pc_we_have_good_relation { base = 2; max = 30; pow = 0.5 }
+		pc_our_army_is_weaker { max = 40 }
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_we_have_nap = 10
+		pc_we_are_allies = 20
+		pc_we_share_same_religion = 10
+		//pc_we_are_catholic_and_they_are_papacy = 50 //cannot have marriage with the papacy
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 50 }
+		pc_we_have_too_many_wars { max = 50; at_war_base = 10; per_additional_war = 20 }
+		pc_we_need_peace_time { max = 20; minutes = 20; pow = 2 }
+		pc_too_many_global_wars { max = 20; num_wars = 20 }
+		pc_our_authority_is_low { per_negative_point = 10 }
+		pc_their_diplomat_skill_level { max = 15 }
+		pc_we_are_their_vassal = 20
+		pc_they_plan_invasion_against_us { max = 30; per_ally_province = 3 }
+		pc_their_influence_in_our_kingdom = 30
+	}
+
+	cons = 50 // a.k.a. war points
+	{	
+		//pc_we_are_papacy = 100 //makes no sense, papacy can't have marriages
+		pc_we_have_no_border = 20
+		pc_they_are_too_far = 50 { threshold = 3 }
+		pc_they_are_our_vassal = 20
+		pc_we_have_bad_relation	{ max = 30;	pow = 2 }
+		pc_our_army_is_stronger { max = 30 }
+		pc_they_rule_our_people { our_kingdom = 10; our_culture = 5; our_culture_family = 2; max = 30 }
+		pc_they_rule_our_lands	{ per_historical_realm = 5; per_core_realm = 5;	max = 30 }
+		pc_we_are_X_times_larger = 20 {	X = 2 ; added_realms = 2}
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_we_want_to_liberate_rome = 100
+		pc_they_hold_our_holy_cities_and_we_are_Sunni {	shia_control = 10; other_religion_control = 50 }
+		pc_they_hold_Baghdad_and_we_are_Shia { sunni_control = 10; other_religion_control = 70 }
+		pc_we_both_have_under_X_towns = 30 { X = 3 } 
+		pc_there_are_our_loyalists = 10
+		pc_they_have_rebels	{ max = 15; per_rebel = 3 }
+		pc_they_have_different_religion = 5
+		//we have defensive pact against them
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+
+def PC_BreakTrade: ProsAndCons //accept claim //placeholder
+{
+
+	pros
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_our_friends { max = 30; per_kingdom = 10; threshold = 250 }
+		pc_we_have_no_border = 10
+		pc_they_are_too_far = 10 {	threshold = 4 }
+		pc_they_have_many_trade_agreements{ unpunished_agreements = 7; penalty_per_excessive_agreement = 10}
+		pc_we_have_many_trade_agreements{ unpunished_agreements = 7; penalty_per_excessive_agreement = 5 }
+	}
+
+	cons = 10
+	{
+		pc_our_trade_level { max = 20 }
+		pc_their_trade_level { max = 20 }
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_we_have_nap = 5
+		pc_we_are_allies = 10
+		pc_we_are_family
+		{
+			our_prince_or_princess = 20
+			our_king = 40
+		} 
+		pc_they_have_more_trade = 10
+		pc_we_are_their_vassal = 20
+		pc_they_are_our_vassal = 10
+	}
+
+	relationship_scale
+	{
+		PP = 1.2 / 1 / 0.9 //relationship is inverted, this is a negative offer
+		CP = 1 / 1 / 1 
+	}
+
+	thresholds
+	{
+		propose = 1
+	}
+}
+
+def PC_Crusade : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_fight_catolics { max = 30; per_war = 5 }
+		pc_they_usurp_jerusalem = 20
+		pc_they_hold_many_christian_provinces { max = 30; per_province = 1; constantinople = 5 }
+		pc_they_are_hated_by_catholics = 30 { threshold = -250 } 
+		pc_they_are_at_war_with_papacy = 40 //on top of "they fight catholics"
+		pc_they_fight_our_friends { max = 50; per_kingdom = 10; threshold = 250 }
+		//pc_they_hold_our_king = 40 //can no longer happen with the papacy
+		//pc_they_hold_our_prince = 20 //can no longer happen with the papacy
+	}
+
+	cons
+	{
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_they_are_our_vassal = 30
+		pc_we_are_allies = 30
+		pc_we_have_trade = 5
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_they_are_excommunicated_and_we_are_catholic = 20
+		pc_they_are_loved_by_catholics = 30 { threshold = 250 }
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 0
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	relationship_scale
+	{
+		PP = 2 / 1 / 0.5
+		CP = 0.5 / 1 / 2
+	}
+
+	thresholds
+	{
+		//accept = 1.2 //this is a papacy think, kingdoms have no say to accept or decline it
+		propose = 1.5
+	}
+}
+
+
+def PC_Accept_AskForCrusadeOffer : ProsAndCons
+{
+	cost = 30000
+	pros
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5}
+		pc_their_influence_in_our_kingdom { max = 30 }
+		pc_we_are_their_vassal = 30
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+		pc_they_control_the_pope = 20
+	}
+
+	cons = 30
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 }
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 300 }
+		pc_ask_for_crusade_cooldown
+	}
+
+	add_pros_and_cons
+	{
+		PC_Crusade = [ (PP), (CP) ]
+		{
+			their_kingdom = (offer.arg)
+		}
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_AskForCrusadeOffer : ProsAndCons
+{
+	cost = 30000
+	pros
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5} 
+		pc_they_are_loved_by_catholics = 30 { threshold = 250 }
+		//pc_they_were_recently_accepted_back_catholics
+		pc_we_control_the_pope = 20
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 }
+		pc_they_are_hated_by_catholics = 30 { threshold = -250 }
+		pc_ask_for_crusade_cooldown
+	}
+
+	PC_WeWantSomeoneToAttackThem = [ (PP), (CP) ]
+	{
+		their_kingdom = (offer.arg)
+	}
+
+	thresholds
+	{
+		propose = 1.2
+	}
+}
+
+def PC_Excommunicate : ProsAndCons
+{
+	pros
+	{
+		pc_we_have_bad_relation	{ max = 20;	pow = 2 }
+		pc_they_are_hated_by_catholics = 30 { threshold = -250 }
+		pc_they_are_at_war_with_papacy = 50
+		//pc_they_refused_to_join_crusade
+		pc_they_fight_our_friends { max = 30; per_kingdom = 10; threshold = 250 }
+		pc_they_just_refused_to_lead_crusade = 20
+		pc_they_catholics_and_have_many_heretics { max = 50 }
+		pc_they_recently_disobeyed_papacy  { max = 20; pow = 3 }
+		//pc_they_hold_our_king = 40 //this can never happen, as the pope cannot be imprisoned
+		//pc_they_hold_our_prince = 20 //this can never happen, as the pope has no children
+	}
+
+	cons = 30
+	{
+		pc_we_have_good_relation{ base = 3;	max = 20; pow = 0.5	}
+		pc_they_are_our_vassal = 30
+		pc_we_are_allies = 30
+		pc_we_have_trade = 10
+		pc_our_trade_level { max = 15 }
+		pc_their_trade_level { max = 15 }
+		pc_they_are_loved_by_catholics = 30 { threshold = 250 }
+		pc_they_control_the_pope = 100
+		pc_many_excommunicated_kingdoms { max = 300; per_kingdom = 30 }
+		pc_they_fight_infidels = 5
+		pc_they_lead_a_crusade = 30
+		pc_they_recently_aided_papacy {	max = 50; pow = 4}
+
+		pc_they_are_player_by_difficulty
+		{
+			easy = 20
+			normal = 0
+			hard = 0
+			very_hard = 0
+		}
+	}
+
+	relationship_scale
+	{
+		PP = 2 / 1 / 0.5
+		CP = 0.5 / 1 / 2
+	}
+
+	thresholds
+	{
+		//accept = 1.2 this is a papacy think, kingdoms have no say to accept or decline it
+		propose = 1.5
+	}
+}
+
+def PC_Accept_AskForExcommunicationOffer : ProsAndCons
+{
+	cost = 30000
+	pros
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5}
+		pc_their_influence_in_our_kingdom { max = 30 }
+		pc_we_are_their_vassal = 30
+		pc_our_trade_level { max = 10 }
+		pc_their_trade_level { max = 10 }
+		pc_they_recently_aided_papacy {	max = 20; pow = 4}
+		pc_they_control_the_pope = 30
+	}
+
+	cons = 40
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 }
+		pc_they_fight_our_friends { max = 20; per_kingdom = 5; threshold = 300 }
+		pc_they_recently_disobeyed_papacy  { max = 30; pow = 3 }
+		pc_many_excommunicated_kingdoms { max = 150; per_kingdom = 15 }
+	}
+
+	add_pros_and_cons
+	{
+		PC_Excommunicate = [ (PP), (CP) ]
+		{
+			their_kingdom = (offer.arg)
+		}
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_AskForExcommunicationOffer : ProsAndCons
+{
+	cost = 30000
+	pros
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5}
+		pc_we_control_the_pope = 30
+	}
+
+	cons
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 }
+		pc_many_excommunicated_kingdoms { max = 100; per_kingdom = 10 } //make it less likely AIs to demand Catholic world breakdown;
+	}
+
+	add_pros_and_cons
+	{
+		PC_WeWantSomeoneToAttackThem = [ (PP), (CP) ]
+		{
+			their_kingdom = (offer.arg)
+		}
+	}
+
+
+	thresholds
+	{
+		propose = 1.5
+	}
+}
+
+def PC_Accept_DemandFundCrusade: ProsAndCons
+{
+	pros = 20
+	{
+		pc_we_have_bad_relation //so we want to improve them urgently
+		pc_we_are_X_times_larger = 20 {	X = 2 ; added_realms = 3}
+	}
+
+	cons
+	{
+		pc_we_have_rebels {	max = 25; per_rebel = 5 }
+		pc_we_have_war_exhaustion {	max = 20 }
+		pc_we_have_too_many_wars { max = 50; at_war_base = 10; per_additional_war = 10 }
+	}
+
+	thresholds
+	{
+		accept = 1
+	}
+}
+
+def PC_Propose_DemandFundCrusade: ProsAndCons
+{
+	pros = 30
+	{
+		pc_we_have_bad_relation { max = 50;	pow = 2 } //so we want gold
+		pc_they_have_many_trade_centers = 30
+		pc_they_are_hated_by_catholics = 20 { threshold = -250 }
+		pc_they_just_refused_to_lead_crusade = 30
+	}
+
+	cons
+	{
+		pc_we_have_good_relation { base = 5; max = 30; pow = 0.5}
+		pc_we_are_allies = 10
+		pc_we_have_common_enemies {	max = 30; per_enemy = 5	}
+		pc_they_have_too_many_wars { at_war_base = 5; per_additional_war = 5; max = 25 }
+		pc_they_have_rebels	{ max = 12; per_rebel = 3 }
+		pc_their_influence_in_our_kingdom { max = 30 }
+		pc_they_are_loved_by_catholics = 20 { threshold = 250 }
+		pc_they_recently_disobeyed_papacy  { max = 200; pow = 1 } //spam protection but linear - time until request depends on rels
+		pc_they_recently_aided_papacy {	max = 200; pow = 2 } //spam protection, guaranteeing more time
+		pc_they_control_the_pope = 30
+	}
+
+	thresholds
+	{
+		propose = 1
+	}
+
+	relationship_scale
+	{
+		PP = 2 / 1 / 0.5
+		CP = 0.5 / 1 / 2
+	}
+}
+
+def PC_Accept_OfferCourtCleric: ProsAndCons
+{
+	pros = 9999
+	
+	thresholds
+	{
+		accept = 0 //always accept court cleric as AI
+	}
+}
+
+def PC_Propose_OfferCourtCleric: ProsAndCons
+{
+	pros = 5 //we currently has no reason not to want this happenning occasionally
+	cost = 1000
+
+	cons
+	{
+		pc_they_are_player_and_game_just_began { value = 50 }
+		pc_they_recently_aided_papacy {	max = 30; pow = 4}
+		pc_they_recently_disobeyed_papacy  { max = 30; pow = 3 }
+	}
+
+	thresholds
+	{
+		propose = 1
+	}
+}
+
+
+
+def PC_AdditionalConditionOffer: ProsAndCons
+{
+	//No touchy!
+	//This is only for the pro-cons to stop whining because of missing PC_.
+}
+
+def PC_Test : ProsAndCons
+{
+	// relationship_scale
+	// {
+	// 	PP = 1 / 1 / 11
+	// 	CP = 1 / 1 / 1
+	// }
+
+	// pros
+	// {
+	// 	pc_we_are_wining
+	// }
+
+	// cons = 5
+	// {
+	// 	pc_we_are_losing
+	// }
+
+	// thresholds
+	// {
+	// 	propose = 1.5
+	// 	accept = 1.2
+	// }
+
+	pros
+	{
+		pc_groom_not_heir_nor_king_and_both_kindoms_are_AI
+
+	}
+
+	cons = 10
+	{
+	}
+
+	add_pros_and_cons
+	{
+		//PC_ExclusiveDeals = [ (value - 1) * 100, 0 ] //!!! recursion
+
+		//PC_War = [ (0), ((value) * 200) ]
+
+		//PC_War { above = 1.2 / 0 / 40 } //above = ["accept", 20, 40 ]
+
+		PC_War
+		{ 
+			above = 1.2 / 0 / 40 
+			below = ["accept_peace", 20, 0 ]
+			//accept_peace = 20 / 0
+		}
+	}
+
+	thresholds
+	{
+		break_basic { below = 0.8 } // for testing
+		accept_basic = 1.2		
+		propose_basic = 1.6
+		accept_exclusive = 1.8
+		propose_exclusive = 1.9
+	}
+}

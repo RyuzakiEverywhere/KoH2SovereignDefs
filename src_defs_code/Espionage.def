@@ -1,0 +1,718 @@
+﻿def SpyPlot : CharacterAction
+{
+	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Generic_Spy.png:Icon_Action_Generic_Spy#2" //GUID:8fabffe00ddb7e442bdc7bffc086f6d0
+	
+	decline_voice_line = "Decline"
+	prepare_voice_line = "confirm_action"
+	cancelled_voice_line = "spy_plot_cancelled"
+	success_voice_line = "action_succeeded"
+	fail_voice_line = "action_failed"
+
+	mission = "OnMission"
+	opportunity
+	{
+		activate_message = NewPlotAvailableMessage
+		deactivate_message = null //PlotNoLongerAvailableMessage - too spammy
+		min_active_time = 300
+	}
+	
+	// override these per plot
+	severity = "Mid" // "Low" = 0 / "Mid" = 1 / "High" = 2 
+	
+	success_base_chance = 25 // rolled after the plot progress finishes 
+	min_success_chance = (min(success_base_chance, 5))
+	
+	reveal_base_chance = 10
+	min_reveal_chance = (min(reveal_base_chance, 5))
+	fail_reveal_chance = (reveal_chance) // calculated from reveal_factors
+	success_reveal_chance = (reveal_chance / 2)
+	escape_chance = (40 + owner.class_level * 2)
+	
+	ai_validate = ((success_chance > 25) and (!owner.is_king or final_reveal_chance <= 70))
+	
+	// should be number between 0.e ... 5
+	float ssums_base = (0.2 * (severity_id + 1))
+	float ssums_bias = 0.5 // 0 only source, 1 only target, anything in between lerps (0.5 is defacto avg)
+	float add_gold_cost = 0
+	float gold_cost_mod = 0.75
+	float cost_rounding_precision = 50 //round costs to X, i.e. at 50 - 736 cost becomes 750
+	
+	ssums_gold = (MaxSSumsBlend(own_kingdom, owner.mission_kingdom, ssums_base, ssums_bias))
+	cost
+	{
+		gold = (ceil((ssums_gold + add_gold_cost) * gold_cost_mod)) //affected by the rounding above
+	}
+	
+	prepare_duration = (prepare_duration_base + intrigue)
+	prepare_duration_base = 10
+	
+	base_intrigue = (ceil(cost.gold / 1000, 5))
+	intrigue = (base_intrigue * (1 + owner.cs_intrigue_cost_perc * 0.01)) // +50s per 1000 gold cost
+	
+	text inline_descr = "({name})" // like "to do this to that"
+	text mk_inline_descr = "{inline_descr}"
+	text puppet_plot_sub = "{puppet:s} puppet plot" //!!! not implemented
+	
+	prepare_status_text = "{owner} is trying to {inline_descr}"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text new_opportunity = "Our {owner} has an opportunity to {inline_descr}."
+		text opportunity_lost = "Our {owner} lost the opportunity to {inline_descr}."
+		text success_undetected = "Our {owner} succeeded in his plot to {inline_descr} and managed to remain undetected!"
+		text success_revealed = "Our {owner} succeeded in his plot to {inline_descr}, but was revealed!"
+		text fail_undetected = "Our {owner} failed in his plot to {inline_descr}! Yet, he managed to remain undetected."
+		text fail_revealed = "Our {owner} failed in his plot to {inline_descr} and was revealed!"
+		text plot_revealed = "Our {owner} was revealed while preparing his plot to {inline_descr}!"
+		text plot_failed = ["Some unforseen circumstances forced {owner} to abandon his plot.",
+							"Someone warned the guards in {owner.mission_kingdom} a plot against them is prepared and {owner} had to cancel all preparations and remain inconspicuous for a while.",
+							"A general state of alarm was raised in {owner.mission_kingdom} and {owner} had to put a stop to his current plot, since the risk became too high.",
+							"The plot of {owner} was going well, but sickness forced him to abandon it and rest, until he got healed. Sadly, all his preparations went in vain.",
+							"It turned out one of {owner:s} men managed to sabotage his plot. The rat is now dealt with, but completion of the plot is now impossible.",
+							"As {owner} was arranging his doings in {owner.mission_kingdom}, it turned out his funds are not enough. We arranged the matter, but it was too late - the plot failed."]
+		text plot_invalidated = "Our {owner} failed his plot to {inline_descr}! One thing led to another and the opportunity is no longer attainable."
+	}
+	
+	validate_prompts
+	{
+		ok = "Click to activate plot."
+		_cost = "{clr:gray}Click to activate plot.{/clr}"
+	}
+	
+	Message mission_kingdom_event = null // reference the event (message) def for the target kingdom for success_undetected
+	Message target_kingdom_event = null // reference the event (message) def for the target kingdom for success_undetected
+	
+	mission_kingdom_messages // what the mission kingdom sees
+	{
+		text success_revealed = "{src_kingdom:anian:cap} spy was caught! Unfortunately, he succeeded in his plot to {mk_inline_descr}."
+		text fail_revealed = "{src_kingdom:anian:cap} spy was revealed as he was about to {mk_inline_descr}!"
+		text plot_revealed = "{src_kingdom:anian:cap} spy was revealed while preparing to {mk_inline_descr}!"
+	}
+
+	target_kingdom_messages // what the target kingdom sees
+	{
+		text success_revealed = "{src_kingdom:anian:cap} spy was caught in {owner.mission_kingdom}! Unfortunately, he succeeded in his plot to {mk_inline_descr}."
+	}
+
+	src_kingdom_voice_lines // what the src kingdom hears
+	{
+		string success_undetected //unused (intentional)
+		string success_revealed = "narrator_voice:our_spy_succeeded_escaped" 
+		string success_captured = "narrator_voice:our_spy_succeeded_imprisoned" 
+		string success_killed = "narrator_voice:our_spy_succeeded_killed" 
+		string fail_undetected //unused (intentional)
+		string fail_revealed = "narrator_voice:our_spy_failed_escaped" 
+		string fail_captured = "narrator_voice:our_spy_failed_imprisoned" 
+		string fail_killed = "narrator_voice:our_spy_failed_killed" 
+	}
+	
+	mission_kingdom_voice_lines // what the mission kingdom hears
+	{
+		string success_undetected //unused (intentional)
+		string success_revealed = "narrator_voice:enemy_spy_escaped" 
+		string success_captured = "narrator_voice:enemy_spy_captured" 
+		string success_killed = "narrator_voice:enemy_spy_killed" 
+		string fail_undetected //unused (intentional)
+		string fail_revealed = "narrator_voice:enemy_spy_escaped" 
+		string fail_captured = "narrator_voice:enemy_spy_captured" 
+		string fail_killed = "narrator_voice:enemy_spy_killed" 
+	}
+	
+	sprite success_chance_icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_6#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+	sprite reveal_chance_icon = "Assets/UI/Elements/Common/Icons/eye icon.psd:eye icon#1" //GUID:143e4beac687e234ca571e157c38e854
+	
+	success_chance_colors
+	{
+		very_low = 25/"red"
+		low = 50/"orange"
+		high = 75/"yellow"
+		very_high = 100/"green"
+	}
+	
+	reveal_chance_colors
+	{
+		very_low = 10/"green"
+		low = 25/"yellow"
+		high = 50/"orange"
+		very_high = 100/"red"
+	}
+	
+	reveal_rel_changes
+	{
+		Low = "rel_spy_revealed_low"
+		Mid = "rel_spy_revealed_mid"
+		High = "rel_spy_revealed_high"
+	}
+	
+	reveal_rel_change = (reveal_rel_changes[severity])
+	
+	our_sf_stats
+	{
+		ks_spy_action_success_chance
+	}
+	
+	// their_sf_stats
+	// {
+	// 	ks_espionage_defense
+	// }
+	
+	int is_murder_plot = 0
+	float murder_plot_stats = (owner.cs_murder_plots_CTS_perc + owner.mission_kingdom.ks_enemy_murder_plots_CTS_perc)
+
+	success_fail = (min_success_chance)
+	{
+		sf_base = (success_base_chance)
+		{
+			text name = "Base chance"
+			show_always = false
+		}
+
+		sf_bribed_nobles = (owner.num_puppets * 5)
+		{
+			text name = "Knights bribed by our spy"
+		}
+
+		sf_spy_level = (2 * owner.class_level)
+		{
+			text name = "Spy's level (x2)"
+		}
+		
+		sf_king_is_spy = (own_kingdom.king.is_spy * 5)
+		{
+			text name = "Our King Is a Spy"
+		}		
+	
+		sf_king_stars = (own_kingdom.king_espionage_ability * 2)
+		{
+			text name = "Our King's Espionage ability (x2)"
+		}
+		sf_our_princess_in_tgt_kingdom = 10
+		{
+			text name = "Our princess in their kingdom"
+		}
+		sf_our_queen_in_tgt_kingdom = 20
+		{
+			text name = "Our queen in their kingdom"
+		}
+		sf_our_stats = (CombineStats(owner, our_sf_stats.FIELD) + is_murder_plot * murder_plot_stats)
+		{
+			text name = "Spy's skills and our traditions"
+		}
+		sf_their_negative_CA = (MapCA(owner.mission_kingdom, 15, 0, 0))
+		{
+			text name = "Their negative crown authority (x3)"
+		}
+		sf_they_are_our_vassal = ((owner.mission_kingdom.vassal_of == own_kingdom) * 10)
+		{
+			text name = "They Are Our Vassal"
+		}
+		sf_their_negative_opinions = (-1 * min(0,owner.mission_kingdom.ks_espionage_defense_opinions))
+		{
+			text name = "Their people's opinions"
+		}
+
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		
+		perc sf_their_positive_CA = (MapCA(owner.mission_kingdom, 0, 0, -15))
+		{
+			text name = "Their positive crown authority (x3)"
+		}
+		
+		perc sf_their_king_spy_class = (-2 * owner.mission_kingdom.king.is_spy * owner.mission_kingdom.king.class_level)
+		{
+			text name = "Their King's Spy level (x2)"
+		}
+		
+		perc sf_their_skills_traditions = (-1 * owner.mission_kingdom.ks_espionage_defense_skills_traditions)
+		{
+			text name = "Their skills and traditions"
+		}
+		
+		perc sf_their_positive_opinions = (-1 * max(0,owner.mission_kingdom.ks_espionage_defense_opinions))
+		{
+			text name = "Their People's Opinions"
+		}
+		
+		perc sf_their_important_relatives = (-1 * max(0,owner.mission_kingdom.espionage_defense_from_relatives))
+		{
+			text name = "Their Important relative espionage defense bonuses"
+		}
+
+		perc sf_their_spy_keeps = (-1 * max(0, owner.mission_kingdom.espionage_defense_from_spy_governed_keeps))
+		{
+			text name = "Castles, governed by their spies (x2)"
+		}
+		//!!! add important relatives spy bonus
+		//perc sf_their_spies_relatives = (-5 * owner.mission_kingdom.important_relative_spies)
+		//{
+		// 	  text name = "Their important relatives spies (x5)"
+		//}
+	}
+	
+	// REVEAL FACTORS
+
+	penalty reveal_factors = (min_reveal_chance)
+	{
+		sf_base = (reveal_base_chance)
+		{
+			text name = "Base chance"
+			show_always = false
+		}
+		sf_their_king_stars = (owner.mission_kingdom.king_espionage_ability * 3)
+		{
+			text name = "Their King's Espionage ability (x3)"
+		}
+		sf_their_king_spy_class = (owner.mission_kingdom.king.is_spy * owner.mission_kingdom.king.class_level * 2)
+		{
+			text name = "Their Spy King level (x2)"
+		}
+		sf_their_positive_CA = (MapCA(owner.mission_kingdom, 0, 0, 15))
+		{
+			text name = "Their positive crown authority (x3)"
+		}
+		sf_their_princess_in_our_kingdom = 10
+		{
+			text name = "Their Princess in our kingdom"
+		}
+		sf_their_queen_in_our_kingdom = 20
+		{
+			text name = "Their Queen in our kingdom"
+		}
+		
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the reveal chance to diminish it
+		// --------------------------------------------------------------------------------		
+		
+		perc sf_class_level = (-1 * 2 * owner.class_level)
+		{
+			text name = "Spy Level (x2)"
+		}
+		
+		perc sf_our_skills = (-1 * owner.cs_spy_reveal_chance_reduction_perc)
+		{
+			text name = "Spy's skills and our traditions"
+		}
+	}
+	
+	outcomes
+	{
+		//log = 1
+		
+		case mission_kingdom
+		{
+			message
+			{
+				def = ActionOutcomeMessage
+			}
+		}
+		
+		case target_kingdom
+		{
+			message
+			{
+				def = ActionOutcomeMessage
+			}
+		}
+		
+		main success //success_base_chance
+		{
+			trigger foreign_spy_succeeded
+			{
+				target = (mission_kingdom)
+				param = (owner)
+			}
+			
+			option success_undetected
+			{
+				case src_kingdom
+				{
+					message
+					{
+						text text = "{src_messages.success_undetected}"
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Success.png:UI_Illustration_Spy_Success#2" //GUID:31b1fe07f5482f74e99aac10932bd4b1
+						string voice_line = "character_voice:action_success"
+					}
+				}
+				case mission_kingdom
+				{
+					message
+					{
+						def = (mission_kingdom_event)
+						voice_line = (mission_kingdom_voice_lines.success_undetected)
+					}
+				}
+				case target_kingdom
+				{
+					message
+					{
+						def = (target_kingdom_event)
+					}
+				}
+			}
+			option success_revealed = (success_reveal_chance) // may be modified in C#
+			{
+				case src_kingdom
+				{
+					message
+					{
+						text text = "{src_messages.success_revealed}"
+					}
+				}
+				case mission_kingdom
+				{
+					message
+					{
+						text caption = "[{mission_kingdom_messages.success_revealed_caption}|Foreign espionage succeeded]"
+						text text = "{mission_kingdom_messages.success_revealed}"
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Success.png:UI_Illustration_Spy_Success#2" //GUID:31b1fe07f5482f74e99aac10932bd4b1
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Negative.png:Icon_Message_GenericEvent_Negative#2" //GUID:f955d92cf71058746985a61f90487bb9
+						voice_line = (mission_kingdom_voice_lines.success_revealed)
+					}
+				}
+				case target_kingdom
+				{
+					message
+					{
+						text caption = "[{target_kingdom_messages.success_revealed_caption}|Foreign espionage succeeded]"
+						text text = "{target_kingdom_messages.success_revealed}"
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Negative.png:Icon_Message_GenericEvent_Negative#2" //GUID:f955d92cf71058746985a61f90487bb9
+					}
+				}
+				
+				main owner_escaped = (escape_chance)
+				{
+					case src_kingdom
+					{
+						message
+						{
+							voice_line = (src_kingdom_voice_lines.success_revealed)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.success_revealed)
+						}
+					}
+					case target_kingdom
+					{
+						bullet = null
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_EscapedOrHidden.tga:UI_Illustration_Spy_EscapedOrHidden#2" //GUID:ad540b15109f78e4fa1e1141425d6492
+					}
+				}
+				option owner_imprisoned
+				{
+					case src_kingdom
+					{
+						message
+						{
+							voice_line = (src_kingdom_voice_lines.success_captured)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.success_captured)
+						}
+					}
+					case target_kingdom
+					{
+						bullet = null
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+					}
+				}
+				option owner_killed
+				{
+					case src_kingdom
+					{
+						message
+						{
+							voice_line = (src_kingdom_voice_lines.success_killed)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.success_killed)
+						}
+					}
+					case target_kingdom
+					{
+						bullet = null
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+					}
+				}
+				
+				also rel_change = (reveal_rel_change)
+				{
+					case target_kingdom
+					{
+						bullet = ""
+					}
+				}
+			}
+		}
+		
+		option fail
+		{
+			option fail_undetected
+			{
+				case src_kingdom
+				{
+					message
+					{
+						text text = "{src_messages.fail_undetected}"
+						string voice_line = "character_voice:action_failed"
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_EscapedOrHidden.tga:UI_Illustration_Spy_EscapedOrHidden#2" //GUID:ad540b15109f78e4fa1e1141425d6492
+					}
+				}
+				case mission_kingdom
+				{
+					message
+					{
+						def = null
+					}
+				}
+				case target_kingdom
+				{
+					message
+					{
+						def = null
+					}
+				}
+			}
+			option fail_revealed = (fail_reveal_chance) // may be modified in C#
+			{
+				trigger foreign_spy_failed_revealed
+				{
+					target = (mission_kingdom)
+					param = (owner)
+				}
+
+				case src_kingdom
+				{
+					message
+					{
+						text text = "{src_messages.fail_revealed}"
+						string voice_line = "character_voice:action_failed"
+					}
+				}
+				case mission_kingdom
+				{
+					message
+					{
+						text text = "{mission_kingdom_messages.fail_revealed}"
+						string voice_line = (mission_kingdom_voice_lines.fail_revealed)
+					}
+				}
+				case target_kingdom
+				{
+					message
+					{
+						def = null
+					}
+				}
+				message
+				{
+					sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+				}
+				main owner_escaped = (escape_chance)
+				{
+					case src_kingdom
+					{
+						message
+						{
+							icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+							voice_line = (src_kingdom_voice_lines.fail_revealed)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.fail_revealed)
+						}
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_EscapedOrHidden.tga:UI_Illustration_Spy_EscapedOrHidden#2" //GUID:ad540b15109f78e4fa1e1141425d6492
+					}
+				}
+				option owner_imprisoned
+				{
+					case src_kingdom
+					{
+						message
+						{
+							voice_line = (src_kingdom_voice_lines.fail_captured)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.fail_captured)
+						}
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+					}
+				}
+				option owner_killed
+				{
+					case src_kingdom
+					{
+						message
+						{
+							string voice_line = (src_kingdom_voice_lines.fail_killed)
+						}
+					}
+					case mission_kingdom
+					{
+						message
+						{
+							voice_line = (mission_kingdom_voice_lines.fail_killed)
+						}
+					}
+					message
+					{
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+					}
+				}
+				
+				also rel_change = (reveal_rel_change)
+			}
+		}
+		
+		// option plot_revealed = 0 // forced when the plot is revealed (chance on tick)
+		// {
+		// 	case src_kingdom
+		// 	{
+		// 		text message = "{src_messages.plot_revealed}"
+		// 		string voice_line = "character_voice:action_failed"
+		// 	}
+		// 	case mission_kingdom
+		// 	{
+		// 		text message = "{mission_kingdom_messages.plot_revealed}"
+		// 	}
+		
+		// 	main owner_escaped = (escape_chance)
+		// 	option owner_imprisoned
+		// 	{
+		// 		message
+		// 		{
+		// 			sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Fail.png:UI_Illustration_Spy_Fail#2" //GUID:748a77e96be45c44ca41c0cefdac098f
+		// 		}
+		// 	}
+		// 	option owner_killed
+		
+		// 	also rel_change = (reveal_rel_change)
+		// }
+		
+		option progress_failed = 0 // forced when plot progress goes bellow 0 
+		{
+			case src_kingdom
+			{
+				text message = "{src_messages.plot_failed}"
+			}
+			case mission_kingdom
+			{
+				message
+				{
+					def = null
+				}
+			}
+		}
+		
+		option invalidated = 0 // forced when the plot is cancelled, because it is no longer valid
+		{
+			case src_kingdom
+			{
+				text message = "{src_messages.plot_invalidated}"
+			}
+			case mission_kingdom
+			{
+				message
+				{
+					def = null
+				}
+			}
+		}
+	}
+}
+
+
+// MURDER PLOTS
+
+def MurderPlot : SpyPlot
+{
+	severity = "High" 
+	success_base_chance = (20) 
+	is_murder_plot = 1
+	float ssums_base = (MapCA(owner.mission_kingdom, 1, 2))
+	float ssums_bias = 0.75
+	add_gold_cost = 1000
+}
+
+def NewPlotAvailableMessage : Message
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Opportunity_Spy_Positive.png:Icon_Message_Opportunity_Spy_Positive#2" //GUID:c9586fab30bba4f4396d80ab8d5731a9
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_SpyRumors.tga:UI_Illustration_SpyRumors#2" //GUID:d9eacb331a1416845b9c68d76b504c5a
+	//illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Spy_Success.png:UI_Illustration_Spy_Success#2" //GUID:31b1fe07f5482f74e99aac10932bd4b1
+	caption = "Plot available: {name}"
+	body = "{src_messages.new_opportunity}"
+	buttons
+	{
+		text activate = "&Start plotting"
+		cancel_opportunity cancel_op 
+		{
+			text text = "&Forget opportunity"
+		}
+		text ok = "&Let me think"
+	}
+	ui_prefab = "Assets/UI/Messages/UIP_NewPlotAvailableMessage.prefab" //GUID:1fe9b0b7d73ffe948983be83cb6265ae
+	sound_effect = "event:/sound_effects/notification/message/plot_available"
+}
+
+def PlotNoLongerAvailableMessage : Message
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Opportunity_Spy_Negative.png:Icon_Message_Opportunity_Spy_Negative#2" //GUID:96a8680fc841ae740ab83c81c38dbb08
+	caption = "Opportunity lost: {name}"
+	body = "{src_messages.opportunity_lost}"
+	//sound_effect = "event:/sound_effects/notification/message/opportunity_lost" //sound effect not ready 
+}
+
+def CancelSpyPlotAction : CharacterAction
+{
+	show_in_action_bar = false
+	icon = (cur_action.icon)
+	name = "Abandon"
+	confirmation_message = ConfirmCancelPlotMessage
+	prepare_voice_line = "cancel_spy_plot_action"
+}
+
+def ConfirmCancelPlotMessage : Message
+{
+	caption = "Cancel Plot?"
+	body = "Are you sure you want to cancel {owner:s} plot?"
+	buttons
+	{
+		text ok = "&Cancel Plot"
+		text close = "&Nevermind"
+	}
+}

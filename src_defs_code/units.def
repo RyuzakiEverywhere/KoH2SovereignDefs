@@ -1,0 +1,3510 @@
+﻿def Army
+{
+	prefab prefab = "Assets/Units/Army.prefab" //GUID:0aa7adb939740b14eb4cc91de44a3881
+	prefab banner = "Assets/Units/banner_prefab.prefab" //GUID:50a1b63e60347374494c8396ee2cd855
+	prefab banner_fleeing = "Assets/Units/banner_fleeing.prefab" //GUID:22fde135f9c13284685861aa237798af
+	prefab ship_banner = "Assets/Units/ship_banner_prefab.prefab" //GUID:7cedbfbf794d41f408375475e8748c8a
+	prefab tents = "Assets/Europe/Tents/Tent_CE.prefab" //GUID:4c262a52f80030d489b3fd39d20e73eb
+	prefab trebuchet = "Assets/Europe/Trebuchets/ArmyTrebuchet.prefab" //GUID:522d03d21a470fd438329d3e9f9e10b3
+	prefab flag_crusader_unit = "Assets/Units/Flags/Flag_Crusader.prefab" //GUID:c025aeb2b469d9946ae121d0c9465d99
+	prefab heal_particles = "Assets/Misc/Selection/ArmyHealParticle.prefab" //GUID:6ea51bb52d720994ca4b710c6f23c2c3
+	
+	int max_units = 5 // not including leader
+	{
+		int marshal = 8
+		int shaman = 8
+		int crusader = 8
+		int king = 8
+	}
+	
+	int max_inventory = 1
+	{
+		marshal = 2
+		king = 2
+	}
+	
+	float world_move_speed = 4 // army travel speed in world view
+	float world_move_speed_neighbor_realm_mod = 0.9
+	float world_move_speed_far_realm_mod = 0.8
+	float ship_speed_mod = 1.2
+	float ship_rotation_speed = 100
+	
+	// formation parameters
+	int battle_columns = 4
+	int thread_columns = 2 // minimum, may be increased to obey max_thread_rows
+	int max_thread_rows = 8
+	float thread_spacing = 0.25
+	float min_marching_dist = 10
+	float min_unit_speed_mul = 0.75
+	float max_unit_speed_mul = 1.5
+	
+	// water crossing durations
+	float water_enter_duration = 5 // entering the sea in non-owned realm
+	float water_enter_duration_fast = 1 // entering the sea in owned realm
+	float water_exit_duration = 5 // exiting the sea in non-owned realm
+	float water_exit_duration_fast = 1 // exiting the sea in owned realm
+	float river_crossing_duration = 10 // crossing a river
+	float teleport_area_duration = 10 // using a teleport area
+	float enter_ocean_prediction_distance = 5
+	
+	int health_segments = 5
+	
+	float units_healed_post_battle = 0 // percentage, full restoration
+	float max_units_healed_post_battle = 75 // after stat modifiers
+	float defeated_heal_mod_perc = 50
+	float army_heal_interval = 120 //once per 2 minutes
+	float army_surrender_marshal_death = 50
+	
+	float supplies_capacity_base = 100
+	float supplies_consumption_interval = 5
+	
+	float flee_distance = 45
+	bool can_interrupt_flee = false
+	
+	float supplies_troop_min = 1000
+	float supplies_troop_max = 10000
+	float supplies_min_mod_per_troops = 1 // between 1 and 2 supplies mod based on troop count between min/max
+	float supplies_max_mod_per_troops = 1 //4
+	
+	string default_stance = "Defensive" // preserve formation
+	
+	float bordercross_relationship_treshold = 0
+	
+	supplies_consumption = 0.2
+	{
+		//Kingdom stances
+		float War = 3
+		float Peace = 3
+		float NonAggression = 2
+		float Alliance = 1
+		float Vassalage = 1
+		float Own = 0.2
+		float Sailing = 5
+		
+		//       Modifiers
+		float NeighbouringProvinceMod = 0.5
+		
+		//Battles
+		float OpenField = 1 //0.8
+		float Plunder = 1
+		float Siege = 1
+		float Assault = 1 //0.8
+		float BreakSiege = 1 //0.8
+		float Naval = 1 //0.8
+		
+		//Other
+		float Camping = 1
+		float Disorganized = 1
+		float OwnTown = 0
+	}
+	
+	ai_status
+	{
+		text reinforce = "Reinforce!"
+		text enemies_too_strong = "Enemies are too strong!"
+		text attack_army = "Attack!"
+		text attack_castle = "Siege the castle!"
+		text attack_realm = "Attack {army.TargetRealm}!"
+		text plunder = "Plunder!"
+		text defend = "Defend {army.TargetRealm}!"
+		text refill = "Refill in {army.TargetRealm}!"
+		text help_with_rebels = "Help with rebels in {army.TargetRealm}!"
+		text go_home = "Go home!"
+	}
+}
+
+def Unit
+{
+	text unit_type = "Unit"
+	string short_unit_type = "U"
+	text name
+	text description
+	bool special = false
+	string surrender_unit = "SurrenderUnit"
+	sprite icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Spearman_CE.tga:Icon_Unit_Heavy_Spearman_CE#2" //GUID:c3ff7dd0ec12ec4439ac41bb9e8c6d4b
+	prefab model
+	prefab hit_particles = "Assets/Europe/VFX/HitEffect/HitEffect 1.prefab" //GUID:bd6ae77d39a77ee4ba7463c23f9af1c5
+	texture dust_texture = "Assets/Test/Anton2Tests/smoke.png" //GUID:dba36f2781926244b8f70cda005f9d38
+	prefab squad_banner = "Assets/Units/squad_banner_prefab.prefab" //GUID:257e9b09f33eb0b49ada619421111337
+	prefab squad_icon = "Assets/Units/squad_icon.prefab" //GUID:f5d1d8bc29b9a264f87acf6c97fb41db
+	prefab direction_arrow = "Assets/BattleView/Prefabs/SquadDirectionArrow.prefab" //GUID:57f6a5da9e83a4448ba3ce6b7e1fc9b7
+	sprite symbol
+	sprite minimap_icon_own = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Green_Dot.psd:Element_UI_Minimap_Green_Dot#2" //GUID:155371900c883634780270389515e955
+	sprite minimap_icon_ally = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Blue_Dot.psd:Element_UI_Minimap_Blue_Dot#2" //GUID:ee10eb0c59486474dac296e3cb79dae2
+	sprite minimap_icon_enemy = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Red_Dot.psd:Element_UI_Minimap_Red_Dot#2" //GUID:93b88a1272260b647b262f474bc1ad68
+	float minimap_scale = 1
+	sprite symbol_dead
+	string hire_sound = "event:/sound_effects/interaction/troops/militia"
+	string hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	string select_sound = "event:/sound_effects/interaction/troops/militia"
+	bool available = true
+	bool fake_unit = false // eg packed trebuchet, surrender units, templates
+	bool hide_if_unavailable = false // don't show this unit if the requirements aren't met
+	prefab squad_prefab = "Assets/BattleView/Prefabs/Squad.prefab" //GUID:407c86f8171e15a4b947b16a6b55de2d
+	
+	string cheering_sound
+	string marching_sound
+	string running_sound
+	string sprinting_sound
+	string charging_sound
+	string battle_sound_weapons
+	string battle_sound_horses //= "event:/sound_effects/battleview/cavalry/fighting"
+	string dying_sound = "event:/sound_effects/battleview/units/dying"
+	string dying_sound_horses = "event:/sound_effects/battleview/cavalry/horses_dying"
+	string voice_sound_effect
+	string idle_sound
+	string battle_sound_voice = "event:/sound_effects/battleview/units/fighting"
+	string hit_wood_gate_sound
+	string hit_metal_gate_sound
+	string packing_sound
+	
+	string melee_attack_range_voice_line = "unit_voice:melee_attack_ranged"
+	string select_voice_line = "unit_voice:select"
+	string charge_voice_line = "unit_voice:charge"
+	string hold_fire_voice_line = "unit_voice:hold_fire"
+	string allow_fire_voice_line = "unit_voice:allow_fire"
+	string stand_ground_voice_line = "unit_voice:stand_ground"
+	string at_ease_voice_line = "unit_voice:at_ease"
+	string face_voice_line = "unit_voice:face"
+	string shoot_voice_line = "unit_voice:shoot"
+	string line_voice_line = "unit_voice:line"
+	string melee_attack_voice_line = "unit_voice:melee_attack"
+	string under_fire_voice_line = "unit_voice:under_fire"
+	string losing_voice_line = "unit_voice:losing"
+	string winning_voice_line = "unit_voice:winning"
+	string refuse_order_voice_line = "unit_voice:refuse_order"
+	string place_voice_line = "unit_voice:place"
+	string reload_voice_line = "unit_voice:reload"
+	string retreat_voice_line = "unit_voice:retreat"
+	string run_voice_line = "unit_voice:run"
+	string square_voice_line = "unit_voice:square"
+	string stop_voice_line = "unit_voice:stop"
+	string shrink_voice_line = "unit_voice:shrink"
+	string triangle_voice_line = "unit_voice:triangle"
+	string walk_voice_line = "unit_voice:walk"
+	string widen_voice_line = "unit_voice:widen"
+	string ram_battering_voice_line = "unit_voice:attack_gates"; //"unit_voice:ram_battering"
+	string ladders_voice_line = "unit_voice:ladders"
+	string take_capture_point_voice_line = "unit_voice:take_capture_point"
+	string defend_capture_point_voice_line = "unit_voice:defend_capture_point"
+	string units_died_voice_line = "narrator_voice:our_leader_is_taking_damage"
+	string marked_as_target_voice_line = "narrator_voice:unit_marked"
+	string unmarked_as_target_voice_line = "narrator_voice:unit_unmarked"
+	string enemy_cavalry_attacks_us_voice_line = "unit_voice:enemy_cavalry_attacks_us"
+	string enemy_flees_voice_line = "unit_voice:enemy_flees"
+	string flanked_voice_line = "unit_voice:flanked"
+	string gates_attacked_voice_line = "unit_voice:gates_attacked"
+	
+	texture selection_arrow_tex = "Assets/BattleView/Textures/selection_arrow.tga" //GUID:b8fe89ab21df4504da36fbbd78dd5152
+	texture selection_circle_tex = "Assets/BattleView/Textures/selection_circle.psd" //GUID:c8736905e87135b42b1b21ffad02c373
+	texture path_arrow_circle_tex = "Assets/BattleView/Textures/squads blob.psd" //GUID:cfc58f4596f308c4ba89039e15272315
+	texture path_arrow_shooting_range_tex = "Assets/BattleView/Textures/Arrow_PathWithinShootingRange.psd" //GUID:085b08ce67d90a24aa82742145b56340
+	
+	string secondary_type = "Invalid" { enum { Invalid; Cavalry; Militia; Infantry; Defense; Ranged } }
+	
+	bool transfer_to_crusader = true // when the army becomes a crusader, this unit/equipment gets transfered to him, otherwise it stays in the old army
+	
+	experience_to_next = [1000,4000,10000]
+	// starts at rank 1, every time the experience is higher than one of these value, the level raises
+
+	rank_texts //!!! to be implemented
+	{
+		text 0 = "Novice"
+		text 1 = "Seasoned"
+		text 2 = "Veteran"
+		text 3 = "Legendary"
+	} 
+	
+	float battle_scale = 1 // model scale in battle view
+	float radius = 0.5 // unit collision radius before scale
+	float radius_mul = 1 // for easier tweaking collision radii of all units (don't override)
+	float selection_radius = 0.5
+	float global_selection_radius = 3 // too small after we changed it from circles to arrows
+	float size_mul = 1 // multiplier for size
+	
+	float bv_squad_size_multiplier = 1
+	// // multiply WV troops count by this for BV
+	// float battleview_limit_mod = 0.4
+	// // multiply BV squads size (in the .csv) to set BV squads max size
+	// float battleview_split_mod = 1.25
+	
+	//****************    Ragdolls    ************************//
+	float death_decal_min_scale = 1.18
+	float death_decal_max_scale = 3.5
+	float death_decal_min_alpha = 0.6
+	float death_decal_max_alpha = 1
+	float death_decal_appear_time = 10
+	float ragdoll_sink_time = 19
+	float sink_depth = 1 // 1 meter down
+	float max_ragdoll_velocity = 1 // per rigidbody in ragdoll
+	material dead_decals = ["Assets/BattleView/DeathDecals/DeathDecal_Atlas.mat" //GUID:d4cb4259044c3ef429074f6ff1b2ebe9
+]
+	int squad_size_pb_coef = 3
+	float manpower_mul = 10 // squad size * this -> man count
+	
+	selection_stance_colors
+	{
+		color Own = "20,127,0" //158000FF
+		color Enemy = "141,0,0" //8E0000FF
+		color Ally = "37,129,163" //2681A4FF
+		color OwnHighlighted = "0,74,1" //004B02FF
+		color EnemyHighlighted = "48,0,0" //300000FF
+		color AllyHighlighted = "5,46,62" //052F3FFF
+		color Preview = "180,171,0" //B4AC00FF
+		color RunningAway = "150,150,150"
+	}
+	
+	outline_stance_colors
+	{
+		color Own = "20,127,0" //158000FF
+		color Enemy = "141,0,0" //8E0000FF
+		color Ally = "37,129,163" //2681A4FF
+		color OwnHighlighted = "0,74,1" //004B02FF
+		color EnemyHighlighted = "48,0,0" //300000FF
+		color AllyHighlighted = "5,46,62" //052F3FFF
+		color Preview = "180,171,0" //B4AC00FF
+		color RunningAway = "150,150,150"
+	}
+	
+	tint_colors
+	{
+		color GrayLighter = "cfcfcf"
+		color Gray = "919191"
+		color GrayDarker = "4f4f4f"
+		// color Or = "f4d72d"
+		// color Argent = "f2f2f2"
+		// color Gules = "ef1e1e"
+		// color Azure = "0038a8"
+		// color Vert = "008000"
+		// color Sable = "00001e"
+		// color Tenne = "cd5700"
+		// color Sangvine = "850505"
+		// color Acqua = "3296cb"
+		// color Cendree = "708090"
+		// color Terry = "654321"
+	}
+	
+	//****************    BONUSES    ************************//
+	// syntax:
+	// battle_bonus_name = "cs_xxx" // or [ "cs_xxx", "cs_yyy", ...] // stat values will be added
+	// {
+	//		stack = "own" (default) | "max" | add" // how bonuses are stacked in battle
+	// }
+	bonuses
+	{
+		squad_size_perc = "cs_squad_size_perc"
+		{
+			stack = "own" // only get bonuses from the own leader / realm
+		}
+		
+		terrain_bonuses_perc = "cs_natural_terrain_bonus_perc"
+		defense = "cs_army_defense_perc"
+		defense_flat = ["cs_defense_flat"]
+		defense_during_siege_perc = "cs_army_defense_during_siege_perc"
+		{
+			validate = (is_siege || is_assault || is_break_siege)
+		}
+		sieging_troops_defense_perc = "cs_sieging_troops_defense_perc"
+		{
+			validate = (is_siege || is_assault || is_break_siege)
+			battle_side = 0
+		}
+		stamina_perc = "cs_army_stamina_perc"
+		retreat_damage_mod = "cs_retreat_penalty_decrease_perc"
+		max_shoot_range = "cs_ranged_range_perc"
+		salvo_capacity = "cs_salvo_capacity_bonus_perc"
+		friendly_fire_reduction = "cs_friendly_fire_reduction_perc"
+		naval_CTH_perc = "cs_naval_CTH"
+		enemy_rebels_morale = "cs_enemy_rebels_morale"
+		{
+			stack = "max"
+		}
+		troops_resilience = "cs_troops_resilience"
+		siege_strength_perc = "cs_siege_attack_perc"
+		//shock_chance_perc = "cs_troops_shock"
+		shock_chance_flat = "cs_troops_shock"
+	}
+	
+	//****************    MOVEMENT PARAMETERS    ************************//
+	
+	float rotation_speed = 90 // in world view
+	float speed_mul = 1 // multiplier for move_speed
+	float move_speed = 2.75 // in m/s, gets multiplied by speed_mul
+	float run_speed_mul = 1.75 // running momvement speed multiplier (gets multiplied by movement_speed)
+	float charge_speed_mul = 1.75 // charging momvement speed multiplier (gets multiplied by movement_speed) ///!!! OBSOLETE
+	float min_speed = 0 // 2 // minimum movement speed, in m/s
+	float max_speed_mul = 1.5 // maximum troop movement speed (gets multiplied by current movement speed)
+	float max_acceleration = 5 // in m/s^2
+	float max_deceleration = 5 // in m/s^2
+	float walk_anim_speed = 2.3 // walk animation speed, before scale
+	float run_anim_speed = 3.45 // run animation speed, before scale
+	float charge_anim_speed = 3.45 // charge animation speed, before scale
+	float sprint_anim_speed = 4 // charge animation speed, before scale
+	float trot_anim_speed = 3
+	
+	float walk_to_trot_ratio = 0.5
+	float trot_to_run_ratio = 0.75
+	float run_to_sprint_ratio = 0.5
+	
+	float check_under_fire_cooldown = 60
+	
+	float max_rotation_x = 360
+	float max_rotation_z = 360
+	
+	float world_speed_mod = 1 // modifier for the army's world_move_speed (the slowest mod is taken in effect for the whole army)
+	float climb_cooldown = 1.5
+	
+	// stamina
+	float stamina_max = 100 // maximum stamina
+	float stamina_req_run = 25 // required stamina to start running
+	float stamina_req_charge = 25 // required stamina to start charging
+	float stamina_rate_idle = 4 // regen when idle (per second)
+	float stamina_rate_move = 2 // while moving
+	float stamina_rate_fight = -2 // drain while fighting
+	float stamina_rate_run = -7 // drain while running
+	float stamina_rate_charge = -7 // drain while charging	
+	
+	//****************    FORMATION PARAMETERS    ************************//
+	
+	float default_troop_spacing = 3 // default spacing value
+	float min_troop_spacing = 2 // min spacing value when shrunk
+	float max_troop_spacing = 4 // max spacing value when expanded
+	
+	//*******************   COMBAT PARAMETERS  *************************//
+	//close combat
+	float attack_range = 2 // melee attack range, in meters
+	float attack_interval = 3 // seconds per attack
+	float CTH = 10 { min = 0; max = 100 } // chance to kill opponent in %
+	float CTH_cavalry_mod = 1
+	float trample_chance = 2
+	float siege_strength = 1 // a unit's sieging capabilities
+	bool can_attack_melee = true
+	float defeat_under_num_units_mul = 0.25 // if squad is at 25% or lower base health, they are defeated
+	//float siege_damage = 10
+	
+	//bonus on shock damage after charge and when it triggers
+	float charge_time = 3 // time it takes to reach charge state
+	float charge_duration = 5 // time you have to use the charge after reaching it
+	float charge_chance_to_shock_perc = 500
+	
+	bool can_attack_walls = false
+	
+	// defense
+	float defense = 0 { min = 0; max = 100 }
+	float defense_starvation_penalty = -50
+	
+	//ranged
+	float salvo_def = "ArrowSalvo"
+	int salvo_capacity = 36
+	float shoot_interval = 3
+	float CTH_shoot_mod = 1 // how much more or less damage the ranged attacks do
+	float friendly_fire_mod = 0.5 // how hard should we hit friendly troops in bv with projectile
+	float max_random_shoot_offset = 0
+	float attrition_mod = 0
+	
+	//naval
+	float naval_CTH_perc = 0
+	
+	//morale
+	float base_morale = 0.0
+	float retreat_damage_mod = 6 //this is then multiplied by simulation_damage_mod = 0.1
+	float chance_to_shock = 5 // % chance to lower enemy morale on attack
+	float shock_damage = 1 // how much morale an enemy loses when you shock him
+	float base_morale_recovery = 1 // per second
+	float base_morale_decay = -1 // per second
+	float resilience = 0 //if negative, added to opponents chance_to_shock, else it is percentage chance to resist shock
+	
+	// per-level bonuses
+	float CTH_per_level = 10
+	float defense_per_level = 10
+	float stamina_per_level = 20
+	float siege_strength_per_level = 1
+	float resilience_per_level = 10
+	
+	//*******************   GAMEPLAY PARAMETERS (GENERAL) *************************//
+	int tier = 0
+	string formation = "Rect"
+	int size = 30 // number of people in the Unit (gets multiplied by size_mul and rounded)
+	int max_size = 300
+	float levy_troop_bonus = 1 // how many bonus troops you get from the governed realm town guards
+	
+	
+	float chance_ignore_marshal = 50
+	float chance_target_closest_archer = 0
+	float chance_target_closest_cavalry = 0
+	float chance_target_already_targetted_squad = 25 //this is reversed, 0 means always target closest, 100 - never attack engaged
+	float chance_ignore_cavalry = 0
+	
+	float battle_row = 0
+	float battle_col = 0
+	
+	//     0  1  2   3  4   5  6  7  8   9  10  11
+	//  0  HD D  HI  I  AM  M  HR R  RC HRC HC  C
+	//  1  D
+	//  2  HI
+	//  3  I
+	//  4  AM
+	//  5  M
+	//  6  HC
+	//  7  C
+	//  8  RC
+	//  9  HRC
+	// 10  HR
+	// 11  R
+	// 100 N	
+	
+	// cost and requirements
+	resources cost = "1 workers 10g"
+	resources upkeep = "1f"
+	resources cost_merc = "20g"
+	resources upkeep_merc = "1g"
+	float heal_gold_cost_per_level = 0/20/30/50
+	upgrade_to = []
+	upgrades_to_available_units = true
+	require
+	
+	string counter = [] //!!! not implemented
+	string countered = [] //!!! not implemented
+	
+	// include list of eligable religion (OR) ex: kingdom_religion = [Ortodox, Orthodox]
+	// include list of realm_religion religion (OR) ex: realm_religon = Sunni
+	// empty denotes no restriction
+	// If both are set, then the requirements are "AND", otherwise it's "OR". 
+	Religion kingdom_religion
+	Religion realm_religion
+	
+	bool unit_is_militia = (unit.unit_type = "Militia")
+	float CTH_cavalry_mod_effect = ((unit.CTH_cavalry_mod - 1) * 100)
+	float unit_move_speed = (ceil(unit.world_speed_mod * 10))
+	
+	template attribute
+	{
+		sprite icon
+		text name
+		text description
+		text label = "{name}: [{cur_val} / ]{value_clr}{final_val}[{perc:if}%]{value_clr_end}[ ({base_val} {bonus_val:bonus:nonzero})]"
+		float cur_val
+		float base_val
+		float bonus_val
+		float final_val = (base_val + (bonus_val or 0))
+		bool validate = true
+		
+		bool is_buffed = (bonus_val > 0)
+		bool is_penalized = (bonus_val < 0)
+		text value_clr = "[{is_buffed:if}{clr:active_buff}|{is_penalized:if}{clr:active_penalty}]"
+		text value_clr_end = "[{is_buffed:if}{/clr}|{is_penalized:if}{/clr}]"
+	}
+	
+	attributes
+	{
+		level : attribute
+		{
+			label = "{name}: {rank_text}"
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Rank_small.psd:stat_Rank_small#2" //GUID:237d0afa3ceba9046abb813ed7b24edc
+			name = "Rank"
+			description = "The experience gained from a squad during combat. Each rank grants bonuses to attack, defense, stamina, siege strength and resilience."
+			rank_text = (Unit.rank_texts["" + unit.level])
+			base_val = (unit.level)
+			validate = (!unit.is_noble and unit.level >= 0 and !unit.is_siege_eq)
+		}
+		
+		manpower : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Manpower_small.psd:stat_Manpower_small#2" //GUID:e24c71fb371aa2d46ab3e389f873ac3a
+			name = "Manpower"
+			description = "The amount of living troops within a squad."
+			cur_val = (unit.max_manpower_base and unit.manpower)
+			base_val = (unit.max_manpower_base or unit.manpower)
+			bonus_val = (unit.max_manpower_bonus)
+			breakdown
+			{
+				bonus squad_size_perc
+				var manpower_from_additional_troops
+				{
+					text name = "From {AdditionalTroops}"
+					perc = true
+				}
+				var manpower_from_governor_levy_troops
+				{
+					text name = "From levies in [{army.leader.governed_castle}|governed province]"
+					perc = true
+				}
+				var manpower_from_garrison_levy_bonus // obsolete? afaik it's 0 everywhere
+				{
+					text name = "From levies in [{garrison.settlement}|province]"
+					perc = true
+				}
+				var manpower_from_garrison_excess_levy_bonus
+				{
+					text name = "From excess levies in [{garrison.settlement}|province]"
+					perc = true
+				}
+				var manpower_from_garrison_excess_town_guard_bonus
+				{
+					text name = "From excess town guards in [{garrison.settlement}|town]"
+					perc = true
+				}
+				var manpower_from_garrison_excess_worker_bonus
+				{
+					text name = "From excess workers in [{garrison.settlement}|province]"
+					perc = true
+				}
+				var manpower_from_siege_defense_garrison // combining permanent and temporary garrison bonuses here, because why not?
+				{
+					text name = "From siege defense in [{garrison.settlement}|town]"
+					perc = true
+				}
+				var manpower_from_garrison_realm // obsolete? afaik it's 0 everywhere
+				{
+					text name = "From garrison in [{garrison.settlement}|town]"
+					perc = true
+				}
+			}
+		}
+		
+		morale : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Morale_small.psd:stat_Morale_small#2" //GUID:82a75cdab1d187742adee31b5854c025
+			name = "Morale"
+			description = "A squad's willingness to fight. High morale increases defense, while low values can force squads to retreat or even flee."
+			cur_val = (unit.morale)
+			base_val = (unit.initial_morale)
+			validate = (unit.morale and unit.initial_morale)
+			breakdown
+			{
+				custom morale_factors // whatever is in battles.def, def battlesimulation(or battleview).morale_factors
+				var temporary_morale
+				{
+					perc = false
+					text name = "Temporary morale"
+				}
+			}
+		}
+		
+		stamina : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Stamina_small.psd:stat_Stamina_small#2" //GUID:6c258c945fc4a784d858888f3cccb606
+			name = "Stamina"
+			description = "A squad's overal endurance in tactical battles. Running and charging uses stamina and can lead to exhaustion."
+			base_val = (unit.stamina_max)
+			bonus_val = (unit.stamina_bonus)
+			breakdown
+			{
+				bonus stamina_perc { perc = true }
+				var stamina_from_level
+				{
+					perc = true
+					name = "From squad rank"
+				}
+			}
+		}
+		
+		movement_speed : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_MovementSpeed_small.psd:stat_MovementSpeed_small#2" //GUID:09144f3ebe6c6114cadbcb18ce38afbb
+			name = "Travel speed"
+			description = "The travel speed of the slowest squad or army equipment in an army determines how quickly the entire army can travel."
+			base_val = (unit.unit_move_speed)
+			bonus_val = (unit.move_speed_bonus) // battleview only // only from buffs i think
+		}
+		
+		melee_attack : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Attack_small.psd:stat_Attack_small#2" //GUID:c03603c9fc3623349a296c91ac07517f
+			name = "Melee attack"
+			description = "The chance to deal lethal damage to enemy troops in melee combat."
+			base_val = (unit.CTH)
+			bonus_val = (unit.CTH_bonus)
+			validate = (!unit.is_siege_eq)
+			breakdown
+			{
+				bonus CTH_perc
+				bonus CTH_flat
+				var cth_from_level
+				{
+					text name = "From squad rank"
+					perc = true
+				}
+				var cth_from_initiative // battleview only
+				{
+					text name = "From battle initiative"
+					perc = true
+				}
+				var cth_from_buffs // battleview only
+				{
+					text name = "From buffs"
+					perc = true
+				}
+			}
+		}
+		
+		trample_chance : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_TrampleChance_small.psd:stat_TrampleChance_small#2" //GUID:7d597cfa32c211d439e62734f0cffa73
+			name = "Trample chance"
+			description = "Charging cavalrymen that have reached high speed may trample over their opponents, dealing major damage."
+			base_val = (unit.trample_chance)
+			bonus_val = (unit.trample_chance_bonus)
+			validate = (unit.is_cavalry)
+			breakdown
+			{
+				bonus trample_chance_perc
+			}
+		}
+		
+		ranged_attack : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_RangedAttack_small.psd:stat_RangedAttack_small#2" //GUID:dc675d7ced79e394db1f8346aafc6b92
+			name = "Ranged attack"
+			description = "The chance to deal lethal damage to enemy troops in ranged combat."
+			base_val = (unit.CTH_ranged)
+			bonus_val = (unit.CTH_ranged_bonus)
+			validate = (unit.is_ranged)
+			breakdown
+			{
+				bonus CTH_perc
+				var cth_from_level
+				{
+					text name = "From squad rank"
+					perc = true
+				}
+				var cth_from_initiative // battleview only
+				{
+					text name = "From battle initiative"
+					perc = true
+				}
+				var cth_from_buffs // battleview only
+				{
+					text name = "From buffs"
+					perc = true
+				}
+			}
+		}
+		
+		attack_range : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_ShootRange_small.psd:stat_ShootRange_small#2" //GUID:0eb9a5038373a004f992c4918710be4f
+			name = "Attack range"
+			description = "The maximum distance at which this squad may shoot."
+			base_val = (unit.max_shoot_range_base or unit.max_shoot_range) // max_shoot_range_base is for units, max_shoot_range is for defs
+			bonus_val = (unit.max_shoot_range_bonus)
+			validate = (unit.is_ranged)
+			breakdown
+			{
+				bonus max_shoot_range { perc = true }
+			}
+		}
+		
+		shoot_interval : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_ShootInterval_small.psd:stat_ShootInterval_small#2" //GUID:b8bb3acd0f919b54184073b927bf331e
+			name = "Shoot interval"
+			description = "The time it takes for a squad to load its bows and shoot its next volley."
+			base_val = (unit.shoot_interval)
+			validate = (unit.is_ranged)
+		}
+		
+		salvos : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Salvos_small.psd:stat_Salvos_small#2" //GUID:11fbf30911c323e4da8b240aa6f65879
+			name = "Salvos"
+			description = "The number of ranged attacks a squad may perform. Upon salvo depletion, a ranged squad will resort to melee combat."
+			cur_val = (unit.salvos)
+			base_val = (unit_def.salvo_capacity)
+			bonus_val = (unit.salvo_capacity_bonus)
+			validate = (unit.is_ranged)
+			breakdown
+			{
+				bonus salvo_capacity { perc = true }
+			}
+		}
+		
+		defense_vs_melee : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_DefenseMelee_small.psd:stat_DefenseMelee_small#2" //GUID:e9ef5f88a76a5494491a08c55e4f2bdf
+			name = "Defense (melee)"
+			description = "The chance to ignore lethal damage from enemy troops in melee combat."
+			base_val = (unit.defense)
+			bonus_val = (unit.defense_bonus)
+			breakdown
+			{
+				bonus defense_flat
+				bonus defense { perc = true }
+				bonus defense_during_siege_perc { perc = true }
+				bonus sieging_troops_defense_perc { perc = true }
+				var defense_from_level
+				{
+					perc = true
+					text name = "From level"
+				}
+				var defense_from_castle_defender_bonus
+				{
+					perc = true
+					text name = "Defender bonus"
+				}
+				var defense_from_morale_flat
+				{
+					perc = false
+					text name = "From morale (flat)"
+				}
+				var defense_from_morale_perc
+				{
+					perc = true
+					text name = "From morale (percentage)"
+				}
+				var defense_from_buffs // battleview only
+				{
+					perc = true
+					text name = "From buffs"
+				}
+				var defense_for_noble
+				{
+					perc = true
+					text name = "Squad is Noble"
+				}
+				var defense_from_starvation // only for attackers, during SIEGE, not assault and break siege
+				{
+					perc = true
+					text name = "From lack of army supplies"
+				}
+				var defense_from_siege_resilience
+				{
+					perc = false
+					add = true
+					text name = "From [{battle.settlement.is_castle:if}castle|town] resilience"
+				}
+			}
+		}
+		
+		defense_vs_ranged : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_DefenseRanged_small.psd:stat_DefenseRanged_small#2" //GUID:da3db0c286e6f3a428b0ab370c7c5e1b
+			name = "Defense (ranged)"
+			description = "The chance to ignore lethal damage from incoming enemy arrows."
+			base_val = (unit.defense)
+			bonus_val = (unit.defense_against_ranged_bonus)
+			breakdown : defense_vs_melee.breakdown
+			{
+				base = (unit.defense)
+				{
+					text name = "From melee defense"
+				}
+				var defense_against_ranged_mod_perc = (unit.defense_against_ranged_mod - 1) * 100
+				{
+					float flat = (unit.defense_against_ranged_modified - unit.defense_modified)
+					text name = "Added ranged defense"
+				}
+			}
+		}
+		
+		chance_to_shock : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_ChanceToShock_small.psd:stat_ChanceToShock_small#2" //GUID:87bb3e3a8df0fe9498480ffbe6384485
+			name = "Chance to shock"
+			description = "The chance to lower enemy morale, upon each hit. Opponents' resilience negates this type of damage."
+			base_val = (unit.chance_to_shock_base or unit.chance_to_shock)
+			bonus_val = (unit.chance_to_shock_bonus)
+			perc = true
+			breakdown
+			{
+				bonus shock_chance_flat { perc = false }
+				bonus shock_chance_perc { perc = true }
+				var shock_chance_from_charging
+				{
+					perc = true
+					text name = "Charging"
+				}
+			}
+		}
+		
+		resilience : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_Resilience_small.psd:stat_Resilience_small#2" //GUID:6fc8cf68c22abfa4091dbfbdac9f38ae
+			name = "Resilience"
+			description = "The chance to ignore enemy shock damage, thus avoiding a decrease of morale."
+			base_val = (unit.resilience_base or unit.resilience or 0)
+			bonus_val = (unit.resilience_bonus)
+			breakdown
+			{
+				bonus troops_resilience { perc = false }
+				var siege_defenders_resilience_bonus
+				{
+					perc = false
+					text name = "From [{battle.settlement.is_castle:if}castle|town] resilience" // siege resilience is giving a resilience bonus? totally not confusing
+				}
+				var resilience_from_level
+				{
+					perc = false
+					text name = "From squad rank"
+				}
+				var bonus_resilience_for_player
+				{
+					perc = false
+					text name = "From difficulty"
+				}
+				var resilience_from_initiative // battleview only / obsolete?
+				{
+					perc = false
+					text name = "From battle initiative"
+				}
+				var resilience_from_buffs // battleview only
+				{
+					perc = false
+					text name = "From buffs"
+				}
+			}
+		}
+		
+		siege_attack : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_SiegeAttack_small.psd:stat_SiegeAttack_small#2" //GUID:9b8aca6f80e633b4e94bc12e22e22a07
+			name = "Siege attack"
+			description = "Determines the damage dealt to enemy town and castle resilience, during sieges."
+			base_val = (unit.siege_strength)
+			bonus_val = (unit.siege_strength_bonus)
+			breakdown
+			{
+				bonus siege_strength_perc
+				var siege_strength_from_level
+				{
+					perc = false
+					text name = "From squad rank"
+				}
+			}
+		}
+		
+		attack_vs_cavalry : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_AttackAgainstCavalry_small.psd:stat_AttackAgainstCavalry_small#2" //GUID:47777031ca43b1942a79468e6127d847
+			name = "Attack versus cavalry"
+			description = "Increased chance to deal lethal damage to enemy cavalrymen."
+			label = "{name}: {base_val:bonus:%}"
+			base_val = (unit.CTH_cavalry_mod_effect)
+			validate = (unit.CTH_cavalry_mod_effect > 0)
+		}
+		
+		naval_attack : attribute
+		{
+			icon = "Assets/UI/BattleView/Elements/Stats/stat_AttackInNavalBattles_small.psd:stat_AttackInNavalBattles_small#2" //GUID:3ac34b59a1a27de4888fc8db46f95cdf
+			name = "Attack in naval battles"
+			description = "Certain squads can benefit or suffer from fighting in naval battles, affecting their chance to deal damage."
+			//label = "{name}: {base_val:bonus:%}"
+			base_val = (unit.naval_strength_perc)
+			bonus_val = (unit.naval_strength_bonus_perc)
+			perc = true
+			validate = (!unit.is_siege_eq and (unit.naval_strength_perc != 0 || unit.naval_strength_bonus_perc != 0))
+			breakdown
+			{
+				bonus naval_CTH_perc { perc = false } // intentionally false, this is flat in regards to the naval strenght, the naval strenght is perc in regard to the cth
+			}
+		}
+	}
+	
+	text atttributes_text = $[
+		"[{unit.is_noble:if_not}Rank: {unit.level}{p}]"
+		"Manpower: {unit.manpower}[ / {unit.max_manpower}][ ({unit.max_manpower_base} base {unit.max_manpower_bonus:bonus})]{p}"
+		"[Morale: {unit.morale:F1}/{unit.initial_morale}{p}]"
+		"[Stamina: {unit.stamina_max}[ ({unit.stamina_bonus:bonus:nonzero})]{p}]"
+		"[Travel speed: {unit_move_speed}{p}]"
+		"{p}"
+		"Melee attack: {unit.CTH}[ ({unit.CTH_bonus:bonus})]{p}"
+		"[{unit.is_cavalry:if}Trample chance: {unit.trample_chance}{p}]"
+		"[{unit.is_ranged:if}{p}]"
+		"[{unit.is_ranged:if}Ranged attack: {unit.CTH_ranged}[ ({unit.CTH_ranged_bonus:bonus})]{p}]"
+		"[{unit.is_ranged:if}Attack range: {unit.max_shoot_range}{p}]"
+		"[{unit.is_ranged:if}Shoot interval: {unit.shoot_interval}{p}]"
+		"[{unit.is_ranged:if}Salvos: [{unit.salvos:penalty_below_zero_no_sign} / ]{unit_def.salvo_capacity}[ ({unit.salvo_capacity_bonus:bonus})]{p}]"
+		"{p}"
+		"[Defense (melee): {unit.defense}[ ({unit.defense_bonus:bonus:nonzero})]{p}]"
+		"[Defense (ranged): {unit.defense_against_ranged}[ ({unit.defense_against_ranged_bonus:bonus:nonzero})]{p}]"
+		"{p}"
+		"Chance to shock: [{unit.chance_to_shock_base}|{unit.chance_to_shock}][ ({unit.chance_to_shock_bonus:bonus})]%{p}"
+		"Resilience: [{unit.resilience_base}|{unit.resilience}|0][ ({unit.resilience_bonus:bonus:nonzero})]{p}"
+		"Siege attack: {unit.siege_strength}[ ({unit.siege_strength_bonus:bonus})]{p}"
+		"{p}"
+		"[Attack versus cavalry: {CTH_cavalry_mod_effect:bonus:nonzero:%}{p}]"
+		"[Attack in naval battles: {unit.naval_CTH_perc:bonus:nonzero:%}{p}]"
+	]
+	
+	text state_text = $[
+		"[{unit.simulation.state} {unit.simulation.target}{p}]"
+		"[{unit.state:plain} [{unit.target.name:plain}]{p}]"
+	]
+	
+	text transfer_target = "[{other_army:if}[{other_army.leader}|the other army]|the garrison]"
+	text militaryUnitType = "{militaryUnitType}"
+}
+
+template InventoryItem : Unit
+{
+	is_inventory_item = true
+	//hide_in_wiki = true
+	CTH = 0
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////           BASE CLASSES (ARCHTYPES)              /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def Militia : Unit
+{
+	fake_unit = true
+	unit_type = "Militia"
+	short_unit_type = "M"
+	
+	//csv://csv: name = "Peasants"
+	description = "Non-professional soldiers, called upon to fight in desperate times and relying only on the strength in numbers."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Militia_CE.tga:Icon_Unit_Militia_CE#2" //GUID:95c43d739771ef74c99666a86bedb182
+	model = "Assets/Units/Militia_CE_01/Militia_CE_01.prefab" //GUID:dbdcfb8367f43fe4495dbf89d936c8fe
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:militia#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:militia_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/militia"
+	
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	battle_row = 5
+	battle_col = 5
+	
+	ai_emergency_only = true
+
+	chance_ignore_cavalry = 50
+
+	bonuses
+	{
+		CTH_perc = ["cs_melee_CTH_perc"]
+	}
+	
+	upgrade_to = [
+		Light_Spearman_CE,
+		Light_Spearman_Arab,
+		Light_Infantry_CE,
+		Light_Infantry_Arab,
+		Light_Infantry_African,
+		Light_Infantry_Steppe,
+		Light_Infantry_Slav,
+		Axeman_Special,
+		Saracen_Special,
+		Highlander_Special,
+		Viking_Special,
+		Varangian_Guard_Special,
+		Roman_Infantry_Special,
+		Light_Archer_Slav,
+		Light_Archer_CE,
+		Light_Archer_Arab,
+		Light_Archer_Steppe,
+		Crossbowman_Special,
+		Light_Cavalry_CE,
+		Light_Cavalry_Arab,
+		Light_Cavalry_Steppe,
+		Light_Cavalry_African,
+		Horse_Archer_CE,
+		Horse_Archer_Arab,
+		Light_Horse_Archer_Steppe,
+		Camel_Archer_Special,
+		Mamluk_Special,
+		Mongol_Cavalry_Special
+	]
+	hide_in_wiki = true
+}
+
+def Infantry : Unit
+{
+	fake_unit = true
+	unit_type = "Infantry"
+	short_unit_type = "I"
+	
+	counter = ["Defense"]
+	countered = ["Cavalry","Ranged"]
+	
+	//csv://csv: name = "Light Infantry"
+	description = "Foot soldiers with lighter armor. They can maneuver faster and maintain their stamina longer than the heavy infantry, but do not stand a chance in direct confrontation."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_CE.tga:Icon_Unit_Light_Infantry_CE#2" //GUID:e4d22df4ab829e74d95d37675a0d8bc6
+	model = "Assets/Units/Light_Infantry_CE_01/Light_Infantry_CE_01.prefab" //GUID:3322d18ace7e12947804fab1707a02d2
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:infantry#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:infantry_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/infantry"
+	select_sound = "event:/sound_effects/interaction/troops/infantry"
+	
+	battle_row = 3
+	battle_col = 3
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+
+	chance_ignore_cavalry = 50
+	
+	bonuses
+	{
+		squad_size_perc = "cs_infantry_squad_size_perc"
+		defense_flat = "cs_infantry_defense"
+		CTH_perc = ["cs_melee_CTH_perc", "cs_infantry_CTH_perc"]
+	}
+	
+	require
+	{
+		Swordsmith
+	}
+	
+	upgrade_to = [
+		Man_At_Arms_Special,
+		Heavy_Swordman_CE,
+		Heavy_Swordman_Arab
+	]
+	hide_in_wiki = true
+}
+
+def Defense : Unit
+{
+	fake_unit = true
+	unit_type = "Defense"
+	short_unit_type = "D"
+	
+	counter = ["Cavalry"]
+	countered = ["Infantry"]
+	
+	//csv://csv: name = "Light Pikemen"
+	description = "Mobile foot soldiers, armed with polearms, very effective in defending a position and keeping the enemy's cavalry at bay."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Spearman_CE.tga:Icon_Unit_Light_Spearman_CE#2" //GUID:94e24f717e3708d42b38b97e9ab3934d
+	model = "Assets/Units/Light_Spearman_CE_01/Light_Spearman_CE_01.prefab" //GUID:3924f21e679e83f49858d1a6cd9d116a
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:defense#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:defense_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/defense"
+	select_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 4.5
+	max_deceleration = 4.5
+	
+	battle_row = 1
+	battle_col = 1
+	
+	chance_target_closest_cavalry = 40
+	
+	require
+	{
+		Spearmaker
+	}
+	
+	bonuses
+	{
+		squad_size_perc = "cs_infantry_squad_size_perc"
+		troops_resilience = "cs_defense_troops_resilience"
+		defense_flat = "cs_infantry_defense"
+		CTH_perc = ["cs_melee_CTH_perc", "cs_infantry_CTH_perc"]
+	}
+	
+	formation = "Checkerboard"
+	
+	upgrade_to = [
+		Halberdier_Special,
+		Flemish_Pikeman_Special,
+		Heavy_Spearman_CE,
+		Heavy_Spearman_Arab
+	]
+	hide_in_wiki = true
+}
+
+def Cavalry : Unit
+{
+	fake_unit = true
+	unit_type = "Cavalry"
+	short_unit_type = "C"
+	
+	counter = ["Infantry","Ranged"]
+	countered = ["Defense"]
+	
+	//csv://csv: name = "Light Cavalry"
+	description = "Mounted warriors, unmatched in their speed. When strategically used, they are devastating on the flanks and when disorder strikes in the enemy army, especially against units with lighter armour."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Cavalry_CE.tga:Icon_Unit_Light_Cavalry_CE#2" //GUID:7a9c1911b30b2de40bf593d83b83cb8e
+	model = "Assets/Units/Light_Cavalry_CE_01/Light_Cavalry_CE_01.prefab" //GUID:d78af08f7e176f24e9070901fec14e3c
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:cavalry#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:cavalry_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/cavalry"
+	select_sound = "event:/sound_effects/interaction/troops/cavalry"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	idle_sound = "event:/sound_effects/battleview/cavalry/idle"
+	
+	run_anim_speed = 4
+	charge_anim_speed = 7
+	sprint_anim_speed = 7.5
+	trot_anim_speed = 3.6
+	
+	max_acceleration = 7
+	max_deceleration = 10
+	
+	formation = "Triangle"
+	default_stance = "Aggressive" // preserve formation
+	
+	default_troop_spacing = 1
+	min_troop_spacing = 0.25
+	max_troop_spacing = 1.75
+	
+	battle_row = 7
+	battle_col = 11
+	
+	chance_target_closest_archer = 75
+	
+	radius = 1
+	selection_radius = 0.8
+
+	chance_ignore_cavalry = 25
+	
+	bonuses
+	{
+		trample_shock_damage_perc = "cs_cavalry_charge_shock_perc"
+		squad_size_perc = "cs_mounted_squad_size_perc"
+		CTH_perc = ["cs_cavalry_CTH_perc","cs_melee_CTH_perc"]
+		discount_perc = ["cs_cavalry_discount_perc"]
+		troops_resilience = ["cs_cavalry_resilience"]
+	}
+
+	States
+	{
+		Disengaging = 2
+	}
+	
+	require
+	{
+		Spearmaker
+		Stables
+	}
+	
+	upgrade_to = [
+		Heavy_Cavalry_CE,
+		Heavy_Cavalry_Arab,
+		Heavy_Cavalry_Slav,
+		Sipahi_Special,
+		Boyar_Special,
+		Cataphract_Special,
+		Norman_Special,
+		Ghulam_Cavalry_Special,
+		Pronoia_Special,
+		Feudal_Knight_Special
+	]
+	
+	
+	float terrain_normal_points = [
+	0, 1,
+	0, -1
+	]
+	max_rotation_z = 0
+
+	hide_in_wiki = true
+}
+
+template HorseCavalry : Cavalry
+{
+	bonuses
+	{	
+		CTH_perc = ["cs_horse_cavalry_CTH_perc"]
+		discount_perc = ["cs_horse_cavalry_discount_perc"]
+		troops_resilience = ["cs_horse_cavalry_resilience"]
+	}
+}
+
+def Noble : HeavyCavalry
+{
+	fake_unit = true
+	unit_type = "Noble"
+	short_unit_type = "N"
+	hide_in_wiki = true
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	//csv://csv: name = "Noblemen Cavalry"
+	description = "Heavy cavalry, protecting the army's commander."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_CE.tga:Icon_Unit_Marshal_CE#2" //GUID:fe1de3c2254cffb42a99f95f0c0890d2
+	model = "Assets/__DELETED_GUID_Trash/15693f0b161ead7459c591c3216c8cc4"
+	hire_sound = "event:/sound_effects/interaction/troops/cavalry"
+	select_sound = "event:/sound_effects/interaction/troops/cavalry"
+	
+	battle_row = 100
+	battle_col = 0
+	
+	secondary_type = "Cavalry"
+	available = false
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	
+	minimap_icon_own = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Green_Dot_Marshal.psd:Element_UI_Minimap_Green_Dot_Marshal#2" //GUID:1daa815f48373cc47b24cc9ef92189db
+	minimap_icon_ally = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Blue_Dot_Marshal.psd:Element_UI_Minimap_Blue_Dot_Marshal#2" //GUID:cfdbd642754ca4145b4c1fd6de73f237
+	minimap_icon_enemy = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Red_Dot_Marshal.psd:Element_UI_Minimap_Red_Dot_Marshal#2" //GUID:5ef64993e1abcf746b497612198686d4
+}
+
+def Ranged : Unit
+{
+	fake_unit = true
+	unit_type = "Ranged"
+	short_unit_type = "N"
+	
+	counter = ["Infantry"]
+	countered = ["Cavalry"]
+	
+	//csv://csv: name = "Light Archers"
+	description = "Bowmen, mobile and deadly for the enemies, but protected only by light leather armour."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Archer_CE.tga:Icon_Unit_Light_Archer_CE#2" //GUID:9987acdfed827ba43a813d01d6db043b
+	model = "Assets/Units/Light_Archer_CE_01/Light_Archer_CE_01.prefab" //GUID:f6aba2a3832e4ce4e9893b290a1329d9
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:ranged#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:ranged_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/archers"
+	select_sound = "event:/sound_effects/interaction/troops/archers"
+	
+	battle_row = 11
+	battle_col = 7
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 3
+	max_deceleration = 3
+	
+	retreat_damage_mod = 20
+
+	chance_ignore_cavalry = 25
+	
+	bonuses
+	{
+		squad_size_perc = "cs_ranged_squad_size_perc"
+		CTH_perc = "cs_ranged_CTH_perc"
+	}
+	
+	require
+	{
+		Fletcher
+	}
+	
+	upgrade_to = [
+		Heavy_Archer_CE,
+		Heavy_Archer_Arab,
+		Longbowman_Special,
+		Pavise_Crossbowman_Special
+	]
+	hide_in_wiki = true
+}
+
+def RangedCavalry : Ranged
+{
+	fake_unit = true
+	unit_type = "Ranged Cavalry"
+	short_unit_type = "RC"
+	
+	counter = ["Infantry","Ranged"]
+	countered = ["Defense"] //"Catapult"
+	
+	hire_sound = "event:/sound_effects/interaction/troops/mounted_archers"
+	select_sound = "event:/sound_effects/interaction/troops/mounted_archers"
+	
+	idle_sound = "event:/sound_effects/battleview/cavalry/idle"
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	
+	battle_row = 8
+	battle_col = 8
+	
+	default_troop_spacing = 1
+	min_troop_spacing = 0.25
+	max_troop_spacing = 1.75
+	
+	run_anim_speed = 4
+	charge_anim_speed = 7
+	sprint_anim_speed = 7.5
+	trot_anim_speed = 3.6
+	
+	max_acceleration = 7
+	max_deceleration = 10
+	
+	radius = Cavalry.radius
+	selection_radius = Cavalry.selection_radius
+	
+	secondary_type = "Cavalry"
+	default_stance = "Aggressive" // preserve formation
+	
+	require
+	{
+		Fletcher
+		Stables
+	}
+	bonuses
+	{
+		squad_size_perc = ["cs_mounted_squad_size_perc"]
+		CTH_perc = ["cs_cavalry_CTH_perc", "cs_ranged_CTH_perc"]
+		trample_shock_damage_perc = "cs_cavalry_charge_shock_perc"
+		discount_perc = ["cs_cavalry_discount_perc"]
+		troops_resilience = ["cs_cavalry_resilience"]
+	}
+
+	States
+	{
+		Disengaging = 2
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Horse_Archer_CE.tga:Icon_Unit_Horse_Archer_CE#2" //GUID:0ffdb6be29317fa40934a444c98081b4
+	
+	upgrade_to = [
+		Heavy_Horse_Archer_Steppe,
+		Mongol_Heavy_Lancers_Special
+	]
+	
+	
+	float terrain_normal_points = [
+	0, 1,
+	0, -1
+	]
+	max_rotation_z = 0
+
+	hide_in_wiki = true
+}
+
+template RangedHorseCavalry : RangedCavalry
+{
+	bonuses
+	{
+		CTH_perc = ["cs_horse_cavalry_CTH_perc"]
+		discount_perc = ["cs_horse_cavalry_discount_perc"]
+		resilience = ["cs_horse_cavalry_resilience"]
+	}
+}
+
+def HeavyInfantry : Infantry
+{
+	fake_unit = true
+	unit_type = "Heavy Infantry"
+	short_unit_type = "HI"
+	
+	//csv://csv: name = "Heavy Infantry"
+	description = "Slower but well armoured foot soldier, possessing formidable strength for close combat."
+	model = "Assets/Units/Heavy_Swordman_CE_01/Heavy_Swordman_CE_01.prefab" //GUID:61fb9fd9613d0994e9c98030c07da996
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Swordsman_CE.tga:Icon_Unit_Heavy_Swordsman_CE#2" //GUID:62a1c38bd22cf4c4fb4e0681e785763a
+	hire_sound = "event:/sound_effects/interaction/troops/infantry"
+	select_sound = "event:/sound_effects/interaction/troops/infantry"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/heavy_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/heavy_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 4
+	max_deceleration = 4
+	
+	battle_row = 2
+	battle_col = 2
+	
+	require
+	{
+		Swordsmith
+		HeavyArmorsmith
+	}
+
+	bonuses
+	{
+		defense_flat = "cs_heavy_unit_defense_flat"
+	}
+	
+	upgrade_to = [Man_At_Arms_Special]
+	hide_in_wiki = true
+}
+
+def HeavyDefense : Defense
+{
+	fake_unit = true
+	unit_type = "Heavy Defense"
+	short_unit_type = "HD"
+	
+	//csv://csv: name = "Heavy Defense"
+	description = "Heavily armoured soldiers with polearms, perfect for defending a position."
+	model = "Assets/Units/Heavy_Spearman_CE_01/Heavy_Spearman_CE_01.prefab" //GUID:788ae39b1f1aac84d943c2921b1ce21d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Spearman_CE.tga:Icon_Unit_Heavy_Spearman_CE#2" //GUID:c3ff7dd0ec12ec4439ac41bb9e8c6d4b
+	
+	hire_sound = "event:/sound_effects/interaction/troops/defense"
+	select_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/heavy_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/heavy_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 3.5
+	max_deceleration = 3.5
+	
+	battle_row = 0
+	battle_col = 0
+	
+	chance_target_closest_cavalry = 30
+	
+	require
+	{
+		Spearmaker
+		HeavyArmorsmith
+	}
+
+	bonuses
+	{
+		defense_flat = "cs_heavy_unit_defense_flat"
+	}
+	
+	upgrade_to = [
+		Halberdier_Special,
+		Flemish_Pikeman_Special
+	]
+	hide_in_wiki = true
+}
+
+def HeavyCavalry : HorseCavalry
+{
+	fake_unit = true
+	unit_type = "Heavy Cavalry"
+	short_unit_type = "HC"
+	
+	//csv://csv: name = "Heavy Cavalry"
+	description = "Heavily armed and armoured mounted soldiers, capable of a devastating charge through the enemy lines."
+	model = "Assets/Units/Heavy_Cavalry_CE_01/Heavy_Cavalry_CE_01.prefab" //GUID:fe0549b7561b18a4382ff700e57beae9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Cavalry_CE.tga:Icon_Unit_Heavy_Cavalry_CE#2" //GUID:de937a70321dde04ea51552d6f23648d
+	
+	hire_sound = "event:/sound_effects/interaction/troops/cavalry"
+	select_sound = "event:/sound_effects/interaction/troops/cavalry"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	
+	battle_row = 6
+	battle_col = 10
+	
+	chance_target_closest_archer = 50
+	
+	require
+	{
+		Spearmaker
+		HeavyArmorsmith
+		Stables
+	}
+
+	bonuses
+	{
+		CTH_perc = ["cs_heavy_cavalry_CTH_perc"]
+		defense_flat = "cs_heavy_unit_defense_flat"
+		trample_chance_perc = ["cs_heavy_cavalry_trample_chance_perc"]
+	}
+	
+	upgrade_to = [
+		Sipahi_Special,
+		Boyar_Special,
+		Cataphract_Special,
+		Norman_Special,
+		Ghulam_Cavalry_Special,
+		Pronoia_Special,
+		Feudal_Knight_Special
+	]
+
+	hide_in_wiki = true
+}
+
+def HeavyRanged : Ranged
+{
+	fake_unit = true
+	unit_type = "Heavy Ranged"
+	short_unit_type = "HR"
+	
+	//csv://csv: name = "Heavy Archers"
+	description = "Ranged soldiers, protected by mail armour, especially valuable in missile exchanges and inevitable melee combats."
+	model = "Assets/Units/Heavy_Archer_CE_01/Heavy_Archer_CE_01.prefab" //GUID:36b79e75f9bb2f443b3b1a1665a7b4bf
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Archer_CE.tga:Icon_Unit_Heavy_Archer_CE#2" //GUID:058736c3380438c42b2f500c9507eed9
+	
+	hire_sound = "event:/sound_effects/interaction/troops/archers"
+	select_sound = "event:/sound_effects/interaction/troops/archers"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/heavy_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/heavy_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 2
+	max_deceleration = 2
+	
+	battle_row = 10
+	battle_col = 6
+	
+	require
+	{
+		Fletcher
+		HeavyArmorsmith
+	}
+
+	bonuses
+	{
+		defense_flat = "cs_heavy_unit_defense_flat"
+	}
+	
+	upgrade_to = [
+		Longbowman_Special,
+		Pavise_Crossbowman_Special
+	]
+
+	hide_in_wiki = true
+}
+
+def HeavyRangedCavalry : HeavyRanged
+{
+	fake_unit = true
+	unit_type = "Heavy Ranged Cavalry"
+	short_unit_type = "HRC"
+	
+	hire_sound = "event:/sound_effects/interaction/troops/mounted_archers"
+	select_sound = "event:/sound_effects/interaction/troops/mounted_archers"
+	
+	idle_sound = "event:/sound_effects/battleview/cavalry/idle"
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	
+	run_anim_speed = 4
+	charge_anim_speed = 7
+	sprint_anim_speed = 7.5
+	trot_anim_speed = 3.6
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	radius = 1
+	
+	battle_row = 9
+	battle_col = 9
+	
+	default_troop_spacing = 1
+	min_troop_spacing = 0.25
+	max_troop_spacing = 1.75
+	
+	bonuses
+	{
+		squad_size_perc = ["cs_mounted_squad_size_perc"]
+		CTH_perc = ["cs_cavalry_CTH_perc", "cs_ranged_CTH_perc", "cs_heavy_cavalry_CTH_perc"]
+		defense_flat = "cs_heavy_unit_defense_flat"
+		trample_shock_damage_perc = "cs_cavalry_charge_shock_perc"
+		trample_chance_perc = ["cs_heavy_cavalry_trample_chance_perc"]
+		discount_perc = ["cs_cavalry_discount_perc"]
+		troops_resilience = ["cs_cavalry_resilience"]
+	}
+
+	States
+	{
+		Disengaging = 2
+	}
+
+	hide_in_wiki = true
+	
+	secondary_type = "Cavalry"
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Horse_Archer_Steppe.tga:Icon_Unit_Heavy_Horse_Archer_Steppe#2" //GUID:eeb5832b6e60d3949a70a4142e5b60b5
+}
+
+template HeavyRangedHorseCavalry : HeavyRangedCavalry
+{
+	bonuses
+	{
+		CTH_perc = ["cs_horse_cavalry_CTH_perc"]
+		discount_perc = ["cs_horse_cavalry_discount_perc"]
+		resilience = ["cs_horse_cavalry_resilience"]
+	}
+}
+
+def TownGuard : Defense
+{
+	//csv://csv: name = "Town guards"
+	description = "Stationary foot soldiers, responsible for the defense of the town and province."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_CE.tga:Icon_Unit_Town_Guard_CE#2" //GUID:84ace21dd3825d943b2418beee1710ed
+	model = "Assets/Units/Town_Guard_CE_01/Town_Guard_CE_01.prefab" //GUID:5733535eaf0e2f043a54e00b0b92f7d8
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:defense#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:defense_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	hire_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	select_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 4.5
+	max_deceleration = 4.5
+	
+	available = false
+	
+	secondary_type = "Guard"
+}
+
+def EliteGuard : HeavyDefense
+{
+	//csv://csv: name = "Elite Guards"
+	description = "Stationary guards that received advanced training and are ready to hold back or at least delay the attacks in their province."
+	model = "Assets/Units/Town_Guard_CE_02/Town_Guard_CE_02.prefab" //GUID:89cf260f5f61af340afa50fc4dbcd142
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_CE.tga:Icon_Unit_Elite_Guard_CE#2" //GUID:94e4668f91c40cf4f92f4622cc655d07
+	
+	hire_sound = "event:/sound_effects/interaction/troops/defense"
+	select_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/heavy_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/heavy_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/heavy_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	max_acceleration = 3.5
+	max_deceleration = 3.5
+	
+	available = false
+	
+	secondary_type = "Guard"
+}
+
+def RoyalGuard : EliteGuard
+{
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+
+	//csv://csv: name = "Royal Guards"
+	description = "Some of the finest foot soldiers of a kingdom, stationed to ensure the safety of a province."
+	model = "Assets/Units/Town_Guard_CE_03/Town_Guard_CE_03.prefab" //GUID:8ec495c2889cb5c4c85b7f3d8555cd0f
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_CE.tga:Icon_Unit_Royal_Guard_CE#2" //GUID:b3e2a12fe90a00a4d97dc8297228e74a
+	
+	select_sound = "event:/sound_effects/interaction/troops/defense"
+	
+	max_acceleration = 3.5
+	max_deceleration = 3.5
+}
+
+def AdvancedMilitia : Militia
+{
+	unit_type = "Advanced Militia"
+	short_unit_type = "AM"
+	
+	//csv://csv: name = "Militia"
+	description = "Armed men, trained only in the basics of warfare."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Advanced_Militia_CE.tga:Icon_Unit_Advanced_Militia_CE#1" //GUID:828791f53491d5b46846fe7b8fb1d294
+	model = "Assets/Units/Militia_CE_01/Militia_CE_01.prefab" //GUID:dbdcfb8367f43fe4495dbf89d936c8fe
+	symbol = "Assets/UI/WV Battle Sim/squadSymbols2.png:militia#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	symbol_dead = "Assets/UI/WV Battle Sim/squadSymbols2.png:militia_dead#1" //GUID:49a6616bae5e0fb47ba24236705f0d77
+	
+	hire_sound = "event:/sound_effects/interaction/troops/militia"
+	select_sound = "event:/sound_effects/interaction/troops/militia"
+	
+	marching_sound = "event:/sound_effects/battleview/units/marching/light_armored"
+	running_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/light_armored"
+	charging_sound = "event:/sound_effects/battleview/units/charge/light_armored"
+	idle_sound = "event:/sound_effects/battleview/units/idle"
+	
+	battle_row = 4
+	battle_col = 4
+	
+	require
+	{
+		VillageMilitia
+	}
+	
+	available = false
+	hide_if_unavailable = false
+	
+	upgrade_to = [
+		Light_Spearman_CE,
+		Light_Spearman_Arab,
+		Light_Infantry_CE,
+		Light_Infantry_Arab,
+		Light_Infantry_African,
+		Light_Infantry_Steppe,
+		Light_Infantry_Slav,
+		Axeman_Special,
+		Saracen_Special,
+		Highlander_Special,
+		Viking_Special,
+		Varangian_Guard_Special,
+		Roman_Infantry_Special,
+		Light_Archer_Slav,
+		Light_Archer_CE,
+		Light_Archer_Arab,
+		Light_Archer_Steppe,
+		Crossbowman_Special,
+		Light_Cavalry_CE,
+		Light_Cavalry_Arab,
+		Light_Cavalry_Steppe,
+		Light_Cavalry_African,
+		Horse_Archer_CE,
+		Horse_Archer_Arab,
+		Light_Horse_Archer_Steppe,
+		Camel_Archer_Special,
+		Mamluk_Special,
+		Mongol_Cavalry_Special
+	]
+
+	hide_in_wiki = true
+}
+
+
+// Arhitypes End
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////             ADVANCED UNITS              ////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def Viking_Special : Infantry
+{
+	//csv://csv: name = "Vikings"
+	description = "Fierce Norse warriors with high stamina, famous for their vicious attacks, but poor in defense."
+	special = true
+	model = [
+		"Assets/Units/Viking_Special_01/Viking_Special_01.prefab", //GUID:2c0e4a4b9bae92544a48928547552f4d
+		"Assets/Units/Viking_Special_02/Viking_Special_02.prefab", //GUID:a36703be32aa97e4c999a9a567e38adf
+		"Assets/Units/Viking_Special_03/Viking_Special_03.prefab" //GUID:94c100e0bbf8893429f3d976476a6823
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Viking_Special.tga:Icon_Unit_Viking_Special#2" //GUID:180ce42f7e9f003408b3871feb763665
+	
+	max_acceleration = 5
+	max_deceleration = 5
+	retreat_damage_mod = 10
+	
+	require
+	{
+		Swordsmith
+	}
+
+	hide_in_wiki = false
+}
+
+def Highlander_Special : Infantry
+{
+	//csv://csv: name = "Highlanders"
+	description = "Brave Scottish warriors with high stamina and mobility, lightly armoured but still capable of defending themselves well."
+	special = true
+	model = "Assets/Units/Highlander_Special_01/Highlander_Special_01.prefab" //GUID:37b41cf95c11ca543acff6570b82ca69
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Highlander_Special.tga:Icon_Unit_Highlander_Special#2" //GUID:eb16fcd97b7530f4abb93ff17a5e6a33
+	
+	max_acceleration = 5
+	max_deceleration = 5
+	
+	require
+	{
+		Swordsmith
+	}
+
+	hide_in_wiki = false
+}
+
+def Saracen_Special : Infantry
+{
+	//csv://csv: name = "Saracen warriors"
+	description = "Skilled muslim warriors, well-rounded in their mobility, attack and defense capabilities."
+	special = true
+	model = "Assets/Units/Saracen_Special_01/Saracen_Special_01.prefab" //GUID:f6f7ef7cf26f0554ab8eae7eb6e5c3e7
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Saracen_Special.tga:Icon_Unit_Saracen_Special#2" //GUID:71facbde3830e6d4fb69d37fb990b550
+	
+	max_acceleration = 5
+	max_deceleration = 5
+	
+	require
+	{
+		Swordsmith
+	}
+	
+	realm_religion = [Sunni, Shia]
+
+	hide_in_wiki = false
+}
+
+def Varangian_Guard_Special : Infantry
+{
+	//csv://csv: name = "Varangian mercenaries"
+	description = "Heavily armoured sellswords of viking heritage. Though their wage is high, their skills in melee combat are known to justify it."
+	special = true
+	model = "Assets/Units/Varangian_Guard_Special_01/Varangian_Guard_Special_01.prefab" //GUID:f2e3a48f1a7aeed4aa9c3a8388adecc4
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Varangian_Special.tga:Icon_Unit_Varangian_Special#2" //GUID:d3615b09c49831d4c9aee22d692bbfb1
+	
+	require
+	{
+		Swordsmith
+	}
+	
+	max_acceleration = 5
+	max_deceleration = 5
+	
+	retreat_damage_mod = 10
+
+	hide_in_wiki = false
+}
+
+def Roman_Infantry_Special : HeavyInfantry
+{
+	//csv://csv: name = "Roman Infantry"
+	description = "Well trained and organized heavy infantry, famous for its defensive tactics."
+	special = true
+	model = "Assets/Units/Roman_Infantry_Special_01/Roman_Infantry_Special_01.prefab" //GUID:e2d12d4382a3cac47ae06f88f354b4b6
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Roman_Infantry_Special.tga:Icon_Unit_Roman_Infantry_Special#2" //GUID:68bbd611e2799b246929f1d98541fce4
+	
+	max_acceleration = 4
+	max_deceleration = 4
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		MasterWeaponsmith
+		HeavyArmorsmith
+	}
+	
+	realm_religion = Orthodox
+
+	hide_in_wiki = false
+}
+
+def Man_At_Arms_Special : HeavyInfantry
+{
+	//csv://csv: name = "Men at Arms"
+	description = "Well trained and heavily armoured soldiers, skilled both in attack and defense when it comes to close combat."
+	special = true
+	model = "Assets/Units/Man_At_Arms_Special_01/Man_At_Arms_Special_01.prefab" //GUID:73c979f4b34ad184da3518c0b09f5ee0
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_ManAtArms_Special.tga:Icon_Unit_ManAtArms_Special#2" //GUID:539461dc6b4ed984f9d3d14a9db5faee
+	
+	max_acceleration = 4
+	max_deceleration = 4
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	require
+	{
+		MasterWeaponsmith
+		HeavyArmorsmith
+	}
+
+	hide_in_wiki = false
+}
+
+def Teutonic_Knight_Special : HeavyInfantry
+{
+	//csv://csv: name = "Teutonic Knight Infantry"
+	description = "Knights of the teutonic order, very well trained and equipped, fearless and dreadful in battle."
+	special = true
+	model = [
+		"Assets/Units/Teutonic_Knight_Special_01/Teutonic_Knight_Special_01.prefab", //GUID:ac9f12a261f5f754f98f6a82c2e19583
+		"Assets/Units/Teutonic_Knight_Special_02/Teutonic_Knight_Special_02.prefab" //GUID:13e6ab1b0d4698947a0d6c69c2745473
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Teutonic_Knight_Special.tga:Icon_Unit_Teutonic_Knight_Special#2" //GUID:f6fc5bd7f3f4a3a479c61d261daa93d2
+	
+	max_acceleration = 4
+	max_deceleration = 4
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		MasterWeaponsmith
+		MasterArmorer
+	}
+	
+	kingdom_religion = Catholic
+
+	hide_in_wiki = false
+}
+
+def Templar_Knight_Special : HeavyInfantry
+{
+	//csv://csv: name = "Templar Knight Infantry"
+	description = "Superbly armored and trained heavy infantry troops that would rather die than surrender against the enemies of Christ."
+	special = true
+	model = "Assets/Units/Templar_Infantry_Special_01/Templar_Infantry_Special_01.prefab" //GUID:15884ae98fef66442a5ee85ee3b4c430
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Templar_Knight_Special.tga:Icon_Unit_Templar_Knight_Special#2" //GUID:e306b193628fb7b4298528466cdc0a90
+	
+	max_acceleration = 4
+	max_deceleration = 4
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		MasterWeaponsmith
+		MasterArmorer
+	}
+	
+	kingdom_religion = Catholic
+
+	hide_in_wiki = false
+}
+
+def Halberdier_Special : HeavyDefense
+{
+	//csv://csv: name = "Halberdiers"
+	description = "Foot soldiers, heavily armoured and armed with two-handed polearms, unmatched in their defensive capabilities. Two lines of the halberdiers can attack at the same time and they are more effective against cavalry."
+	special = true
+	model = "Assets/Units/Halberdier_Special_01/Halberdier_Special_01.prefab" //GUID:61c4ebf12a68aa94da8465108790632f
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Halberdier_Special.tga:Icon_Unit_Halberdier_Special#2" //GUID:3eb96455cdfa75841878855650423d22
+	
+	max_acceleration = 3.5
+	max_deceleration = 3.5
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Spearmaker
+		MasterArmorer
+	}
+
+	hide_in_wiki = false
+}
+
+def Flemish_Pikeman_Special : HeavyDefense
+{
+	//csv://csv: name = "Flemish Pikemen"
+	description = "Well armored polearm soldiers, capable to fend off both cavalry and infantry attacks with their goedendag and pikes.{p}Two lines of the flemish pikemen can attack at the same time and they are more effective against cavalry."
+	special = true
+	model = "Assets/Units/Flemish_Pikeman_Special/Flemish_Pikeman_Special.prefab" //GUID:da50c394ea05d9648895b1129bf9fde9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Flemish_Pikeman_Special.tga:Icon_Unit_Flemish_Pikeman_Special#2" //GUID:219733cca255cb447bb11614e5f26fff
+	
+	max_acceleration = 3.5
+	max_deceleration = 3.5
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Spearmaker
+		MasterArmorer
+	}
+
+	hide_in_wiki = false
+}
+
+def Jenissary_Special : Ranged
+{
+	//csv://csv: name = "Jenissaries"
+	description = "Ottoman standing army, trained to fight with swords and bows and arrows just as well."
+	special = true
+	model = "Assets/Units/Janissary_Special_01/Janissary_Special_01.prefab" //GUID:59835cc5a43335b43b414decec64b94b
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Janissary_Special.tga:Icon_Unit_Janissary_Special#2" //GUID:113dfad2acc85e44a965c5a00cbe775d
+	
+	max_acceleration = 3
+	max_deceleration = 3
+	
+	require
+	{
+		Fletcher
+		Swordsmith
+	}
+	
+	kingdom_religion = [Sunni, Shia]
+
+	hide_in_wiki = false
+}
+
+def Crossbowman_Special : Ranged
+{
+	//csv://csv: name = "Crossbowmen"
+	description = "Archers which require only minimal training. They can shoot at a long distance, but only a few bolts per minute."
+	special = true
+	model = "Assets/Units/Crossbowman_Special_01/Crossbowman_Special_01.prefab" //GUID:0c20f0b0e1eafdb45849cd5646d8655c
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Crossbowman.tga:Icon_Unit_Crossbowman#2" //GUID:9f2d71efe0ba41140a62781472c5a925
+	
+	max_acceleration = 2
+	max_deceleration = 2
+	
+	require
+	{
+		Fletcher
+	}
+
+	hide_in_wiki = false
+}
+
+def Longbowman_Special : HeavyRanged
+{
+	//csv://csv: name = "Longbowmen"
+	description = "Highly trained archers, armed with a powerful wooden bow, effective even against armoured enemies. Longbowmen are equipped and specialized to fight especially well against cavalry."
+	special = true
+	model = "Assets/Units/Longbowman_Special_01/Longbowman_Special_01.prefab" //GUID:6c4795eb33cec7a4bb030d00ed411feb
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Longbowman_Special.tga:Icon_Unit_Longbowman_Special#2" //GUID:0b3efb2eefce00247b717606dee3c795
+	
+	max_acceleration = 3
+	max_deceleration = 3
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Fletcher
+		MasterArmorer
+	}
+
+	hide_in_wiki = false
+}
+
+def Pavise_Crossbowman_Special : HeavyRanged
+{
+	//csv://csv: name = "Pavise Crossbowmen"
+	description = "Professional archers, protected in battle by their formidable shields. They can shoot at a long distance, but only a few bolts per minute."
+	special = true
+	model = "Assets/Units/Pavise_Crossbowman_Special_01/Pavise_Crossbowman_Special_01.prefab" //GUID:d15ca6a98b7e69448b83fb3180ccabec
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Pavise_Crossbowman.tga:Icon_Unit_Pavise_Crossbowman#2" //GUID:d7e790b9e59116e408bfc46410bea915
+	
+	max_acceleration = 2
+	max_deceleration = 2
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Fletcher
+		MasterArmorer
+	}
+
+	hide_in_wiki = false
+}
+
+def Horse_Archer_CE : RangedHorseCavalry
+{
+	//csv://csv: name = "Horse Archers"
+	description = "Cavalrymen, armed with bows and arrows and trained to shoot from the saddles. Mounted archers are extremely effective in harrasment of the enemy troops, especially foot soldiers."
+	special = true
+	model = "Assets/Units/Horse_Archer_CE_01/Horse_Archer_CE_01.prefab" //GUID:64e552fb207019245b105075aa9f25aa
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Horse_Archer_CE.tga:Icon_Unit_Horse_Archer_CE#2" //GUID:0ffdb6be29317fa40934a444c98081b4
+	
+	require
+	{
+		Fletcher
+		Stables
+	}
+
+	hide_in_wiki = false
+}
+
+def Horse_Archer_Arab : RangedHorseCavalry
+{
+	//csv://csv: name = "Horse Archers"
+	description = "Cavalrymen, armed with bows and arrows and trained to shoot from the saddles. Mounted archers are extremely effective in harrasment of the enemy troops, especially foot soldiers."
+	special = true
+	hire_sound = "event:/sound_effects/interaction/troops/mounted_archers"
+	model = "Assets/Units/Horse_Archer_Arab_01/Horse_Archer_Arab_01.prefab" //GUID:5e0bc6820c5123c42afb0af12702bd57
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Horse_Archer_Arab.tga:Icon_Unit_Horse_Archer_Arab#2" //GUID:c177779dfc4919347b4fae98da04348d
+	
+	require
+	{
+		Fletcher
+		Stables
+	}
+
+	hide_in_wiki = false
+}
+
+def Light_Horse_Archer_Steppe : RangedHorseCavalry
+{
+	//csv://csv: name = "Light Horse Archers"
+	description = "Eastern warriors, unmatched in the skill of mounted archery and capable to wreak havoc in the enemy lines while avoiding close combat."
+	special = true
+	model = "Assets/Units/Steppe_Cavalry_Special_01/Steppe_Cavalry_Special_01.prefab" //GUID:35dd6c75d144fb846bb8481a536f5d75
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Horse_Archer_Steppe.tga:Icon_Unit_Horse_Archer_Steppe#2" //GUID:3ae80d84bb1cc9b4296c560c56ec6273
+	
+	require
+	{
+		Fletcher
+		Stables
+	}
+
+	hide_in_wiki = false
+}
+
+def Camel_Archer_Special : RangedCavalry
+{
+	//csv://csv: name = "Camel Archers"
+	description = "Camel riders, capable to shoot at their enemies at short range. They are more efficient versus cavalry, as the horses detest their smell."
+	special = true
+	model = "Assets/Units/Camel_Archer_Special_01/Camel_Archer_Special_01.prefab" //GUID:b11c986184460264f8cd0ad1c443d5fb
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Camel_Archer_Special.tga:Icon_Unit_Camel_Archer_Special#2" //GUID:5e45177840060ff4ca60372a989f1c77
+	
+	hire_sound = "event:/sound_effects/interaction/troops/camel_archers"
+	select_sound = "event:/sound_effects/interaction/troops/camel_archers"
+	
+	idle_sound = "event:/sound_effects/battleview/cavalry/idle"
+	marching_sound = "event:/sound_effects/battleview/units/marching/cavalry"
+	running_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	sprinting_sound = "event:/sound_effects/battleview/units/running/cavalry"
+	charging_sound = "event:/sound_effects/battleview/units/charge/cavalry"
+	
+	counter = ["Infantry","Ranged","Cavalry"]
+	countered = ["Defense"] //"Catapult"
+	
+	require
+	{
+		Fletcher
+		Stables
+	}
+
+	bonuses
+	{
+		CTH_perc = ["cs_camels_CTH_perc"]
+		discount_perc = ["cs_camels_discount_perc"]
+		troops_resilience = ["cs_camels_resilience"]
+	}
+
+	hide_in_wiki = false
+}
+
+def Mamluk_Special : RangedHorseCavalry
+{
+	//csv://csv: name = "Mamluks"
+	description = "Initially bought or recruited as slaves, mamluks are trained and released as professional light cavalry soldiers, skilled both with bow and arrow and in close combat."
+	special = true
+	model = "Assets/Units/Mamluk_Special_01/Mamluk_Special_01.prefab" //GUID:58a8245dfc956554492445fed0a2766d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Mamluk_Special.tga:Icon_Unit_Mamluk_Special#2" //GUID:c2733d2afd5a23a44ab8c2202b8e7de3
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Fletcher
+		MasterWeaponsmith
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Mongol_Cavalry_Special : HeavyRangedHorseCavalry
+{
+	//csv://csv: name = "Mongol Ranged Cavalry"
+	description = "Elite mounted archers, able to shoot from a long distance and also having some armour for close combat, once it becomes unavoidable."
+	special = true
+	model = "Assets/Units/Mongol_Cavalry_Special_01/Mongol_Cavalry_Special_01.prefab" //GUID:4594ffa380f4f0747ab493e15dce73f6
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Mongol_Cavalry.tga:Icon_Unit_Mongol_Cavalry#2" //GUID:8cf36d70512183d40af85815fffcee95
+
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Fletcher
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Heavy_Horse_Archer_Steppe : HeavyRangedHorseCavalry
+{
+	//csv://csv: name = "Heavy Horse Archers"
+	description = "Heavily armored cavalrymen, capable to charge through their enemies' lines, but to shoot few volleys of arrows before that as well."
+	special = true
+	model = "Assets/Units/Steppe_Heavy_Horse_Archer/Steppe_Heavy_Horse_Archer.prefab" //GUID:b6a57654d36254e40ab9f7d6f84b7b85
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Horse_Archer_Steppe.tga:Icon_Unit_Heavy_Horse_Archer_Steppe#2" //GUID:eeb5832b6e60d3949a70a4142e5b60b5
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+
+	require
+	{
+		Fletcher
+		HeavyArmorsmith
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Hobelar_Special : HorseCavalry
+{
+	//csv://csv: name = "Hobelar Cavalry"
+	description = "Fast European light cavalry, used both in raids, harrasment and skirmishing."
+	special = true
+	model = "Assets/Units/Hobelar_Special_01/Hobelar_Special_01.prefab" //GUID:4b6eb9dca47541b4ba0aa07ec40da2bb
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Hobelar_Special.tga:Icon_Unit_Hobelar_Special#2" //GUID:66c826e6801d46d4d80bee70a7b0c12f
+	
+	max_acceleration = 7
+	max_deceleration = 10
+	
+	require
+	{
+		Spearmaker
+		Stables
+	}
+
+	hide_in_wiki = false
+}
+
+def Camel_Rider_Special : Cavalry
+{
+	//csv://csv: name = "Camel Cavalry"
+	description = "Light cavalry, extremely well suited for desert warfare and good against conventional cavalry, since the smell of camels makes the horses alarmed and disoriented."
+	special = true
+	model = "Assets/Units/Camel_Rider_Special_01/Camel_Rider_Special_01.prefab" //GUID:034118a0bf99dc44a95ff748f7f9b9d0
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Camel_Rider_Special.tga:Icon_Unit_Camel_Rider_Special#2" //GUID:3be9496bda1aa8f41884ae3aaca3c802
+	
+	counter = ["Infantry","Ranged","Cavalry"]
+	countered = ["Defense"]
+	
+	select_sound = "event:/sound_effects/interaction/troops/camel_riders"
+	hire_sound = "event:/sound_effects/interaction/troops/camel_riders"
+	
+	max_acceleration = 5
+	max_deceleration = 10
+	
+	require
+	{
+		Spearmaker
+		Stables
+	}
+
+	bonuses
+	{
+		CTH_perc = ["cs_camels_CTH_perc"]
+		discount_perc = ["cs_camels_discount_perc"]
+		troops_resilience = ["cs_camels_resilience"]
+	}
+
+	hide_in_wiki = false
+}
+
+def Jinetes_Special : HorseCavalry
+{
+	//csv://csv: name = "Jinetes Cavalry"
+	description = "Light horsemen of Christian Iberia, perfect for harrasment of the enemy with their hit and run tactics."
+	special = true
+	model = "Assets/Units/Jinetes_Special_01/Jinetes_Special_01.prefab" //GUID:c5cb461a774880a45a5c333f6926a181
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Jinetes_Special.tga:Icon_Unit_Jinetes_Special#2" //GUID:7b3f460cda735d8469c2748a4409aed6
+	
+	max_acceleration = 7
+	max_deceleration = 10
+	
+	require
+	{
+		Spearmaker
+		Stables
+	}
+
+	hide_in_wiki = false
+}
+
+def Mongol_Heavy_Lancers_Special : HeavyRangedHorseCavalry
+{
+	//csv://csv: name = "Mongol Heavy Lancers"
+	description = "Though a bit less armored than European heavy cavalry, mongol lancers are armed with bows as well and surpass them in speed, manoeuvrability and stamina, which are especially valuable qualities in the vast grassland plains."
+	special = true
+	model = "Assets/Units/Mongol_Heavy_Lancer_Special/Mongol_Heavy_Lancer_Special.prefab" //GUID:a3c248220b027e04f94e5e8aae84d196
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Mongol_Heavy_Lancers_Special.tga:Icon_Unit_Mongol_Heavy_Lancers_Special#2" //GUID:848597a249428574c88c40e1ffe2e86d
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+
+	require
+	{
+		Spearmaker
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Sipahi_Special : HeavyCavalry
+{
+	//csv://csv: name = "Sipahi Cavalry"
+	description = "Elite Turk cavalry, extensively trained and equipped with the finest arms and armour."
+	special = true
+	model = "Assets/Units/Spahia_Special_01/Spahia_Special_01.prefab" //GUID:cfb08b0a48f20604f9b25de04e797e55
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Sipahi_Special.tga:Icon_Unit_Sipahi_Special#2" //GUID:b58a107b20e314d42ad4e48b6efdf2e0
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+
+	require
+	{
+		Spearmaker
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Boyar_Special : HeavyCavalry
+{
+	//csv://csv: name = "Boyar Cavalry"
+	description = "A warrior class of Slavic amoured knights of the highest ranks - a powerful force in every battle."
+	special = true
+	model = "Assets/Units/Boyar_Special_01/Boyar_Special_01.prefab" //GUID:537ef0889f84afc428f82a2d0c461f37
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Boyar_Special.tga:Icon_Unit_Boyar_Special#2" //GUID:61b24fa25e8b035459cf89618b0fb8c3
+	
+	walk_anim_speed = 2.4
+	trot_anim_speed = 3.5
+	run_anim_speed = 5
+	sprint_anim_speed = 6.5
+	charge_anim_speed = 6.5
+	
+	max_acceleration = 5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Spearmaker
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Cataphract_Special : HeavyCavalry
+{
+	//csv://csv: name = "Cataphracts"
+	description = "Unstoppable heavy cavalry, in which both the horseman and mount are draped from head to toe in armour."
+	special = true
+	model = "Assets/Units/Cataphract_Special_01/Cataphract_Special_01.prefab" //GUID:d46adf2af360f384d92ca98a9ef4fbd8
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Cataphract_Special.tga:Icon_Unit_Cataphract_Special#2" //GUID:c79672aa510122447b8fc6f4af5ce540
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Spearmaker
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Norman_Special : HeavyCavalry
+{
+	//csv://csv: name = "Norman Cavalry"
+	description = "Partly descendants of norse vikings, the heavily armoured and extensively trained norman knights are fearless and deadly in battle."
+	special = true
+	model = "Assets/Units/Norman_Special_01/Norman_Special_01.prefab" //GUID:1ad465d9d42aa9b48a6da38458092025
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Norman_Special.tga:Icon_Unit_Norman_Special#2" //GUID:4d1d9c81715edd3449290e6fa0d48742
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Swordsmith
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Ghulam_Cavalry_Special : HeavyCavalry
+{
+	//csv://csv: name = "Ghulam Cavalry"
+	description = "Professional soldiers of slave heritage, slightly less armored, but more mobile than standard heavy cavalry."
+	special = true
+	model = "Assets/Units/Ghulam_Cavalry_Special_01/Ghulam_Cavalry_Special_01.prefab" //GUID:20b23008806bc3149b6ccfb1b509186d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Ghulam_Cavalry_Special.tga:Icon_Unit_Ghulam_Cavalry_Special#2" //GUID:87b29d895dbbf0f4483f28b45d837d88
+	
+	max_acceleration = 5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Spearmaker
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+
+def Pronoia_Special : HeavyCavalry
+{
+	//csv://csv: name = "Pronoia Cavalry"
+	description = "Heavily armoured knights of noble heritage. The elite training of these warriors and their horses tunrs them into unstoppable force on the battlefield."
+	special = true
+	model = "Assets/Units/Pronoia_Special_01/Pronoia_Special_01.prefab" //GUID:9f2425b6348acf849b8a0e9b105690fb
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Pronoia_Special.tga:Icon_Unit_Pronoia_Special#2" //GUID:8c5c9b524dffa844aa8df1314a8bfa9f
+	
+	max_acceleration = 5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Swordsmith
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Feudal_Knight_Special : HeavyCavalry
+{
+	//csv://csv: name = "Feudal Knights"
+	description = "Extremely heavily armoured cavalrymen, whose training in the art of war matches the quality of their equipment."
+	special = true
+	model = "Assets/Units/Feudal_Knight_Special_01/Feudal_Knight_Special_01.prefab" //GUID:38c8dc2c793b15e47b50459988fa7644
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Feudal_Knight_Special.tga:Icon_Unit_Feudal_Knight_Special#2" //GUID:989914db51388964c9d021174bf9c65a
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		Swordsmith
+		MasterArmorer
+		WarStables
+	}
+
+	hide_in_wiki = false
+}
+
+def Templar_Special : HeavyCavalry
+{
+	//csv://csv: name = "Templars"
+	description = "The most elite warriors even among knights, a symbol of purity and chastity. They are heavily armoured and supported in conquest by three-four horses and few squires."
+	special = true
+	model = "Assets/Units/Templar_Special_01/Templar_Special_01.prefab" //GUID:2fc04b23b15884d429eb1c9775c849fd
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Templar_Knight__Mounted_Special.tga:Icon_Unit_Templar_Knight__Mounted_Special#2" //GUID:9d86a225d0a843e4d9e7745a29a151d9
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		MasterWeaponsmith
+		MasterArmorer
+		WarStables
+	}
+	
+	kingdom_religion = Catholic
+
+	hide_in_wiki = false
+}
+
+def Teutonic_Knight_Mounted_Special : HeavyCavalry
+{
+	//csv://csv: name = "Teutonic Knight Cavalry"
+	description = "Knights of the teutonic order, very well trained and equipped, fearless and dreadful in battle."
+	special = true
+	model = [
+		"Assets/Units/Teutonic_Knight_Mounted_Special_01/Teutonic_Knight_Mounted_Special_01.prefab", //GUID:7cdcf18500a0ba54f80ceb426abe563e
+		"Assets/Units/Teutonic_Knight_Mounted_Special_02/Teutonic_Knight_Mounted_Special_02.prefab" //GUID:91967b5ddfe58324d83472110dd50816
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Teutonic_Knight_Mounted_Special.tga:Icon_Unit_Teutonic_Knight_Mounted_Special#2" //GUID:415a12de46bd37b4d99263ca43c4d729
+	
+	max_acceleration = 4.5
+	max_deceleration = 10
+	
+	bonuses
+	{
+		defense_flat = "cs_elite_unit_defense_flat"
+	}
+	
+	require
+	{
+		MasterWeaponsmith
+		MasterArmorer
+		WarStables
+	}
+	
+	kingdom_religion = Catholic
+
+	hide_in_wiki = false
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////             RESKINNED BASE UNITS              /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def Militia_CE : Militia
+{
+	model = [
+		"Assets/Units/Militia_CE_01/Militia_CE_01.prefab", //GUID:dbdcfb8367f43fe4495dbf89d936c8fe
+		"Assets/Units/Militia_CE_02/Militia_CE_02.prefab" //GUID:3e42c385967af964284299b56a285c6f
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Militia_CE.tga:Icon_Unit_Militia_CE#2" //GUID:95c43d739771ef74c99666a86bedb182
+	hide_in_wiki = false
+}
+
+def Militia_Arab : Militia
+{
+	model = [
+		"Assets/Units/Militia_Arab_02/Militia_Arab_02.prefab", //GUID:5274a3254b0f8c644964d9e674cff2b9
+		"Assets/Units/Militia_Arab_03/Militia_Arab_03.prefab" //GUID:17cb8b698f740154aa10bc76bd05e3ce
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Militia_Arab.tga:Icon_Unit_Militia_Arab#1" //GUID:3d5d331ffdfbeed4c86ded8f5184c9ef
+	hide_in_wiki = false
+}
+
+def Militia_Nord : Militia
+{
+	model = [
+		"Assets/Units/Militia_Nordic_01/Militia_Nordic_01.prefab", //GUID:6a0d85cd55961754f9e51e193f612e14
+		"Assets/Units/Militia_Nordic_02/Militia_Nordic_02.prefab" //GUID:6b2fb4261d0276e488542094de8ec20f
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Militia_Nord.tga:Icon_Unit_Militia_Nord#2" //GUID:8edab9891eabcf74d96cd43ec5709969
+	hide_in_wiki = false
+}
+
+def Militia_Steppe : Militia
+{
+	model = [
+		"Assets/Units/Militia_Steppe_01/Militia_Steppe_01.prefab", //GUID:74722bddc2d6a514b98341661c5a2269
+		"Assets/Units/Militia_Steppe_02/Militia_Steppe_02.prefab" //GUID:e925111d7cc2525418a91778020c8904
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Militia_Steppe.tga:Icon_Unit_Militia_Steppe#2" //GUID:ea48dd77cd146b044bdf6f087993bec2
+	hide_in_wiki = false
+}
+
+def AdvancedMilitia_CE : AdvancedMilitia
+{
+	model = "Assets/Units/Militia_CE_03/Militia_CE_03.prefab" //GUID:5de2656d1a8e6614f9d9175e7db57cfc
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Advanced_Militia_CE.tga:Icon_Unit_Advanced_Militia_CE#1" //GUID:828791f53491d5b46846fe7b8fb1d294
+}
+
+def AdvancedMilitia_Arab : AdvancedMilitia
+{
+	model = "Assets/Units/Militia_Arab_01/Militia_Arab_01.prefab" //GUID:7c4b2302bad1edc4ab32c6c057507377
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Advanced_Militia_Arab.tga:Icon_Unit_Advanced_Militia_Arab#2" //GUID:d4dfba008fe12ef4ca3e155007c4ccd2
+}
+
+def AdvancedMilitia_Nord : AdvancedMilitia
+{
+	model = "Assets/Units/Militia_Nordic_03/Militia_Nordic_03.prefab" //GUID:ffeafc9ca39aa4043aa3d939f467c6fe
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Advanced_Militia_Nord.tga:Icon_Unit_Advanced_Militia_Nord#2" //GUID:64c06482d37cce844b4e10a1430ebf67
+}
+
+def AdvancedMilitia_Steppe : AdvancedMilitia
+{
+	model = "Assets/Units/Militia_Steppe_03/Militia_Steppe_03.prefab" //GUID:499493ff0c18cab478e19a0ccbce4bba
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Advanced_Militia_Steppe.tga:Icon_Unit_Advanced_Militia_Steppe#2" //GUID:f2d70a21ac81ade4f903bf7346345d6c
+}
+
+def Light_Infantry_CE : Infantry
+{
+	model = [
+		"Assets/Units/Light_Infantry_CE_01/Light_Infantry_CE_01.prefab", //GUID:3322d18ace7e12947804fab1707a02d2
+		"Assets/Units/Light_Infantry_CE_02/Light_Infantry_CE_02.prefab", //GUID:14abf40aa16232847937de6140eb4002
+		"Assets/Units/Light_Infantry_CE_03/Light_Infantry_CE_03.prefab" //GUID:de8931c475298d347996de954bbf8387
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_CE.tga:Icon_Unit_Light_Infantry_CE#2" //GUID:e4d22df4ab829e74d95d37675a0d8bc6
+
+	hide_in_wiki = false
+}
+
+def Light_Infantry_Arab : Infantry
+{
+	
+	model = [
+		"Assets/Units/Light_Infantry_Arab_01/Light_Infantry_Arab_01.prefab", //GUID:80e283e03ed309e49add66b2627ed6e2
+		"Assets/Units/Light_Infantry_Arab_02/Light_Infantry_Arab_02.prefab", //GUID:f6116690aab08664f999465ca4d9ad0a
+		"Assets/Units/Light_Infantry_Arab_03/Light_Infantry_Arab_03.prefab" //GUID:61b33e83377a77040b00a79e80032004
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_Arab.tga:Icon_Unit_Light_Infantry_Arab#2" //GUID:7b02d5a9a262fbd4f87eb8a200459721
+
+	hide_in_wiki = false
+}
+
+def Light_Infantry_Steppe : Infantry
+{
+	model = "Assets/Units/Light_Infantry_Steppe/Light_Infantry_Steppe.prefab" //GUID:3f12dc34cbaba824aabfc0c9ca9ebd51
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_Steppe.tga:Icon_Unit_Light_Infantry_Steppe#2" //GUID:d42c16bcd79d4ee48920a2f5d8090458
+
+	hide_in_wiki = false
+}
+
+def Light_Infantry_Slav : Infantry
+{
+	model = [
+		"Assets/Units/Light_Infantry_Slav_01/Light_Infantry_Slav_01.prefab", //GUID:f59e885fc65653146bfc2a87d8d70e2c
+		"Assets/Units/Light_Infantry_Slav_02/Light_Infantry_Slav_02.prefab", //GUID:8b573693ca79ad64aa0e80be9a3082c5
+		"Assets/Units/Light_Infantry_Slav_03/Light_Infantry_Slav_03.prefab" //GUID:bf3f5473d0e43924b935e94ce4606f9c
+
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_Slav.tga:Icon_Unit_Light_Infantry_Slav#2" //GUID:5f758b6d532295f4bba8d9575861407e
+
+	hide_in_wiki = false
+}
+
+def Axeman_Special : Infantry
+{
+	model = [
+		"Assets/Units/Axeman_Slavic_Special/Axeman_Slavic_Special.prefab" //GUID:cf6abce64fada6b488b45f6a90faf74c
+	]
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Axeman_Special.tga:Icon_Unit_Axeman_Special#2" //GUID:8b696ab22a451a24e86486c069f2de9f
+
+	hide_in_wiki = false
+}
+
+def Light_Infantry_African : Infantry
+{
+	
+	model = "Assets/Units/Light_Infantry_African/Light_Infantry_African.prefab" //GUID:14600db8837934443bcb02355918d0b9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Infantry_African.tga:Icon_Unit_Light_Infantry_African#2" //GUID:0eccb17ca0e1c9a429f3bcc5921571cc
+	surrender_unit = "SurrenderUnitAfrican"
+
+	hide_in_wiki = false
+}
+
+def Light_Spearman_CE : Defense
+{
+	model = "Assets/Units/Light_Spearman_CE_01/Light_Spearman_CE_01.prefab" //GUID:3924f21e679e83f49858d1a6cd9d116a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Spearman_CE.tga:Icon_Unit_Light_Spearman_CE#2" //GUID:94e24f717e3708d42b38b97e9ab3934d
+
+	hide_in_wiki = false
+}
+
+def Light_Spearman_Arab : Defense
+{
+	model = "Assets/Units/Light_Spearman_Arab_01/Light_Spearman_Arab_01.prefab" //GUID:0536a0427a3106240a4af6eaeae2dac1
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Spearman_Arab.tga:Icon_Unit_Light_Spearman_Arab#2" //GUID:5393c7e19a875e644880fd11bb704d81
+
+	hide_in_wiki = false
+}
+
+def Light_Cavalry_CE : HorseCavalry
+{
+	
+	model = "Assets/Units/Light_Cavalry_CE_01/Light_Cavalry_CE_01.prefab" //GUID:d78af08f7e176f24e9070901fec14e3c
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Cavalry_CE.tga:Icon_Unit_Light_Cavalry_CE#2" //GUID:7a9c1911b30b2de40bf593d83b83cb8e
+
+	hide_in_wiki = false
+}
+
+def Light_Cavalry_Arab : HorseCavalry
+{
+	
+	model = "Assets/Units/Light_Cavalry_Arab_01/Light_Cavalry_Arab_01.prefab" //GUID:36c9d18631509a441bbed87651106b8d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Cavalry_Arab.tga:Icon_Unit_Light_Cavalry_Arab#2" //GUID:d51560d1a2348c44f900f7b9c06001cc
+
+	hide_in_wiki = false
+}
+
+def Light_Cavalry_Steppe : HorseCavalry
+{
+	model = "Assets/Units/Light_Cavalry_Steppe/Light_Cavalry_Steppe.prefab" //GUID:bf7427dc147a7d74fb922aa649e192ec
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Cavalry_Steppe.tga:Icon_Unit_Light_Cavalry_Steppe#2" //GUID:8b40a529af66a704b9ecd846bd2611f7
+
+	hide_in_wiki = false
+}
+
+def Light_Cavalry_African : HorseCavalry
+{
+	model = "Assets/Units/Light_Cavalry_African_01/Light_Cavalry_African_01.prefab" //GUID:8151a3518e16b2c46b8b3c0e48c0f823
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Cavalry_African.tga:Icon_Unit_Light_Cavalry_African#2" //GUID:badc610dca8d3024c916befe2c207890
+	
+	require
+	{
+		Stables
+		Swordsmith
+	}
+	surrender_unit = "SurrenderUnitAfrican"
+
+	hide_in_wiki = false
+}
+
+def Light_Archer_CE : Ranged
+{
+	model = "Assets/Units/Light_Archer_CE_01/Light_Archer_CE_01.prefab" //GUID:f6aba2a3832e4ce4e9893b290a1329d9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Archer_CE.tga:Icon_Unit_Light_Archer_CE#2" //GUID:9987acdfed827ba43a813d01d6db043b
+
+	hide_in_wiki = false
+}
+
+def Light_Archer_Arab : Ranged
+{
+	model = "Assets/Units/Light_Archer_Arab_01/Light_Archer_Arab_01.prefab" //GUID:fae4d93f69db66645b9fe7e3d539bb7e
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Archer_Arab.tga:Icon_Unit_Light_Archer_Arab#2" //GUID:5767b52d0f891c946826fc2d375b148f
+
+	hide_in_wiki = false
+}
+
+def Light_Archer_Steppe : Ranged
+{
+	model = "Assets/Units/Light_Archer_Steppe/Light_Archer_Steppe.prefab" //GUID:a98e3ff726d7ada4bb30505169386d9a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Archer_Steppe.tga:Icon_Unit_Light_Archer_Steppe#2" //GUID:e4eb4a05170703046bdcea0c1cc35ef0
+
+	hide_in_wiki = false
+}
+
+def Light_Archer_Slav : Ranged
+{
+	model = "Assets/Units/Light_Archer_Slavic/Light_Archer_Slavic.prefab" //GUID:409234aecb6b6b741b1170f8098c337e
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Light_Archer_Slav.tga:Icon_Unit_Light_Archer_Slav#2" //GUID:5b4207fbc2f1a06488e08ed57f15ebf3
+
+	hide_in_wiki = false
+}
+
+def Heavy_Swordman_CE : HeavyInfantry
+{
+	model = "Assets/Units/Heavy_Swordman_CE_01/Heavy_Swordman_CE_01.prefab" //GUID:61fb9fd9613d0994e9c98030c07da996
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Swordsman_CE.tga:Icon_Unit_Heavy_Swordsman_CE#2" //GUID:62a1c38bd22cf4c4fb4e0681e785763a
+
+	hide_in_wiki = false
+}
+
+def Heavy_Swordman_Arab : HeavyInfantry
+{
+	model = "Assets/Units/Heavy_Swordman_Arab_01/Heavy_Swordman_Arab_01.prefab" //GUID:334eaee876e5bf848a55a07144d8b056
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Swordsman_Arab.tga:Icon_Unit_Heavy_Swordsman_Arab#2" //GUID:bed0df423992c9d4392582723b0eb07e
+
+	hide_in_wiki = false
+}
+
+def Heavy_Spearman_CE : HeavyDefense
+{
+	
+	model = "Assets/Units/Heavy_Spearman_CE_01/Heavy_Spearman_CE_01.prefab" //GUID:788ae39b1f1aac84d943c2921b1ce21d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Spearman_CE.tga:Icon_Unit_Heavy_Spearman_CE#2" //GUID:c3ff7dd0ec12ec4439ac41bb9e8c6d4b
+
+	hide_in_wiki = false
+}
+
+def Heavy_Spearman_Arab : HeavyDefense
+{
+	model = "Assets/Units/Heavy_Spearman_Arab_01/Heavy_Spearman_Arab_01.prefab" //GUID:98b6cc94a244e9f4a9ecc1b3311367d3
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Spearman_Arab.tga:Icon_Unit_Heavy_Spearman_Arab#2" //GUID:85744d3b82a2a0140b4cfdbc9ac2b125
+
+	hide_in_wiki = false
+}
+
+def Heavy_Cavalry_CE : HeavyCavalry
+{
+	model = "Assets/Units/Heavy_Cavalry_CE_01/Heavy_Cavalry_CE_01.prefab" //GUID:fe0549b7561b18a4382ff700e57beae9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Cavalry_CE.tga:Icon_Unit_Heavy_Cavalry_CE#2" //GUID:de937a70321dde04ea51552d6f23648d
+
+	hide_in_wiki = false
+}
+
+def Heavy_Cavalry_Arab : HeavyCavalry
+{
+	model = "Assets/Units/Heavy_Cavalry_Arab_01/Heavy_Cavalry_Arab_01.prefab" //GUID:aa65aa9d662ebf44e827b2fcd196ba47
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Cavalry_Arab.tga:Icon_Unit_Heavy_Cavalry_Arab#2" //GUID:ab1f6137552922045abb1f99c52d11b1
+
+	hide_in_wiki = false
+}
+
+def Heavy_Cavalry_Slav : HeavyCavalry
+{
+	model = "Assets/Units/Heavy_Cavalry_Slavic/Heavy_Cavalry_Slavic.prefab" //GUID:4daf7469caac006418c56bdbab7742cf
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Cavalry_Slav.tga:Icon_Unit_Heavy_Cavalry_Slav#2" //GUID:89db483db0259bc408505bff2cfa494b
+	
+	require
+	{
+		Stables
+		HeavyArmorsmith
+		Swordsmith
+	}
+
+	hide_in_wiki = false
+}
+
+def Heavy_Archer_CE : HeavyRanged
+{
+	model = "Assets/Units/Heavy_Archer_CE_01/Heavy_Archer_CE_01.prefab" //GUID:36b79e75f9bb2f443b3b1a1665a7b4bf
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Archer_CE.tga:Icon_Unit_Heavy_Archer_CE#2" //GUID:058736c3380438c42b2f500c9507eed9
+
+	hide_in_wiki = false
+}
+
+def Heavy_Archer_Arab : HeavyRanged
+{
+	model = "Assets/Units/Heavy_Archer_Arab_01/Heavy_Archer_Arab_01.prefab" //GUID:d05bd4d8a89b80840a0d989f8a575d47
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Heavy_Archer_Arab.tga:Icon_Unit_Heavy_Archer_Arab#2" //GUID:785db09d267ffa742af8ae0ce17ad951
+
+	hide_in_wiki = false
+}
+
+def Marshal_CE : Noble
+{
+	model = "Assets/Units/Marshal_CE_01/Marshal_CE_01.prefab" //GUID:060508f616445124297f31333fe0b12d
+	battleview_model = "Assets/Units/Marshal_CE_01/Marshal_Guard_CE_01.prefab"
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_CE.tga:Icon_Unit_Marshal_CE#2" //GUID:fe1de3c2254cffb42a99f95f0c0890d2
+}
+
+def Marshal_Arab : Noble
+{
+	model = "Assets/Units/Marshal_Arab_01/Marshal_Arab_01.prefab" //GUID:57b785a3e3fa4a34a8a771ee1b738050
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Arab.tga:Icon_Unit_Marshal_Arab#2" //GUID:c652251bece8cf343be278586d1df8d7
+}
+
+def Marshal_Nord : Noble
+{
+	model = "Assets/Units/Marshal_Nord_01/Marshal_Nord_01.prefab" //GUID:6637518f59307394caa623bc2e063ade
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Nord.tga:Icon_Unit_Marshal_Nord#2" //GUID:0e4cecc31db10a94c92834e9c5b0d1c7
+}
+
+def Marshal_Steppe : Noble
+{
+	model = "Assets/Units/Marshal_Steppe_01/Marshal_Steppe_01.prefab" //GUID:a14c4a8238c01314f95b64a47ac75a3c
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Steppe.tga:Icon_Unit_Marshal_Steppe#2" //GUID:b2c47f09d26f2194895da2421b349664
+}
+
+def Marshal_African : Noble
+{
+	model = "Assets/Units/African_Marshal/African_Marshal.prefab" //GUID:bdc5cedac5f7d554b8867233b2be2f3a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_African.tga:Icon_Unit_Marshal_African#2" //GUID:e8bcd415f28a1d54a8709bb389af095b
+	surrender_unit = "SurrenderUnitAfrican"
+}
+
+
+def Marshal_Guard_CE : Noble
+{
+	model = "Assets/Units/Marshal_Guard_CE_01/Marshal_Guard_CE_01.prefab" //GUID:8ab5b58b7fb422a4fad86b70978f6931
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_CE.tga:Icon_Unit_Marshal_CE#2" //GUID:fe1de3c2254cffb42a99f95f0c0890d2
+}
+
+def Marshal_Guard_Arab : Noble
+{
+	model = "Assets/Units/Marshal_Guard_Arab_01/Marshal_Guard_Arab_01.prefab" //GUID:f9fc230de4fc7a442b09a6089f9efc76
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Arab.tga:Icon_Unit_Marshal_Arab#2" //GUID:c652251bece8cf343be278586d1df8d7
+}
+
+def Marshal_Guard_Nord : Noble
+{
+	model = "Assets/Units/Marshal_Guard_Nord_01/Marshal_Guard_Nord_01.prefab" //GUID:20818fd473107a347961590f5a57bf9f
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Nord.tga:Icon_Unit_Marshal_Nord#2" //GUID:0e4cecc31db10a94c92834e9c5b0d1c7
+}
+
+def Marshal_Guard_Steppe : Noble
+{
+	model = "Assets/Units/Steppe_Marshal_Guard/Steppe_Marshal_Guard.prefab" //GUID:92b53754899797d448a77df77c000cec
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Steppe.tga:Icon_Unit_Marshal_Steppe#2" //GUID:b2c47f09d26f2194895da2421b349664
+}
+
+def Marshal_Guard_African : Noble
+{
+	model = "Assets/Units/Marshal_Guard_African/Marshal_Guard_African.prefab" //GUID:6c10480a7e06c7c48b93e7c05631c91b
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_African.tga:Icon_Unit_Marshal_African#2" //GUID:e8bcd415f28a1d54a8709bb389af095b
+	surrender_unit = "SurrenderUnitAfrican"
+}
+
+def Marshal_Rebel_CE : Noble
+{
+	model = "Assets/Units/EU_Rebel_Marshal/EU_Rebel_Marshal.prefab" //GUID:f1fd9620fb9d47f4e82e36ce5f3ff50a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_CE.tga:Icon_Unit_Marshal_Rebel_CE#2" //GUID:07c87dd2f930dda4d9bf1aba13bb136c
+}
+
+def Marshal_Rebel_Arab : Noble
+{
+	model = "Assets/Units/Arab_Rebel_Marshal/Arab_Rebel_Marshal.prefab" //GUID:0c386cb501395eb4cbb3f42a71333d11
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Arab.tga:Icon_Unit_Marshal_Rebel_Arab#2" //GUID:ac641af913bd3c04fbedec447ad8fda1
+}
+
+def Marshal_Rebel_Nord : Noble
+{
+	model = "Assets/Units/Nord_Rebel_Marshal/Nord_Rebel_Marshal.prefab" //GUID:9db1d376f30d6fe4f9c04f1cbdb25d10
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Nord.tga:Icon_Unit_Marshal_Rebel_Nord#2" //GUID:12c11b9f2abb63543bcb9fd8bc43c42d
+}
+
+def Marshal_Rebel_Steppe : Noble
+{
+	model = "Assets/Units/Steppe_Marshal_Rebel/Steppe_Marshal_Rebel.prefab" //GUID:6afd8f32de73b514bbdb4e8f4001cf5c
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Steppe.tga:Icon_Unit_Marshal_Rebel_Steppe#2" //GUID:0d33fe5d3d222484abf1593f4739200e
+}
+
+def Marshal_Rebel_African : Noble
+{
+	model = "Assets/Units/African_Marshal_Rebel/African_Marshal_Rebel.prefab" //GUID:81b29ad25ccf5914fbc5695c3424a0b4
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_African.tga:Icon_Unit_Marshal_Rebel_African#2" //GUID:36c7e4421b19e434092ec1a1891e6e7e
+	surrender_unit = "SurrenderUnitAfrican"
+}
+
+
+def Marshal_Guard_Rebel_CE : Noble //!!! add model
+{
+	model = "Assets/Units/EU_Rebel_Marshal/EU_Rebel_Marshal.prefab" //GUID:f1fd9620fb9d47f4e82e36ce5f3ff50a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_CE.tga:Icon_Unit_Marshal_Rebel_CE#2" //GUID:07c87dd2f930dda4d9bf1aba13bb136c
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+}
+
+def Marshal_Guard_Rebel_Arab : Noble //!!! add model
+{
+	model = "Assets/Units/Arab_Rebel_Marshal/Arab_Rebel_Marshal.prefab" //GUID:0c386cb501395eb4cbb3f42a71333d11
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Arab.tga:Icon_Unit_Marshal_Rebel_Arab#2" //GUID:ac641af913bd3c04fbedec447ad8fda1
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+}
+
+def Marshal_Guard_Rebel_Nord : Noble //!!! add model
+{
+	model = "Assets/Units/Nord_Rebel_Marshal/Nord_Rebel_Marshal.prefab" //GUID:9db1d376f30d6fe4f9c04f1cbdb25d10
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Nord.tga:Icon_Unit_Marshal_Rebel_Nord#2" //GUID:12c11b9f2abb63543bcb9fd8bc43c42d
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+}
+
+def Marshal_Guard_Rebel_Steppe : Noble //!!! add model
+{
+	model = "Assets/Units/Arab_Rebel_Marshal/Arab_Rebel_Marshal.prefab" //GUID:0c386cb501395eb4cbb3f42a71333d11
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_Steppe.tga:Icon_Unit_Marshal_Rebel_Steppe#2" //GUID:0d33fe5d3d222484abf1593f4739200e
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+}
+
+def Marshal_Guard_Rebel_African : Noble //!!! add model
+{
+	model = "Assets/Units/Arab_Rebel_Marshal/Arab_Rebel_Marshal.prefab" //GUID:0c386cb501395eb4cbb3f42a71333d11
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Marshal_Rebel_African.tga:Icon_Unit_Marshal_Rebel_African#2" //GUID:36c7e4421b19e434092ec1a1891e6e7e
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	surrender_unit = "SurrenderUnitAfrican"
+}
+
+def TownGuard_CE : TownGuard
+{
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_CE.tga:Icon_Unit_Town_Guard_CE#2" //GUID:84ace21dd3825d943b2418beee1710ed
+	model = "Assets/Units/Town_Guard_CE_01/Town_Guard_CE_01.prefab" //GUID:5733535eaf0e2f043a54e00b0b92f7d8
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def EliteGuard_CE : EliteGuard
+{
+	model = "Assets/Units/Town_Guard_CE_02/Town_Guard_CE_02.prefab" //GUID:89cf260f5f61af340afa50fc4dbcd142
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_CE.tga:Icon_Unit_Elite_Guard_CE#2" //GUID:94e4668f91c40cf4f92f4622cc655d07
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def RoyalGuard_CE : RoyalGuard
+{
+	model = "Assets/Units/Town_Guard_CE_03/Town_Guard_CE_03.prefab" //GUID:8ec495c2889cb5c4c85b7f3d8555cd0f
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_CE.tga:Icon_Unit_Royal_Guard_CE#2" //GUID:b3e2a12fe90a00a4d97dc8297228e74a
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+
+def TownGuard_Arab : TownGuard
+{
+	model = "Assets/Units/Town_Guard_Arab_01/Town_Guard_Arab_01.prefab" //GUID:3631e320787ebd5409777271c73dbd06
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_Arab.tga:Icon_Unit_Town_Guard_Arab#2" //GUID:1f81eeadce86e6f4b88e9149ceb45de7
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+
+def EliteGuard_Arab : EliteGuard
+{
+	model = "Assets/Units/Town_Guard_Arab_02/Town_Guard_Arab_02.prefab" //GUID:f1f65952582996c479b8672339f92053
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_Arab.tga:Icon_Unit_Elite_Guard_Arab#2" //GUID:f64c402a04de8a145be3e72013ac8bcd
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+
+def RoyalGuard_Arab : RoyalGuard
+{
+	model = "Assets/Units/Town_Guard_Arab_03/Town_Guard_Arab_03.prefab" //GUID:4b645383fe53b014eadd90b2fbe402f9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_Arab.tga:Icon_Unit_Royal_Guard_Arab#2" //GUID:a0b7b02340b7e8747aec85323a438b63
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def TownGuard_Nord : TownGuard
+{
+	model = "Assets/Units/Town_Guard_Nordic_01/Town_Guard_Nordic_01.prefab" //GUID:0a33388112979e849bbacfb689d51c43
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_Nord.tga:Icon_Unit_Town_Guard_Nord#2" //GUID:e0c17f97904f95042a0fdb0b8ea24f80
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def EliteGuard_Nord : EliteGuard
+{
+	model = "Assets/Units/Town_Guard_Nordic_02/Town_Guard_Nordic_02.prefab" //GUID:b1acd0adaa4dc7845a943735714d3048
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_Nord.tga:Icon_Unit_Elite_Guard_Nord#2" //GUID:a6b7d153c54abeb47b98baef2e524df1
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def RoyalGuard_Nord : RoyalGuard
+{
+	model = "Assets/Units/Town_Guard_Nordic_03/Town_Guard_Nordic_03.prefab" //GUID:6111029fee3f40a4793a3541a9bb053d
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_Nord.tga:Icon_Unit_Royal_Guard_Nord#2" //GUID:55a9d15f703a3034a96cc1ef98024d63
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def TownGuard_Steppe : TownGuard
+{
+	model = "Assets/Units/Town_Guard_Steppe_01/Town_Guard_Steppe_01.prefab" //GUID:169c0b2203ae2d54f8540cad268b0886
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_Steppe.tga:Icon_Unit_Town_Guard_Steppe#2" //GUID:ef506823eb6a620498575859badb9a7f
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+
+def EliteGuard_Steppe : EliteGuard
+{
+	model = "Assets/Units/Town_Guard_Steppe_02/Town_Guard_Steppe_02.prefab" //GUID:859569fc18f7c49408b3c646d551d5d9
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_Steppe.tga:Icon_Unit_Elite_Guard_Steppe#2" //GUID:0bb76884e2ec5284ca6d80e0d2fc6b1f
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+
+def RoyalGuard_Steppe : RoyalGuard
+{
+	model = "Assets/Units/Town_Guard_Steppe_03/Town_Guard_Steppe_03.prefab" //GUID:af48360c0dc07c049b78046803fcda93
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_Steppe.tga:Icon_Unit_Royal_Guard_Steppe#2" //GUID:31375f27ce8450647ab87e36f3ec491b
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	hide_in_wiki = true
+}
+
+def TownGuard_African : TownGuard
+{
+	model = "Assets/Units/Town_Guard_African_01/Town_Guard_African_01.prefab" //GUID:9391c5c2f4e10164da5fb793a438a04a
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Town_Guard_African.tga:Icon_Unit_Town_Guard_African#2" //GUID:b85af7f2c6f073a4eb4d40630292d6d5
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	surrender_unit = "SurrenderUnitAfrican"
+	hide_in_wiki = true
+}
+
+
+def EliteGuard_African : EliteGuard
+{
+	model = "Assets/Units/Town_Guard_African_02/Town_Guard_African_02.prefab" //GUID:a06dfc72dd0b546409e17c89107b3df5
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Elite_Guard_African.tga:Icon_Unit_Elite_Guard_African#2" //GUID:22f37c56fc4bbf44b84827c170bb067d
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	surrender_unit = "SurrenderUnitAfrican"
+	hide_in_wiki = true
+}
+
+
+def RoyalGuard_African : RoyalGuard
+{
+	model = "Assets/Units/Town_Guard_African_03/Town_Guard_African_03.prefab" //GUID:60c51e8fa075a4d4b91f01d1a353b858
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_Unit_Royal_Guard_African.tga:Icon_Unit_Royal_Guard_African#2" //GUID:83fb85a644ba4b14f98591f959df2686
+	//voice_line_sound = "" //unused
+	//select_voice = "" //unused
+	surrender_unit = "SurrenderUnitAfrican"
+	hide_in_wiki = true
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////              INVENTORY                /////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+def AdditionalTroops : InventoryItem
+{
+	description = "A company of men ready to serve under their commander. Increases the army's manpower by {add_squad_size_perc:%:bonus}."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InvetoryItem_AdditionalTroops.png:Icon_InvetoryItem_AdditionalTroops#2" //GUID:b458f15ae9e203241b54f02286b6120f
+	squad_banner = "Assets/Units/squad_banner_prefab.prefab" //GUID:257e9b09f33eb0b49ada619421111337
+	hire_sound = "event:/sound_effects/interaction/army/additional_troops"
+	hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	VO_role = null
+	
+	add_squad_size_perc = 15
+	food_upkeep_per_unit = 1
+	
+	progressive_cost
+	{
+		1 = "1000g 7 workers 500 Levy"
+		2 = "2000g 8 workers 1000 Levy"
+		3 = "3000g 9 workers 1500 Levy"
+		4 = "4000g 10 workers 2000 Levy"
+	}
+	
+	progressive_upkeep
+	{
+		1 = "10g 10f"
+		2 = "20g 15f"
+		3 = "30g 20f"
+		4 = "40g 25f"
+	}
+	
+	transfer_to_crusader = false
+	hide_in_wiki = true
+}
+
+def FoodWagon : InventoryItem
+{
+	description = "Sturdy carts capable of carrying large quantities of provisions. Adds {add_supplies:bonus}{supply_icon} to the supplies of your armies."
+	//model = "Assets/Units/Siege_Ram/Siege_Ram.prefab" //GUID:fd353e79281df014eb0afd473f588c7b
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InvetoryItem_FoodWagon.png:Icon_InvetoryItem_FoodWagon#2" //GUID:83f77b32bdd44584fbc3a867818c653c
+	squad_banner = "Assets/Units/squad_banner_prefab.prefab" //GUID:257e9b09f33eb0b49ada619421111337
+	hire_sound = "event:/sound_effects/interaction/food_wagon"
+	VO_role = null
+	
+	add_supplies = 100
+	
+	progressive_cost
+	{
+		1 = "750g 100f"
+		2 = "1000g 100f"
+		3 = "1500g 100f"
+		4 = "2500g 100f"
+	}
+	
+	progressive_upkeep
+	{
+		1 = "10g"
+		2 = "15g"
+		3 = "20g"
+		4 = "30g"
+	}
+	hide_in_wiki = true
+}
+
+def SiegeEquipment : InventoryItem
+{
+	description = "Equipment and machinery of all kinds, used for destruction and overpowering town defenses."
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InvetoryItem_SiegeTower.png:Icon_InvetoryItem_SiegeTower#2" //GUID:b757a1bc952e3b647be7ecc46db94724
+	hire_sound = "event:/sound_effects/interaction/siege_equipment"
+	hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	ram_battering_voice_line = "unit_voice:ram_battering"
+	VO_role = null
+	
+	symbol = "Assets/UI/Elements/Buttons/circle_ui.PNG:circle_ui#2" //GUID:da601f1beea6c5f4d88dce791f656d7a
+	symbol_dead
+	available = false
+	max_acceleration = 3
+	max_deceleration = 3
+	siege_damage = 2
+	
+	sink_depth = 10
+	
+	size_mul = 1 // multiplier for size
+	max_speed_mul = 1
+	
+	default_troop_spacing = 0.25
+	min_troop_spacing = 0.25
+	max_troop_spacing = 0.25
+
+	chance_ignore_cavalry = 25
+	
+	require
+	{
+		SiegeWorkshop
+	}
+	bonuses
+	{
+		CTH_perc = "cs_siege_equipment_cth_perc"
+		health_perc = "cs_siege_equipment_health_perc"
+		discount_perc = "cs_siege_equipment_discount_perc"
+	}
+	bool auto_find_target = false
+	bool can_attack_gates = false
+	bool can_attack_walls = false
+	bool can_attack_towers = false
+	float max_health = 6
+	
+	float terrain_normal_points = [
+	0, 1,
+	1, 0,
+	-1, 0,
+	0, -1
+	]
+
+	hide_in_wiki = true
+}
+
+def Siege_Ram : SiegeEquipment
+{
+	//csv://csv: name = "Battering Ram"
+	description = "Warmachine, created to take down castle gates."
+	model = "Assets/Units/BV_Ram/BV_Ram.prefab" //GUID:80c841c513f833c4ea25283b8ce14c26
+	available = true
+	selection_radius = 1.5
+	radius = 4
+	turn_speed = 45
+	siege_damage = 2
+	max_health = 6
+	hire_sound = "event:/sound_effects/interaction/battering_ram"
+	select_sound = "event:/sound_effects/interaction/battering_ram"
+	hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	dying_sound = "event:/sound_effects/battleview/siege_equipment/destroyed/battering_ram"
+	marching_sound = "event:/sound_effects/battleview/siege_equipment/moving/batteing_ram"
+	running_sound = marching_sound
+	sprinting_sound = marching_sound
+	charging_sound = marching_sound
+	
+	counter = ["Gate"]
+	countered = ["Trebuchet"]
+	
+	require
+	{
+		SiegeWorkshop
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InvetoryItem_BatteringRam.png:Icon_InvetoryItem_BatteringRam#1" //GUID:d96e15c9cc15fe04f8232c46aa5cfd53
+	float attack_frame_anim_time = 1.17
+	
+	hit_wood_gate_sound = "event:/sound_effects/battleview/gate/hit/wooden"
+	hit_metal_gate_sound = "event:/sound_effects/battleview/gate/hit/metal"
+	
+	can_attack_gates = true
+	can_attack_melee = false
+
+	hide_in_wiki = false
+}
+
+def Catapult : SiegeEquipment
+{
+	//csv://csv: name = "Catapult"
+	description = "Warmachine, created to take down castle walls and devastate all structures and men in the way of its projectiles."
+	model = "Assets/Units/BV_Catapult/Catapult_01.prefab" //GUID:603b08fe0fb5f34439388f4805483ca4
+	squad_icon = "Assets/Units/BV_Trebuchet_01/squad_icon trebuchet.prefab" //GUID:1fe88756a0339dc48ac0c442bc2fed9e
+	hire_sound = "event:/sound_effects/interaction/siege_equipment"
+	hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	dying_sound = "event:/sound_effects/battleview/siege_equipment/destroyed/catapult"
+	marching_sound = "event:/sound_effects/battleview/siege_equipment/moving/catapult"
+	running_sound = marching_sound
+	sprinting_sound = marching_sound
+	charging_sound = marching_sound
+	VO_role = null
+	
+	counter = ["WallsAndTowers","Ranged"]
+	countered = ["Trebuchet"]
+	
+	available = true
+	selection_radius = 1.25
+	radius = 4
+	turn_speed = 45
+	siege_damage = 3
+	max_health = 6
+	walk_anim_speed = 0.8
+	battle_scale = 0.85
+	
+	secondary_type = "Ranged"
+	
+	require
+	{
+		SiegeWorkshop
+		cs_unlock_catapults
+		{
+			text tooltip = "Siegecraft Skill"
+		}
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InventoryItem_Catapult.psd:Icon_InventoryItem_Catapult#2" //GUID:b3564d75e8288534eabe334483c4c9c9
+	
+	float attack_frame_anim_time = 0.25
+	auto_find_target = true
+	can_attack_gates = true
+	can_attack_walls = true
+	can_attack_towers = true
+	can_attack_melee = false
+	attrition_mod = 1
+
+	hide_in_wiki = false
+}
+
+
+def Trebuchet : SiegeEquipment
+{
+	//csv://csv: name = "Trebuchet"
+	description = "Warmachine, created to take down castle walls and devastate all structures and men in the way of its projectiles."
+	model = "Assets/Units/BV_Trebuchet_01/BV_Trebuchet_01.prefab" //GUID:9fbb64ef8cbe99e428139d47c62df98d
+	squad_banner = "Assets/Units/BV_Trebuchet_01/squad_banner_trebuchet.prefab" //GUID:a30f5a28240d54c4eb9b1483c95a6b80
+	squad_icon = "Assets/Units/BV_Trebuchet_01/squad_icon trebuchet.prefab" //GUID:1fe88756a0339dc48ac0c442bc2fed9e
+	hire_sound = "event:/sound_effects/interaction/siege_equipment"
+	hire_failed_sound = "event:/sound_effects/interaction/unavailable"
+	packing_sound = "event:/sound_effects/battleview/siege_equipment/unpacking/trebuchet" //sound effect not ready
+	dying_sound = "event:/sound_effects/battleview/siege_equipment/destroyed/trebuchet"
+	marching_sound = "event:/sound_effects/battleview/siege_equipment/moving/trebuchet"
+	running_sound = marching_sound
+	sprinting_sound = marching_sound
+	charging_sound = marching_sound
+	VO_role = null
+	
+	counter = ["WallsAndTowers","Catapult","Ram"]
+	countered = ["Trebuchet"]
+	
+	walk_anim_speed = 0
+	
+	available = true
+	selection_radius = 1.8
+	turn_speed = 45
+	siege_damage = 5
+	max_health = 10
+	
+	secondary_type = "Ranged"
+	
+	require
+	{
+		SiegeWorkshop
+		cs_unlock_trebuchets
+		{
+			text tooltip = "Siegecraft (Tradition and Marshal Skill Lvl. 3)"
+		}
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Units/Icon_InvetoryItem_Trebuchet.png:Icon_InvetoryItem_Trebuchet#2" //GUID:bfe320789668afc4c80cb8355db68093
+	
+	float attack_frame_anim_time = 0.25
+	auto_find_target = true
+	can_attack_gates = true
+	can_attack_walls = true
+	can_attack_towers = true
+	can_attack_melee = false
+	max_random_shoot_offset = 15
+	
+	string packed_def_key = "TrebuchetPacked"
+	float unpack_time = 10
+	prefab unpack_particles = "Assets/BattleView/BV_FX/SiegeEquipmentPackDust.prefab" //GUID:50d9951f19e09a64d85feddf7bfc56e5
+	radius = 6.8
+	battle_scale = 0.8
+	
+	float terrain_normal_points = [
+	0, 1,
+	1, 0,
+	-1, 0,
+	0, -1
+	]
+
+	hide_in_wiki = false
+}
+
+def TrebuchetPacked : Trebuchet
+{
+	fake_unit = true
+	walk_anim_speed = 0.5
+	available = false
+	model = "Assets/Units/BV_Trebuchet_Cart/Trebuchet_Cart.prefab" //GUID:48c54b611424a3841ad9ee702345d625
+	squad_banner = "Assets/Units/squad_banner_prefab.prefab" //GUID:257e9b09f33eb0b49ada619421111337
+	radius = 4
+	selection_radius = 1.35
+	
+	float terrain_normal_points = [
+	0, 1,
+	1, 0,
+	-1, 0,
+	0, -1
+	]
+}
+
+def TestUnit : Militia_CE
+{
+	fake_unit = true
+	
+	available = false
+}
+
+def SurrenderUnit : Militia_CE
+{
+	fake_unit = true
+	model = "Assets/Units/Surrender_Unit/Surrender_Unit.prefab" //GUID:44bdeaf7728e042408e19e43474bbab4
+	available = false
+}
+
+def SurrenderUnitAfrican : SurrenderUnit
+{
+	fake_unit = true
+	model = "Assets/Units/Surrender_Unit_Black/Surrender_Unit_Black.prefab" //GUID:8ecb62dc67ad73e4c962d59222bae7f7
+	available = false
+}

@@ -1,0 +1,123 @@
+﻿#if = TEST       
+
+color expr_color = (1 and link_bright or link_dark)
+
+inifinite_loop1 = inifinite_loop2
+inifinite_loop2 = inifinite_loop1
+
+color link_bright = "#dbb806"
+color link_dark = "163,147,96" //A49360FF
+
+color green_dark = "#34671d"
+color green_bright = "#492b"
+
+color red_dark = "#9c190f" //"#711c1c" 
+color red_bright = "#cc2114"
+
+_cases_example
+{
+	V = "V" // default value, when no "value" is specified in cases
+	{
+		vars
+		{
+			bool i_is_2 = (i = 2) // bool expression in vars
+		}
+		Two = 2 // value outside vars	
+		
+		b = "V.B" // default param when not overriden in cases
+		
+		switch_value = "i" // string switch_value -> vars.GetVar("i")
+		
+		case 1 // numeric key
+		{
+			value = "i1"
+			a = "i1"
+			
+			switch_value = (j) // expression for switch_value
+			
+			case i // key is variable name
+			{
+				value = "i1j1"
+				a = "i1j1"
+			}
+			
+			case default // special key, = true
+			{
+				//value = "i1j2"
+				a = "i1j2"
+				b = "i1j2"
+			}
+		}
+		
+		case i_is_2 // key is reference to bool field
+		{
+			value = "i2"
+			a = "i2"
+			b = "i2"
+			
+			//switch_value is passed in vars as j.ToString()
+			
+			case 1 // numeric key compared to string
+			{
+				value = "i2j1"
+				//a = "i2j1"				
+			}
+			
+			case Two // key is reference to value field
+			{
+				//value = "j2"
+				//a = "j2"
+				b = "i2j2"
+			}
+		}
+		
+		case j2 = (j = 2) // expression case, not using switch_value
+		{
+			b = "i0j2"
+		}
+	}
+}
+
+
+// event enter_castle
+// {	
+// 	case player = (kingdom = player)
+// 	{
+// 		message = OurArmyEnteredCastle
+// 	}
+// }
+
+// def OurArmyEnteredCastle : OkGotoMessage
+// {
+// 	icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_14#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+// 	caption = "Army at home"
+// 	body = "{leader} entered the castle of {castle}"
+// }
+
+
+
+
+// obj: Army, param: null
+def _enter_castle : OkGotoMessage
+{
+	vars
+	{
+		army = (obj)
+		kingdom = (army.kingdom)
+		bool our_kingdom = (player = kingdom)
+		bool visible_neighbor = (player.HasNeighbor(kingdom) && realm_in.IsVisibleBy(player.id))
+	}
+	
+	icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_14#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+	
+	case our_kingdom
+	{
+		caption = "Our army at home"
+		body = "{leader} entered the castle of {castle}"
+	}
+	case visible_neighbor
+	{
+		caption = "Neighbor army at home"
+		body = "A {kingdom:ian} {obj:link}army{/link} led by {leader} entered the castle of {castle}"
+	}
+}

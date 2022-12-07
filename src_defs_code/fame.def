@@ -1,0 +1,39 @@
+﻿def Fame
+{
+	float max = 10000
+	float min_fame_victory_perc = 50
+
+	//Fame
+    important_realms
+    {
+    	//fame for holding important realms
+    	float Al_Maqqah = 200 
+    	float Yathrib = 200 
+    	float Baghdad = 200 
+    	float Constantinopolis = 200 
+    	float Latium = 200
+    	float Palestine = 200 
+    	float Ile_de_France = 50 
+    	float Veneto = 50 
+    	float Liguria = 50 
+    	float Alexandria = 50
+    	float Novgorod = 50 
+    	float Kyiv = 50 
+    	float Andalucia = 50 
+    	float Marrakesh = 50
+    	float Cairo = 50 
+    	float Essex = 50
+    }
+
+    // Goods
+    float fame_per_good_produced = 50
+
+	//Relationship - relationship.min = 0 to 2000
+	float fame_vassal_base = 0.1 
+    float fame_rel_vassal_mod = 0.00005 //Sum of Vassal.(Fame) * (fame_base + (Relationship - relationship.min)*fame_rel_mod)
+    float fame_marriage_base = 0.1  //Sum of marriage_other_kingdom(only when the wife is form our kingdom).Fame * fame_base * (wife.isQueen() * fame_marriage_queen_mod + wife.isPrincess() * fame_marriage_princess_mod)
+    float fame_marriage_queen_mod = 1.5
+    float fame_marriage_princess_mod = 1
+    float TC_base = 50 //trade center base bonus
+    float TC_mod = 2 //trade center income bonus
+}

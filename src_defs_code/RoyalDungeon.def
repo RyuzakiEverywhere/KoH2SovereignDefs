@@ -1,0 +1,95 @@
+﻿def RoyalDungeon
+{
+	float base_prisoner_value = 0
+	float prisoner_position_knight = 1
+	float prisoner_position_prince = 1.5
+	float prisoner_position_king = 2
+	float prisoner_position_pope = 2;
+    float prisoner_position_cardinal = 1.5;
+    float prisoner_position_ecumenical_patriarch = 2;
+    float prisoner_position_patriarch = 1.5;
+    float prisoner_position_caliph = 1.5;
+	float prisoner_age_old = 0.75
+	float prisoner_age_venerable = 0.5
+	float ransom = ((base_prisoner_value + MaxSSumsBlend(kingdom, prison_kingdom, 0.75, 0.5, 100)) * (1 + 0.04 * class_level) * royalty_position * religious_position * age)
+	
+	float relationship_execute_mod_prince_or_cardinal = 2
+	float relationship_execute_mod_king_or_patriarch = 3
+	float relationship_execute_mod_war = 0.25
+	float relationship_execute = ((-50 + prisoner.class_level * -5) * relationship_execute_royalty_mod * relationship_execute_war_mod* (1 + 0.5 * prisoner.is_spy))
+	
+	float relationship_release_mod_prince_or_cardinal = 2
+	float relationship_release_mod_king_or_patriarch = 3
+	float relationship_release_mod_war = 0.75
+	float relationship_release = ((50 + prisoner.class_level * 5) * relationship_release_royalty_mod * relationship_release_war_mod * (1 + 0.5 * prisoner.is_spy))
+	
+	float renounce_after = 300/1200 // renounce after 5-20 minutes in player prison
+	
+	float relationship_ransom_mod = 0.0005
+	float base_ransom_price = 1
+	float ransom_price = (ceil((1 - relationship_ransom_mod * relation) * base_ransom_price * prisoner.PrisonerValue(), 200))
+	float ransom_war_royal = 100
+	float ransom_war_not_royal = 70
+	float ransom_no_war_not_royal = 85
+	float ransom_no_war_royal = 100
+	float successful_ransom_relationship_bonus = 50
+	float unsuccessful_ransom_relationship_penalty = -30
+	float ransom_cooldown_time = 300
+	
+	float ransom_spy_or_war_and_royal_or_marshal = 70
+	float ransom_war_none = 85
+	float ransom_no_war_no_spy = 70
+	float ransom_no_war_spy = 100
+	
+	float inspire_riot_death_chance = 25
+	float inspire_riot_conspiracy_bonus = 10
+	int riot_max_escaped = 20
+	int riot_max_died = 20
+	int inspire_riot_unit_count_min = 1
+	int inspire_riot_unit_count_max = 3
+	
+	float plot_escape_together_chance = 20
+	
+	
+	float event_tick_min = 300
+	float event_tick_max = 600
+	
+	float mass_escape_success = 75
+	float mass_escape_death = 0
+	float mass_escape_recaptured = 25
+	int min_prisoner_escape = 5
+	int min_prisoner_riot = 5
+	
+	event_outcomes
+	{
+		main escape = 45
+		{
+			main escape_success = (prisoner_count - kingdom_authority)
+		}
+		option mass_escape = 20
+		{
+			// min escape is set in code
+			main mass_escape_success = (min_escape + 10 * excess_prisoners - 2 * kingdom_authority)
+		}
+		option inspire_riot = 10
+		{
+			// min riot is set in code
+			main inspire_riot_success = (min_riot + 10 * excess_prisoners - 2 * kingdom_authority)
+		}
+		option die = 10
+		{
+			main die_success = (2 * prisoner_count)
+		}
+	}
+	
+	float ai_min_character_prison_time = 120
+	float ai_actions_subsequent_tick_min = 450
+	float ai_actions_subsequent_tick_max = 600
+	float ai_war_execute_marshal_spy_dangerous = 25
+	float ai_war_execute_other = 10
+	float ai_war_ransom_marshal_spy = 0
+	float ai_war_ransom_other = 25
+	float ai_neutral_ransom = 40
+	float ai_alliance_ransom = 50
+	float ai_alliance_release = 50
+}

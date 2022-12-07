@@ -1,0 +1,760 @@
+﻿def Tradition
+{
+	text name
+	sprite icon = "Assets/UI/Elements/Common/Icons/Skills_Character/UI_Icon_Skill_Finance.png:UI_Icon_Skill_Finance#2"
+	sprite icon_wide = "Assets/UI/Elements/Common/Icons/Skills_Character/UI_Icon_Skill_Finance.png:UI_Icon_Skill_Finance#2"
+	text tooltip
+	
+	int max_rank = 1
+	
+	resources adopt_cost
+	{
+		gold = (per_adopted_cost_gold * adopted_num + tier_cost_gold[tier])
+		books = (per_adopted_cost_books * adopted_num + tier_cost_books[tier])
+	}
+	
+	resources upgrade_cost = ["500b 500g","500b 1000g"] // obsolete as traditions don't use level with current design
+	
+	float per_adopted_cost_gold = 500
+	float per_adopted_cost_books = 0
+	float tier_cost_gold = [1000,2000,3000,4000]
+	float tier_cost_books = [400,600,800,1000]
+	
+	text name_rank = "{name}" //[ {rank_text}]"
+}
+
+def ArcheryTradition : Tradition
+{
+	name = "Archery"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Archery_3.tga:UI_Icon_Skill_Archery_3#2" //GUID:5448fac5bb61692419e98c222e288bbb
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Archery_Wide.png:UI_Icon_Tradition_Archery_Wide#2" //GUID:0b7d0b01b1107f34c979593dc7a9a677
+	tooltip = "These set of laws oblige all adult men to possess bows and arrows and practice archery regularly."
+	
+	mod ks_ranged_squad_size_perc = 25
+	
+	skills
+	{
+		skill ArcherySkill
+		{
+			Marshal
+			{
+				mod cs_ranged_range_perc = 10
+				mod cs_salvo_capacity_bonus_perc = 50
+			}
+		}
+	}
+}
+
+def AssassinationTradition : Tradition
+{
+	name = "Assassination"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Assassination_3.tga:UI_Icon_Skill_Assassination_3#2" //GUID:08fd745d76fb9f74a9edf571d49a4572
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Assassination_Wide.png:UI_Icon_Tradition_Assassination_Wide#2" //GUID:45a3252df198aa241b4a331ad86c83eb
+	tooltip = "Embracing teachings of trickery and murder is an advantage, but where assassination is a kingdom's tradition, the noblemen rarely grow old."
+	
+	//mod ks_max_crown_authority = -2
+	mod ks_enemy_murder_plots_CTS_perc = 10
+	mod ks_own_murder_plots_CTS_perc = 10
+	
+	skills
+	{
+		skill AssassinationSkill
+		{
+			class Spy
+			{
+				plot KillTheKingAction
+				plot KillTheQueenAction
+			}
+		}
+	}
+}
+
+def BargainTradition : Tradition
+{
+	name = "Bargain"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bargain_3.tga:UI_Icon_Skill_Bargain_3#2" //GUID:78f1bec32e735d244868a7e0c62daf1c
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Bargain_Wide.png:UI_Icon_Tradition_Bargain_Wide#2" //GUID:7724b7d0a79776548af062a7c0405754
+	tooltip = "For a kingdom, relying on trade, haggling for the best price is a natural and necessary perk."
+	
+	mod ks_food_in_farms = 1
+	mod ks_build_upgrade_cost_discount_perc = 5
+	mod ks_mercenary_price_reduction_perc = -25
+	mod ks_import_goods_and_food_upkeep_reduction_perc = 30
+	
+	
+	skills
+	{
+		skill BargainSkill
+		{
+			Default
+			{
+				tag Govern
+				{
+					governed_realm_mod rs_governor_food_per_farm = 2
+				}
+			}
+		}
+	}
+}
+
+def BriberyTradition : Tradition
+{
+	name = "Bribery"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bribery_3.tga:UI_Icon_Skill_Bribery_3#2" //GUID:94b9d42c27411664aac70b6c48ef3b93
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Bribery_Wide.png:UI_Icon_Tradition_Bribery_Wide#2" //GUID:547ca988d4942fc4fb813b1c580d4082
+	tooltip = "Accepting bribery and corruption as a way thing are done might seem strange, but people of such kingdoms know well how to gain the support of a foreign nobleman."
+	
+	mod ks_bribe_CTS_perc = 15
+	mod ks_corruption = 10
+	mod ks_siege_attack_perc = 10
+	
+	skills
+	{
+		skill BriberySkill
+		{
+			class Spy
+			{
+				mod cs_bribe_cost_upkeep_reduction_perc = 30
+				mod cs_allow_bribe_princes = 1
+			}
+		}
+	}
+}
+
+def CavalryTacticsTradition : Tradition
+{
+	name = "Cavalry Tactics"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_CavalryTactics_3.tga:UI_Icon_Skill_CavalryTactics_3#2" //GUID:5426defe76fd02a41ac8d4ebb9dfab4e
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_CavalryTactics_Wide.png:UI_Icon_Tradition_CavalryTactics_Wide#2" //GUID:7242c98d1565ac54fb0bf9fdf5887583
+	tooltip = "When the people of a kingdom are born on the saddle, their mounted warriors are unmatched and feared amongst their enemies."
+	
+	mod ks_mounted_squad_size_perc = 25
+	
+	skills
+	{
+		skill CavalryTacticsSkill
+		{
+			class Marshal
+			{
+				mod cs_cavalry_charge_shock_perc = 100
+			}
+		}
+	}
+}
+
+def CharityTradition : Tradition
+{
+	name = "Charity"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Charity_3.tga:UI_Icon_Skill_Charity_3#2" //GUID:b63127e5dfa3a004199aae9aff19e9eb
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Charity_Wide.png:UI_Icon_Tradition_Charity_Wide#2" //GUID:7feeb8f291ba8fe41bc8a02588f79d30
+	tooltip = "Teaching the people of a kingdom to be kind and help each other creates a stronger and thriving society."
+	
+	mod ks_kingdom_stability_from_traditions = 10
+	mod ks_population_growth_perc = 20
+	mod ks_max_population = 3
+	mod ks_kingdom_traditions_influence = 50
+	
+	skills
+	{
+		skill CharitySkill
+		{
+			Default
+			{
+				kingdom_mod ks_kingdom_stability_from_traditions = 3
+			}
+			class Cleric
+			{
+				mod cs_help_the_weak_cleric_effect = 1
+			}
+			tag King
+			{
+				kingdom_mod ks_kingdom_stability_from_traditions = 5
+			}
+		}
+	}
+}
+
+def ConcealmentTradition : Tradition
+{
+	name = "Concealment"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Concealment_3.tga:UI_Icon_Skill_Concealment_3#2" //GUID:ac3f40630d1f3eb44be3b2963b43b114
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Concealment_Wide.png:UI_Icon_Tradition_Concealment_Wide#2" //GUID:6a405d4344fa62a41820d9ae1f9b4f21
+	tooltip = "Living every day with the thought of covering one's tracks is helpful for a kingdom, that aims to inflitrate others and destroy them from the insight before they know what's happening."
+	
+	mod ks_plot_reveal_chance_reduction_perc = 15
+	
+	skills
+	{
+		skill ConcealmentSkill
+		{
+			class Spy
+			{
+				mod cs_spy_reveal_chance_reduction_perc = 5
+				mod cs_spy_return_reveal_chance_negation = 1
+			}
+		}
+	}
+}
+
+def ConspiracyTradition : Tradition
+{
+	name = "Conspiracy"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Conspiracy_3.tga:UI_Icon_Skill_Conspiracy_3#2" //GUID:d1cec5ef471ae3d4d802bcbbc4b6e3af
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Conspiracy_Wide.png:UI_Icon_Tradition_Conspiracy_Wide#2" //GUID:3f4cbe46ae5a07e4db83288f7ca99dbe
+	tooltip = "An oppourtunistic life of the society and royal court, filled with intrigue, sets the perfect conditions for creation of the slickest spies."
+	
+	mod ks_espionage_defense_skills_traditions = 20
+	mod ks_sow_dissent_chance = 10
+//	mod ks_allow_PuppetSupportPretenderToTheThroneAction = 1
+	
+	skills
+	{
+		skill ConspiracySkill
+		{
+			class Spy
+			{
+				mod cs_witch_hunt_efficiency_perc = 10
+				mod cs_sow_dissent_chance = 10
+				//mod cs_support_pretender_cost_reduction_perc = 50
+			}
+		}
+	}
+}
+
+def CourtesyTradition : Tradition
+{
+	name = "Courtesy"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Courtesy_3.tga:UI_Icon_Skill_Courtesy_3#2" //GUID:6612d9e2dc446234d81f6cac501a2cac
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Courtesy_Wide.png:UI_Icon_Tradition_Courtesy_Wide#2" //GUID:6ee4317d81847f04abc9fd9d71c8dcc1
+	tooltip = "Politeness and good manners are always important for keeping your allies close. "
+	
+	mod ks_kingdom_traditions_influence = 100
+	mod ks_culture_from_traditions = 50
+	
+	skills
+	{
+		skill CourtesySkill
+		{
+			Default
+			{
+				mod cs_mission_passive_rel_increase = 10  //3/5/10
+			}
+			
+			class Merchant
+			{
+				kingdom_mod ks_culture_from_traditions = 20
+			}
+			
+			class Cleric
+			{
+				mod cs_culture_per_governed_monastery = 20
+				tag Govern
+				{
+					governed_realm_mod rs_governor_commerce_per_monastery = 1
+				}
+			}
+		}
+	}
+}
+
+def FieldTacticsTradition : Tradition
+{
+	name = "Field Tactics"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_FieldTactics_3.tga:UI_Icon_Skill_FieldTactics_3#2" //GUID:bb66aafae861cae4b96e502b6a4c5bc9
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_FieldTactics_Wide.png:UI_Icon_Tradition_FieldTactics_Wide#2" //GUID:571c2d4841ff4de4ba30b8716dad0282
+	tooltip = "Generals, skillful in the art of war, strategy and tactics can often make the difference when armies of two kingdoms meet."
+	
+	mod ks_disorganized_state_disable = 1
+	mod ks_army_defense_perc = 25
+	mod ks_troops_resilience = 5
+	
+	skills
+	{
+		skill FieldTacticsSkill
+		{
+			class Marshal
+			{
+				mod cs_retreat_penalty_decrease_perc = 50
+			}
+		}
+	}
+}
+
+def InfantryTacticsTradition : Tradition
+{
+	name = "Infantry Tactics"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_InfantryTactics_3.tga:UI_Icon_Skill_InfantryTactics_3#2" //GUID:00b5f922515c8f54c8ef19ec023cce82
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_InfantryTactics_Wide.png:UI_Icon_Tradition_InfantryTactics_Wide#2" //GUID:d61cd9942295ed84ebacc08b7343be5d
+	tooltip = "Specialization in strategic command of infantry is crucial in creating fearsome legions of pikemen and swordsmen."
+	
+	mod ks_infantry_squad_size_perc = 25
+	
+	skills
+	{
+		skill InfantryTacticsSkill
+		{
+			class Marshal
+			{
+				mod cs_infantry_CTH_perc = 15
+			}
+		}
+	}
+}
+
+def IronFistTradition : Tradition
+{
+	name = "Iron Fist"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_IronFist_3.tga:UI_Icon_Skill_IronFist_3#2" //GUID:04a8715a2a024e34da5554f26adf1238
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_IronFist_Wide.png:UI_Icon_Tradition_IronFist_Wide#2" //GUID:08d80d3ba34698d4a9a1095f1f1cb92f
+	tooltip = "Merciless rulership might be unpopular among the common folk, but people dare not raise their voice against the crown."
+	
+	mod ks_happiness = -10
+	mod ks_CA_cost_tradition_perc = -50
+	mod ks_vassal_tax_perc = 15 //percent of their income
+	
+	skills
+	{
+		skill IronFistSkill
+		{
+			Marshal
+			{
+				mod cs_troops_resilience = 3
+			}
+			
+			tag King
+			{
+				kingdom_mod ks_corruption = -20
+			}
+		}
+	}
+}
+
+def LawsTradition : Tradition
+{
+	name = "Laws"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Laws_3.tga:UI_Icon_Skill_Laws_3#2" //GUID:91eeb404cd9f56c4f95610bfd9b79c98
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Laws_Wide.png:UI_Icon_Tradition_Laws_Wide#2" //GUID:33995b24ac64af44e8c35149c891cff5
+	tooltip = "Where order and justice thrive, few dare raise their hand against the crown."
+	
+	mod ks_vassal_tax_perc = 10
+	mod ks_kingdom_stability_from_traditions = 5
+	mod ks_corruption = -20
+	mod ks_levy_per_village = 1
+	mod ks_town_guards = 1
+	
+	skills
+	{
+		skill LawsSkill
+		{
+			tag Govern
+			{
+				governed_realm_mod rs_governor_stability_realm = 5
+				governed_realm_mod rs_governor_books = 3
+			}
+		}
+	}
+}
+
+def LeadershipTradition : Tradition
+{
+	name = "Leadership"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Leadership_3.tga:UI_Icon_Skill_Leadership_3#2" //GUID:ef3a461ac9561df4291409f406c733c6
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Leadership_Wide.png:UI_Icon_Tradition_Leadership_Wide#2" //GUID:58315f53ef17ca84095a32484f214778
+	tooltip = "Warriors, inspired by respected nobility and leaders will stop at nothing to enforce their will."
+	
+	mod ks_kingdom_stability_from_traditions = 5
+	mod ks_kingdom_traditions_influence = 100
+	mod ks_army_morale = 3 { text mod_name = "Tradition: {LeadershipTradition}" }
+	skills
+	{
+		skill LeadershipSkill
+		{
+		}
+	}
+}
+
+def LearningTradition : Tradition
+{
+	name = "Learning"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Learning_3.tga:UI_Icon_Skill_Learning_3#2" //GUID:ed6fdd94cef2eef478e50cd0e4194f1b
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Learning_Wide.png:UI_Icon_Tradition_Learning_Wide#2" //GUID:dceb876e68fe8084f86a265ee4228fe6
+	tooltip = "Knowledge is where all other skills and traditions take root."
+	
+	
+	mod ks_troop_experience_gain_rate_perc = 20
+	mod ks_learn_upgrade_skill_tradition_discount_perc = 10 //we can separate this if we want
+	mod ks_culture_from_traditions = 50
+	mod ks_piety_converted_to_books_perc = 10
+	
+	skills
+	{
+		skill LearningSkill
+		{
+			class Cleric
+			{
+				kingdom_mod ks_culture_from_traditions = 20
+			}
+			tag King
+			{
+				kingdom_mod ks_princes_skill_upgrade = 1
+			}
+		}
+	}
+}
+
+def LogisticsTradition : Tradition
+{
+	name = "Logistics"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Logistics_3.tga:UI_Icon_Skill_Logistics_3#2" //GUID:3aae9195008da264198415653c373b2b
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Logistics_Wide.png:UI_Icon_Tradition_Logistics_Wide#2" //GUID:fd9b87285a9e6604bb4a68c0f2b343be
+	tooltip = "Transportation of goods, supplies and arms plays crucial role in both civil and military matters."
+	
+	mod ks_food_production_perc = 20
+	mod ks_army_speed_world_perc = 5
+	mod ks_gold_per_good = 1
+	mod ks_resupply_price_gold_reduction_perc  = 20
+	
+	skills
+	{
+		skill LogisticsSkill
+		{
+			Default
+			{
+				mod cs_army_item_bonus = 2
+			}
+			class Marshal
+			{
+				mod cs_sieging_troops_defense_perc = 25
+			}
+			class Merchant
+			{
+				tag Govern
+				{
+					// maybe unite this with rs_governor_gold_in_town_per_good?
+					governed_realm_mod rs_governor_gold_per_good = 1
+				}
+			}
+		}
+	}
+}
+
+def MedicineTradition : Tradition
+{
+	name = "Medicine"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Medicine_3.tga:UI_Icon_Skill_Medicine_3#2" //GUID:b5fb300b7abd42f4490a3d368ab5d67d
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Medicine_Wide.png:UI_Icon_Tradition_Medicine_Wide#2" //GUID:6a4a64df2efaf754a947f7e064679a68
+	tooltip = "Development of medicine and healthcare undoubtedly leads to growth of the population and improves its well-being."
+	
+	mod ks_max_population = 5
+	mod ks_population_growth_perc = 30
+	mod ks_happiness = 10
+	mod ks_culture_from_traditions = 50
+	
+	skills
+	{
+		skill MedicineSkill
+		{
+			class Cleric
+			{
+				kingdom_mod ks_fame_traditions = 250
+				tag Govern
+				{
+					governed_realm_mod rs_governor_gold_per_religious_settlement = 3
+				}
+			}
+			
+			class Marshal
+			{
+				mod cs_retreat_penalty_decrease_perc = 25
+			}
+		}
+	}
+}
+
+def NegotiationTradition : Tradition
+{
+	name = "Negotiation"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Negotiation_3.tga:UI_Icon_Skill_Negotiation_3#2" //GUID:b1ab3490b5beadd43acfc5b1890c2d97
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Negotiation_Wide.png:UI_Icon_Tradition_Negotiation_Wide#2" //GUID:a9c5e511a062ff347a6107ae487af92a
+	tooltip = "Negotiating the best terms even with your direst enemies is hard to achieve, but practical policy."
+	
+	mod ks_kingdom_traditions_influence = 200
+	mod ks_mercenary_price_reduction_perc = -15
+	mod ks_chance_avoid_opinion_drops_perc = 5
+	mod ks_ransom_cost_perc = -50
+	
+	skills
+	{
+		skill NegotiationSkill
+		{
+			class Merchant
+			{
+				mod cs_trade_income_perc = 15
+			}
+		}
+	}
+}
+
+def NavigationTradition : Tradition
+{
+	name = "Navigation"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Navigation_3.tga:UI_Icon_Skill_Navigation_3#2" //GUID:56742830b8806c94cb4da7b1f2707dcb
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Navigation_Wide.png:UI_Icon_Tradition_Navigation_Wide#2" //GUID:35d5b5bd1c17dea4c8737384b314d36c
+	tooltip = "Experienced and well educated captains and precise maps are beneficial for maritime trade, faster transportation of armies and naval battles."
+	
+	mod ks_naval_CTH = 20
+	mod ks_ships_level = 1
+	mod ks_gold_in_coastal_settlements = 3
+	
+	skills
+	{
+		skill NavigationSkill
+		{
+			class Marshal
+			{
+				mod cs_ships_speed_perc = 30
+			}
+			class Merchant
+			{
+				
+				tag Govern
+				{
+					governed_realm_mod rs_governor_commerce_per_coastal_settlement = 3
+				}
+			}
+		}
+	}
+}
+
+def PlottingTradition : Tradition
+{
+	name = "Plotting"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Plotting_3.tga:UI_Icon_Skill_Plotting_3#2" //GUID:219572cabaa731847ab2c863371bf70b
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Plotting_Wide.png:UI_Icon_Tradition_Plotting_Wide#2" //GUID:2686da7bbaf43cc4dac36d3d5ea5b2cf
+	tooltip = "The art of spying, plotting and hitting the enemy when are where he least expects it."
+	
+	mod ks_spy_action_success_chance = 15
+	
+	skills
+	{
+		skill PlottingSkill
+		{
+			class Spy
+			{
+				mod cs_intrigue_cost_perc = -50
+			}
+		}
+	}
+}
+
+def RhetoricTradition : Tradition
+{
+	name = "Rhetoric"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Rhetoric_3.tga:UI_Icon_Skill_Rhetoric_3#2" //GUID:6137d6deda29bf4478646f9442a58657
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Rhetoric_Wide.png:UI_Icon_Tradition_Rhetoric_Wide#2" //GUID:43490c55203c82e488ed84e1912c32f6
+	tooltip = "Regardless of what kingdom action is done, showing a good angle can make it seem more impressive to friends and at least justified to enemies."
+	
+	
+	mod ks_prod_books_traditions = 5
+	mod ks_kingdom_traditions_influence = 100
+	mod ks_chance_avoid_opinion_drops_perc = 5
+	mod ks_discard_exile_abandon_penalties = 1
+	
+	
+	skills
+	{
+		skill RhetoricSkill
+		{
+			Default
+			{
+				mod cs_influence_per_governed_keep = 20
+				kingdom_mod ks_kingdom_traditions_influence = 50
+			}
+		}
+	}
+}
+
+def SiegecraftTradition : Tradition
+{
+	name = "Siegecraft"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Siegecraft_3.tga:UI_Icon_Skill_Siegecraft_3#2" //GUID:dba7963ef861258408838e516b44fa93
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Siegecraft_Wide.png:UI_Icon_Tradition_Siegecraft_Wide#2" //GUID:04c43f3bc5eef9e42b10196b370091b8
+	tooltip = "Focus on engineering and researching newer and better defenses and war machinery pays off when armies clash in siege battles."
+	
+	mod ks_siege_defense = 50
+	mod ks_siege_attack_perc = 15
+	
+	skills
+	{
+		skill SiegecraftSkill
+		{
+			class Marshal
+			{
+				mod cs_unlock_trebuchets = 1
+			}
+		}
+	}
+}
+
+def StewardshipTradition : Tradition
+{
+	name = "Stewardship"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Stewardship_3.tga:UI_Icon_Skill_Stewardship_3#2" //GUID:c20daaf2fb48185428553384818ca053
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Stewardship_Wide.png:UI_Icon_Tradition_Stewardship_Wide#2" //GUID:29a341945c4b22f4aabcf3b68902050b
+	tooltip = "Strict bookkeeping and examination of reports in a kingdom leads to more efficient governing of the royal lands."
+	
+	mod ks_inflation_reduction_perc = 50
+	mod ks_gold_in_castles = 1
+	mod ks_build_upgrade_cost_discount_perc = 10
+	
+	skills
+	{
+		skill StewardshipSkill
+		{
+			
+			class Merchant
+			{
+				tag Govern
+				{
+					governed_realm_mod rs_governor_commerce_flat = 5
+				}
+			}
+		}
+	}
+}
+
+def StrategyTradition : Tradition
+{
+	name = "Strategy"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Strategy_3.tga:UI_Icon_Skill_Strategy_3#2" //GUID:d1981ac6a7bafc747a45800ed7034f02
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Strategy_Wide.png:UI_Icon_Tradition_Strategy_Wide#2" //GUID:0ac49922627e5fb41b6cf677053c7158
+	tooltip = "Strategic planning determines the time and cost for taking decisive measures."
+	
+	mod ks_army_speed_world_perc = 15
+	mod ks_troop_experience_gain_rate_perc = 10
+	mod ks_army_morale_at_neutral = 2
+	mod ks_levy_per_keep = 1
+	mod ks_town_guards = 1
+	
+	skills
+	{
+		skill StrategySkill
+		{
+			class Marshal
+			{
+				mod cs_army_speed_world_perc = 5
+			}
+			
+			class Diplomat
+			{
+				mod cs_diplomat_improve_relations_perc = 5
+			}
+		}
+	}
+}
+
+def TradingTradition : Tradition
+{
+	name = "Trading"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Trading_3.tga:UI_Icon_Skill_Trading_3#2" //GUID:2f9b5d41a5b603c4e9c4de21dc91ff19
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Trading_Wide.png:UI_Icon_Tradition_Trading_Wide#2" //GUID:f9121d6b308654d4bbf9d41f4915a43e
+	tooltip = "Creating a powerful trade empire is the shortest way to riches and prosperity."
+	
+	mod ks_gold_from_own_TCs_perc = 25
+	mod ks_import_goods_and_food_upkeep_reduction_perc = 20
+	mod ks_trade_income_perc = 5
+	
+	skills
+	{
+		skill TradingSkill
+		{
+			class Merchant
+			{
+				mod cs_trade_income_perc = 10
+			}
+			
+			class Cleric
+			{
+				tag Govern
+				{
+					governed_realm_mod rs_governor_commerce_per_monastery = 3
+				}
+			}
+		}
+	}
+}
+
+def TheologyTradition : Tradition
+{
+	name = "Theology"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Theology_3.tga:UI_Icon_Skill_Theology_3#2" //GUID:b59ac2e4c4600c844a3aa9303dfd6f05
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Theology_Wide.png:UI_Icon_Tradition_Theology_Wide#2" //GUID:9c5b2841fce93ee40b698585b13a7655
+	tooltip = "Strong religious beliefs can hardly be shaken by other kingdoms and spread among neighbors and overtaken lands, yet following false gods."
+	
+	mod ks_piety_per_religous_settlement = 1
+	mod ks_piety_cathedrals = 10
+	mod ks_army_morale_vs_other_religion = 3
+	mod ks_piety_converted_to_books_perc = 20
+	mod ks_troops_resilience = 5
+	
+	skills
+	{
+		skill TheologySkill
+		{
+			Default
+			{
+				mod cs_convert_chance_after_siege_perc = 20
+			}
+			class Cleric
+			{
+				tag Govern
+				{
+					governed_realm_mod rs_governor_piety_per_settlement = 1
+				}
+			}
+			tag King
+			{
+				kingdom_mod ks_culture_from_traditions = 100
+			}
+		}
+	}
+}
+
+def WritingTradition : Tradition
+{
+	name = "Writing"
+	icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Writing_3.tga:UI_Icon_Skill_Writing_3#2" //GUID:2322f4f7dcd8a9142abf34403388b2be
+	icon_wide = "Assets/UI/Elements/Common/Icons/Traditions/UI_Icon_Tradition_Writing_Wide.png:UI_Icon_Tradition_Writing_Wide#2" //GUID:d8a49f7fd47742047aafcb97f2f4d153
+	tooltip = "Literacy and historical archives are the fundaments of passing the knowledge from one generation to another and the cultural blossoming of a kingdom."
+	
+	mod ks_prod_books_traditions = 10
+	mod ks_prod_piety_traditions = 5
+	mod ks_culture_from_traditions = 100
+	mod ks_kingdom_traditions_influence = 50
+	//mod ks_culture_universities = 10
+	
+	skills
+	{
+		skill WritingSkill
+		{
+			tag Govern
+			{
+				governed_realm_mod rs_governor_books_church_or_masjid = 3
+				governed_realm_mod rs_governor_books_cathedral_or_great_mosque = 5
+				governed_realm_mod rs_governor_books_university_or_madrasah = 10
+			}
+			class Merchant
+			{
+				mod cs_trade_income_perc = 5
+			}
+			class Cleric
+			{
+				kingdom_mod ks_fame_traditions = 150
+				tag Govern
+				{
+					governed_realm_mod rs_governor_books_per_settlement = 1
+				}
+			}
+		}
+	}
+}

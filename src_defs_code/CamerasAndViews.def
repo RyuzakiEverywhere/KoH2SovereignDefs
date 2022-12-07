@@ -1,0 +1,1328 @@
+﻿def ViewMode
+{
+	material terrain_material
+	bool highlight = false
+	text name
+	text description = "Placehodler"
+	
+	color selection_highlight_color = "255,245,184" //FFF6B8FF //controls the border selection
+}
+
+def WorldView : ViewMode
+{
+	//terrain_material = "Assets/Resources/Shaders/Terrain/WorldView.mat" //GUID:805f14bb3bbd5b84cad582674e5c4923
+	color clr_hatch_Enemy1 = "#B03D3D"
+	color clr_hatch_Enemy2 = "#B03D3DA6"
+	color clr_hatch_EnemyRebel1 = "#B03D3D"
+	color clr_hatch_EnemyRebel2 = "#4D4D4DD9"
+	color clr_hatch_Neutral1 = "#4D4D4D"
+	color clr_hatch_Neutral2 = "#414141A6"
+	color clr_hatch_Ally1 = "#17a220D9"
+	color clr_hatch_Ally2 = "#17a220A6"
+	color clr_hatch_AllyLoyalist1 = "#17a220"
+	color clr_hatch_AllyLoyalist2 = "#414141A6"
+	color clr_hatch_Own1 = "#17a220"
+	color clr_hatch_Own2 = "#17a220A6"
+	name = "World View"
+}
+
+def OverlayView : ViewMode
+{
+	highlightStrength = 1
+	terrain_material = "Assets/Resources/Shaders/Terrain/WVOverlay.mat" //GUID:11aa94c5b9c99414c9be1f10d58610f0
+	name = "Overlay View"
+}
+
+def PoliticalView : ViewMode
+{
+	
+	prefab realm_label_prefab = "Assets/Europe/PoliticalMap/RealmLabel.prefab" //GUID:2c901a0a529c3c34b848589abdf265c8
+	{
+		prefab en = "Assets/Europe/PoliticalMap/RealmLabel.prefab" //GUID:2c901a0a529c3c34b848589abdf265c8
+		prefab fr = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab de = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab es = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab pl = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ru = "Assets/Europe/PoliticalMap/RealmLabel_Cyrilic.prefab" //GUID:32386b23ac7745244a9b8c063388a788
+		prefab tr = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ind = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ko = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab ja = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab zh = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab zh_tw = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab tz = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab hi = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+	}
+	prefab kingdom_label_prefab = "Assets/Europe/PoliticalMap/RealmLabel.prefab" //GUID:2c901a0a529c3c34b848589abdf265c8
+	{
+		prefab en = "Assets/Europe/PoliticalMap/RealmLabel.prefab" //GUID:2c901a0a529c3c34b848589abdf265c8
+		prefab fr = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab de = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab es = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab pl = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ru = "Assets/Europe/PoliticalMap/RealmLabel_Cyrilic.prefab" //GUID:32386b23ac7745244a9b8c063388a788
+		prefab tr = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ind = "Assets/Europe/PoliticalMap/RealmLabel_LatinExtended.prefab" //GUID:e73f4403600385a41bedb343fe4f3766
+		prefab ko = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab ja = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab zh = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab zh_tw = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab tz = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+		prefab hi = "Assets/Europe/PoliticalMap/RealmLabel_CJK.prefab" //GUID:c496119c3f6ea484d8df82440563a597
+	}
+	prefab captial_icon_prefab = "Assets/Europe/PoliticalMap/CapitalIcon 1.prefab" //GUID:fde5b9757782c98498b2cafeabe60e0c
+	prefab gold_income_prefab = "Assets/Europe/PoliticalMap/Authority Political View/GoldIncome.prefab" //GUID:87ac69121f9aff84193bbd70ccbdfd31
+	prefab political_map_prefab = "Assets/Europe/PoliticalMap/PoliticalMap.prefab" //GUID:548774f5af6b09d47aa6a563382a8420
+	name = "Political View"
+	colors
+	{
+		color None = 0,0,0,0
+	}
+	
+	borders
+	{
+		material wv_realm_material = "Assets/Europe/Borders/RealmBorder.mat" //GUID:2f6e11ce77328084aa2039bb19a845f8
+		float wv_realm_width = 1
+		material wv_kingdom_material = "Assets/Europe/Borders/KingdomBorders.mat" //GUID:af6d376c9c02d9940a7a2bb9c52d0ed1
+		float wv_kingdom_width = 4
+		material pv_realm_material = "Assets/Europe/Borders/PVRealmBorder.mat" //GUID:39c5dd0f8ace5b04fb31e557e48e3d38
+		float pv_realm_width = 4
+		material pv_kingdom_material = "Assets/Europe/Borders/PVKingdoomBorder.mat" //GUID:c6b12a2260ba45740bbb889b200834e6
+		float pv_kingdom_width = 4
+		material highlighted_realm_material = "Assets/Europe/Borders/HighlightedRealmBorder.mat" //GUID:c5901c95ff0930b4496fb5b5ffb93a1d
+		float highlighted_realm_width = 2
+		material highlighted_kingdom_material = "Assets/Europe/Borders/HighlightedKingdoomBorder.mat" //GUID:fe795327caed954469922adc426ae983
+		float highlighted_kingdom_width = 2
+		material highlighted_PV_custom_material = "Assets/Europe/Borders/HighlightedPVCurstomBorder.mat" //GUID:794e68116facfb0409741b99d67464c2
+		float highlighted_PV_custom_width = 2
+	}
+	highlight = true
+	
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = false
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "kingdom"
+	}
+	
+	bool allowed_figures_army = true
+	bool allowed_figures_mercenary = true
+	bool allowed_figures_town = true
+	bool allowed_figures_battle = true
+	
+	pv_figures
+	{
+		float figure_scale = 0.5
+		float figure_scale_to_camera_zoom = [2.1, 1] // [scale_when_zoomed_in, scale_when_zoomed_out] , multiplicative with figure_scale
+		Army
+		{
+			offset_2d = [0, 10]
+			//prefab figure_prefab = "Assets/Units/PV Figures/PV_Figure_Army.prefab" //GUID:759bfcff86c7d9c409c3e20c57891812
+			prefab ui_figure_prefab = "Assets/UI/Elements/PVFigures/UIP_PVFigureArmy.prefab" //GUID:9077ba19df917434db8a730a31975329
+			float icon_measurements = [0, 0, 1, 1] //posX, posY, scaleX, scaleY
+			// Normal
+			// {
+			// 	float crest_measurements = [-0.10, -0.08, 0.304, 0.40] //posX, posY, scaleX, scaleY
+			// 	texture enemy_texture = "Assets/Units/PV Figures/Icons/PV_Icon_MarshalEnemy.tga" //GUID:a20302f5ce9dbb84e8a8f1f1138ca815
+			// 	texture own_texture = "Assets/Units/PV Figures/Icons/PV_Icon_MarshalOwn.tga" //GUID:c27d9b6d7afa16c4cb72735c130a0eaf
+			// 	texture neutral_texture = "Assets/Units/PV Figures/Icons/PV_Icon_MarshalNetral.tga" //GUID:4385cdba12e8d88489246382a099a51f
+			// }
+			// Crusade
+			// {
+			// 	float crest_measurements = [0.092, -0.23, 0.3192, 0.42] //posX, posY, scaleX, scaleY
+			// 	texture enemy_texture = "Assets/Units/PV Figures/Icons/PV_Icon_CrusadeEnemy.tga" //GUID:5e7fcb524d15487498e8c77fa639a91b
+			// 	texture own_texture = "Assets/Units/PV Figures/Icons/PV_Icon_CrusadeOwn.tga" //GUID:06b7f002f0028e64894ccd001d9743ad
+			// 	texture neutral_texture = "Assets/Units/PV Figures/Icons/PV_Icon_CrusadeNeutral.tga" //GUID:34bd281f8f759b249af84eba438c1bb3
+			// }
+			// Rebel
+			// {
+			// 	float crest_measurements = [0.08, -0.13, 0.266, 0.35] //posX, posY, scaleX, scaleY
+			// 	texture enemy_texture = "Assets/Units/PV Figures/Icons/PV_Icon_RebelEnemy.tga" //GUID:40fe3acc96c57b242884fe54db1ff8bf
+			// 	texture own_texture = "Assets/Units/PV Figures/Icons/PV_Icon_RebelOwn.tga" //GUID:6a69ffe470d380b4190b7d38394d4d41
+			// 	texture neutral_texture = "Assets/Units/PV Figures/Icons/PV_Icon_RebelNeutral.tga" //GUID:e6b9f08806337b74b8d4fc3431745838
+			// }
+			// Ship
+			// {
+			// 	float crest_measurements = [0.24, -0.08, 0.304, 0.40] //posX, posY, scaleX, scaleY
+			// 	texture enemy_texture = "Assets/Units/PV Figures/Icons/PV_Icon_ShipEnemy.tga" //GUID:230eac30cd869dc4fa3e144a4ce789e9
+			// 	texture own_texture = "Assets/Units/PV Figures/Icons/PV_Icon_ShipOwn.tga" //GUID:157326383cdbe554c8b73fa80a3b046b
+			// 	texture neutral_texture = "Assets/Units/PV Figures/Icons/PV_Icon_ShipNeutral.tga" //GUID:86aec61b52149ad4f89c887f07110b80
+			// }
+			// Mercenary
+			// {
+			// 	float crest_measurements = [-0.04, -0.32, 0.38, 0.5] //posX, posY, scaleX, scaleY
+			// 	texture enemy_texture = "Assets/Units/PV Figures/Icons/PV_Icon_Mercs.png" //GUID:b663ea6405ffeaa4193aa3c541eb06a7
+			// 	texture own_texture = "Assets/Units/PV Figures/Icons/PV_Icon_Mercs.png" //GUID:b663ea6405ffeaa4193aa3c541eb06a7
+			// 	texture neutral_texture = "Assets/Units/PV Figures/Icons/PV_Icon_Mercs.png" //GUID:b663ea6405ffeaa4193aa3c541eb06a7
+			// 	figure_scale_to_camera_zoom = [0.9, 0.35]
+			// }
+			Normal
+			{
+				float icon_measurements = [0, 0, -0.5, 0.5]
+				float crest_measurements = [4.2, -3.9, 0.175, 0.23] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalEnemy.psd:PV_Icon_MarshalEnemy#2" //GUID:074a8b61656957843b22695070227979
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalEnemy_Selected.psd:PV_Icon_MarshalEnemy_Selected#2" //GUID:7df030c8dbdb9bf40bd23fe4dfa2f9e8
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalOwn.psd:PV_Icon_MarshalOwn#2" //GUID:451de5c52242eb143bfa55669146f96e
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalOwn_Selected.psd:PV_Icon_MarshalOwn_Selected#2" //GUID:46dfe3d9664b83f4e9f4e5e5e630dfff
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalNeutral.psd:PV_Icon_MarshalNeutral#2" //GUID:139af331575722a499dca766724ba9d0
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_MarshalNeutral_Selected.psd:PV_Icon_MarshalNeutral_Selected#2" //GUID:2c72800b1f10f7a4ead430a44a8e337f
+				}
+				float raycast_target_anchor = [0.39, 0.34, 0.61, 0.69]
+			}
+			Crusade
+			{
+				float icon_measurements = [0, 0, 0.5, 0.5]
+				float crest_measurements = [4.8, -10.9, 0.15, 0.2] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeEnemy.psd:PV_Icon_CrusadeEnemy#2" //GUID:384625bd226a854489a983081f816108
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeEnemy_Selected.psd:PV_Icon_CrusadeEnemy_Selected#2" //GUID:8d0daa5ac5a9b2e45abcfa68ec797852
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeOwn.psd:PV_Icon_CrusadeOwn#2" //GUID:9ec83b4ef9390004cafd3aa23343837e
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeOwn_Selected.psd:PV_Icon_CrusadeOwn_Selected#2" //GUID:a7ea051173fd11646a8d77f22b7285a5
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeNeutral.psd:PV_Icon_CrusadeNeutral#2" //GUID:c21c1b14b98a73c46b5332b32329a9c4
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_CrusadeNeutral_Selected.psd:PV_Icon_CrusadeNeutral_Selected#2" //GUID:44bbd5349ffcb92488b72675949a7b61
+				}
+				float raycast_target_anchor = [0.3, 0.3, 0.7, 0.8]
+			}
+			Rebel
+			{
+				float icon_measurements = [0, 0, -0.5, 0.5]
+				float crest_measurements = [-4.5, -6, 0.152, 0.2] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelEnemy.psd:PV_Icon_RebelEnemy#2" //GUID:ad55badb74df87149902eb8f39263580
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelEnemy_Selected.psd:PV_Icon_RebelEnemy_Selected#2" //GUID:5e8089b0312065a4f9b2fd1d7b21967e
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelOwn.psd:PV_Icon_RebelOwn#2" //GUID:fdb1e19741508094294aef4a19f113ba
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelOwn_Selected.psd:PV_Icon_RebelOwn_Selected#2" //GUID:59757be3a4e48fc4b8c682e7a51ab09a
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelNeutral.psd:PV_Icon_RebelNeutral#2" //GUID:0b427260abceb4d488108ed5eddc211d
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_RebelNeutral_Selected.psd:PV_Icon_RebelNeutral_Selected#2" //GUID:8429a74e65eecfa47b3b1e830049ddb5
+				}
+				float raycast_target_anchor = [0.35, 0.34, 0.65, 0.75]
+			}
+			Ship
+			{
+				float icon_measurements = [0, 0, 0.5, 0.5]
+				float crest_measurements = [12, -4, 0.152, 0.20] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipEnemy.psd:PV_Icon_ShipEnemy#2" //GUID:6c55207720ce4df449786bbc11cc1729
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipEnemy_Selected.psd:PV_Icon_ShipEnemy_Selected#2" //GUID:75a633507a02bb6409f76a89e10b2d54
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipOwn.psd:PV_Icon_ShipOwn#2" //GUID:830c86a5c70516d4ea771b2cc8a3ac10
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipOwn_Selected.psd:PV_Icon_ShipOwn_Selected#2" //GUID:feba4d18fd41875419aac0fc60dbdd1b
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipNeutral.psd:PV_Icon_ShipNeutral#2" //GUID:d09a7f09ad6f7bd4888b05d2eb3bb3a1
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_ShipNeutral_Selected.psd:PV_Icon_ShipNeutral_Selected#2" //GUID:fd6409fe5d4128646a5a4429068c6481
+				}
+				float raycast_target_anchor = [0.3, 0.35, 0.7, 0.8]
+			}
+			Mercenary
+			{
+				float icon_measurements = [0, 0, 0.5, 0.5]
+				float crest_measurements = [-1.2, -28.2, 0.342, 0.45] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs.psd:PV_Icon_Mercs#2" //GUID:d4e23a9fe2d2b5f42b94508fea96f09c
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Selected.psd:PV_Icon_Mercs_Selected#2" //GUID:5b29d3d1f83900d479b63b77bf4615d1
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs.psd:PV_Icon_Mercs#2" //GUID:d4e23a9fe2d2b5f42b94508fea96f09c
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Selected.psd:PV_Icon_Mercs_Selected#2" //GUID:5b29d3d1f83900d479b63b77bf4615d1
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs.psd:PV_Icon_Mercs#2" //GUID:d4e23a9fe2d2b5f42b94508fea96f09c
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Selected.psd:PV_Icon_Mercs_Selected#2" //GUID:5b29d3d1f83900d479b63b77bf4615d1
+				}
+				figure_scale_to_camera_zoom = [0.9, 0.35]
+				float raycast_target_anchor = [0.3, 0.3, 0.7, 0.8]
+			}
+			HiredMercenary
+			{
+				float icon_measurements = [0, 0, -0.5, 0.5]
+				float crest_measurements = [4.2, -3.9, 0.175, 0.23] //posX, posY, scaleX, scaleY
+				sprite enemy_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired_Enemy.psd:PV_Icon_Mercs_Hired_Enemy#2" //GUID:9bdc6453f09b29e47b25efef46a1ef57
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired_Enemy_Selected.psd:PV_Icon_Mercs_Hired_Enemy_Selected#2" //GUID:22e8d5a3acaa8b045b7ef3cadb231133
+				}
+				sprite own_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired_Own.psd:PV_Icon_Mercs_Hired_Own#2" //GUID:399dbe51120b42e44bacd72c6d545c77
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired_Own_Selected.psd:PV_Icon_Mercs_Hired_Own_Selected#2" //GUID:d44cb678c70edd5468ff12704eb77f93
+				}
+				sprite neutral_texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired.psd:PV_Icon_Mercs_Hired#2" //GUID:fc0294488b2bec644ab1ea19c095daca
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Mercs_Hired_Selected.psd:PV_Icon_Mercs_Hired_Selected#2" //GUID:47488d33c2fb0c9458e5819c68056991
+				}
+				float raycast_target_anchor = [0.37, 0.3, 0.63, 0.69]
+			}
+		}
+		
+		Settlement
+		{
+			// prefab figure_prefab = "Assets/Europe/Settlements/PV Figures/PV_Figure_Settlement.prefab" //GUID:7fea4cf3af72e8747ae5a79509ae4d1d
+			// Castle
+			// {
+			// 	float crest_measurements = [0, -0.1, 0.266, 0.35]
+			// 	float icon_measurements = [0.012, 0.055, 0.795, 0.795]
+			// 	texture texture = "Assets/Europe/Settlements/PV Figures/Icons/PV_Icon_Town01_256.png" //GUID:162cbe8696a967d4e81595df0fa8a717
+			// }
+			// Settlement
+			// {
+			// 	float crest_measurements = [0.0236, -0.04, 0.174, 0.23]
+			// 	float icon_measurements = [0.012,0.055,0.53,0.5]
+			// 	texture texture = "Assets/Europe/Settlements/PV Figures/Icons/PV_Icon_Settlement_256.png" //GUID:839af33c540f9cd4494d6655edb9c483
+			// }
+			
+			float figure_scale_to_camera_zoom = [0.9, 0.3] // [scale_when_zoomed_in, scale_when_zoomed_out] , multiplicative with figure_scale
+			prefab ui_figure_prefab = "Assets/UI/Elements/PVFigures/UIP_PVFigureSettlement.prefab" //GUID:879a2b7c0a8d48547adde506eceb51b9
+			float raycast_target_anchor = [0.2, 0.21, 0.8, 0.7]
+			Castle
+			{
+				float crest_measurements = [-2.4, -16.2, 0.266, 0.35]
+				float icon_measurements = [0.012, 0.055, 0.795, 0.795]
+				sprite texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Town01_256.psd:PV_Icon_Town01_256#2" //GUID:ee5c1f73e65213249a55702eaac11615
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Town01_256_Selected.psd:PV_Icon_Town01_256_Selected#2" //GUID:225feb639fae41b4494d07f8aa2fb518
+				}
+			}
+			Castle_Religion_HQ
+			{
+				float crest_measurements = [-2.4, -16.2, 0.266, 0.35]
+				float icon_measurements = [0.012, 0.055, 0.795, 0.795]
+				sprite texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_TownReligiousHQ_256.psd:PV_Icon_TownReligiousHQ_256#2" //GUID:d4995184ebb2d51468e8fd8d044eeda9
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_TownReligiousHQ_256_Selected.psd:PV_Icon_TownReligiousHQ_256_Selected#2" //GUID:5c4511409ba50544bbc8813edfbb2041
+				}
+			}
+			Castle_Disorder
+			{
+				float crest_measurements = [-2.4, -16.2, 0.266, 0.35]
+				float icon_measurements = [0.012, 0.055, 0.795, 0.795]
+				sprite texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_TownDisorder_256.psd:PV_Icon_TownDisorder_256#2" //GUID:ce61550c0d094be4e808f888a4fe4169
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_TownDisorder_256_Selected.psd:PV_Icon_TownDisorder_256_Selected#2" //GUID:52c9dbf51a80e4546bdd6a890bacb1e7
+				}
+			}
+			Settlement
+			{
+				//float crest_measurements = [1.3, -9.6, 0.174, 0.23]
+				//float icon_measurements = [0.012,0.055,0.53,0.5]
+				float crest_measurements = [-1.2, -10.6, 0.271, 0.345]
+				float icon_measurements = [0.012,0.055,0.795,0.765]
+				sprite texture = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Settlement_256.psd:PV_Icon_Settlement_256#2" //GUID:631c25320ee21ec4082c1c82e71acaea
+				{
+					sprite hover = "Assets/UI/Elements/PVFigures/Sprites/PV_Icon_Settlement_256__Selected.psd:PV_Icon_Settlement_256__Selected#2" //GUID:120b87d76422dbb498d6b392b3629070
+				}
+				float raycast_target_anchor = [0.2, 0.21, 0.8, 0.8]
+			}
+		}
+		
+		Battle
+		{
+			offset_2d = [0, 0]
+			float figure_scale = 0.5
+			//prefab figure_prefab = "Assets/Europe/Battles/PV_Figure_Battle.prefab" //GUID:f2700eaf059190a40a5a6517ef1edbfd
+			prefab ui_figure_prefab = "Assets/UI/Elements/PVFigures/UIP_PVFigureBattle.prefab" //GUID:69f05522a5430fb45a5a0afc58cea42a
+		}
+	}
+	
+}
+
+// def RealmsView : PoliticalView
+// {
+// 	name = "Provinces"
+// 	description = "Individual provinces are displayed. These lands make up the territory of a kingdom."
+// 	texture realm_color_texture = "Assets/Europe/PoliticalMap/colors.png" //GUID:ddf929631bd3419429238d74d35e5589
+// 	// allowed_figures_army = true
+// 	// allowed_figures_mercenary = false
+// 	// allowed_figures_town = false
+// 	// allowed_figures_battle = true
+// 	selection_rules
+// 	{
+// 		preferred_sub_mode = "realm"
+// 	}
+// 	// legend
+// 	// {
+// 	// 	occupation
+// 	// 	{
+// 	// 		text text = "Province occupied by Rebels"
+// 	// 		sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Stripe_RebelOcupation.psd:Element_Minimap_Legend_Stripe_RebelOcupation#2" //GUID:ad4ed0d643def7740848714d1bcc850b
+// 	// 		color icon_color_primary = "255,255,255" //FFFFFFFF
+// 	// 	}
+// 	// 	disorder
+// 	// 	{
+// 	// 		text text = "Province in disorder"
+// 	// 		sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+// 	// 		color icon_color_primary = "142,35,35" //8E2323FF
+// 	// 	}
+// 	// }
+// }
+
+def KingdomsView : PoliticalView
+{
+	name = "Kingdoms"
+	description = "Kingdom territories are displayed. Each kingdom consists of smaller provinces. Vassals are shown with stripes bearing the colors of their sovereign."
+	// allowed_figures_army = true
+	// allowed_figures_mercenary = true
+	// allowed_figures_town = true
+	// allowed_figures_battle = true
+	
+	selection_rules
+	{
+		Kingdom
+		{
+			show_realm_border = false
+		}
+	}
+	// legend
+	// {
+	// 	occupation
+	// 	{
+	// 		text text = "Province occupied by Rebels"
+	// 		sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Stripe_RebelOcupation.psd:Element_Minimap_Legend_Stripe_RebelOcupation#2" //GUID:ad4ed0d643def7740848714d1bcc850b
+	// 		color icon_color_primary = "255,255,255" //FFFFFFFF
+	// 	}
+	// 	disorder
+	// 	{
+	// 		text text = "Province in disorder"
+	// 		sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+	// 		color icon_color_primary = "142,35,35" //8E2323FF
+	// 	}
+	// }
+}
+
+def StancesView : PoliticalView
+{
+	name = "Stances"
+	description = "Select a kingdom to view its stances with all other kingdoms. Note that invasion plans are often hidden, requiring dilligent spying in order to be discovered."
+	colors
+	{
+		color Own = 0,0,255
+		color War = 160,20,20
+		color War2 = 92,10,10
+		color Peace = 0,0,0,0
+		color Trade = 140,120,20
+		color NonAggression = 32,100,32
+		color Vassal = 0,0,255,160
+		color Sovereign = 30,120,140
+		color DefensivePactAgainst = 0,0,0 //190,128,50
+		color Alliance = 10,160,10
+		color Marriage = 128,0,255
+	}
+	legend
+	{
+		selection
+		{
+			text text = "Selection"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		peace
+		{
+			text text = "Peace"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "166,145,117,255"
+		}
+		pact_or_non_aggression
+		{
+			text text = "Non-aggression/is in pact with selected kingdom"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#4f7541"
+		}
+		trade
+		{
+			text text = "Trade Agreement"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#d1ac40"
+		}
+		marriage
+		{
+			text text = "Marriage"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#954b95"
+		}
+		vassal
+		{
+			text text = "Vassal"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#7c6f90"
+		}
+		sovereign
+		{
+			text text = "Sovereign"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#7ea990"
+		}
+		pact_against_selected
+		{
+			text text = "Holds an invasion plan/defensive pact against the selected kingdom"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#474238"
+		}
+		war_enemy_leader_we_are_leader
+		{
+			text text = "Enemy leader (selected kingdom is also leader)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "160,20,20"
+		}
+		war_enemy_leader_we_are_supporter
+		{
+			text text = "Enemy leader (selected kingdom is supporter)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "92,10,10"
+		}
+		war_enemy_supporter_we_are_leader
+		{
+			text text = "Enemy supporter (selected kingdom is leader)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "160,20,20"
+		}
+		war_enemy_supporter_we_are_supporter
+		{
+			text text = "Enemy supporter (selected kingdom is supporter)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "92,10,10"
+		}
+		war_our_supporter_leader
+		{
+			text text = "War supporter/leader of selected kingdom"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#6eb654"
+		}
+	}
+}
+
+def RelationsView : PoliticalView
+{
+	name = "Relations"
+	description = "Select a kingdom to view its relations with others."
+	color clr_worst = 150,0,0,255
+	color clr_neutral_neg = 150,55,0,100
+	color clr_neutral_pos = 75,130,0,100
+	color clr_best = 0,130,0,255
+	color clr_seleciton = 0,0,255,255
+	highlightStrength = 0.5
+	marriage
+	{
+		text text = "Marriage"
+		sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		color icon_color_primary
+	}
+	legend
+	{
+		selection
+		{
+			text text = "Selection"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		relations
+		{
+			text text = "Relations (from best to worst)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Background_Gradient1.psd:Element_Background_Gradient1#2" //GUID:fe91cd9be561de940ac5b09a57517ad6
+			color icon_color_primary = "255,255,255,255"
+		}
+	}
+}
+
+def ReligionView : PoliticalView
+{
+	name = "Religions"
+	description = "Territories are displayed based on the religion they follow. Provinces which follow a religion, different than their kingdom's one, are shown with stripes bearing the colors of the local beliefs."
+	// allowed_figures_army = true
+	// allowed_figures_mercenary = true
+	// allowed_figures_town = true
+	// allowed_figures_battle = true
+	
+	legend
+	{
+		catholic
+		{
+			text text = "Catholic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#798B92"
+		}
+		catholic_excommunicated
+		{
+			text text = "Catholic (Excommunicated)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#4e5a61"
+		}
+		orthodox
+		{
+			text text = "Orthodox (Subordinated)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#9F6F7E"
+		}
+		orthodox_independant
+		{
+			text text = "Orthodox (Indenendent and Ecumenical)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#D98CA7"
+		}
+		pagan
+		{
+			text text = "Pagan"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#7F8A57"
+		}
+		sunni
+		{
+			text text = "Sunni"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#967944"
+		}
+		shia
+		{
+			text text = "Shia"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#A3704A"
+		}
+		caliphate
+		{
+			text text = "Muslim Caliphate"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#cca343"
+		}
+	}
+}
+
+def MarriagesView : PoliticalView
+{
+	name = "Marriages"
+	description = "Shows which kingdoms have unmarried royal family members, in addition to our current royal ties."
+	
+	color color_selection = "255, 255, 255, 0"
+	color color_royal_marriage = "255, 156, 25" //ff9c1a
+	color color_unmarried_prince_or_king = "0, 125, 255" //007DFFFF
+	color color_unmarried_princess = "200, 0, 255" //C800FFFF
+	
+	legend
+	{
+		male
+		{
+			text text = "Kingdom has unmarried princes of age and/or an unmarried king"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#75c7d6"
+		}
+		female
+		{
+			text text = "Kingdom has unmarried princesses of age"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#df58b2"
+		}
+		we_have_royal_ties
+		{
+			text text = "We have royal ties"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#ff9c1a"
+		}
+	}
+}
+
+def AuthoritiesView : PoliticalView
+{
+	name = "Authorities (DBG)"
+	texture authority_color_texture = "Assets/Europe/PoliticalMap/Authority Political View/GoldIncomes_grad.png" //GUID:85f03892048cde947b31f8bc6c76ccd7
+}
+
+def GoldIncomeView : PoliticalView
+{
+	name = "Gold Income (DBG)"
+	texture income_color_texture = "Assets/Europe/PoliticalMap/Authority Political View/GoldIncomes_grad.png" //GUID:85f03892048cde947b31f8bc6c76ccd7
+}
+
+def TradePowerView : PoliticalView
+{
+	name = "Trade Power (DBG)"
+	texture trade_power_color_texture = "Assets/Europe/PoliticalMap/Gradients/authority_grad.jpg" //GUID:15687f66f36e87740baca35272757e07
+}
+
+// def ReligiousPowerView : PoliticalView
+// {
+// 	texture religious_power_color_texture = "Assets/Europe/PoliticalMap/CityPowers/religious_power_gradient.png" //GUID:6eeaa1859616e094693acdfad975169c
+// }
+
+def CulturePowerView : PoliticalView
+{
+	name = "Loyalty"
+	description = "Select a kingdom to view the loyalty of its provinces, along with foreign lands in which its influence has spread."
+	texture culture_power_color_texture = "Assets/Europe/PoliticalMap/Gradients/culture_power_gradient.png" //GUID:8ddebda120e844448841dea573c371fb
+	
+	color color_loyal_to_selection = "0,0,255"
+	color color_loyal_to_selection_outside = "0,255,0"
+	color color_unloyal = "255,0,0"
+	
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		row_1
+		{
+			text text = "Part of and fully loyal to the selected kingdom"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		row_2
+		{
+			text text = "Part of and partially loyal to the selected kingdom"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#8b7a7c"
+		}
+		row_3
+		{
+			text text = "Outside of the selected kingdom and partially loyal to it"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "124,132,90,255"
+		}
+		outside_own_fully
+		{
+			text text = "Outside of the selected kingdom and fully loyal to it"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#59c642"
+		}
+		inside_foreign_part
+		{
+			text text = "Part of the selected kingdom and partially loyal to another"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#c8735f"
+		}
+		inside_foreign_fully
+		{
+			text text = "Part of the selected kingdom and fully loyal to another"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#ce4c3d"
+		}
+	}
+	
+}
+
+def CulturesView : PoliticalView
+{
+	name = "Cultures"
+	description = "Shows the distribution of cultures amongst all existing kingdoms. Selecting a culture shows its spread in the world."
+	
+	color defaultColor = 0, 0, 0, 0 // 000000FF
+	
+	bool useSelectionColor = false
+	color selectedColor = 255, 0, 255 // FF00FFFF
+	
+	float non_selection_desaturate_perc = 0
+	
+	//tint values, for when culture is selected
+	float color_map_min = 0.5
+	float color_map_max = 1.5
+	
+	colors_per_culture //these are culture groups
+	{
+		color Turkic = "#FF0000"
+		color WestGermanic = "#8B0000"
+		color Arberian = "#FF7F50"
+		color Iberian = "#FF4500"
+		color Latin = "#FFA500"
+		color Arabic = "#FFD700"
+		color WestSlavic = "#BDB76B"
+		color Celtic = "#32CD32"
+		color SouthSlavic = "#2E8B57"
+		color Mongolic = "#008000"
+		color FinnoUgric = "#556B2F"
+		color African = "#6B8E23"
+		color Iranic = "#9ACD32"
+		color Nordic = "#004B87"
+		color Wallachian = "#00008B"
+		color Caucasian = "#4169E1"
+		color Gaelic = "#4682B4"
+		color EastSlavic = "#3BDEFF"
+		color Greek = "#800080"
+		color Germanic = "#663399"
+		color Baltic = "#FF00FF"
+		color Magyar = "#A52A2A"
+		color Berber = "#8B4513"
+	}
+	
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		turkic_and_west_germanic
+		{
+			text text = "Turkic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#FF0000"
+			int text_width = 150
+			
+			text second_text = "West Germanic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#8B0000"
+			int second_text_width = 150
+		}
+		arberian_and_iberian
+		{
+			text text = "Arberian"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#FF7F50"
+			int text_width = 150
+			
+			text second_text = "Iberian"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#FF4500"
+			int second_text_width = 150
+		}
+		latin_and_arabic
+		{
+			text text = "Latin"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#FFA500"
+			int text_width = 150
+			
+			text second_text = "Arabic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#FFD700"
+			int second_text_width = 150
+		}
+		west_slavic_and_celtic
+		{
+			text text = "West Slavic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#BDB76B"
+			int text_width = 150
+			
+			text second_text = "Celtic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#32CD32"
+			int second_text_width = 150
+		}
+		south_slavic_and_mongolic
+		{
+			text text = "South Slavic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#2E8B57"
+			int text_width = 150
+			
+			text second_text = "Mongolic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#008000"
+			int second_text_width = 150
+		}
+		finnoUgric_and_african
+		{
+			text text = "Finno-Ugric"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#556B2F"
+			int text_width = 150
+			
+			text second_text = "African"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#6B8E23"
+			int second_text_width = 150
+		}
+		iranic_and_nordic
+		{
+			text text = "Iranic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#9ACD32"
+			int text_width = 150
+			
+			text second_text = "Nordic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#004B87"
+			int second_text_width = 150
+		}
+		wallachian_and_caucasian
+		{
+			text text = "Wallachian"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#00008B"
+			int text_width = 150
+			
+			text second_text = "Caucasian"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#4169E1"
+			int second_text_width = 150
+		}
+		gaelic_and_east_slavic
+		{
+			text text = "Gaelic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#4682B4"
+			int text_width = 150
+			
+			text second_text = "East Slavic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#3BDEFF"
+			int second_text_width = 150
+		}
+		greek_and_germanic
+		{
+			text text = "Greek"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#800080"
+			int text_width = 150
+			
+			text second_text = "Germanic"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#663399"
+			int second_text_width = 150
+		}
+		baltic_and_magyar
+		{
+			text text = "Baltic"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#FF00FF"
+			int text_width = 150
+			
+			text second_text = "Magyar"
+			sprite second_icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color second_icon_color_primary = "#A52A2A"
+			int second_text_width = 150
+		}
+		berber
+		{
+			text text = "Berber"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#8B4513"
+		}
+	}
+}
+
+
+def ResourcesView : PoliticalView
+{
+	name = "Goods (DBG)"
+	int zeroChance = 40 //percent
+	int numResources = 20 //number of different resourcs
+	int randonExtraNumMin = 0 //extra added random number of resources per realm min
+	int randonExtraNumMax = 2 //max
+}
+
+def CoreHistRealmsView : PoliticalView
+{
+	
+}
+
+def TradeZonesView : PoliticalView
+{
+	name = "Trade Zones"
+	description = "Shows trade centers and the provinces which fall within their zones of influence. Each trade center's zone is indicated with a unique color on the map."
+	//texture trade_power_color_texture = "Assets/Europe/PoliticalMap/Gradients/authority_grad.jpg" //GUID:15687f66f36e87740baca35272757e07
+	
+	color color_non_tc_selection = "0,0,255"
+	color color_tc_selection = "0,255,255"
+	color color_tc_stripe = "0,0,255"
+	
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		selection
+		{
+			text text = "Selection"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		trade_center
+		{
+			text text = "Trade Center"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = " 82,71,125,255" //9560E5FF
+		}
+		// trade_zone_strenght
+		// {
+		// 	text text = "Trade zone strength"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Background_Gradient1.psd:Element_Background_Gradient1#2" //GUID:fe91cd9be561de940ac5b09a57517ad6
+		// 	color icon_color_primary = "255,255,255,255"
+		// }
+	}
+}
+
+def ProvinceFeaturesView : PoliticalView
+{
+	
+	name = "Province Features"
+	description = "Select a province feature to view its location on the map. Multiple province features can be selected simultaneously (CTRL + LMB)."
+	color highlighted_color = "#0b4f00" //"63,146,44" //40932DFF
+	color highlighted_color_partial = "170,199,164" //ABC8A5FF
+	color highlighted_color_selected = "0,0,0,0" //2FBE0FFF //best case should not change, but it either deletes, either 
+	color highlighted_color_player = "0,0,255" //0000FFFF 
+	
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		// selection
+		// {
+		// 	text text = "Selection"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "63,146,44" //40932DFF
+		// }
+		player
+		{
+			text text = "Your kingdom's territories"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		your_province_has_feature
+		{
+			text text = "Your province has the selected province feature"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#417d37"
+		}
+		foreign_province_has_feature
+		{
+			text text = "A foreign province has the selected province feature"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#417d37"
+		}
+		// has_all_features
+		// {
+		// 	text text = "Province has the selected feature(s)"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "99,124,67,255"
+		// }
+		// has_a_feature
+		// {
+		// 	text text = "Province has one of multiple selected features"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "150,149,105,255"
+		// }
+		// has_none
+		// {
+		// 	text text = "Province does not have the selected feature"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "185,160,131,255"
+		// }
+	}
+}
+
+def WarPeacePointsView : PoliticalView
+{
+	name = "WarPeace Points (DBG)"
+	texture color_texture = "Assets/Europe/PoliticalMap/Gradients/authority_grad.jpg" //GUID:15687f66f36e87740baca35272757e07
+}
+
+def RebellionRiskView : PoliticalView
+{
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+	
+	name = "Stability"
+	description = "Shows the stability of provinces in the world, in addition to lands which are currently occupied by rebels. Click on a stability category to isolate its effects."
+	// allowed_figures_army = true
+	// allowed_figures_mercenary = true
+	// allowed_figures_town = true
+	// allowed_figures_battle = true
+	texture color_texture = "Assets/Europe/PoliticalMap/Gradients/rebel_risk_gradient.psd" //GUID:5f67bce97dc676148b7d5791b253e72c
+	color color_rebel_presence = "255, 0, 0"
+	color color_rebel_occupation = "0, 0, 0"
+	legend
+	{
+		stability
+		{
+			text text = "Stability (darker is worse)"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Background_Gradient2.psd:Element_Background_Gradient2#2" //GUID:2677c1f0acb209b4e9d93de6ab2c7fa2
+			color icon_color_primary = "255,255,255" //FFFFFFFF
+		}
+		occupation_by_rebels
+		{
+			text text = "Province occupied by rebels"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "120,120,120" //FFFFFFFF
+		}
+		rebel_presence
+		{
+			text text = "There is rebel presence in the province"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "160,20,20"
+		}
+	}
+}
+
+def MercenariesView : PoliticalView
+{
+	name = "Mercenaries (DBG)"
+	texture color_texture = "Assets/Europe/PoliticalMap/Gradients/mercenaries_count_gradient.png" //GUID:82b9414df238af844aa99b830f541eff
+}
+
+def OfferWeightView : PoliticalView
+{
+	name = "Offer Weight (DBG)"
+	color clr_worst = "red"
+	color clr_neutral = "yellow"
+	color clr_best = "green"
+}
+
+def NeighborsView : PoliticalView
+{
+	name = "Neighbors (DBG)"
+}
+
+def BuildingsView : PoliticalView
+{
+	name = "Buildings"
+	description = "Select a building to view the provinces in which it can be constructed. Multiple buildings can be selected simultaneously (CTRL + LMB)." //!!! upr delete
+	//description = "Select a building to view the provinces in which it can be constructed. Lands that already contain the selected building are also highlighted." //!!! upr
+	
+	color highlighted_color = "#0b4f00"
+	color highlighted_color_partial = "170,199,164" //ABC8A5FF
+	color highlighted_color_selected = "0,0,0,0" //2FBE0FFF
+	color highlighted_color_player = "0,0,255" //0000FFFF
+	
+	selection_rules
+	{
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		// selection
+		// {
+		// 	text text = "Selection"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "63,146,44" //40932DFF
+		// }
+		player
+		{
+			text text = "Your kingdom's territories"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		constructed
+		{
+			text text = "Building is already constructed"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#417d37"
+		}
+		can_be_constructed
+		{
+			text text = "Building can be constructed"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#417d37"
+		}
+		// can_be_constructed_all
+		// {
+		// 	text text = "All of the selected buildings can be constructed"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "99,124,67,255"
+		// }
+		// can_be_constructed_single
+		// {
+		// 	text text = "One of the selected buildings can be constructed"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "150,149,105,255"
+		// }
+	}
+}
+
+def ProducedResourcesView : PoliticalView
+{
+	name = "Goods"
+	description = "Select a good to view the kingdoms in which it is currently produced. Multiple goods can be selected simultaneously (CTRL + LMB)." //!!! upr delete
+	//description = "Select a good to view the provinces in which it can be produced. Lands that already produce the selected good are also highlighted." //!!! upr
+	
+	color highlighted_color = "#0b4f00"
+	color highlighted_color_partial = "170,199,164" //ABC8A5FF
+	color highlighted_color_selected = "0,0,0,0" //2FBE0FFF //best case should not change, but it either deletes, either 
+	color highlighted_color_player = "0,0,255" //0000FFFF 
+	
+	selection_rules
+	{
+		string preferred_sub_mode = "realm"
+	}
+	
+	legend
+	{
+		// selection
+		// {
+		// 	text text = "Selection"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "#544C92"
+		// }
+		// can_be_produced
+		// {
+		// 	text text = "Selected good can be produced"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "147,148,102,255"
+		// }
+		player
+		{
+			text text = "Your kingdom's territories"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#544C92"
+		}
+		produced
+		{
+			text text = "Good is already produced"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+			color icon_color_primary = "#417d37"
+		}
+		can_be_produced
+		{
+			text text = "Good can be produced"
+			sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_OneStripe.psd:Element_Minimap_Legend_OneStripe#2" //GUID:23e300c060fce0c40a01d33b6bd396fc
+			color icon_color_primary = "#417d37"
+		}
+		// produced_all
+		// {
+		// 	text text = "Kingdom produces the selected good(s)"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "99,124,67,255"
+		// }
+		// can_be_produced_single
+		// {
+		// 	text text = "Kingdom produces one of multiple selected goods"
+		// 	sprite icon = "Assets/UI/Elements/Minimap/Legend/Element_Minimap_Legend_Solid_Color.psd:Element_Minimap_Legend_Solid_Color#2" //GUID:d25367a5e05737b4a865b14b23da15c9
+		// 	color icon_color_primary = "150,149,105,255"
+		// }
+		
+	}
+}
+
+// hack using data from poliical view as this virualy the same
+def TitleView : PoliticalView
+{
+	
+}
+
+def TitleRealmsView : TitleView
+{
+	texture realm_color_texture = "Assets/Europe/PoliticalMap/colors.png" //GUID:ddf929631bd3419429238d74d35e5589
+	allowed_figures_town = false
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "kingdom"
+	}
+}
+
+def TitleKingdomsView : TitleView
+{
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "kingdom"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "kingdom"
+	}
+}

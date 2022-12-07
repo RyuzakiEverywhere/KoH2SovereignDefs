@@ -1,0 +1,130 @@
+﻿template RealmAction : Action
+{
+	owner_type = "Realm"
+	secondary = true
+	show_in_action_bar = false
+}
+
+def AnnexRealmWithPopMajorityConfirmMessage : Message
+{
+	caption = "Annex?"
+	body = "Are you sure you want to annex {owner.castle}? The people in these lands are loyal to us, but such an act will not be overlooked by some kingdoms."
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+def AnnexRealmWithPopMajorityAction : RealmAction
+{
+	name = "Take what’s ours!"
+	tooltip = "Annex {owner.castle} and gain full ownership over the province."
+	icon = "Assets/UI/Elements/Common/WindowElements/UI_Icon_Realm_Annex_Pop_Majority.png:UI_Icon_Realm_Annex_Pop_Majority#2" //GUID:d364b33725db2ff4d91b91ebabcac820
+	confirmation_message = AnnexRealmWithPopMajorityConfirmMessage
+}
+
+def AnnexRealmRuthlesslyConfirmMessage : Message
+{
+	caption = "Annex?"
+	body = "Are you sure you want to annex {owner.castle}? It might lead to terrible political consequences, since the people in this lands are loyal to another kingdom."
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+
+def AnnexRealmRuthlesslyAction : RealmAction
+{
+	name = "Ruthlessly annex"
+	tooltip = $[
+	"Forcefully takeover {owner.castle} and gain full ownership over the province."
+	"{p}{p}"
+	"{b}This will have the following effects:{/clr}{/b}"
+	"{p}"
+	"[{blt} Crown authority: {kingdom.CrownAuthority.realm_annex:bonus}{p}]"
+	"[{blt} Relations with {castle.kingdom}: {owner_rel_change:bonus}{p}]"
+	"[{blt} Relations with all other kingdoms: {other_rel_change:bonus}]"]
+	float owner_rel_change = (RelationModifiers["rel_realm_annex_owner"])
+	float other_rel_change = (RelationModifiers["rel_realm_annex_everyone_else"])
+	icon = "Assets/UI/Elements/Common/WindowElements/UI_Icon_Realm_Annex.png:UI_Icon_Realm_Annex#2" //GUID:3742d95f8ee01994b8418cc05ebcfdaf
+	int annex_chance = 100
+	confirmation_message = AnnexRealmRuthlesslyConfirmMessage
+}
+
+def LiftOccupationConfirmMessage : Message
+{
+	caption = "Lift occupation?"
+	body = "Are you sure you want to lift the occupation off {owner.castle}?"
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+def LiftOccupationAction : RealmAction
+{
+	name = "Lift Occupation"
+	tooltip = $["Return the ownership of {owner.castle} to {owner.kingdom}."]
+	icon = "Assets/UI/Elements/Common/WindowElements/UI_Icon_Realm_Lift_Occupation.png:UI_Icon_Realm_Lift_Occupation#2" //GUID:d2cb33ec868d3384e876f8389b9efc77
+	confirmation_message = LiftOccupationConfirmMessage
+}
+
+def UpgradeFortificationsAction : RealmAction
+{
+	name = "Town fortifications ({owner.castle.fortifications_level}/{owner.castle.fortifications_max_level})"
+	switch_value = (owner.castle.fortifications_state)
+	case disorder
+	{
+		tooltip = $[
+			"{owner.castle.fortifications.description}"
+			"{p}{p}{clr:red}Can't upgrade while town is in disorder{/clr}"
+		]	
+	}
+	case normal
+	{
+		tooltip = $[
+			"{owner.castle.fortifications.description}"
+			//"[{owner.castle.fortifications_can_upgrade:if}|{p}{p}{clr:red}Fortifications cannot be upgraded further  until this town becomes bigger. Construct more buildings first.{/clr}]"
+			"[{p}{p}{owner.castle.fortifications_fully_upgraded:if}{clr:green}Fortifications are fully upgraded.{/clr}{p}|{p}{p}{clr:section_header}{b}When improved:{/b} {owner.castle.fortifications_upgrade_bonus:bonus} siege defense{p}{p}{b}Improve Cost:{/b} {owner.castle.fortifications_upgrade_cost}{/clr}]"
+		]
+		confirmation_message = UpgradeFortificationsConfirmMessage
+	}
+	case upgrading
+	{
+		
+		tooltip = $[
+			"{owner.castle.fortifications.description}{p}{p}{i}{clr:section_header}Fortifications are currently upgrading.{/clr}{/i}"
+		]
+	}
+	case repairing
+	{
+		tooltip = $[
+			"{p}{p}{owner.castle:s}{clr:red} defenses are damaged and slowly repairing.{/clr}"
+			"{p}{p}[{owner.castle.fortifications_can_boost_repairs:if}{clr:section_header}Boost repairs: {owner.castle.siege_defence_repair_cost}{/clr}|{i}{clr:section_header}Fortifications are currently repairing at maximum efficiency.{/clr}{i}]"
+		]
+	}
+	validate_prompts
+	{
+		text cant_afford_upgrade = "{clr:gray}Click to improve.{/clr}"
+		text cant_afford_repair = "{clr:gray}Click to repair.{/clr}"
+	}
+}
+
+
+def UpgradeFortificationsConfirmMessage : Message
+{
+	caption = "Upgrade fortifications"
+	body = $["When completed, fortification upgrades significantly boosts town's siege defense."
+		"[{p}{p}Siege defense increase: {owner.castle.fortifications_upgrade_bonus:bonus_dark}{/clr}]"
+		"[{p}Cost: {owner.castle.fortifications_upgrade_cost}]"
+	]
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}

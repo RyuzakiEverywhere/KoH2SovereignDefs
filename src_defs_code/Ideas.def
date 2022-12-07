@@ -1,0 +1,616 @@
+﻿def Idea
+{
+	text name
+	text tooltip
+	text flavor
+	sprite icon = "Assets/UI/Elements/Common/Icons/Structures/Buildings/UI_Structure_Spice_Garden_Build.png:UI_Structure_Spice_Garden_Build#2" //GUID:462eb99dadafa83459f9ec66137953ac
+	string advantage
+	
+	float adopt_duration = 300 // seconds
+	adopt_cost = "500g 500b"
+	
+	// do not override these
+	sprite icon_empty_enabled = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_AddIdea_Enabled.png:UI_KingdomAdvantages_AddIdea_Enabled#2" //GUID:3076a2af15a509f4e8b05eaf6e8e79a3
+	sprite icon_empty_disabled = "Assets/UI/Elements/KingdomAdvantages/UI_KingdomAdvantages_AddIdea_Disabled.png:UI_KingdomAdvantages_AddIdea_Disabled#2" //GUID:e6928fb1c21bb724eb6cffbb74fdf25b
+}
+
+//-------- WEALTH -------------- 
+
+// LocalTradeIdea : Idea
+// {
+// 	name = "Local trade"
+// 	tooltip = "{blt} {ks_gold_per_good:bonus}{gold_icon} for each resource produced in the kingdom"
+// 	flavor = "Development of markets and local trade is beneficial for the economy, especially in Kingdoms with well developed production of goods and commodities."
+	
+// 	mod ks_gold_per_good = 3
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// BankingIdea : Idea
+// {
+// 	name = "Banking"
+// 	tooltip = $[
+// 		"{blt} No gold lost due to inflation{p}"
+// 		"{blt} War tax penalty on happiness is halved"] //!!! NOT IMPLEMENTED (skip for now)
+// 	flavor = "Establishing strong financial institutions ensures the stability of the royal treasury."
+	
+// 	mod ks_inflation_reduction_perc = 100
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// GrainTradeIdea : Idea
+// {
+// 	name = "Grain trade"
+// 	tooltip = "{blt} {clr:green}+1{/clr}{trade_icon} per 4{food_icon} produced in the kingdom"
+// 	flavor = "Though exotic resouces have high commercial value, trading with foodstuff comprises the bulk of the trade and has proven its importance and benefits since the dawn of civilization."
+	
+// 	mod ks_commerce_ideas = (kingdom.food_produced / 4)
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// MaritimeTradeIdea : Idea
+// {
+// 	name = "Maritime trade"
+// 	tooltip = $[
+// 		"{blt} {clr:green}+2{/clr}{trade_icon} from each coastal province{p}" 
+// 		"{blt} {ks_gold_per_coastal_realm:bonus}{gold_icon} in each coastal province{p}"
+// 		"{blt} Trade center zones spread more effectively by sea."]
+// 	flavor = "Harbors and fleets of merchants ships is extremely advantageous for large scale and long-distance trade."
+	
+// 	mod ks_commerce_ideas = (kingdom.num_costal_realms * 2)
+// //	mod ks_tc_sea_spread_penalty_reduced_perc = 0.5
+	
+// 	mod ks_gold_per_coastal_realm = 2
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// CaravansIdea : Idea
+// {
+// 	name = "Caravans"
+// 	tooltip = $[
+// 		"{blt} Trade Centers influence {ks_increase_TC_range:bonus} province further by land{p}"
+// 		"{blt} {ks_gold_for_own_influenced_by_TC_realms:bonus}{gold_icon} in own provinces, influenced by Trade Centers"]
+// 	flavor = "Caravans play important role in trading by land, creating good connections between a trade center and the near-by provinces."
+	
+// 	mod ks_increase_TC_range = 20 //percent
+// 	mod ks_gold_for_own_influenced_by_TC_realms = 2
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	string onAdopt = "tc_refresh"
+// 	string onAbandon = "tc_refresh"
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// MercantilismIdea : Idea
+// {
+// 	name = "Mercantilism"
+// 	tooltip = $[
+// 		"{blt} {ks_merchant_trade_income_perc:bonus:%}{gold_icon} income from trade for Merchants{p}"
+// 		"{blt} {clr:green}+5{/clr}{trade_icon} per Merchant who is trading"]
+// 	flavor = "Well organized trade network and relations improves the efficiency of a kingdom's merchants."
+	
+// 	mod ks_commerce_ideas = (kingdom.trading_merchants_count * 5)
+// 	mod ks_merchant_trade_income_perc = 20
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// PatronageIdea : Idea
+// {
+// 	name = "Patronage"
+// 	tooltip = "{blt} Relations improvement by offering gold and land is doubled"
+// 	flavor = "Few diplomats will deny any request of a kingdom, that builds a renomee of a just, trustworthy and supportive ally"
+		
+// 	advantage = "WealthAdvantage"
+// }
+
+// ReinvestmentIdea : Idea
+// {
+// 	name = "Reinvestment"
+// 	tooltip = $[
+// 		"{blt} {ks_happiness:bonus} happiness in provinces{p}"
+// 		"{blt} {ks_population_growth_perc:bonus:%} growth rate in provinces{p}"
+// 		"{blt} {ks_prod_gold_perc:bonus:%}{gold_icon} income throughout the Kingdom"]
+// 	flavor = "Using a decent amount of the taxes to improve the quality of life of the people earns their respect and helps the community grow and thrive."
+	
+// 	mod ks_happiness = 5
+// 	mod ks_prod_gold_perc = -10
+// 	{
+// 		category = "Ideas"
+// 	}
+// 	mod ks_population_growth_perc = 25
+	
+// 	advantage = "WealthAdvantage"
+// }
+
+// //-------- CONQUEST --------------
+
+// MilitaryEngineeringIdea : Idea
+// {
+// 	name = "Military engineering"
+// 	tooltip = $[
+// 		"{blt} {ks_siege_attack:bonus:%} siege power{p}"
+// 		"{blt} {ks_siege_defense:bonus:%} siege defense"]
+// 	flavor = "Preparing military engineers and equipment plays significant role in sieges, both in attack and defense."
+	
+// 	mod ks_siege_defense = 20
+// 	mod ks_siege_attack = 20
+// 	advantage = "ConquestAdvantage"
+// }
+
+// NavalSupremacyIdea : Idea
+// {
+// 	name = "Naval supremacy"
+// 	tooltip = $[
+// 		"{blt} {ks_ships_speed_perc:bonus:%} faster naval travel speed{p}"
+// 		"{blt} {ks_naval_CTH:bonus:%} attack of troops in naval battles"]
+// 	flavor = "Traditions in shipbuilding and seafaring may be decisive in naval battles and strive for controlling the seas."
+	
+// 	advantage = "ConquestAdvantage"
+// 	mod ks_naval_CTH = 20
+// 	mod ks_ships_speed_perc = 30
+// }
+
+// ProfessionalArmyIdea : Idea
+// {
+// 	name = "Professional Army"
+// 	tooltip = $[
+// 		"{blt} Hiring troops costs {ks_troop_cost_increase:penalty:%} more gold{p}" 
+// 		"{blt} {ks_initial_troops_level:bonus} starting level to newly hired troops"]
+// 	flavor = "Longer professional training of the army is costly, but the better preparation pays off when the freshmen enter battle."
+	
+// 	mod ks_troop_cost_increase = 10
+// 	mod ks_initial_troops_level = 1
+	
+// 	advantage = "ConquestAdvantage"
+// }
+
+// ArcheryTraditionsIdea : Idea
+// {
+// 	name = "Archery traditions"
+// 	tooltip = $[
+// 		"{blt} {ks_ranged_CTH_perc:bonus:%} attack to ranged troops{p}"
+// 		"{blt} {ks_salvo_capacity_bonus_perc:bonus:%} salvo capacity to ranged troops"]
+// 	flavor = "Regular training with bows and arrows is a must for armies, relying heavily on ranged combat."
+	
+// 	mod ks_ranged_CTH_perc = 20
+// 	mod ks_salvo_capacity_bonus_perc = 50
+	
+// 	advantage = "ConquestAdvantage"
+// }
+
+// HorsebackRidingIdea : Idea
+// {
+// 	name = "Horseback riding"
+// 	tooltip = $[
+// 		"{blt} {ks_army_speed_world_perc:bonus:%} movement speed to armies on land{p}"
+// 		"{blt} {ks_cavalry_CTH_perc:bonus:%} attack to cavalry troops"]
+// 	flavor = "Nations with traditions in horse breeding and riding have fearsome cavalries and advantage in hit-and-run tactics."
+	
+// 	mod ks_cavalry_CTH_perc = 20
+// 	mod ks_army_speed_world_perc = 10 //CHECK
+	
+// 	advantage = "ConquestAdvantage"
+// }
+
+// // BloodTaxIdea : Idea
+// // {
+// // 	name = "Blood-tax"
+// // 	tooltip = $[
+// // 		"{blt} {villages_levy_increase:bonus}{levy_icon} in villages{p}"
+// // 		"{blt} {happiness_increase:bonus} happiness in provinces"]
+// // 	flavor = "Taking young boys in service of the kingdom is hated by the people, but nevertheless an efficiant method for militarization."
+
+// // 	mod villages_levy_increase = 2
+// // 	mod happiness_increase = -3
+// // 	advantage = "ConquestAdvantage"
+// // }
+
+// // Patrols : Idea
+// // {
+// // 	name = "Patrols"
+// // 	tooltip = $[
+// // 		"{blt} {ks_troops_per_militia_town:bonus}{arms_icon} more troops per town guards{p}"]
+// // 	flavor = "Defensive preparation and scouting of the province guards improves the regional security and increases the chances of timely reaction when a settlement is attacked."
+	
+// // 	mod ks_troops_per_militia_town = 1
+// // 	advantage = "ConquestAdvantage"
+// // }
+
+// ScorchedEarthIdea : Idea
+// {
+// 	name = "Scorched earth"
+// 	tooltip = $[
+// 		"{blt} Enemy settlements recover {ks_settlement_razed_penalty:bonus:%} slower from pillages{p}"
+// 		"{blt} {ks_pillage_gold_perc:bonus:%}{gold_icon} from pillages"]
+// 	flavor = "Perfecting the military strategy of pillaging and destruction of resources aims to exhaust the enemy in longer wars."
+	
+// 	mod ks_settlement_razed_penalty = 100
+// 	mod ks_pillage_gold_perc = 100
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "ConquestAdvantage"
+// }
+
+// FortificationsIdea : Idea
+// {
+// 	name = "Fortifications"
+// 	tooltip = $[
+// 		"{blt} {ks_attrition_bonus:bonus} attrition damage in provinces{p}"
+// 		"{blt} {ks_siege_defense:bonus} siege defense in provinces"]
+// 	flavor = "Stronger fortification of towns and castles slows down the invasions of enemies and makes them pay dearly."
+	
+// 	mod ks_attrition_bonus = 10
+// 	mod ks_siege_defense = 100
+// 	advantage = "ConquestAdvantage"
+// }
+
+// //-------- CULTURE --------------
+
+// PilgrimageIdea : Idea
+// {
+// 	name = "Pilgrimage"
+// 	tooltip = "{blt} {ks_piety_per_monastery:bonus}{kingdom.piety_icon} in monasteries"
+// 	flavor = "Religion is the guiding light of the people and plays an undeniable role both in local and foreign policy."
+	
+// 	mod ks_piety_per_monastery = 2
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// LiteracyIdea : Idea
+// {
+// 	name = "Literacy"
+// 	tooltip = "{blt} {ks_books_per_monastery:bonus}{books_icon} in monasteries{p}"
+// 	flavor = "The path of enlightenment opens many doors for the development of a kingdom." //TODO what can you do with books?
+	
+// 	mod ks_books_per_monastery = 2
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// MissionariesIdea : Idea
+// {
+// 	name = "Missionaries"
+// 	tooltip = $[
+// 		"{blt} Converting provinces to your religion is twice as fast{p}"
+// 		"{blt} {ks_piety_per_cleric:bonus}{kingdom.piety_icon} for each hired Cleric"]
+// 	flavor = "Converting the people of a conquered territories to the righteous path is necessary for the stability and unity of a larger empire."
+	
+// 	mod ks_convert_religion_duration_reduction_perc = 50
+// 	mod ks_piety_per_cleric = 5
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// FameEducationIdea : Idea
+// {
+// 	name = "Fame education"
+// 	flavor = "Elite education for the aristocracy assures better preparation of the knights for the moment in which their service will be required."
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// EntertainmentIdea : Idea
+// {
+// 	name = "Entertainment"
+// 	tooltip = $[
+// 		"{blt} {ks_happiness:bonus} happiness in all provinces{p}"
+// 		"{blt} {clr:green}+1{/clr}{gold_icon} per 5 population"]
+// 	flavor = "Entertainment for the masses makes them happier and brings some coins back to the royal treasury."
+	
+// 	mod ks_happiness = 5
+// 	mod ks_gold_per_population = 0.2
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// MedievalFairsIdea : Idea
+// {
+// 	name = "Medieval fairs"
+// 	tooltip = "{blt} {ks_happiness_medieval_fairs:bonus} happiness and {ks_trade_per_medieval_fairs_idea:bonus}{trade_icon} in all provinces producing {clr:sp_resource_color}Sausages{/clr}, {clr:sp_resource_color}Beer{/clr} or {clr:sp_resource_color}Wine{/clr}{p}"
+// 	flavor = "Where delicious food and beverages are abundant, fairs provide enjoyment for the common folk and more gold to be collected from taxes."
+	
+// 	mod ks_happiness_medieval_fairs = 3
+// 	mod ks_trade_per_medieval_fairs_idea = 2
+// 	advantage = "CultureAdvantage"
+// 	string onAdopt = "recalc_income"
+// 	string onAbandon = "recalc_income"
+// }
+
+// HistoricalArchivesIdea : Idea
+// {
+// 	name = "Historical archives"
+// 	tooltip = $[
+// 		"{blt} Knights can pick from {ks_character_additional_skill_pick} additional skill each time they level up{p}"
+// 		"{blt} {ks_character_experience_perc:bonus:%} faster experience gain for all knights{p}"
+// 		"{blt} {ks_prod_books_flat:bonus}{books_icon}"]
+// 	flavor = "A good knowledge and understanding of the past guides the wise leaders to the most successful strategies and helps them avoid those, known to fail."
+	
+// 	mod ks_prod_books_flat = 5
+// 	mod ks_character_experience_perc = 10
+// 	mod ks_character_additional_skill_pick = 1
+// 	advantage = "CultureAdvantage"
+// }
+
+// ArchitectureIdea : Idea
+// {
+// 	name = "Architecture"
+// 	tooltip = $[
+// 		"{blt} {ks_production_bonus:bonus}{hammers_icon} in all provinces{p}"
+// 		"{blt} Buildings are {ks_build_cost_discount_perc:bonus:%} cheaper"]
+// 	flavor = "Development of masonry and architecture leads to more efficient construction in terms of time and gold alike."
+	
+// 	mod ks_production_bonus = 5
+// 	mod ks_build_cost_discount_perc = 10
+	
+// 	advantage = "CultureAdvantage"
+// }
+
+// //-------- SOCIETY --------------
+
+// RuralSocietyIdea : Idea
+// {
+// 	name = "Rural society"
+// 	tooltip = $[
+// 		"{blt} {ks_food_in_towns:bonus}{food_icon} in all provinces{p}"
+// 		"{blt} {ks_max_food_in_provinces_per_village:bonus}{food_icon} storage in provinces, per Village"]
+// 	flavor = "Agricultural development increases the population growth and the food reserves of a kingdom."
+	
+// 	mod ks_food_in_towns = 5
+// 	mod ks_max_food_in_provinces_per_village = 50
+// 	advantage = "PopulationAdvantage"
+// }
+
+// AristocracyIdea : Idea
+// {
+// 	name = "Aristocracy"
+// 	tooltip = $[
+// 		"{blt} All knight wages are halved{p}"
+// 		"{blt} {ks_hire_knight_cost_discount_perc:bonus:%} cheaper cost for hiring new knights"]
+// 	flavor = "Strong connections between prominent noblemen and the crown is helpful when the services of able and loyal knights are required."
+	
+// 	mod ks_knight_wage_discount_perc = 50
+// 	mod ks_hire_knight_cost_discount_perc = 50
+	
+// 	advantage = "PopulationAdvantage"
+// }
+
+// NationalismIdea : Idea //!!! rename to Patriotism
+// {
+// 	name = "Patriotism"
+// 	tooltip = $[
+// 		"{blt} Foreign influence in your provinces is greatly reduced{p}"
+// 		"{blt} Rebels loyal to your kingdom are more likely to appear in foreign provinces with your influence"]
+// 	flavor = "Where the people are willing to die for they kingdom, the roots of foreign influences are cut short. The idea of a strong nation often reaches outside its borders as well."
+	
+// 	mod ks_nationalism = 50
+// 	mod ks_nationalism_rebel_risk = -20
+// 	advantage = "PopulationAdvantage"
+// }
+
+// CitizenshipIdea : Idea
+// {
+// 	name = "Citizenship"
+// 	tooltip = $[
+// 		"{blt} {ks_max_population:bonus} population in provinces{p}"]
+// 	flavor = "Development of the cities ensures that there will be more taxes to be collected, as well as more recruits for the army."
+	
+// 	mod ks_max_population = 4
+	
+// 	advantage = "PopulationAdvantage"
+// }
+
+// ToleranceIdea : Idea
+// {
+// 	name = "Tolerance"
+// 	tooltip = $[
+// 		"{blt} No rebel risk from religion in provinces with competing religions{p}"
+// 		"{blt} No religious penalties from vassals with other religions{p}"
+// 		"{blt} No diplomacy penalty when negotiating with kingdoms with different religions."] //!!! check "mod liege_reign_perc" in religion.def
+// 	flavor = "A policy of religious tolerance helps for the stability of а growing empire and in the diplomatic relations with kingdoms, following different religion."
+	
+// 	mod ks_reduce_religious_tension_perc = 100
+// 	mod ks_reduce_culture_tension_perc = 100
+// 	advantage = "PopulationAdvantage"
+// }
+
+// FiefdomsIdea : Idea
+// {
+// 	name = "Fiefdoms"
+// 	tooltip = $[
+// 		"{blt} {ks_keeps_local_stability_bonus:bonus} province stability per castle, in all provinces{p}"
+// 		"{blt} {ks_tax_bonus:bonus:%} bonus{gold_icon} income from taxes"]
+// 	flavor = "Delegating more power to loyal regional leaders pays off, as they have better knowledge and dedication to control and please the local population."
+	
+// 	mod ks_keeps_local_stability_bonus = 1
+// 	mod ks_tax_bonus = 20
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "PopulationAdvantage"
+// }
+
+// IlluminatedNationIdea : Idea
+// {
+// 	name = "Illuminated Nation"
+// 	tooltip = "{blt} {ks_trade_per_society:bonus}{trade_icon}, {ks_piety_per_society:bonus}{kingdom.piety_icon} and {ks_books_per_society:bonus}{books_icon} per society"
+// 	flavor = "A feared ruler thinks only of war and expansion. A wise ruler creates a future by conceiving an enlightened nation."
+	
+// 	mod ks_trade_per_society = 1
+// 	{
+// 		category = "Ideas"
+// 	}
+// 	mod ks_piety_per_society = 1
+// 	{
+// 		category = "Ideas"
+// 	}
+// 	mod ks_books_per_society = 1
+// 	{
+// 		category = "Ideas"
+// 	}
+	
+// 	advantage = "PopulationAdvantage"
+// }
+
+// DynastiesIdea : Idea
+// {
+// 	name = "Dynasties"
+// 	tooltip = $["{blt} Higher chance kingdoms to accept marriage offers{p}"
+// 				"{blt} King's death no longer breaks alliances"]
+// 	flavor = "A line of hereditary rulers induces respect and trust both in the eyes of the kingdom's subjects and foreign diplomats and rulers."
+	
+// 	mod ks_accept_marriage_pc_bonus = 20
+	
+// 	advantage = "PopulationAdvantage"
+// }
+
+// //-------- POLITICS --------------
+
+// CounterEspionageIdea : Idea
+// {
+// 	name = "Counter-espionage"
+// 	tooltip = $[
+// 		"{blt} Greatly reduces the chance for successful spy actions against you{p}"
+// 		"{blt} Reduced rebellion risk in provinces with each hired Spy"]
+// 	flavor = "Ensuring the security of a nation through the means of intelligence and espionage is sometimes crucial against cunning enemies."
+	
+// 	//mod ks_counter_espionage_tick_time = -50 //percent
+// 	mod ks_rebellion_risk_total_bonus = (-kingdom.spies_count * 5)
+// 	mod ks_enemy_spy_action_success_chance = -10 //Added Chance
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// SpyNetworksIdea : Idea
+// {
+// 	name = "Spy networks"
+// 	tooltip = $[
+// 		"{blt} Spies are more likely to succeed in espionage actions{p}"
+// 		"{blt} Organizing revolts and escaping from prison are more likely to succeed"]
+// 	flavor = "An intricate network of spies can sometimes succeed where armies fail."
+	
+// 	mod ks_spy_action_success_chance = 15 //ADDED in chance 
+// 	mod ks_prison_action_bonus_chance = 10 //ADDED in chance 
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// ImperialismIdea : Idea
+// {
+// 	name = "Imperialism"
+// 	tooltip = $[
+// 		"{blt} {ks_vassal_tax_perc:bonus:%}{gold_icon} from vassal tributes{p}"
+// 		"{blt} Higher chance to annex other kingdoms{p}"
+// 		"{blt} -200 relations with all kingdoms upon adopting this idea{p}"]
+// 	flavor = "The open policy, determination and strength to dominate over foreign nations makes it more likely the weaker foes to bow their heads. The stronger ones will see a growing empire as a threat, though, and might act against it."
+	
+// 	mod ks_vassal_tax_perc = 50 { perc }
+// 	mod ks_vassal_annex_pc_bonus = 30
+	
+// 	string onAdopt = "relations_imperialism"
+// 	string onAbandon = "relations_imperialism"
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// ColonialismIdea : Idea
+// {
+// 	name = "Colonialism"
+// 	tooltip = $[
+// 		"{blt} +5{trade_icon} per imported exotic good{p}" //!!! NOT IMPLEMENTED
+// 		"{blt} {ks_gold_in_ungoverned_realms_perc:bonus:%}{gold_icon} from ungoverned provinces{p}"
+// 		"{blt} {ks_rebellion_risk_total_bonus:penalty:} rebellion risk in provinces"]
+// 	flavor = "This policy aims to extend and retain the economical interest of a kingdom over dominated territories."
+	
+// 	mod ks_gold_in_ungoverned_realms_perc = 50
+// 	{
+// 		category = "Ideas"
+// 	}
+// 	mod ks_rebellion_risk_total_bonus = 5
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// NegotiationsIdea : Idea
+// {
+// 	name = "Negotiations"
+// 	tooltip = $[
+// 		"{blt} Ransoming your captured knights costs half the gold and is always successful{p}"]
+// 	flavor = "The art of persuasion and increasing the influence in foreign kingdoms is invaluable for every kingdom, that does not rely solely on its army to deal with problems abroad."
+		
+// 	string onAdopt = "relations_negotiations"
+// 	string onAbandon = "relations_negotiations"
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// CruelLawsIdea : Idea
+// {
+// 	name = "Cruel laws"
+// 	tooltip = $[
+// 		"{blt} {ks_rebel_spawn_chance_bonus:penalty:%} chance for rebellious population to turn into rebels{p}"
+// 		"{blt} {ks_happiness:bonus} happiness in provinces"]
+// 	flavor = "Merciless and rigorous control might be harsh in the eyes of the people, but it clences the kingdom from those, prone to disobedience."
+	
+// 	mod ks_rebel_spawn_chance_bonus = -75
+// 	mod ks_happiness = -3
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// ExploitationIdea : Idea
+// {
+// 	name = "Exploitation"
+// 	tooltip = $[
+// 		"{blt} {ks_prod_gold_perc:bonus:%}{gold_icon} in all provinces{p}" 
+// 		"{blt} {ks_hammers_in_provinces_perc:bonus:%} production in all provinces{p}"
+// 		"{blt} {ks_happiness:bonus} happiness in all provinces"]
+// 	flavor = "In order to serve the crown to their full potential, the people need firm control. In darker times, this is required for their own good and the thriumph of the kingdom."
+	
+// 	mod ks_prod_gold_perc = 10
+// 	{
+// 		category = "Ideas"
+// 	}
+// 	mod ks_hammers_in_provinces_perc = 20
+// 	mod ks_happiness = -3
+	
+// 	advantage = "PoliticsAdvantage"
+// }
+
+// IntimidationIdea : Idea
+// {
+// 	name = "Intimidation"
+// 	tooltip = "{blt} Kingdoms that are weaker and dislike you are more likely to accept your demands when your army is stronger than theirs"
+// 	flavor = "While friendship and trust are not always achieveable by the means of diplomacy, fear and respect are unignorable factors in negotiations."
+	
+// 	mod ks_intimidation_pc_bonus = 30
+// 	advantage = "PoliticsAdvantage"
+// }

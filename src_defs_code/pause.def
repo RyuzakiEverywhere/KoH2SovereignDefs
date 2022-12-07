@@ -1,0 +1,109 @@
+def PauseRequest
+{
+	bool debug = false
+
+	bool allow_in_multiplayer = false
+	float timeout = -1
+	float cooldown_mul = 0
+	text label
+
+	// these cannot be inherited:
+	text caption = "[{is_paused:if_not}PAUSED|CAN'T PAUSE]"
+	text cannot_unpause_label = "[{p}{b}<mark=#7f00007f>Can't Unpause</mark>{/b}{p}You must wait {cannot_unpause_time:F0}{p}seconds ...]"
+	text cannot_pause_label = "[{p}{b}<mark=#7f00007f>Can't Pause</mark>{/b}{p}You must wait {cannot_pause_time:F0}{p}seconds ...]" //!!! not implemented
+}
+
+def ManualPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	timeout = (debug and 15 or campaign_rules.unpause_cooldown)
+	cooldown_mul = (debug and 1 or campaign_rules.pause_refresh)
+
+	label = "[by {q}{player_name}{q}[ ({kingdom})]]"
+}
+
+def AltTabPause : PauseRequest
+{
+	label = "[{debug:if}(Alt-Tab)]"
+}
+
+def TutorialPause : PauseRequest
+{
+	label = "[{debug:if}(Tutorial)]"
+}
+
+def LoadingPause : PauseRequest
+{
+	timeout = 0 // allow manual unpause, just in case it is stuck
+	label = "[{debug:if}(Loading)]"
+}
+
+def DisconnectPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	timeout = MultiplayerSettings.wait_for_players_disconnect_timeout
+	label = "[{player_name}[ ({kingdom})] disconnected.]"
+}
+
+def QuitPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	timeout = 0
+	label = "[{player_name}[ ({kingdom})] left.]"
+}
+
+def WaitingForPlayersPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	timeout = MultiplayerSettings.wait_for_players_join_timeout
+	label = "(Waiting for [{players}|players])" //!!! {players} not implemented
+}
+
+def HostMigratedPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	timeout = 0
+	label = "Host migrated."
+}
+
+def EoWPause : PauseRequest
+{
+	allow_in_multiplayer = true
+	label = "[{debug:if}(Emperor of the  World)]"
+}
+
+def MenuPause : PauseRequest
+{
+	label = "[{debug:if}(Menu)]"
+}
+
+def BugReportPause : ManualPause
+{
+	label = "[by {q}{player_name}{q} (Reporting a bug)]"
+}
+
+def EndGamePause : PauseRequest
+{
+	timeout = 0
+	allow_in_multiplayer = true
+	label = "[{debug:if}(End Game)]"
+}
+
+def LeadBattlePause : PauseRequest
+{
+	allow_in_multiplayer = false
+	label = "[{debug:if}(LeadBattle Confirmation)]"
+}
+
+def GameResumed : PauseRequest //!!! not implemented
+{
+	caption = "RESUMED"
+	label = "[by {q}{player_name}{q}[ ({kingdom})]]"
+}
+
+def GameSpeedChanged //!!! not implemented
+{
+	caption = "SPEED CHANGED"
+	label = "[by {q}{player_name}{q}[ ({new_game_speed})]]"
+	text new_game_speed = "x{game_speed}"
+}

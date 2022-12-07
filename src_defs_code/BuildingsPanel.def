@@ -1,0 +1,94 @@
+﻿def BuildingsPanel
+{
+	int cols // must be set
+	int rows // must be set
+	
+	arrow_prefabs
+	{
+		object line = "Assets/Test/Michael/BuildingsPanel/UIP_LineArrow.prefab" //GUID:e2aef7da4a879ad4eb032737cfbc8e7d
+		object arrow = "Assets/Test/Michael/BuildingsPanel/UIP_Arrow.prefab" //GUID:49b26dcd661ce164dbeab812ce1e68b0
+		object arrow_on_top = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowOnTop.prefab" //GUID:f298a125c9af67947b2240b992156c8e
+		object arrow_bellow = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowBellow.prefab" //GUID:baf8a664a713d6d49b25a34b8a589cd2
+	}
+	
+	icon_margins // distance from cell edge to icon edge, 1.0 is the size of the cell
+	{
+		float left = 0.12
+		float bottom = 0.05
+		float right = 0.15
+		float top = 0.12
+	}
+	
+	//buildings
+	//{
+	// key is a building def id
+	// X and Y are float grid coords, [1 .. cols/rows]
+	// default X,Y are grid-like from left to right, bottom to top		
+	//bldg_def_id [= X,Y]
+	//}
+	
+	//arrows
+	//{
+	// some_key // key doesn't matter
+	// {
+	// 	object prefab = arrow_prefabs.***
+	// 	float row = ***
+	// 	float left = ***
+	// 	float right = ***
+	// }
+	//}
+}
+
+// def TestBuildingsPanel : BuildingsPanel
+// {
+// 	cols = 3
+// 	rows = 3
+	
+// 	buildings
+// 	{
+// 		Market = 1.5,1
+// 		LoggingCamp = 2.5,1 //changed buildings - previous were outputing errors, no more such building
+		
+// 		Machinery = 1,2 
+// 		Library
+		
+// 		Orphanage = 1.5,3
+// 		ManurePits
+// 	}
+	
+// 	arrows
+// 	{
+// 		BellowApothecary
+// 		{
+// 			object prefab = arrow_prefabs.arrow
+// 			float row = 1.5
+// 			float left = 1
+// 			float right = 1.5
+// 		}
+		
+// 		BellowMerchantsGuild
+// 		{
+// 			object prefab = arrow_prefabs.arrow_on_top
+// 			float row = 1.5
+// 			float left = 1.5
+// 			float right = 2.5
+// 		}
+		
+// 		BellowBakery
+// 		{
+// 			object prefab = arrow_prefabs.arrow
+// 			float row = 1.5
+// 			float left = 3.25
+// 			float right = 3.75
+// 		}
+		
+// 		AboveMerchantsGuild
+// 		{
+// 			object prefab = arrow_prefabs.arrow_bellow
+// 			float row = 2.5
+// 			float left = 1.5
+// 			float right = 2.5
+// 		}
+// 	}
+	
+// }

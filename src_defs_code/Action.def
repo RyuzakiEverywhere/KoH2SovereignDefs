@@ -1,0 +1,170 @@
+def Action
+{
+	text name
+	text tooltip
+	sprite icon
+	string owner_type
+	string target
+	Table target_select_table = GovernActionTargetTable;
+	string args = []
+	Table args_select_table = ActionArgumentTable
+	text costText = "[{cost}]"
+	string mission = "NotOnMission" // "Ignore", "NotOnMission", "OnMission"
+	bool secondary = false
+	bool while_leading_army = false
+	float prepare_duration = 0
+	float prepare_tick = 0
+	float max_progres = 0
+	bool show_if_invalid = false
+	bool show_in_action_bar = true
+	bool show_in_character_widnow = false
+	bool show_while_executing = false
+	bool can_be_canceled = true
+	Status show_in_status
+	prefab target_picker_prefab
+	Message confirmation_message
+	Message target_confirmation_message
+	Message cancel_message = CancelCurrentActionMessage
+	bool voice_from_character = false // if true, treat voice_line fields as keys and get the sound from the character class
+	string prepare_voice_line // also used for instant actions 
+	string success_voice_line // played when an action succeeds
+	string decline_voice_line // refuse to do the action for one reason or another
+	string cancel_voice_line // manually cancelled action
+	string cancelled_voice_line // automatically cancelled action
+	string fail_voice_line // voice line for fail special outcome
+	string prepare_sound_effect // also used for instant actions 
+	string done_voice_line
+	string done_sound_effect
+	int ui_order = 0;			// higher is higher
+	bool ai_validate = false
+	// for tooltips and cost validation only:
+	resources upkeep
+	{
+		gold = (gold_upkeep || 0)
+		trade = (commerce_upkeep)
+	}
+
+	text picker_text = "[{action.success_chance_text:%}]"
+
+	target_vars
+	{
+		tooltip_def = "ActionTooltip"		
+	}
+
+	//cancel_events
+	//{
+		// sender_type can be one of the following:
+		//   owner (default if no type is specified)
+		//   target
+		//   target_realm (target must be realm or settlement)
+		//   target_castle (target must be realm or settlement)
+		//   src_kingdom, own_kingdom
+		//   tgt_kingdom, target_kingdom
+		//   mission_kingdom
+		//   prepare_tick
+		// for other senders either add support or use "sender = (expr)" syntax
+
+		// sender_type message_or_just_key = (cancel_condition)
+		// {
+		// 	sender = (expr_returning_object) // if present used instead of parent's type
+		// 	message = [ "message1", "message2" ] // if present used instead of parent's key
+		// 	cancel_condition = (cancel_condition) // if present used instead of parent's value
+		// 	cancelled_message = ActionCancelledMessage // this is the default value, set = null to disable
+		//  cancel_reason = "..." // if not set, the parent key (message_or_just_key) will be used
+		// }
+
+		// examples:
+
+		// target dying
+
+		// target_realm religion_changed = (!target_valid)
+
+		// check_target = (!target_valid) // key is not a message, just unique key
+		// {
+		// 	sender = (mission_kingdom.king) // custom sender
+		// 	message = [ "died", "prison_changed" ]
+		// }
+	//}
+
+	text cancelled_message_caption = "Action halted: {action.name}"
+	cancelled_message_texts
+	{
+		text default = "Due to change in circumstances, {owner} had to abandon his current task."
+	}
+
+	requirement_defaults
+	{
+		text requirements_text = "{section_header}Requirements:{/section_header}{p}{section_body}{requirement_texts}{/section_body}"
+		text requrement_met = "{clr:green}{blt} {name}{/clr}"
+		text requrement_not_met = "{clr:red}{blt} {name}{/clr}"
+
+		king_skills // = [ "Skill1", "Skill2", ...], all of them must be at least min_level
+		{
+			// no default text, specify it where used and mention the skills and level
+		}
+		not_vassal
+		{
+			text name = "Not a vassal of any kingdom"
+		}
+		no_wars
+		{
+			text name = "Not at war with any kingdom"
+		}
+		sf_points
+		{
+			text name = "Have at least {clr:gold}{value:%}{/clr} success chance"
+		}
+
+		Christian = (own_kingdom.is_christian)
+		{
+			text name = "Christian religion"
+		}
+		Catholic = (own_kingdom.is_catholic)
+		{
+			text name = "Catholic religion"
+		}
+		Orthodox = (own_kingdom.is_orthodox)
+		{
+			text name = "Orthodox religion"
+		}
+		Muslim = (own_kingdom.is_muslim)
+		{
+			text name = "Muslim religion"
+		}
+		Sunni = (own_kingdom.is_sunni)
+		{
+			text name = "Sunni religion"
+		}
+		Shia = (own_kingdom.is_shia)
+		{
+			text name = "Shia religion"
+		}
+		Pagan = (own_kingdom.is_pagan)
+		{
+			text name = "Pagan religion"
+		}
+	}
+
+	outcome_defaults : ActionOutcomeDefaults
+
+	text prepare_status_text
+	text running_status_text
+
+	validate_prompts
+	{
+		text ok = "[{picker_tooltip:if}Click to select[ {target}].|{has_target_and_args:if_not}Click to pick a target.|Click to perform the action.]"
+		text generic_invalid = "{clr:red_bright}[The action is currently not available.]{/clr}"
+		text _severity = "{clr:red_bright}Not allowed versus players.{/clr}"
+		text _no_possible_targets = "{clr:red_bright}There are no possible targets for this action.{/clr}"
+		text _no_possible_args = "{clr:red_bright}There are no possible targets for this action.{/clr}"
+		text _another_action_in_progress = "{clr:red_bright}[{owner} is busy with another action.|Another action is in progress.]{/clr}"	
+		//text another_action_in_progress = "{clr:red_bright}[{owner} is busy with another action.|Another action is in progress.]{/clr}"
+		text _in_progress = "[{owner} is currently performing this action|Action is in progress.]" // has support for {prepare_status_text}
+		text _unique = "[{other_character_doing_the_same}|Another knight] is already doing that.";
+		text _not_idle = "{clr:red_bright}[{owner} is busy with another action.|Another action is in progress.]{/clr}"
+		text _cost = "{clr:gray}{ok}{/clr}"
+		text _upkeep = "{clr:gray}{ok}{/clr}"
+		text _is_player = "{clr:gray}The action cannot be performed against another player.{/clr}"
+		//text chance_too_low = "{clr:red_bright}Cannot be performed while success chance is below {validation_min_chance}%."
+	}
+}

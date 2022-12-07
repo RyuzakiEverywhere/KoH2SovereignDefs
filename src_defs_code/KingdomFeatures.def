@@ -1,0 +1,14 @@
+def KingdomFeature
+{
+	text name
+}
+
+// def HeavyUnitsKingdom : KingdomFeature
+// {
+// 	name = "Blast Furnace"
+// }
+
+// def HeavyMountedKingdom : KingdomFeature
+// {
+// 	name = "Warhorse Breed"
+// }

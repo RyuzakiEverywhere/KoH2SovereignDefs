@@ -1,0 +1,3175 @@
+﻿def Tooltip
+{
+	prefab prefab
+	text caption
+	text text = "{obj}"
+	float delay = 0.05 //if changing these, change the default/min/max of tooltip_delay at UserSettings.def
+	float min_delay = 0
+	float max_delay = 0.5
+	string alignment = "left" // defines alignment type between 
+	float min_width = 30
+	float max_width = 600
+	
+	// pinable settings
+	int pinable = -1 // <0: auto, 0: not pinable, >0: pinable
+	float pinable_delay = 0  //if changing these, change the default/min/max of pinable_delay at UserSettings.def
+	float min_pinable_delay = 0
+	float max_pinable_delay = 5
+	// placement heuristics
+	float prefer_aligned = 0.5
+	float prefer_vertical = 0.25
+	float prefer_top = 0.1
+	float prefer_right = 0.05
+	
+	// use "visible_condition" field to add auto close conditions for tooltips
+	// ex:  visible_condition = (is_valid)
+}
+
+def HyperTextTooltip : Tooltip
+{
+	prefab = "Assets/UI/Elements/Common/HyperText/UIP_HyperTextTooltip.prefab" //GUID:8741e9a559e385f4a92be1f08ae9fb8e
+}
+
+def CharacterTooltip : Tooltip
+{
+	prefab = "Assets/UI/Character/UIP_CharacterTooltip.prefab" //GUID:884266cce1960e442baf4719f9d30c4b
+	
+	class_gradient_colors
+	{
+		color Marshal = "185,25,25,16"
+		color Merchant = "255,205,0,16"
+		color Diplomat = "0,128,0,16"
+		color Spy = "249,34,225,16"
+		color Cleric = "95,241,255,16"
+	}
+	
+	text character_name = "{title} {name}[ {name_idx:roman}][ of {governed_castle}]"
+	text kingdom_class = "[{kingdom:ian} {class_name}|{kingdom}]"
+	text character_age = "{age}"
+	text marriage = "[{is_widowed:if}Widow[ of {widowed_spouse}]|Married to {spouse}]"
+	
+	bool has_important_relative_morale_bonus = (cs_important_relative_marshal_morale_bonus > 0)
+	bool has_important_relative_gold_bonus = (cs_important_relative_merchant_gold_bonus > 0)
+	bool has_important_relative_books_bonus = (cs_important_relative_cleric_books_bonus > 0)
+	bool has_important_relative_influence_bonus = (cs_important_relative_diplomat_influence_bonus > 0)
+	bool has_important_relative_espionage_defense_bonus = (cs_important_relative_spy_espionage_defense_bonus > 0)
+	bool is_maintaining_pact = (pact)
+	bool is_promoting_belief = (paganBelief.name != null)
+	
+	text add_text = $[
+		"[{puppet_of} has bribed {obj} and can use him to our advantage.[{prison_kingdom:if} While he is imprisoned, there is not much he can do, though.]{p}{p}]"
+		"[{clr:character_tooltip_status_color}{is_maintaining_pact:if}{character:link}{title} {name}{/link} is maintaining {pact:an}.{/clr}{p}{p}]"
+		"[{clr:character_tooltip_status_color}{is_promoting_belief:if}{title} {name} is promoting {paganBelief} throughout {kingdom}.{/clr}{p}{p}]"
+		"[{has_important_relative_morale_bonus:if}{CharacterStats.cs_important_relative_marshal_morale_bonus.name}: {cs_important_relative_marshal_morale_bonus:bonus} army morale{p}{p}]"
+		"[{has_important_relative_gold_bonus:if}{CharacterStats.cs_important_relative_merchant_gold_bonus.name}: {cs_important_relative_merchant_gold_bonus:bonus}{gold_icon}{p}{p}]"
+		"[{has_important_relative_books_bonus:if}{CharacterStats.cs_important_relative_cleric_books_bonus.name}: {cs_important_relative_cleric_books_bonus:bonus}{books_icon}{p}{p}]"
+		"[{has_important_relative_influence_bonus:if}{CharacterStats.cs_important_relative_diplomat_influence_bonus.name}: {cs_important_relative_diplomat_influence_bonus:bonus} influence{p}{p}]"
+		"[{has_important_relative_espionage_defense_bonus:if}{CharacterStats.cs_important_relative_spy_espionage_defense_bonus.name}: {cs_important_relative_spy_espionage_defense_bonus:bonus} espionage defense{p}{p}]"
+	]
+	{
+		alt = $[
+			"{clr:gold}Portrait id:{/clr} {obj.portraitID}{p}"
+			"{clr:gold}Portrait age:{/clr} {obj.portrait_age}{p}"
+			"{clr:gold}Portrait variant:{/clr} {obj.portrait_variantID}{p}"
+		]
+	}
+	
+	text advise_label = "[{advise_text}]"
+	float advise_decline_bellow = -50000
+	float advise_accept_above = 50000
+	text advise_accept = "{clr:green}{title} {name} recommends us to accept[:{/clr}{clr:gray}{p}{i}{advise_reason}{/i}|.]{/clr}"
+	text advise_decline = "{clr:red}{title} {name} recommends us to decline[:{/clr}{clr:gray}{p}{i}{advise_reason}{/i}|.]{/clr}"
+	
+	bool always_show_king_generation = true
+}
+
+def ArmyLinkTooltip : CharacterTooltip
+{
+	obj = (leader)
+}
+
+def SkillTooltip : HyperTextTooltip
+{
+	hypertext = SkillTooltipHT
+	
+	rank_texts
+	{
+		text 1 = "I"
+		text 2 = "II"
+		text 3 = "III"
+	}
+	
+	skill_descr
+	{
+		text primary = "{class_name} Primary Skill"
+		text secondary = "{class_name} Secondary Skill"
+	}
+	
+	captions
+	{
+		text Class = "{class_name:nolink}"
+		text Skill = "Skill: {skill:link}{skill.name}[ {rank_text}]{/link}"
+		text Tradition = "Tradition: {tradition}[{tradition_needs_rank:if} (activates at rank {max_rank})]"
+		text Prison = "When in prison"
+		text King = "King effects"
+		text Cardinal = "Cardinal effects"
+		text Patriarch = "Patriarch effects"
+	}
+	
+	tag_icons
+	{
+		sprite King = "Assets/UI/Elements/Common/Icons/Icon_Crown_King_SkillEffect.tga:Icon_Crown_King_SkillEffect#2" //GUID:5b8d43ad1db107b408d0cc97bdf496be
+	}
+	
+	color clr_active_header = "#C3B798" //"210,177,90"
+	color clr_inactive_header = "#C3B79860" //"#77705E" //"210,177,90,64"
+	color clr_active = "#C3B798" //"166,163,155"
+	color clr_inactive = "#C3B79860" //"#79756F" //"166,163,155,64"
+	
+	text value_separator = "{clr:value_separator}\|{/clr}"
+	text class_level_name = "Character Level"
+	text tactic_text = "Tactic: [{from_tradition:if}{clr:active_tradition_buff}|{clr:active_buff}]{name}{/clr}"
+	text action_text = "[{action_type}|Action]: [{from_tradition:if}{clr:active_tradition_buff}|{clr:active_buff}]{name}{/clr}"
+	
+	action_types
+	{
+		text action = "Action"
+		text plot = "Plot"
+		text opportunity = "Opportunity"
+	}
+}
+
+def SkillLinkTooltip : HyperTextTooltip
+{
+	hypertext = SkillTooltipHT
+	
+	tooltip_vars
+	{
+		skill = (link_obj)
+		target = (link_vars.target)
+		class_name = (link_vars.class_name || target.class_name)
+		realm = (link_vars.target.governed_castle.realm)
+	}
+}
+
+def SkillSlotTooltip : Tooltip
+{
+	text = "[{is_player_court_member:if}[{can_learn_new_skill:if}Select one of the skills below|{clr:red}Unable to learn skill{/clr}]|Skill Slot]"
+}
+
+def TraditionTooltip : HyperTextTooltip
+{
+	hypertext = TraditionTooltipHT
+	//text stat_mod_text = "[{stars_icon}{min_rank}: ]+[{value}|{min_val}-{max_val}]{perc} {stat_name}"
+	//text buff_cell_text = "{u}{b}{tag_name}{/b}{/u}:{p}{cell_bonuses_text}{p}"
+	//text buff_cell_text = "{cell_bonuses_text}"
+}
+
+def TraditionLinkTooltip : HyperTextTooltip
+{
+	hypertext = TraditionTooltipHT
+	
+	tooltip_vars
+	{
+		tradition = (link_obj)
+		adopted = true // prevent adopt prompts and costs from showing
+	}
+}
+
+def ViewCharacterTooltip : Tooltip
+{
+	caption = "View"
+	text = "View more information about {obj}"
+}
+
+
+def HireNobleTooltip : Tooltip
+{
+	caption = "{align:left}Hire {cls:nolink}"
+	//text = "{align:left}There are always young and ambitious nobles of humble origin,<br>waiting to be hired and serve their Kingdom.{p}{align:right}Cost: {cost}"
+	text hire_marshal_needs_town = "To hire a marshal, you need at least one town, which is not attacked or controlled by enemy forces."
+	text = $[
+		"{align:left}{cls.description}"
+		"[{cannot_hire_marshal:if}{clr:red_bright}{p}{i}{HireNobleTooltip.hire_marshal_needs_town}{/i}{/clr}{p}]"
+		"{p}{align:right}Cost: {cost}"
+		]
+}
+
+def PickClassTooltip : Tooltip
+{
+	caption = "{cls}"
+	text = ""
+}
+
+def ActionTooltip : HyperTextTooltip
+{
+	hypertext = ActionTooltipHT
+	
+	// text = $[
+	// 	"{tooltip}"
+	// 	"[{p}{p}{requirements_text}]"
+	// 	"[{p}{p}{i}Success chance: {success_chance_text}%{/i}]"
+	// 	"[{p}{sf_factors_text}]"
+	// 	"[{add_tooltip}]"
+	// 	"[{p}{p}{size:-2}{i}[{alt:if}{validate_key:#}|{validate_prompt_text}]{/i}{/size}]"
+	// 	"[{p}{align:right}Cost: {cost}]"
+	// ]
+	// caption = "{name}"
+}
+
+def OpportunityTooltip : ActionTooltip
+{
+}
+
+def SpyPlotTooltip : ActionTooltip
+{
+}
+
+def SuccessChance
+{
+	text name = "Success Chance"
+}
+
+def SuccessChanceTooltip : Tooltip
+{
+	caption = "Success Chance"
+	text = $[
+		"The likelyhood of {action.owner} to be successful depends on various factors related to this action, which can additionally be modified by the sum of all percentage success factors."
+		"[{p}{p}Minimum success chance: {action.min_success_chance}%]"
+		// "{p}Owner: {action.owner}"
+		// "{p}Obj: {obj}"
+		// "{p}Action: {action}"
+		// "{p}Link Vars: {link_vars}"
+		// "{p}Link Action: {link_vars.action}"
+	]
+}
+
+def SuccessChanceLinkTooltip : SuccessChanceTooltip
+{
+	tooltip_vars
+	{
+		action = (link_vars.action)
+	}
+}
+
+def RevealChance
+{
+	text name = "Reveal Chance"
+}
+
+def RevealChanceTooltip : Tooltip
+{
+	caption = "Reveal Chance"
+	text = $[
+		"The likelyhood of {action.owner} to be revealed depends on various factors related to this action, which can additionally be modified by the sum of all percentage reveal factors. Our knight can be revealed even if he was successful, albeit with a lower chance."
+		"{p}{p}If revealed, our spy may be killed, become imprisoned by {action.owner.mission_kingdom} or manage to escape and return to our royal court. Keep in mind that the other kingdom will remember our spying attempts and will most likely capture {action.owner}, if he decides to infiltrate once again."
+		"{p}{p}Minimum reveal chance: {action.min_reveal_chance}%"
+		//"{p}Works similar to {SuccessChance}"
+	]
+}
+
+def RevealChanceLinkTooltip : RevealChanceTooltip
+{
+	tooltip_vars
+	{
+		action = (link_vars.action)
+	}
+}
+
+def CancelMainActionTooltip : Tooltip
+{
+	caption = "Cancel {action.name}"
+	text = $[
+		"{prepare_status_text}"
+		"{p}{p}{i}Click to cancel{/i}"
+	]
+	pinable = 0
+}
+
+def CancelSpyPlotActionTooltip : Tooltip
+{
+	caption = "{name}"
+	text = $[
+		"{p}{prepare_status_text}"
+		"{p}{p}{i}Click to cancel{/i}"
+	]
+}
+
+def CancelImportGoodActionTooltip : Tooltip
+{
+	//caption = "Stop good import"
+	text = $["{i}Click to stop importing this good{/i}"]
+}
+
+def KingdomTooltip : Tooltip
+{
+	prefab = "Assets/UI/Kingdom/UIP_KingdomTooltip.prefab" //GUID:82a0b17243057454595684bed97076b7
+	
+	stance_colors
+	{
+		color own = "19,137,0,26" //1489001A
+		color neutral = "0,134,156,26" //00869C1A
+		color friend = "0,134,156,26" //1CBE001A
+		color ally = "27,190,0,26" //1CBE001A
+		color enemy = "214,11,0,26" //D60C001A
+		color rebel = "214,11,0,26" //D60C001A
+		color mercenary = "255,194,0,26" //FFC2001A
+		color defeated = "127,127,127,26" //8080801A
+	}
+	
+	text kingdom_name = "{kingdom}"
+	text mercenaries_name = "Mercenary"
+	text generic_mercenary_name = "Mercenaries"
+	text abandoned_army_name = "Abandoned army"
+	text generic_rebellion_name = "[{is_famous:if}Famous ]Rebellion"
+	text rebellion_name = "[{rebellion.is_famous:if}Famous][{rebellion.is_loyalist:if}{rebellion.loyal_to:ian} Loyalists| {rebellion}]"
+	text crusade_name = "Crusade against {crusade.target}"
+	
+	//SUBTITLES (the text below the name)
+	text own_and_foreign_kingdom_subtitle = "{kingdom.culture_name} ({kingdom.culture_group_name} Family)"
+	text destroyed_kingdom_subtitle = "Destroyed Kingdom"
+	text generic_mercenary_subtitle = "Soldiers for hire"
+	text mercenaries_regular_subtitle = "Roaming army for hire"
+	text mercenaries_hired_subtitle = "Hired by {mercenary.current_owner}"
+	text abandoned_army_subtitle = "Former troops of {mercenary.former_owner}"
+	text generic_rebellion_subtitle = "Hostile faction"
+	text rebellion_subtitle = "[{rebellion:if}Led by {rebellion.leader}|]"
+	text crusade_subtitle = "Led by {crusade.leader}"
+	text exlie_subtitle = "Neutral faction"
+	
+	// pack icon
+	text pacts = "They participate in [{pacts_against_us:if}{pacts_against_us_amount} [{multiple_hostile_pacts:if}pacts|pact] against us|no pacts against us] and in [{pacts_with_us:if}{pacts_with_us_amount} [{multiple_friendly_pacts:if}pacts|pact] with us|no pacts with us]."
+	
+	//FLAVORS
+	text no_active_stances_flavor = "We share no agreements, nor any pacts with {kingdom}. An audience with their king might be beneficial."
+	text own_kingdom_flavor = "Our people serve under the wise ruleship of {kingdom.king}[{kingdom.queen:if} and {kingdom.queen}|, who is yet to be wed].[{kingdom.heir:if} Successor to the throne is {kingdom.heir}.| The successorship of our crown remains undecided.]"
+	text destroyed_kingdom_flavor = $["[{destroyed_by:if}Once a proud nation, {kingdom} was reduced to ashes by the unstoppable forces of {destroyed_by}…"
+	"|People of {kingdom:ian} ancestry can still be found in several provinces, serving under different rulers.]"
+	]
+	text generic_mercenary_flavor = "Roaming parties who offer their services to any kingdom. Mercenary squads may be hired individually, or collectively as an army."
+	text mercenaries_regular_flavor = "This army will offer its troops and services to any kingdom, for the right amount of gold."
+	text mercenaries_hired_flavor = "These troops have sworn their temporary loyalty to the banners of {mercenary.current_owner}."
+	text abandoned_army_flavor = "This army once served {mercenary.former_owner:anian} noble, but is now left without a leader."
+	text generic_rebellion_flavor = "An uprising against unjust rulership. Rebellions may form in provinces with stability issues, or within the court itself at certain times."
+	text rebellion_flavor = "This rebellion has originated in the province of {rebellion.origin_realm}, in opposition to {rebellion.origin_realm.kingdom.king} of {rebellion.origin_realm.kingdom}."
+	text crusade_flavor = "{crusade.leader.status.status_text}"
+	text exile_flavor = "Exiled knights serve no kingdom. Their loss of allegiance is a result of their rulers abandoning them."
+	
+	
+	// multiplayer
+	text player_description = "Played by {player_name}[ <color=#{team_color}>({team}){/clr}]"
+}
+
+// def LoyalistKingdomShieldTooltip : Tooltip
+// {
+// 	var loyalist_kingdom = (rebel.rebellion.loyal_to || rebellion.loyal_to)
+// 	text = "[{loyalist_kingdom:link}{loyalist_kingdom:ian:cap}{/link} ]Loyalists"
+// }
+
+def OpinionTooltip : Tooltip
+{
+	caption = "{name} Opinion: {value:F0}"
+	text = $[
+		"{tooltip}"
+		"[{p}{p}{mods_text}]"
+		]
+	max_width = 450
+}
+
+def WarTooltip : Tooltip
+{
+	visible_condition = (is_valid)
+	prefab = "Assets/UI/Wars/UIP_WarTooltip.prefab" //GUID:f36255000d1f0c54390cdb4831c9148e
+	caption = "[{name}]"
+	text = "[{description}]"
+	text footer = $[
+		"[{b}Jihad Bonuses:{/b}{p}{bonuses_text}{p}]"
+		"[Upkeep: {upkeep:nonzero}{gold_icon}{p}]" 
+		//"[{target:if}{i}Click to inspect{/i}]"
+	]
+}
+
+def CannotDeclareWarOnAllyTooltip : Tooltip
+{
+	text = "We cannot declare war on {tgt_kingdom} because we're currently allies[ against {allied_against}]"
+}
+
+def PactTooltip : Tooltip
+{
+	prefab = "Assets/UI/Wars/UIP_PactTooltip.prefab" //GUID:2e81abd3759188c4f973a0a13eecbb64
+	//visible_condition = (is_valid)
+	caption = "[{def.name}]"
+	text = "[{def.tooltip}]"
+}
+
+def LeavePactTooltip : Tooltip
+{
+	caption = "Leave pact"
+	text = "Leave {owner.kingdom:s} {obj}" //owner.kingdom shows the kingdom of the diplomat who holds the pact
+}
+
+def RealmTooltip : Tooltip
+{
+	visible_condition = (!is_sea_realm)
+	prefab = "Assets/UI/Settlements/UIP_RealmTooltip.prefab" //GUID:5423509f03e994c4c84e8489734c9317
+	text realm_name = "{obj.province_name}"
+	text realm_subtitle_not_occupied = "Owned by {realm.kingdom}[{realm.is_disorder:if} {clr:red}(in disorder){/clr}]"
+	//text realm_subtitle_occupied = "Occupied by [{realm.occupant.is_famous:if}Famous ][{realm.occupant.is_loyalist:if}{realm.occupant.loyal_to:ian} Loyalists|{realm.occupant}]"
+	text realm_subtitle_occupied = "Occupied by [{realm.occupant.is_famous:if}Famous ][{realm.occupant.is_loyalist:if}{realm.occupant.loyal_to:ian} Loyalists|Rebels]"
+	
+	icons
+	{
+		town
+		{
+			sprite icon = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Buildings.png:Icon_MiniMap_ViewMode_Buildings#2" //GUID:ff98aa826433b3f45b594f7b1a28fabd
+			text text = "Town: {castle}"
+		}
+		religion
+		{
+			sprite icon = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Religions.png:Icon_MiniMap_ViewMode_Religions#2" //GUID:d4702490eebd97b46b6d95a627f3c863
+			text text = "{obj.religion}"
+		}
+		loyalty
+		{
+			sprite icon = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_Culture.png:Icon_MiniMap_ViewMode_Culture#2" //GUID:b835c25a5eae332478e09a07d211912b
+			//text text = "Loyal to {realm.majority_kingdom.name} ({realm.majority_strength:F0}%)"
+			text text = "Loyal to {majority_kingdom} ({majority_strength:F0}%)"
+		}
+		culture
+		{
+			sprite icon = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_CulturePower.png:Icon_MiniMap_ViewMode_CulturePower#2" //GUID:af2ca777f6f27e945abd5a3419a188f5
+			text text = "Culture: {majority_kingdom.culture_name}[, {majority_kingdom.culture_group_name} Family]"
+		}
+		stability
+		{
+			sprite icon = "Assets/UI/Elements/Minimap/PoliticalViewIcons/Icon_MiniMap_ViewMode_RebellionRisk.png:Icon_MiniMap_ViewMode_RebellionRisk#2" //GUID:0c56c0712ab294f469be7a52d0a6ed8d
+			text text = "Stability: {rebellion_risk:bonus}"
+		}
+	}
+	text settlements_and_features_label = "Settlements and province features"
+}
+
+//def CastleTooltip : Tooltip
+
+// def CustomBuildingTooltip : Tooltip
+// {
+// 	caption = "{name} [({num_instances} / {multi_instances})]"
+// 	text flavor = "{flavor}"
+// 	text cost = "{align:left}Cost: {cost}{/align}[, Upkeep: {upkeep}{gold_icon}]"
+// 	// requirements moved under Prerequisites in the main tooltip body as per new GD the previously designated place is too small 
+// 	// additional UX design needed here
+// 	// text requirements = "[{align:right}Requires: {requirements}{/align}]"
+// 	text = $[
+// 		"{align:left}"
+// 		//"{tooltip}{p}"
+// 		"[{production_tooltip_text}{p}]"
+// 		"[{mods_tooltip_text}{p}]"
+// 		"[{produces_tooltip_text}{p}]"
+// 		"[{add_tooltip}{p}]"
+// 		"[{i}You can build {name} up to {multi_instances} times{/i}{p}]"
+// 		//"[{at_level_text}]"
+// 		"[{p}Prerequisites: {prerequisites} and {prerequisites_or}|"
+// 		 "{p}Prerequisites: {prerequisites}|"
+// 		 "{p}Prerequisites: {prerequisites_or}]"
+// 		"[{p}Requires: {requirements}]"
+// 		"{/align}"]
+// 	{
+// 		alt = $[
+// 			"{align:left}"
+// 			"id: {id}{p}"
+// 			"district: {def.district.id}{p}"
+// 			"State: {state}{p}"
+// 			"[Availability: {res_info}{p}]"
+// 			"Level: {level}{p}"
+// 			"Applied Level: {applied_level}{p}"
+// 			"{p}{clr:gray}{i}Debug hotkeys:{p}"
+// 			"Alt-click to force build{p}"
+// 			"Ctrl-click to add to City Plan{p}"
+// 			"{/align}"]
+// 	}
+// 	prefab = "Assets/UI/Settlements/UIP_StructureTooltip.prefab" //GUID:ffe7c857afad96a4cb661f5a802dbc65
+// }
+
+def EmptyBuildingSlotTooltip : Tooltip
+{
+	caption = "Buildings"
+	text = "{i}Click to build a new building.{/i}"
+}
+
+def ExpandCitySlotsTootip : Tooltip //NOTE: text field has support {building_slots_per_tier}. This is currently always 1, so not needed for now.
+{
+	caption = "Expand Town"
+	text = $[
+		"[{obj.realm.is_occupied:if} You cannot expand the town while it's occupied."
+		"|Allows the construction of one additional building within the province.{p}"
+		"Cost: {expand_cost}]"
+	]
+}
+
+def BuildingTooltip : HyperTextTooltip
+{
+	hypertext = BuildingTooltipHT
+}
+
+def BuildingLinkTooltip : BuildingTooltip
+{
+	tooltip_vars
+	{
+		building = (link_obj)
+		castle = (link_vars.castle)
+		instance = (link_vars.instance)
+		kingdom = (plr_kingdom) //(link_vars.kingdom)
+	}
+}
+
+def ResourceTooltip : HyperTextTooltip
+{
+	hypertext = ResourceTooltipHT
+}
+
+def ResourceLinkTooltip : ResourceTooltip
+{
+	tooltip_vars
+	{
+		resource = (link_obj)
+		kingdom = (plr_kingdom) //(link_vars.kingdom)
+	}
+}
+
+def ProvinceFeatureTooltip : HyperTextTooltip
+{
+	hypertext = ProvinceFeatureTooltipHT
+}
+
+
+def ProvinceFeatureLinkTooltip : ProvinceFeatureTooltip
+{
+	tooltip_vars
+	{
+		province_feature = (link_obj)
+		kingdom = (plr_kingdom) //(link_vars.kingdom)
+	}
+}
+
+def SettlementTooltip : HyperTextTooltip
+{
+	hypertext = SettlementTooltipHT
+}
+
+def SettlementLinkTooltip : SettlementTooltip
+{
+	tooltip_vars
+	{
+		//obj = (link_obj)
+		kingdom = (link_vars.kingdom)
+	}
+}
+
+def SettlementTypeTooltip : HyperTextTooltip
+{
+	hypertext = SettlementTypeTooltipHT
+}
+
+// def BuiltBuildingTooltip : Tooltip
+// {
+// 	caption = "{name}"
+// 	text flavor = "{flavor}"
+// 	text = "{align:left}{tooltip}{/align}"
+// 	prefab = "Assets/UI/Settlements/UIP_StructureTooltip.prefab" //GUID:ffe7c857afad96a4cb661f5a802dbc65
+// }
+
+def VacantSlotTooltip : Tooltip
+{
+	caption = "Vacant position"
+	text = "Click to hire a noble in the Royal Court"
+}
+
+def CharacterClassTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{description}"
+}
+
+def CloseTooltip : Tooltip
+{
+	text = "Close"
+}
+
+def CrownAuthorityIconTooltip : Tooltip
+{
+	max_width = 500
+	caption = "[{authority.maxed:if}Crown Authority cannot be increased any further|Click to increase Crown Authority by 1]"
+	text = $[
+	"A kingdom's crown authority determines its ruler's hold over his people and lands. It can be increased or decreased by various events."
+	//"{p}{p}{b}Current effects:{/b}"
+	"{p}"
+	"{p}{b}Income (taxes): {/b} {tax_CA:bonus:%}"
+	"{p}{b}Effect on espionage defense:{/b} {KingdomStats.ks_espionage_defense_TT.crown_autority:bonus}"
+	"{p}{b}Effect on stability:{/b} {stability_crown_authority:bonus}"
+	"{p}{b}Corruption:{/b} {corruption:penalty}"
+	// probably not "{p}Relations with other kingdoms: {relationship_bonus:bonus}"
+	"[{authority.maxed:if} |{p}{align:right}Cost: {authority.cost}{/align}]"
+	]
+}
+
+def CrownAuthorityIconMaxedTooltip : Tooltip
+{
+	text = "Crown Authority cannot be increased any further."
+}
+
+def CrownAuthorityBarTooltip : Tooltip
+{
+	alignment = "center"
+	max_width = 500
+	caption = "{align:left}Crown Authority ({crown_authority})"
+	text = $["A kingdom's crown authority determines its ruler's hold over his people and lands. It can be increased or decreased by various events."
+	"{p}"
+	"{p}{b}Income (taxes): {/b} {tax_CA:bonus:%}"
+	"{p}{b}Effect on espionage defense:{/b} {KingdomStats.ks_espionage_defense_TT.crown_autority:bonus}"
+	"{p}{b}Effect on stability:{/b} {stability_crown_authority:bonus}"
+	"{p}{b}Corruption:{/b} {authority.corruption:penalty}"
+	]
+}
+
+def KingodmStabilityTooltip : Tooltip
+{
+	caption = "Kingdom stability:{/b} {stability:bonus}{p}"
+	text = $[
+		"Various factors play a role in determining the contentment of the population with your rule. Neglecting those can be detrimental, as negative stability may lead to rebellions."
+		"[{has_stability_factors:if}{p}{p}{b}Stability factors:{/b}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_taxes:if}Taxes: {stability_taxes:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_wars:if}War exhaustion: {stability_wars:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_dead_king:if}Recently deceased king: {stability_dead_king:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_hunger:if}Hunger: {stability_hunger:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_crown_authority:if}Crown authority: {stability_crown_authority:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_rel_difference:if}Religious differences: {stability_rel_difference:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_cul_difference:if}Cultural differences: {stability_cul_difference:bonus}{p}]" 
+		"[{has_stability_factors:if}{blt} {stability_traditions:if}Traditions: {stability_traditions:bonus}{p}]" 
+		"[{has_stability_factors:if}{blt} {stability_cleric:if}Cleric actions: {stability_cleric:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_opinions:if}Opinions : {stability_opinions:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_rebel_leaders:if}Rebel leaders: {stability_rebel_leaders:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_defeated_rebels:if}Recently defeated rebellions: {stability_defeated_rebels:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_religous_bonuses:if}Religion: {stability_religous_bonuses:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_own_spies:if}Spies: {stability_own_spies:bonus}{p}]"
+		"[{has_stability_factors:if}{blt} {stability_stability:if}Other stability effects: {stability_stability:bonus}{p}]"
+		"{p}{b}Kingdom happiness: {ks_happiness:bonus}{/b}" 
+		"{p}{p}{b}{KingdomStats.ks_espionage_defense_TT.name}: {ks_espionage_defense_TT:bonus}{/b}"
+		"[{worst_realm_0:if}{p}{p}{b}Realms with lowest stability:{/b}{p}]"
+		"[{worst_realm_0}{p}]"
+		"[{worst_realm_1}{p}]"
+		"[{worst_realm_2}{p}]"
+	]
+}
+
+def EmptyUnitSlotTooltip : Tooltip
+{
+	caption = "Squads"
+	text = $[
+		"[{alt:if}Army: [{army:#}|null]{p}]"
+		"[{alt:if}Castle: [{castle:#}|null]{p}]"
+		"[{alt:if}Slot: [{slot:#}|null]{p}]"
+
+		"[{castle:if}{army:if}{i}Click to hire a new squad[ for {army.leader}].{/i}]"
+		"[{castle:if}{army:if_not}{i}Click to hire a new garrison squad.{/i}]"
+		"[{castle:if_not}{army:if}{i}Enter a town to hire new squads.{/i}]"
+	]
+}
+
+def UnitTooltip : HyperTextTooltip
+{
+	hypertext = UnitTooltipHT
+	
+	// caption = "{name}"
+	// text = $[
+	// 	"{align:left}"
+	// 	"[{cur_article:if_not}{description}{p}{p}]"
+	// 	"{clr:tooltip_title_color}Attributes:{/clr}{p}"
+	// 	"Manpower: {manpower}[/{max_manpower}][ ({max_manpower_base} base {max_manpower_bonus:bonus})]{p}"
+	// 	"Attack: {CTH}[ ({CTH_bonus:bonus})] {p}"
+	// 	"[{is_ranged:if}Ranged attack: {CTH_ranged}[ ({CTH_ranged_bonus:bonus})] {p}]"
+	// 	"Defense: {defense} [ ({defense_bonus:bonus})]{p}"
+	// 	"Chance to shock: {chance_to_shock}%{p}"
+	// 	"Resilience: [{resilience_base}|{resilience}|0][{resilience_bonus:if} ({resilience_bonus:bonus})]{p}"
+	// 	"[Salvos: {salvos}/{def.salvo_capacity} [ ({salvo_capacity_bonus:bonus})]{p}]"
+	// 	"Siege strength: {siege_strength}[ ({siege_strength_bonus:bonus})]{p}"
+	// 	"Stamina: {stamina_max}[ ({stamina_bonus:bonus})]{p}"
+	// 	"[Level: {level}{p}]"
+	// 	"[Morale: {morale:F1}/{initial_morale}]"
+	// 	"{p}"
+	// 	"[{clr:tooltip_title_color}State:{/clr} {simulation.state} {simulation.target}{p}]"
+	// 	"[{state:plain} [{target.name:plain}]{p}]"
+	// 	"[Upkeep: {upkeep}]"
+	// 	"[{p}{p}{selectable:if}{i}Click to select this squad{/i}|]"
+	// 	"[{p}{p}{selected_swappable:if}{i}Right-click on a squad from the other army to swap{/i}|]"
+	// 	"[{p}{p}{transferable:if}{i}Right-click to transfer[ to {target_army_leader}]{/i}|]"
+	// 	"[{p}{p}{transferable_garrison:if}{i}Right-click to transfer to town's garrison{/i}|]"
+	// 	"[{p}{p}{swappable_target:if}{i}Right-click to swap both troops{/i}|]"
+	// 	"[{mergeable:if}{p}{p}{i}Right-click on a highlighted squad to merge troops{/i}]"
+	// 	"[{valid_merge_target:if}{p}{p}{i}Right click to merge troops with the currently selected squad{/i}]"
+	// 	"[{invalid_merge_target:if}{p}{p}{i}Cannot merge troops with this squad{/i}]"
+	// 	"[{show_hire_hint:if}{p}{p}{i}SHIFT + Click to open hire menu{/i}]"
+	// 	]
+	// 	{
+	// 		alt = $[
+	// 		"{align:left}"
+	// 		"{description}{p}{p}"
+	// 		"CTD: {defense_visual} [ ({defense_bonus_visual:bonus})]{p}"
+	// 		"Experience: {experience}{p}"
+	// 		"Total troops: {max_manpower}{p}"
+	// 		"Healthy troops: {num_healty}{p}"
+	// 		"Casualties: {num_dead}{p}"
+	// 		"Tier: {tier}{p}"
+	// 		]
+	// 	}
+}
+
+def UnitAttributeTooltip : HyperTextTooltip
+{
+	hypertext = UnitAttributeTooltipHT
+	text Base = "Base"
+	text Skill = "Skill"
+	text Tradition = "Tradition"
+	text PaganBelief = "Belief"
+}
+
+// def UnitHireTooltip : Tooltip
+// {
+// 	//pinable = 0
+// 	sprite image = "Assets/Europe/icons.PNG:tradition#1" //GUID:373d7d9ea9d700642b010dcf36bc223f
+// 	max_width = 500
+// 	caption = "{name}"
+// 	text = $[
+// 		"{align:left}"
+// 		"[{cur_article:if_not}{i}{description}{/i}{p}{p}]"
+// 		"{clr:tooltip_title_color}Attributes:{/clr}{p}"
+// 		"Manpower: {manpower}{p}"
+// 		"Attack: {CTH} {p}"
+// 		"[{is_ranged:if}Ranged attack: {CTH_ranged}{p}]"
+// 		"Defense: {defense}{p}"
+// 		"Chance to shock: {chance_to_shock}%{p}"
+// 		"Resilience: {resilience}{p}"
+// 		"[Salvo capacity: {def.salvo_capacity} [ ({salvo_capacity_bonus:bonus})]{p}]"
+// 		"Stamina: {stamina_max}{p}"
+// 		"Siege strength: {siege_strength}"
+// 		"{p}{p}"
+// 		"Upkeep: {upkeep}{p}"
+// 		"[Requires: {requirements}{p}]"
+// 		"[{cur_article:if_not}{p}]"
+// 		"[{castle.realm.is_occupied:if}{clr:red}Cannot train troops while the town is occupied.{/clr}|{align:right}Cost: {cost}{/align}]{p}"]
+// 		{
+// 			alt = $[
+// 			"{align:left}"
+// 			"{description}{p}{p}"
+// 			"Stamina: {stamina_max}{p}"
+// 			"CTD: {defense_visual}{p}"
+// 			"Tier: {tier}{p}{p}"]
+// 		}
+// }
+
+def DissmisUnitTooltip : Tooltip
+{
+	pinable = 0
+	text = "{i}Click to dismiss {obj}.{p}Shift-click to dismiss instantly."
+}
+
+def RemoveInvetoryItemTooltip : Tooltip
+{
+	pinable = 0
+	text = "Click to remove {obj}."
+}
+
+def InvetoryItemTooltip : Tooltip
+{
+	//pinable = 0
+	
+	switch_value = (state)
+	case empty
+	{
+		text = "[{castle:if}Click to purchase equipment|Enter a town to purchase equipment]"
+	}
+	case purchase
+	{
+		caption = "{name}"
+		text = $[
+			"{align:left}"
+			"{i}{description}{/i}"
+			"[{p}{p}Siege attack: {siege_strength:nonzero}]"
+			"{p}{p}"
+			"[Requires: {requirements}{p}]"
+			"[Upkeep: {upkeep:plain}[(incl. {food_upkeep_per_unit:nonzero}{food_icon} per squad)]{p}]"
+            "[{in_disorder:if}{clr:red}{p}{i}Army equipment cannot be bought in provinces in disorder.{/i}{/clr}{p}]"
+            "[{can_purchase:if}{i}Click to buy army equipment.{/i}{p}]"
+			"[{align:right}Cost: {cost}]"
+		]
+	}
+	case instance
+	{
+		caption = "{name}"
+		text = $[
+			"{align:left}"
+			"{i}{description}{/i}"
+			"[{p}{p}Siege attack: {siege_strength:nonzero}]"
+			"{p}{p}"
+			"[Upkeep: {upkeep}]"
+		]
+	}
+	case battle
+	{
+		caption = "{name}"
+		text = $[
+			"{align:left}"
+			"{i}{description}{/i}"
+			"[{p}{p}Siege attack: {siege_strength:nonzero}]"
+			"{p}{p}"
+			"[Upkeep: {upkeep}]"
+		]
+	}
+	case locked
+	{
+		text = "Unlocked by learning the Logistics skill and adopting its tradition"
+	}
+}
+
+def InventoryItemLinkTooltip : Tooltip
+{
+	caption = "{name}"
+	text = $[
+		"{align:left}"
+		"{i}{description}{/i}"
+		"[{p}{p}Siege attack: {siege_strength:nonzero}]"
+	]
+}
+
+def SquadSymbolTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{align:left}[{p}Damage: {unit.damage}][{p}Shock: {shock}][{p}{state}]"
+}
+
+def KingdomAdvantageTooltip : HyperTextTooltip
+{
+	hypertext = KingdomAdvantageTooltipHT
+	// caption = "{name}"
+	// text = $[
+	// 	"{description}"
+	// 	"{p}{p}Gains:"
+	// 	"[{p}{blt}{rankings#0.def}: {rankings#0.fame} fame (Rank: {rankings#0.rank})]"
+	// 	"[{p}{blt}{rankings#1.def}: {rankings#1.fame} fame (Rank: {rankings#1.rank})]"
+	// 	"[{p}{blt}{rankings#2.def}: {rankings#2.fame} fame (Rank: {rankings#2.rank})]"
+	// ]
+}
+
+def AdvantagesVictoryTooltip : Tooltip
+{
+	min_width = 350
+	max_width = 550
+	text = $[
+	"[{has_all_advantages:if}{clr:white}|{clr:gray}]Unlock all advantages by producing or importing the goods required for them.{/clr}"
+	"{p}{p}Clicking on this button will grant you immediate victory, stating your economic prowess before all other kingdoms."
+	]
+}
+
+def KingdomAdvantageLinkTooltip : HyperTextTooltip
+{
+	hypertext = KingdomAdvantageTooltipHT
+	
+	tooltip_vars
+	{
+		advantage = (link_obj)
+		kingdom = (link_vars.kingdom)
+	}
+}
+
+def KingdomRankingCategoryTooltip : Tooltip
+{
+	caption = "{name}"
+	text = $[
+		"{description}"
+		"{p}{p}Gains:"
+		"[{p}{blt}{rankings#0.def}: {rankings#0.fame} fame (Rank: {rankings#0.rank})]"
+		"[{p}{blt}{rankings#1.def}: {rankings#1.fame} fame (Rank: {rankings#1.rank})]"
+		"[{p}{blt}{rankings#2.def}: {rankings#2.fame} fame (Rank: {rankings#2.rank})]"
+	]
+}
+
+
+// def StructureAdvantageRequiermentTooltip : Tooltip
+// {
+// 	caption = "{name}"
+// 	text = "Own {name} {requirement.CurrentValue}/{requirement.TargetValue}"
+// }
+
+// def ResoureAdvantageRequiermentTooltip : Tooltip
+// {
+// 	caption = "{obj.name}"
+// 	text = "Produce {obj.name} {requirement.CurrentValue}/{requirement.TargetValue}"
+// }
+
+// def CustomAdvantageRequiermentTooltip : Tooltip
+// {
+// 	caption = "{obj.name}"
+// 	text = "{obj.tooltip} {requirement.CurrentValue}/{requirement.TargetValue}"
+// }
+
+// def StatAdvantageRequiermentTooltip : Tooltip
+// {
+// 	caption = "{obj.name}"
+// 	text = "{obj.tooltip} {requirement.CurrentValue}/{requirement.TargetValue}"
+// }
+
+def GoldRealmTooltip : Tooltip
+{
+	taxed_difference = (abs(realm.incomes.gold.TOTAL - realm.incomes.gold.TAXED))
+	caption = "Gold"
+	text = $[
+		"{flavor_text}Gold income, added in the royal treasury.{/flavor_text}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From town: {realm.incomes.gold.TOWN:F1:bonus}{gold_icon}{p}"
+			"From settlements: {realm.incomes.gold.SETTLEMENTS:F1:bonus}{gold_icon}{p}"
+			"From population: {realm.incomes.gold.Population:F1:bonus}{gold_icon}{p}"
+			"From governor: {realm.incomes.gold.GOVERNOR:F1:bonus}{gold_icon}{p}"
+		"{/section_body}{p}"
+		"{section_header}Total income {/section_header}[{no_governor}(provinces): {realm.incomes.gold.TAXED:F1}{gold_icon} ({kingdom.def.tax_rates:%} of {realm.incomes.gold.TOTAL:F1}{gold_icon} in ungoverned provinces)|(Royal lands): {realm.incomes.gold.TOTAL:F1}{gold_icon}]"
+	]
+}
+
+def BooksRealmTooltip : Tooltip
+{
+	caption = "Books"
+	text = $[
+		"{flavor_text}The amount of books written within the province.{/flavor_text}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From Town: {realm.incomes.books.TOWN:F1:bonus}{books_icon}{p}"
+			"From Settlements: {realm.incomes.books.SETTLEMENTS:F1:bonus}{books_icon}{p}"
+			"From Governor: {realm.incomes.books.GOVERNOR:F1:bonus}{books_icon}{p}"
+		"{/section_body}{p}"
+		"{section_header}Total income:{/section_header}[{no_governor} {realm.incomes.books.TAXED:F1}{books_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.books.TOTAL:F1}{books_icon} province income)| {realm.has_governor:if} {realm.incomes.books.TOTAL:F1}{books_icon}]"
+	]
+}
+
+def FoodRealmTooltip : Tooltip
+{
+	caption = "Food"
+	text = $[
+		"{flavor_text}Local food production determines the speed of recovery of food storage after sieges.{p}Kingdom's food production is needed for army upkeep and when it is insufficient, army morale and population growth are decreased and stability decreases.{/flavor_text}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From town: {realm.incomes.food.TOWN:F1:bonus}{food_icon}{p}"
+			"From settlements: {realm.incomes.food.SETTLEMENTS:F1:bonus}{food_icon}{p}"
+			"From governor: {realm.incomes.food.GOVERNOR:F1:bonus}{food_icon}{p}"
+			"[Realm modifiers: {realm.incomes.food.Realm.ks_food_production_perc:nonzero:bonus}{food_icon}{p}]"
+		"{/section_body}{p}"
+		"{section_header}Total income:{/section_header}[{no_governor} {realm.incomes.food.TAXED:F1}{food_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.food.TOTAL:F1}{food_icon} province income)| {realm.incomes.food.TOTAL:F1}{food_icon}]"
+		//"{section_header}Garrison upkeep:{/section_header} {garrison_upkeep_food:penalty_no_sign}{food_icon}{p}"
+	]
+}
+
+def FaithRealmTooltip : Tooltip
+{
+	caption = "{kingdom.religion.piety}"
+	text = $[
+		"{flavor_text}The religious contributions of the province towards the kingdom's {kingdom.religion.piety}.{/flavor_text}{p}{p}"
+		"{section_header}Province religion:{/section_header} [{realm.religious_difference:if}{clr:red}|{clr:gold}]{realm.religion.full_name}{/clr}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From Town: {realm.incomes.piety.TOWN:F1:bonus}{kingdom.piety_icon}{p}"
+			"From Settlements: {realm.incomes.piety.SETTLEMENTS:F1:bonus}{kingdom.piety_icon}{p}"
+			"From Governor: {realm.incomes.piety.GOVERNOR:F1:bonus}{kingdom.piety_icon}{p}"
+		"{/section_body}{p}"
+		"{section_header}Total income:{/section_header}[{no_governor} {realm.incomes.piety.TAXED:F1}{piety_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.piety.TOTAL:F1}{piety_icon} province income)| {realm.incomes.piety.TOTAL:F1}{piety_icon}]"
+	]
+}
+
+def HammersRealmTooltip : Tooltip
+{
+	caption = "Production"
+	text = $[
+		"{flavor_text}Determines the rate at which structures are built and repaired.{/flavor_text}{p}{p}"
+		"From Town: {realm.incomes.hammers.TOWN}{hammers_icon}{p}"
+		"From Settlements: {realm.incomes.hammers.SETTLEMENTS}{hammers_icon}"
+	]
+}
+
+// def ArmsRealmTooltip : Tooltip
+// {
+// 	caption = "Arms"
+// 	text = $[
+// 		"Equipment used for training armies.{p}{p}"
+// 		"Production: {realm_arms:bonus}{arms_icon}{p}"
+// 	]
+// }
+
+def TownGuardsRealmTooltip : Tooltip
+{
+	caption = "Town guards"
+	text = $[
+		"{flavor_text}Local armed squads ready to defend the town from hostile armies during siege battles.{/flavor_text}{p}{p}"
+		"{realm_town_guards}{guard_icon}{p}"
+	]
+}
+
+def LevyRealmTooltip : Tooltip
+{
+	caption = "Levy"
+	text = $[
+		"{flavor_text}Kingdom-wide levy production, the sum of levies in all provinces, defines how quickly kingdom levies increase, which are needed for recruiting squads and army equipment. Levies can also generate defending squads during settlement battles, in addition to increasing the manpower of the province governor's army and defending squads.{/flavor_text}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From town: {realm.incomes.levy.TOWN:F1:bonus}{levy_icon}{p}"
+			"From settlements: {realm.incomes.levy.SETTLEMENTS:F1:bonus}{levy_icon}{p}"
+			"From governor: {realm.incomes.levy.GOVERNOR:F1:bonus}{levy_icon}{p}"
+		"{/section_body}{p}"
+		"{section_header}Total income:{/section_header}[{no_governor} {realm.incomes.levy.TAXED:F1}{levy_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.levy.TOTAL:F1}{levy_icon} province income)| {realm.has_governor:if} {realm.incomes.levy.TOTAL:F1}{levy_icon}]"
+	]
+}
+
+def TradeRealmTooltip : Tooltip
+{
+	caption = "Commerce"
+	text = $[
+		"{flavor_text}The province's trading power and commercial output. On a local level, high commerce increases the chances of a town to become and remain trade center, as well as its appeal and income.{/flavor_text}{p}{p}"
+		"{section_header}Province income:{/section_header}{p}"
+		"{section_body}"
+			"From Town: {realm.incomes.trade.TOWN:F1:bonus}{trade_icon}{p}"
+			"From Settlements: {realm.incomes.trade.SETTLEMENTS:F1:bonus}{trade_icon}{p}"
+			"From Governor: {realm.incomes.trade.GOVERNOR:F1:bonus}{trade_icon}{p}"
+		"{/section_body}{p}"
+		"{section_header}Total income:{/section_header}[{no_governor} {realm.incomes.trade.TAXED:F1}{trade_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.trade.TOTAL:F1}{trade_icon} province income)| {realm.incomes.trade.TOTAL:F1}{trade_icon}]"
+	]
+}
+
+def SetKingomdTaxTooltip : Tooltip
+{
+	text = "Set tax rates to: {obj}%"
+}
+
+def SkillBookSelectTooltip : Tooltip
+{
+	caption = "Read a book"
+	text = "Learn or improve a skill by reading a book from the Royal Library"
+}
+
+def ReligionTooltip : Tooltip
+{
+	text = "{tooltip}"
+	caption = "{obj}"
+}
+
+def ReligionIconTooltip : Tooltip
+{
+	text = "{name}"
+	caption = "{description}"
+}
+
+def ReligionTensionTooltip : Tooltip
+{
+	caption = "Religious tension"
+	text = "The people of {realm} follow {realm.religion.full_name} beliefs."
+}
+
+def UpgradeVillageTooltip : Tooltip
+{
+	text = "Upgrade {obj} for {upgrade_cost}"
+	caption = "Upgrade"
+}
+
+def ArmySuppliesTooltip : Tooltip
+{
+	caption = "Army supplies and upkeep"
+	text = $[
+	"All kinds of provisions, carried by [{army.leader:s}|the] troops. [{army.leader.is_crusader:if}Crusader armies cannot rebel due to a total lack of supplies, but will suffer from lower stamina.|Total lack of supplies reduces the army's morale, stamina, travelling speed and may lead to army revolt.]"
+	"[{multiple:if_not}{p}{p}Supplies: {supplies:F0}/{supplies_max}{supply_icon}]"
+	"[{multiple:if}{p}{p}Supplies for {army.leader}: {army.supplies:F0}/{army.supplies_max}{supply_icon}]"
+	"[{multiple:if}{p}Supplies for {second_army.leader}: {second_army.supplies:F0}/{second_army.supplies_max}{supply_icon}]"
+	"[{p}Supplies depletion rate: {army.supplies_rate_per_tick:bonus:F3}{supply_icon}]"
+	"{p}"
+	"[{army.mercenary:if_not}{army.rebel:if_not}{army.is_crusader:if_not}[{second_army:if_not}{p}Upkeep: {army.upkeep}|{p}Upkeep for {army.leader}: {army.upkeep}]]"
+	"[{second_army.mercenary:if_not}{second_army.rebel:if_not}{p}Upkeep for {second_army.leader}: {second_army.upkeep}]"
+	"[{p}{p}{army.full_resupply_requirements_not_met:if}{army.castle:if}Restocking all missing supplies ({army.missing_supplies}{supply_icon}) would cost {army.full_resupply_cost}.]"
+	"[{p}{p}{army.can_resupply:if_not}{army.castle:if}{i}{clr:red}[{army.missing_resupply.gold:if:nonzero}{army.missing_resupply.food:if:nonzero}Gather more {gold_icon} and produce more {food_icon} to restock missing supplies.|{army.missing_resupply.gold:if:nonzero}Gather more {gold_icon} to restock missing supplies.|{army.missing_resupply.food:if:nonzero}Produce more {food_icon} to restock missing supplies.]{/clr}{/i}]"
+	"[{p}{p}{army.can_resupply:if}{i}Click to restock {army.resupply_potential} {supply_icon}, which will cost {army.resupply_cost.gold} {gold_icon} and {army.resupply_cost.food} {food_icon} from the town's storages{/i}]"
+	"[{p}{p}{army.no_supplies:if}Debuffs to {army.leader}:]"
+	"[{p}{army.no_supplies:if}Morale: {army.leader.cs_army_morale.no_supplies:value:nonzero:bonus}]"
+	"[{p}{army.no_supplies:if}Defense: {army.no_supplies_defense_penalty:nonzero:bonus}]"
+	"[{p}{army.no_supplies:if}Travel speed: {army.leader.cs_army_speed_world_perc.out_of_supplies:value:nonzero:bonus}]"
+	"[{p}{p}{second_army.no_supplies:if}Debuffs to {second_army.leader}:]"
+	"[{p}{second_army.no_supplies:if}Morale: {second_army.leader.cs_army_morale.no_supplies:value:nonzero:bonus}]"
+	"[{p}{second_army.no_supplies:if}Defense: {second_army.no_supplies_defense_penalty:nonzero:bonus}]"
+	"[{p}{second_army.no_supplies:if}Travel speed: {second_army.leader.cs_army_speed_world_perc.out_of_supplies:value:nonzero:bonus}]"
+	]
+}
+
+def ManpowerArmyTooltip : Tooltip
+{
+	int manpower_bonus_sum = ((army0.manpower_bonus || 0) + (army1.manpower_bonus || 0) + (garrison.manpower_bonus || 0))
+	int manpower_additional_troops_sum = ((army0.manpower_additional_troops || 0) + (army1.manpower_additional_troops || 0))
+	int bonuses = (manpower_bonus_sum || manpower_additional_troops_sum || garrison.manpower_bonus)
+	int max_manpower_sum = ((army0.max_manpower || 0) + (army1.max_manpower || 0)  + (garrison.max_manpower || 0))
+	int max_manpower_healthy_sum = ((army0.max_manpower_healthy || 0) + (army1.max_manpower_healthy || 0)  + (garrison.max_manpower_healthy || 0))
+	int max_manpower_dead_sum = ((army0.max_manpower_dead || 0) + (army1.max_manpower_dead || 0)  + (garrison.max_manpower_dead || 0))
+	bool has_levy_bonus = (army0.levies_manpower_perc > 0)
+	bool has_king_bonus = (army0.leader.cs_squad_size_perc.king > 0)
+	bool has_crusader_bonus = (army0.leader.cs_crusader_squad_size_perc > 0)
+	bool has_rebel_bonus = (army0.rebel.squad_size_perc > 0)
+	bool has_infantry_tactics = (army0.leader.kingdom.ks_infantry_squad_size_perc > 0)
+	bool has_archery_tactics = (army0.leader.kingdom.ks_ranged_squad_size_perc > 0)
+	bool has_cavalry_tactics = (army0.leader.kingdom.ks_mounted_squad_size_perc > 0)
+	bool has_conquest_belief = (army0.leader.kingdom.ks_squad_size_perc > 0)
+	bool has_additional_troops = (army0.additional_troops_perc > 0)
+	bool has_level_bonus = (army0.leader.cs_squad_size_perc.level > 0)
+	bool show_effects = ((army0.battle == null) && (has_levy_bonus || has_king_bonus || has_crusader_bonus || has_rebel_bonus || has_infantry_tactics || has_archery_tactics || has_cavalry_tactics || has_additional_troops || has_level_bonus))
+	
+	caption = "Army manpower"
+	text = $[
+	"[[{army0.rebel.is_regular:if}Rebel|[{army0.leader:s}|Army]] squads: {army0.manpower_base}{p}]"
+	"[[{army1.rebel.is_regular:if}Rebel|[{army1.leader:s}|Army]] squads: {army1.manpower_base}{p}]"
+	"[Garrisoned squads: {garrison.manpower_base}{p}]"
+	"[{bonuses:if}{p}]"
+	"[{manpower_bonus_sum:if}From leader and [{has_rebel_bonus:if}faction|kingdom]: {manpower_bonus_sum:bonus}{p}]"
+	"[{manpower_additional_troops_sum:if}From {AdditionalTroops}: {manpower_additional_troops_sum}{p}]"
+	"[{max_manpower_sum:if}{p}]"
+	"[{b}Army full size: {max_manpower_sum}{/b}{p}]"
+	"[Healthy: {clr:green}{max_manpower_healthy_sum}{/clr}{p}]"
+	"[Deceased: {clr:red}{max_manpower_dead_sum}{/clr}{p}]"
+	"["
+		"{show_effects:if}"
+		"{p}"
+		"{b}Manpower effects:{/b}"
+		"[{has_king_bonus:if}{p}{Skill.effects.King.Marshal.cs_king_squad_size_perc.mod_name}: {army0.leader.cs_king_squad_size_perc:bonus:%}]"
+		"[{has_crusader_bonus:if}{p}{Skill.effects.Crusader.Default.cs_crusader_squad_size_perc.mod_name}: {army0.leader.cs_crusader_squad_size_perc:bonus:%}]" // Crusader.Default.cs_squad_size_perc
+		"[{has_rebel_bonus:if}{p}{CharacterStats.cs_squad_size_perc.rebel.mod_name}: {army0.rebel.squad_size_perc:bonus:%}]"
+		"[{has_level_bonus:if}{p}{CharacterStats.cs_level_squad_size_perc.level.mod_name}: {army0.leader.cs_level_squad_size_perc:bonus:%}]"
+		"[{has_infantry_tactics:if}{p}{UnitAttributeTooltip.Tradition}: {InfantryTacticsTradition}: {army0.leader.kingdom.ks_infantry_squad_size_perc:bonus:%}]"
+		"[{has_archery_tactics:if}{p}{UnitAttributeTooltip.Tradition}: {ArcheryTradition}: {army0.leader.kingdom.ks_ranged_squad_size_perc:bonus:%}]"
+		"[{has_cavalry_tactics:if}{p}{UnitAttributeTooltip.Tradition}: {CavalryTacticsTradition}: {army0.leader.kingdom.ks_mounted_squad_size_perc:bonus:%}]"
+		"[{has_conquest_belief:if}{p}{UnitAttributeTooltip.PaganBelief}: {Pagan.Conquest}: {Pagan.Conquest.ks_squad_size_perc:bonus:%}]"
+		"[{has_additional_troops:if}{p}From {AdditionalTroops}: {army0.additional_troops_perc:bonus:%}]"
+		"[{has_levy_bonus:if}{p}From levies in {army0.leader.governed_castle}: {army0.levies_manpower_perc:bonus:%}]"
+	"]"
+	]
+}
+
+def ArmyMoraleTooltip : Tooltip
+{
+	text = $[
+		"{b}Army morale:{/b} {permanent_morale}[ ({temporary_morale:bonus:nonzero})]" //show final value, taking into account bonuses and penalties
+		"["
+			"{p}"
+			"[{p}[{army.is_rebel:if}This rebel's|{army.leader:s}] squads are affected by the following bonuses and penalties:]"
+			"[{p}{factors_text}]"
+			"[{p}{p}Temporary morale effects: {temporary_morale:bonus:nonzero}]"
+			"[{bonus_defense_per_morale:nonzero:if}{p}Average bonus defense[{army.is_in_battle:if_not} in battle]: {bonus_defense_per_morale:bonus:%}]"
+		"]"
+	]
+	text base_value = "    [{blt} {mod_name}|Base]: {value}"
+	text mod_factor = "    {blt} {mod_name}: {value:bonus}"
+}
+
+def SquadMoraleTooltip : Tooltip
+{
+	text = $[
+		"{b}Squad morale:{/b} {morale:F1}" //show final value, taking into account bonuses and penalties
+		"["
+			"{p}"
+			//"[{p}[{army.is_rebel:if}This rebel's|{army.leader:s}] troops are affected by the following bonuses and penalties:]"
+			"[{p}{factors_text}]"
+			"[{p}{p}Temporary morale effects: {temporary_morale:bonus:nonzero}]"
+			"[{bonus_defense_per_morale:nonzero:if}{p}{p}[{is_multiple:if}Average bonus|Bonus] defense: {bonus_defense_per_morale:bonus:%}]"
+		"]"
+	]
+	text base_value = "    {blt} {mod_name}: {value:bonus:F1}"
+}
+
+def SquadMoraleTooltipUnPinable : SquadMoraleTooltip
+{
+	pinable = 0
+}
+
+def OverallMoraleTooltip : Tooltip
+{
+	text = $[
+		"{b}Overall morale:{/b} {morale:F1}" //show final value, taking into account bonuses and penalties
+		"["
+			"{p}"
+			//"[{p}[{army.is_rebel:if}This rebel's|{army.leader:s}] troops are affected by the following bonuses and penalties:]"
+			"[{p}{factors_text}]"
+			"[{p}{p}Temporary morale effects: {temporary_morale:bonus:nonzero}]"
+			"[{bonus_defense_per_morale:nonzero:if}{p}{p}Average bonus defense: {bonus_defense_per_morale:bonus:%}]"
+		"]"
+	]
+	text base_value = "    {blt} {mod_name}: {value:bonus:F1}"
+}
+
+def BattleMoraleTooltip : Tooltip
+{
+	text = "Army morale: {morale_total}"
+}
+
+def QuickCastleRepairTooltip : Tooltip
+{
+	text = "{repair_cost}{p}Hurry the structure's repairing"
+}
+
+def QuickCastleRepairActiveTooltip : Tooltip
+{
+	text = "This structure is being repaired"
+}
+
+def TerrainBonusTooltip : Tooltip
+{
+	text = "{obj.description}"
+	caption = "{obj.name}"
+}
+
+def GovernorTooltip : HyperTextTooltip
+{
+	hypertext = GovernorTooltipHT
+	
+	//caption = "[Governed by {governor}|No governor]"
+	
+	// switch_value = (kingdom.crown_authority < 0)
+	
+	// case 1
+	// {
+	// 	text = $[
+	// 	"[The province of {obj} is prospering under {governor:s} wise leadership.|"
+	// 	"You cannot assign governor, since your Crown authority is less than 0.{realm} is not governed and has the following effects:"
+	// 	"{p}{blt} Gold income is equal to the kingdom's current tax rate {kingdom.tax_rate}%"
+	// 	"{p}{blt} You receive {no_governor_penalty}% of the province's Books, Faith, Commerce and Food production"
+	// 	"{p}{p}Assign a governor to convert these lands to royal and receive full access to the realm's production.]"
+	// 	]
+	// }
+	// case default 
+	// {
+	// 	text = $[
+	// 	"You can assign governor{p}"
+	// 	"[The province of {obj} is prospering under {governor:s} wise leadership.|"
+	// 	"{realm} is not governed and has the following effects:"
+	// 	"{p}{blt} Gold income is equal to the kingdom's current tax rate {kingdom.tax_rate}%"
+	// 	"{p}{blt} You receive {no_governor_penalty}% of the province's Books, Faith, Commerce and Food production"
+	// 	"{p}{p}Assign a governor to convert these lands to royal and receive full access to the realm's production.]"
+	// 	]
+	// }
+	
+	// negative_authority = (kingdom.crown_authority < 0)
+	// text = $[
+	// 	"["
+	// 		"The province of {obj} is prospering under {governor:s} wise leadership."
+	// 	"|"
+	// 		"{realm} is not governed and has the following effects:"
+	// 		"{p}{blt} Gold income is equal to the kingdom's current tax rate[ ({kingdom.tax_rate}%)]"
+	// 		"[{p}{blt} You receive only {no_governor_penalty}% of the province's Books, Faith, Commerce and Food production]"
+	// 		"{p}{p}"
+	// 		"["
+	// 			"{negative_authority:if}{clr:active_penalty}You cannot assign a governor while Crown authority is negative!{/clr}"
+	// 		"|"
+	// 			"{i}Click to [replace {governer} with another governor|assign a governor and convert these lands to royal. You will then receive full realm's production].{/i}"
+	// 		"]"
+	// 	"]"
+	// ]
+}
+
+def GovernningTooltip : Tooltip // HyperTextTooltip
+{
+	// hypertext = GoverningTooltipHT
+	
+	text = $[
+		"[{obj} is governing province of {governed_castle}|"
+		"{obj} is not governing]"
+	]
+}
+
+def ChooseCastleToGovernTooltip : HyperTextTooltip
+{
+	hypertext = ChooseCastleToGovernHT
+}
+
+def ChooseGovernorTooltip : HyperTextTooltip
+{
+	hypertext = ChooseGovernorHT
+}
+
+def TradeCenterTooltip : Tooltip
+{
+	text = $[
+		"{clr:tooltip_title_color}Income in province:{/clr}{p}"
+		"+ {realm.incomes.gold.TCGoldFromCommerce}{gold_icon} from commerce{p}"
+		"[+ {realm.incomes.gold.TCGoldInTown:if}{realm.incomes.gold.TCGoldInTown}{gold_icon} from town{p}]"
+		"[+ {realm.incomes.gold.TCGoldInSettlements:if}{realm.incomes.gold.TCGoldInSettlements}{gold_icon} from settlements{p}]"
+		"[+ {realm.incomes.gold.TCGoldFromGoods:if}{realm.incomes.gold.TCGoldFromGoods}{gold_icon} from produced goods{p}]"
+		"[+ {realm.incomes.books.TCBooksInTown:if}{realm.incomes.books.TCBooksInTown}{books_icon} from town{p}]"
+		"{p}"
+		"{clr:tooltip_title_color}Income from influenced provinces:{/clr}{p}" //{IncomeUntaxedGoldTotal}{gold_icon}{/clr}{p}"
+		"+ {IncomeUntaxedGoldProvinces}{gold_icon} from provinces{p}"
+		"[+ {IncomeUntaxedGoldGoods:if}{IncomeUntaxedGoldGoods}{gold_icon} from produced goods{p}]"
+		"[+ {IncomeUntaxedGoldCommerse:if}{IncomeUntaxedGoldCommerse}{gold_icon} from commerce]"
+	]
+	
+	caption = "Trade Center"
+}
+
+def TradeCenterTooltipInfluenced : Tooltip
+{
+	text = "This province is influenced by the trade centre in {obj}"
+	
+	caption = "Trade Center"
+}
+
+def TradeCenterTooltipNotInfluenced : Tooltip
+{
+	text = "This province is not influenced by a trade centre"
+	caption = "Trade Center"
+}
+
+def CulturePowerTooltip : Tooltip
+{
+	text = $[
+			"{clr:gold}{realm:nolink}:{/clr}{p}"
+			"{realm.majority_strength:F0}% {realm.majority_kingdom.culture_name}[({realm.majority_kingdom.culture_group_name})][, loyal to {realm.majority_foreign_kingdom}]{p}"
+	]
+	{
+		alt = $[
+			"{clr:gold}Province:{/clr} {realm}{p}"
+			"{clr:gold}Majority:{/clr} {realm.majority_strength:F1}% {realm.majority_kingdom} ({realm.majority_kingdom.culture_name}[({realm.majority_kingdom.culture_group_name})], {realm.majority_kingdom.religion}){p}"
+			"{clr:gold}Owner:{/clr} {kingdom} ({kingdom.culture_name}, {kingdom.religion}){p}"
+			"{clr:gold}Influencers:{/clr}{p}"
+			"{realm.majority_debug}"
+		]
+	}
+}
+
+def CulturesTooltip : CulturePowerTooltip { }
+
+def WorkersTotalTooltip : Tooltip
+{
+	text = $[
+		//"{clr:gold}Loyal to:{/clr} {realm.majority_kingdom} ({realm.majority_strength:F0}%)"
+		//"{p}"
+		//"{clr:gold}Culture:{/clr} {realm.majority_kingdom.culture_name}[, {realm.majority_kingdom.culture_group_name} Family]"
+		//"{p}{p}"
+		"{clr:gold}Workers: {/clr}[{has_rebellious_population:if}{clr:red}{workers}{/clr}/{worker_slots}|{workers}/{worker_slots}]{workers_icon}{p}"
+		"The province's general workforce. Each worker contributes to the gold production of the province and can be hired as basic troops. Workers may also form basic defensive squads during battles in the province."
+		"{p}{p}"
+		"{clr:gold}Rebellious population:{/clr} {rebellious_population}{rebel_icon}"
+		"{p}"
+		"Workers who have become rebellious. Rebellious population can migrate to other provinces, or become rebels. Cannot be used as hired troops."
+		"{p}{p}"
+		"{clr:gold}Growth rate: {/clr}{realm.rs_growth_rate_perc}%{p}"
+		"Indicates how quickly the population grows, further modified by food production in the province and food sufficiency in the kingdom."
+		"{p}{p}"
+		"{clr:gold}Hammers: {/clr}{realm.income.hammers}{hammers_icon}{p}"
+		"Determines the speed of constructing buildings, upgrading/repairing fortifications and pillaged settlement recovery."
+	]
+	{
+		alt = $[
+			"{clr:gold}Province:{/clr} {realm}{p}"
+			"{clr:gold}Majority:{/clr} {realm.majority_strength:F1}% {realm.majority_kingdom} ({realm.majority_kingdom.culture_name}[({realm.majority_kingdom.culture_group_name})], {realm.majority_kingdom.religion}){p}"
+			"{clr:gold}Owner:{/clr} {kingdom} ({kingdom.culture_name}, {kingdom.religion}){p}"
+			"{clr:gold}Influencers:{/clr}{p}"
+			"{realm.majority_debug}"
+		]
+	}
+}
+
+def LevyTotalTooltip : Tooltip
+{
+	text = $[
+		"{clr:gold}Levy:{/clr} {levy}/{levy_slots}{p}"
+		"A military-oriented type of population, primarily used as elite troops for recruitment. In case of insufficient workers, levys are can be used for hiring any type of army.{p}"]
+}
+
+def WorkersTooltip : Tooltip
+{
+	text = "Workers: {workers}/{worker_slots}"
+}
+
+def LevyTooltip : Tooltip
+{
+	text = "Levy: {levy}/{levy_slots}"
+}
+
+def RebelliousPopulationTooltip : Tooltip
+{
+	text = "Rebellious population: {rebellious_population}"
+}
+
+def BuildingsCountTooltip : Tooltip
+{
+	text = $[
+		"Shows how many times we have built {building} in {kingdom}."
+		"{p}{i}The cost of upgrades increases with the number of times the building is built.{/i}"
+		"{p}{i}The cost of a building increases with the number of upgrades it already has.{/i}"
+		"[{p}{p}We have built {building} in:{build_locations}]"
+		"[{p}... and {num_additional_built_locations} more]"
+	]
+}
+
+def CancelBuildTooltip : Tooltip
+{
+	text = "{i}Click to cancel[{curent_build.is_upgrade:if} {curent_build}| the construction of {curent_build}]{/i}"
+}
+
+def BeginBuildTooltip : Tooltip
+{
+	pinable = 0
+	max_width = 400
+	text = "{i}{build_prompt}{p}[{align:right}Cost: {cost}]"
+}
+
+def RemoveBuildTooltip : Tooltip
+{
+	text = "{i}[{instance.is_planned:if}Click to remove [{building}|building] from plan|Click to demolish [{building}|building]]{/i}"
+}
+
+def LearnFromBookTooltip : Tooltip
+{
+	text = "Learn a new skill from a book"
+}
+
+def LearnFromRealmTooltip : Tooltip
+{
+	text = "Learn a new skill from a structure in your kingdom"
+}
+
+def LearnFromClericTooltip : Tooltip
+{
+	text = "Learn a new skill from one of your clerics"
+}
+
+def QuestTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{tooltip}"
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Tittle screen 
+///////////////////////////////////////////////////////////////////////////////
+
+def CreateNewCampaignTooltip : Tooltip
+{
+	text = "Create new campaign"
+}
+
+def FindCampaignTooltip : Tooltip
+{
+	text = "Find campaign to join in"
+}
+
+def DeleteCampaignTooltip : Tooltip
+{
+	text = "[{can_delete_campaign:if}Delete the selected campaign.|[{is_multiplayer:if}You cannot delete an active multiplayer campaign.|You cannot delete the campaign you are currently playing.]]"
+}
+
+def DeleteGameSaveTooltip : Tooltip
+{
+	text = "[{can_delete_save:if}Delete the selected save.|You cannot delete the latest save in a multiplayer campaign.]"
+}
+
+def LoadGameSaveTooltip : Tooltip
+{
+	text = "[{can_load_save:if}Load the selected save.|Loading Multiplayer saves is forbidden from this menu, but you can start a New Campaign and choose 'Create from save'.]"
+}
+
+def SaveGameTooltip : Tooltip
+{
+	text = "Save the current progress of your campaign."
+}
+
+def CreateCampaignFromSaveTooltip : Tooltip
+{
+	text = "Create a campaign from save file"
+}
+
+def GameBrowserBackTooltip : Tooltip
+{
+	text = "Return to title menu."
+}
+
+def GameBrowserEnterCodeTooltip : Tooltip
+{
+	text = "If you have a campaign code, sent by friends, you can enter it here to join their campaign."
+}
+
+def GameBrowserJoinGameTooltip : Tooltip
+{
+	text = "Join the campaign, that you have selected from the list."
+}
+
+def GameBrowserRefreshGamesTooltip : Tooltip
+{
+	text = "Refresh campaign list, to see all campaigns, that are public and available for joining, as well as their current settings."
+}
+
+def GameBrowserSearchGamesTooltip : Tooltip
+{
+	text = "Search for campaign, containing the string you've written in the left 'Search' field"
+}
+
+def GameBrowserResetSortingTooltip : Tooltip
+{
+	text = "Clear current sorting and restore the original one (by campaign creation time)"
+}
+
+def CampaignRulesPreserveChoicePreserveTooltip : Tooltip
+{
+	text = "Preserve Rules"
+}
+
+def CampaignRulesPreserveChoiceResetTooltip : Tooltip
+{
+	text = "Reset Rules"
+}
+
+def LeaveCampaignTooltip : Tooltip
+{
+	text = "Leave campaign and go back to the multiplayer menu"
+}
+
+def ForgetCampaignTooltip : Tooltip
+{
+	text = "Forget campaign and free the slot"
+}
+
+def PublishCampaignTooltip : Tooltip
+{
+	text = "Publish campaign to allow other players to discover it"
+}
+
+def UnpublishCampaignTooltip : Tooltip
+{
+	text = "Unpublish campaign to hide it from other players"
+}
+
+def LeaveLobbyTooltip : Tooltip
+{
+	text = "Leave this lobby and return to the Multiplayer menu"
+}
+
+def PickKingdomTooltip : Tooltip
+{
+	text = "Confirm your selection of this kingdom to rule over it[{picked_by_another_player:if}{p}{p}Warning: Another player has already chosen that kingdom - until one of you selects another one, you will not be able to mark yourself as 'Ready']"
+}
+
+
+def JoinCampaignTooltip : Tooltip
+{
+	text = "[{enabled:if}Join campaign|{clr:orange_bright}Cannot join the campaign. Possible reasons:{p}{blt}The host is offline{p}{blt}The campaign is full{p}{blt}You are eliminated{/clr}]"
+}
+
+def ReadyCampaignTooltip : Tooltip
+{
+	switch_value = (no_ready_reason)
+	case kingdom
+	{
+		text = "[{enabled:if}Mark yourself ready to allow the host to start the campaign|{clr:orange_bright}Check kingdom and kingdom size first.{/clr}]"
+	}
+	case team
+	{
+		text = "[{enabled:if}Mark yourself ready to allow the host to start the campaign|{clr:orange_bright}Check team first.{/clr}]"
+	}
+	case kingdom_team
+	{
+		text = "[{enabled:if}Mark yourself ready to allow the host to start the campaign|{clr:orange_bright}Check kingdom, kingdom size and team first.{/clr}]"
+	}
+	case kingdom_multipicked
+	{
+		text = "[{enabled:if}Mark yourself ready to allow the host to start the campaign|{clr:orange_bright}Pick kingdom no other player has picked first.{/clr}]"
+	}
+	case default
+	{
+		text = "[{enabled:if}Mark yourself ready to allow the host to start the campaign|{clr:orange_bright}Check selections first.{/clr}]"
+	}
+}
+
+def SingleplayerStartCampaignTooltip : Tooltip
+{
+	text = "[{enabled:if}Start the campaign|{clr:orange_bright}The campaign cannot be started, yet.{p}{blt}Select a valid kingdom first{/clr}]"
+}
+
+def MultiplayerStartCampaignTooltip : Tooltip
+{
+	text = "[{enabled:if}Start the campaign|{clr:orange_bright}The campaign cannot be started, yet.{p}{blt}All players must pick valid kingdoms{p}{blt}All players must mark themselves ready{/clr}]"
+}
+
+def PickCampaignKingdomTooltip : Tooltip
+{
+	text = "Choose a starting kingdom"
+}
+
+def PickCampaignKingClassTooltip : Tooltip
+{
+	text = "Choose the starting class of your King"
+}
+
+
+def InvateToCampaignKingClassTooltip : Tooltip
+{
+	text = "Invite another player"
+}
+
+def GameSettingTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{description}"
+	prefab = "Assets/UI/Elements/Tooltips/UIP_GameSettingsTooltip.prefab" //GUID:9718de48b85370c4194c3ee0c954343e
+}
+
+def GameSettingOptionTooltip : Tooltip
+{
+	//prefab = "Assets/UI/Elements/Tooltips/UIP_GameSettingsTooltip.prefab" //GUID:9718de48b85370c4194c3ee0c954343e
+	text = $[
+		"{clr:orange}{name}{/clr}{p}{description}"
+		"[{is_locked:if}{p}{p}{i}Rule cannnot be changed after campaign started.{/i}]"
+		"[{is_locked:if_not}{is_host:if_not}{p}{p}{i}Only the host can change campaign's rules.{/i}]"
+	]
+}
+
+def SingleplayerSettingsOverviewTooltip : Tooltip
+{
+	caption = "{game_mode.name}"
+	text = $[
+		"{b}Victory Conditions:{/b}{p}"
+		"{blt} {game_mode.victory_condition}{p}{p}"
+		"{b}{i}Rules{/i}{/b}{p}"
+		"{rules}"
+	]
+}
+
+def MultiplayerSettingsOverviewTooltip : Tooltip
+{
+	caption = "{game_mode.name}"
+	text = $[
+		"{b}Victory Conditions:{/b}{p}"
+		"{blt} {game_mode.victory_condition}{p}{p}"
+		"{b}{i}Early end conditions{/i}{/b}{p}"
+		"{early_end_conditions}{p}{p}"
+		"{b}{i}Rules{/i}{/b}{p}"
+		"{rules}"
+	]
+}
+
+def NewCampaignFromSaveTooltip : Tooltip
+{
+	caption = "Create from save"
+	text = "Load a custom scenario from one of your existing singleplayer or multiplayer saves.[{is_host:if_not}{p}{p}{i}Only the owner may perform this{/i}]"
+}
+
+def MultiplyerTimeLimitTooltip : Tooltip
+{
+	caption = "Campaign Duration"
+	switch_value = (type)
+	case Time
+	{
+		text = "The campaign will end when the timer reaches 0"
+	}
+	case Generations
+	{
+		text = "The campaign will end when any player reaches their fourth generations of kings."
+	}
+}
+
+def GenerationsPassedTooltip : Tooltip
+{
+	pinable = 0
+	text = "Generations changed: {kingdom.generations}"
+}
+
+def ClassLevelTooltip : Tooltip
+{
+	pinable = 0
+	text = "Character level [{class_level:if}({class_level})|(-)]"
+}
+
+def RealmFoodStorageTootlip : Tooltip
+{
+	caption = "Stored Food"
+	text = $[
+		"{flavor_text}Local food reserves are used to replenish the supplies of stationed armies."
+		"They also play an important role during siege battles, leading in some penalties for defenders when fully depleted.{/flavor_text}{p}{p}"
+		// "{b}Province income:{/b}{p}"
+		// "{section_body}"
+		// "From Town: {realm.incomes.food.TOWN:F1:bonus}{food_icon}{p}"
+		// "From Settlements: {realm.incomes.food.SETTLEMENTS:F1:bonus}{food_icon}{p}"
+		// "From Governor: {realm.incomes.food.GOVERNOR:F1:bonus}{food_icon}{p}"
+		// "{/section_body}{p}"
+		// "{b}Total income:{/b}[{no_governor} {realm.incomes.food.TAXED:F1}{food_icon} ({realm.castle.no_governor_penalty:%} of {realm.incomes.food.TOTAL:F1}{food_icon} province income)| {realm.incomes.food.TOTAL:F1}{food_icon}]{p}{p}"
+		"Garrison upkeep: {garrison_upkeep_food:penalty_no_sign:F1}{food_icon}{p}"
+		"Stored food: {cur_food:F0}/{max_food:F0}"
+	]
+}
+
+def RegionSettlementsTooltip : Tooltip
+{
+	caption = "{caption}"
+	text = $["{body}"
+			"{p}"
+			"Regional settlements owned by your kingdom may be affected by structures built in this province."
+			]
+	
+	prefab = "Assets/UI/Elements/Tooltips/IconTooltip.prefab" //GUID:f8307c7637074ba43b9c995cd73d25a8
+	max_width = 400
+}
+
+def SquadBVTooltip : HyperTextTooltip
+{
+	hypertext = UnitTooltipHT//BVUnitTooltipHT
+	// caption = "{obj.name}"
+	// text = $[	
+	// 			//"{obj.militaryUnitType}{p}{p}"
+	// 			"{obj.description}{p}{p}"
+	// 			"[Level: {level}[{unit_is_militia:if} (Peasants cannot level up from combat)]{p}]"
+	// 			"Troops alive: {num_troops}/{size}[ ({size_bonus:bonus})]{p}"
+	// 			"[Morale: {morale:F1}/{initial_morale}{p}]"
+	// 			"[Stamina: {stamina}/{stamina_max}{p}]"
+	// 			"Movement speed: {def.move_speed} [ ({move_speed_bonus:bonus})]{p}"
+	// 			"{p}"
+	// 			"{Battle.squad_window_stats}{p}"
+	// 			//"State: {state}{p}"
+	// 			//"Command: {command}{p}"
+	// ]
+}
+
+def SquadBVTooltipUnPinable : SquadBVTooltip
+{
+	pinable = 0
+}
+
+// OBSOLETE
+def KingdomExperienceTooltip : Tooltip
+{
+	caption = " Kingdom Power"
+	text = "Represents the current experience gained by {kingdom:s} knights. Stars are gained over time as knights perform various duties, and can be spent to promote any member of the royal court."
+}
+
+def KingdomAdvisorsTooltip : Tooltip
+{
+	caption = "Kingdom Advisors"
+	text = "Kingdom Advisor description placeholder"
+}
+
+def KingAbilityTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{description}"
+}
+
+def CharacterLevelTooltip : Tooltip
+{
+	caption = "Character Level"
+	text = $["A knight's level determines the success and effectiveness of various events and actions."
+	"{p}{p}{i}Click to view and choose skills{/i}"]
+}
+
+def InspectStabilityTooltip : Tooltip
+{
+	text = "View Stability"
+}
+
+def InstectPoliticalViewStabilityTooltip : Tooltip
+{
+	text = "View stability political view"
+}
+
+def OccupiedStateTooltip : Tooltip
+{
+	caption = "Occupied state"
+	text = "This province is currently controlled by {occupant:ian} forces."
+}
+
+def SetHeirTooltip : Tooltip
+{
+	max_width = 350
+	caption = "[{is_heir:if}Heir of the crown|Select as new heir]"
+	bool heir_is_patriarch = (obj.is_patriarch || obj.is_ecumenical_patriarch)
+	text = $[
+		"{obj} "
+		"[{is_heir_eligable:if} is ready to rule the {kingdom.KingdomType} when the time comes.|[{heir_is_patriarch:if}cannot rule {kingdom} as a patriarch.|{obj.is_cardinal:if}cannot rule {kingdom} as a cardinal.|{obj.is_rebel:if}cannot rule as a rebel.|is not yet ready to carry the burden of the crown.]]"
+		"[{is_heir:if} He is chosen by the {kingdom.king.title} as the rightful heir.|[{is_rebel:if}| His brother, {kingdom.heir}, is chosen by the king to succeed the crown.]]"
+	]
+}
+
+def RebellionTooltip : Tooltip
+{
+	caption = "[{rebellion.is_famous:if}Famous ]Rebellion"
+	text = $[
+	"A mass revolt originating in the province of {origin_realm}, headed by {leader}.[This rebellion is loyal to {leader.loyal_kingdom}]"
+	"{p}{p}Ctrl + Click to show leader location"
+	"[{show_inspect_hint:if}{p}Click to inspect]"]
+}
+
+def RebellionStrengthTooltip : Tooltip
+{
+	text = "The combined strength of all rebellion armies"
+}
+
+def RebelTooltip : Tooltip
+{
+	pinable = 1
+	//caption = "[{is_leader:if}{rebellion.leader}|]"
+	text = $[
+		"[{is_leader:if}"
+			"An army leading the rebellion, helmed by {leader}. Eliminate his retinue to put an end to the uprising."
+			//"[Origin: {origin_realm}]"
+		"|[{is_general:if}"
+			"A rebel army led by {leader}.{p}This army may become the new rebellion leader, if {rebellion.leader} perishes."
+		"|A mob of rebels [supporting {rebellion.leader:s} rebellion]. If left unchecked, this army may get promoted to a general, gaining a leader and the ability to become the new head of the rebellion.]]"
+		"[{is_loyalist:if}{p}Loyal to: {rebellion.loyal_to}]"
+		"[{is_leader:if}|{p}{p}Double-click to show the rebellion leader's location]"
+	]
+}
+
+def AbandonTraditionTooltip : Tooltip
+{
+	text = "Abandon tradition"
+}
+
+def OpenRoyalFamilyTooltip : Tooltip
+{
+	text = "Royal Family"
+}
+
+def OpenTraditionsTooltip : Tooltip
+{
+	text = "Kingdom Traditions"
+}
+
+def OpenWarPreparationsTooltip : Tooltip //!!! obsolete, to be removed
+{
+	text = "War Preparations"
+}
+
+def KingActionsModeChangeTooltip : Tooltip
+{
+	text = "View other actions"
+}
+
+def CancelTraditonAdoptionTooltip : Tooltip
+{
+	text = "Cancel adoption of traditon {obj}"
+}
+
+def TraditonRankMaxedTooltip : Tooltip //!!! obsolete, to be removed
+{
+	float max_width = 350
+	text = "Max level reached"
+}
+
+def TraditionAlreadyAdoptedTooltip : Tooltip
+{
+	float max_width = 350
+	text = "Tradition already adopted"
+}
+
+def TraditionAdoptionWrongCategoryTooltip : Tooltip //!!! obsolete, to be removed
+{
+	text = "Tradition cannot be adopted in this category"
+}
+
+def TraditionAdoptionReqiermentsNotMetTooltip : Tooltip
+{
+	text = "None of your knights have this skill at level 3"
+}
+
+def ChatToggleTooltip : Tooltip
+{
+	text = "Toggle chat [{p}{p}{i}Press {keybindings.toggle_chat} to open chat and start typing{/i}]"
+}
+
+def PlayerStatsToggleTooltip : Tooltip
+{
+	text = "Toggle objectives and rules [({keybindings.toggle_score})]"
+}
+
+def CommonDistrictWIPTooltip : Tooltip
+{
+	text = "Common district (WIP)"
+}
+
+def ActiveRebelArmiesCountTooltip : Tooltip
+{
+	text = "Number of rebel armies active on the territory of the kingdom"
+	max_width = 250
+}
+
+def CitadelTooltip : Tooltip
+{
+	caption = "Citadel"
+	text = "A town's core fortified center. Its size automatically increases as the province develops."
+}
+
+def SiegeDefenseTooltip : Tooltip
+{
+	caption = "Fortifications"
+	text = "Represents the town's siege defense against potential enemy besiegers.{p}"
+}
+
+def KingdomStabilityTooltip : Tooltip
+{
+	caption = "Kingdom Stability"
+	text = $[
+		"Discontent of the population leads to problems like migration and riots.{p}{p}"
+		"Global revolt risk: {kingdom.stability:F0}{p}"
+//		"Positives: {clr:green}{stability_positives}{/clr}{p}"
+//		"Negatives: {clr:red}{stability_negatives}{/clr}{p}"
+		"Rebel armies across all rebellions: {num_rebel_armies}{p}"
+		"{separator}{p}"
+		"Local revolt risk (average): {rebellion_risk_average:penalty:F0}{p}"
+	]
+}
+
+def DisorderTooltip : Tooltip
+{
+	caption = "Disorder"
+	text = $[
+	"{realm.castle:s} population is loyal to {kingdom_loyal_to} and refuses to serve under {kingdom.king:s} rulership.{p}{p}"
+	"Disorder can be resolved by bringing an army and using establish order action, by adopting population with a {kingdom.religion.titles.Cleric}.{p}{p}"
+	"In time, if you are not in war with the kingdom the province population is loyal to, they might decide voluntarily to follow your orders."]
+}
+
+def CharacterOpportunitiesTooltip : HyperTextTooltip
+{
+	//text = "Opprotunity Actions"
+	hypertext = CharacterOpportunitiesTooltipHT
+}
+
+def MerchantImportGoodsIconTooltip : Tooltip
+{
+	caption = "Import Goods"
+	text = "Click to open the import options"
+}
+
+def MerchantImportedGoodIconTooltip : Tooltip
+{
+	caption = "Importing {name}"
+	text = $["{tooltip}"
+	"{p}{p}"
+	"Importing {name} costs us an upkeep of {gold_upkeep}{gold_icon} and {trade_upkeep}{trade_icon}."
+	"{p}{p}"
+	"{i}Click to stop importing this good.{/i}"]
+}
+
+def PopMajorityTooltip : Tooltip
+{
+	text = $[
+	"{clr:gold}Loyal to:{/clr} {realm.majority_kingdom} ({realm.majority_strength:F0}%){p}"
+	"{clr:gold}Culture:{/clr} {realm.majority_kingdom.culture_name}[, {realm.majority_kingdom.culture_group_name} Family]"]
+}
+
+def ProvinceLoyalty : Tooltip
+{
+	text = "The province is loyal to {kingdom}."
+}
+
+def LocalAuthorityTooltip : Tooltip
+{
+	caption = "Province stability"
+	text = "Represents the fealty of {realm:s} people. High province stability can partially compensate for a low kingdom's stability."
+}
+
+def RoyalFamilyAndDiplomacyTooltip : Tooltip
+{
+	caption = "Royal Family and Traditions[ ({keybindings.royal_family_and_traditions})]"
+	text = "{kingdom} is currently led by the wise rulership of {king} [and his wife - {queen}]. [{heir} has been chosen as a successor to the throne.|With no successor to the throne, the fate of {kingdom} remains undecided.]" //The throne room of the {king_title}, {queen_title} and their children. 
+}
+
+def RoyalDungeonTooltip : Tooltip
+{
+	caption = "Royal Dungeon"
+	max_width = 400
+	text = $[
+	"Prisoners can be used for ransoming, bribery, interrogation and other. If your royal dungeon gets too crowded, the likelihood of problems in it increase."
+	"{p}{p}Prisoners:{/clr} {num_prisoners}"
+	"{p}Capacity:{/clr} {prison_capacity}"
+	]
+}
+
+def KingdomWarsTooltip : Tooltip
+{
+	caption = "Friends, Threats and Wars[ ({keybindings.friends_threats_and_wars})]"
+	min_width = 250
+	text = "An overview of all wars waged by {kingdom}, in addition to our potential foes and allies.{p}{p}Active wars: {num_wars}"
+}
+
+def PrestigeTooltip : Tooltip
+{
+	caption = "Prestige ({prestige:F0})"
+}
+
+def FameTooltip : Tooltip
+{
+	caption = "{kingdom:s} Fame ({fame:F0})"
+	
+	great_power_morale = (ks_army_morale.great_power)
+	//great_power_stability = (ks_stability.great_power)
+	great_power_influence = (ks_influence.great_power)
+	great_power_culture = (ks_culture.great_power)
+	
+	text = $[
+	"[{is_great_power:if}{is_player:if}As a great power, {kingdom} benefits from the following effects:{p}"
+	"{blt} {great_power_morale:bonus} Army morale{p}"
+	//"{blt} {great_power_stability:bonus} Stability{p}"
+	"{blt} {great_power_influence:bonus} Influence in neighbors{p}"
+	"{blt} {great_power_culture:bonus} Culture{p}{p}]"
+	//!!! REMOVE THE INFO BELOW as it is unneeded, due to the window's new design
+	"[{hide_sources:if}|"
+	"[{b}Sources:{/b}{p}"
+	"[{blt} Rankings: {rankings_fame:if}{rankings_fame:bonus:F0}{p}]"
+	"[{blt} Provinces: {realms_fame:if}{realms_fame:bonus:F0}{p}]"
+	"[{blt} Buildings: {building_fame:if}{building_fame:bonus:F0}{p}]"
+	"[{blt} Trade centers: {trade_centers_fame:if}{trade_centers_fame:bonus:F0}{p}]"
+	"[{blt} Produced goods: {produced_goods_fame:if}{produced_goods_fame:bonus:F0}{p}]"
+	"[{blt} Vassals: {vassals_fame:if}{vassals_fame:bonus:F0}{p}]"
+	"[{blt} Marriages: {marriages_fame:if}{marriages_fame:bonus:F0}{p}]"
+	"[{blt} Ecumenical patriarch: {ecumenical_patriarch_fame:if}{ecumenical_patriarch_fame:bonus:F0}{p}]"
+	"[{blt} Caliphate: {caliphate_fame:if}{caliphate_fame:bonus:F0}{p}]"
+	"[{blt} Autocephaly: {autocephaly_fame:if}{autocephaly_fame:bonus:F0}{p}]"
+	"[{blt} Non-Orthodox: {non_orthodox_fame:if}{non_orthodox_fame:bonus:F0}{p}]"
+	"[{blt} Traditions: {traditions_fame:if}{traditions_fame:bonus:F0}{p}]"
+	"[{blt} Other bonuses: {other_fame_bonuses:if}{other_fame_bonuses:bonus:F0}{p}]"
+	"]]"
+	]
+}
+
+def RealmFameTooltip : Tooltip
+{
+	caption = "Province Fame"
+	text = $[
+	"Important buildings raise the fame of a town, attracting visitors from all corners of the world. Certain notable towns also grant fame to their kingdom, no matter what buildings are inside."
+	"{p}{p}{realm} is currently generating {b}{realm.fame} fame{/b}."
+	"[{p}{p}{realm.no_governor:if}{i}Assign a governor to gain access to the fame generated by this town's buildings.{/i}]"
+	]
+}
+
+def FameVictoryTooltip : Tooltip
+{
+	min_width = 350
+	bool at_peace = (num_wars == 0)
+	text = $[
+	"Meet the following requirements to attempt to claim victory:"
+	"{p}{blt} [{game_is_paused:if_not}{clr:white}|{clr:gray}]You cannot initiate 'Emperor of the World' voting while the game is paused.{/clr}"
+	"{p}{blt} [{is_great_power:if}{clr:white}|{clr:gray}]Become a Great Power {/clr}"
+	"{p}{blt} [{has_required_victory_fame:if}{clr:white}|{clr:gray}]Have at least {required_fame_victory} fame{/clr}"
+	"{p}{blt} [{at_peace:if}{clr:white}|{clr:gray}]Do not be at war.{/clr}"
+	"{p}{blt} [{eotw_enough_great_powers:if}{clr:white}|{clr:gray}]At least {eotw_min_great_powers} great powers must exist{/clr}"
+	"{p}{p}Clicking on this button will initiate a voting process, where the rest of the great powers will decide whether your claim to become 'Emperor of the World' is just."
+	]
+	
+}
+
+def TraditionSlotTooltip : Tooltip
+{
+	min_width = 100
+	max_width = 450
+	text = $[
+	"[{is_locked:if}Locked Tradition Slot{p}{p}{i}It will become available when traditions are adopted in every tradition slot above.{/i}|"
+	"[{is_player:if}"
+	"A new tradition can be adopted in this slot, based on a skill mastered by a knight in the royal court."
+	"{p}{p}{i}Click to pick and adopt a tradition{/i}"
+	"|{obj} has not yet adopted a tradition in this slot.]"
+	"]"
+	]
+}
+
+def MercenaryMissionTooltip : Tooltip
+{
+	caption = "{obj.caption}"
+	text = "{obj.description}"
+}
+
+def DismissMercenaryTooltip : Tooltip
+{
+	caption = "Dismiss"
+	text = "Let go of {army.leader}, you can hire him again in the future."
+}
+
+def PrisonerTooltip : Tooltip
+{
+	text = $[
+		"{prisoner_name} ({prisoner.kingdom:ian} {prisoner.class_name}"
+		"{p}Age: {prisoner.age}"
+		"{p}{p}Click to inspect"
+	]
+}
+
+def PrisonersTooltip : Tooltip
+{
+	text = $[
+		"Prisoners: {num_prisoners}"
+		"{p}Capacity: {prison_capacity}"
+		"{p}{p}Click to inspect Royal Dungeon"
+	]
+}
+
+def WarsTooltip : Tooltip
+{
+	text = $[
+		"Active wars: {num_wars}"
+		"{p}{p}Click to inspect all Friends, Threats and Wars"
+	]
+}
+
+def ThirdPartyJihadsTooltip : Tooltip
+{
+	text = $[
+		"Ongoing jihads: {num_jihads}"
+		"{p}{p}Click to inspect all jihads"
+	]
+}
+
+def RebellionsTooltip : Tooltip
+{
+	text = $[
+		"Active rebellions: {num_rebellions}"
+		"{p}{p}Click to inspect Kingdom Stability"
+	]
+}
+
+def MercenaryTooltip : Tooltip
+{
+	text = $[
+		"Mercenary camp"
+		"{p}{p}Ctrl + Click to show location"
+		"{p}Click to select the mercenary camp"
+	]
+}
+
+def MercenariesTooltip : Tooltip
+{
+	text = $[
+		"Notable mercenaries loyal to {kingdom}"
+		"{p}{p}Ctrl + Click to cycle through and show mercenary camps location"
+		"{p}Click to cycle through the mercenary camps"
+	]
+}
+
+def ManpowerGarrisonTooltip : Tooltip
+{
+	caption = "Town defenders"
+	text = $["{flavor_text}The amount of troops stationed behind {realm:s} walls. A town's garrison, its town guards and the provinces population all participate in the defense of a town.{/flavor_text}"
+	"[{p}{p}{clr:gold}Garrison squads:{/clr} {garrison.garrison_squads_amount}]"
+	"[{p}{blt} Base manpower: {garrison.garrison_manpower}]"
+	"[{garrison.garrison_siege_defense_manpower:if}{p}{blt} Bonus from siege defense: {garrison.garrison_siege_defense_manpower:bonus}]"
+	"[{garrison.garrison_rs_garrison_manpower:if}{p}{blt} Bonus from realm: {garrison.garrison_rs_garrison_manpower:bonus}]"
+	"[{garrison.garrison_levies_manpower:if}{p}{blt} Bonus from province levies: {garrison.garrison_levies_manpower:bonus}]"
+	"[{garrison.garrison_excess_guards_manpower:if}{p}{blt} Bonus from excess town guards: {garrison.garrison_excess_guards_manpower:bonus}]"
+	"[{garrison.garrison_excess_population_manpower:if}{p}{blt} Bonus from excess province population: {garrison.garrison_excess_population_manpower:bonus}]"
+	"{p}{p}{clr:gold}Town guards:{/clr} {realm_town_guards}{guard_icon}"
+	"[{garrison.town_guards_manpower:if}{p}{blt} Base manpower: {garrison.town_guards_manpower}]"
+	"[{garrison.town_guards_siege_defense_manpower:if}{p}{blt} Bonus from siege defense: {garrison.town_guards_siege_defense_manpower:bonus}]"
+	"[{garrison.town_guards_rs_garrison_manpower:if}{p}{blt} Bonus from realm: {garrison.town_guards_rs_garrison_manpower:bonus}]"
+	"[{garrison.town_guards_siege_defense_temp_manpower:if}{p}{blt} Bonus from siege defense: {garrison.town_guards_siege_defense_temp_manpower:bonus}]"
+	"[{garrison.town_guards_excess_guards_manpower:if}{p}{blt} Bonus from excess town guards: {garrison.town_guards_excess_guards_manpower:bonus}]"
+	"[{garrison.town_guards_excess_population_manpower:if}{p}{blt} Bonus from excess province population: {garrison.town_guards_excess_population_manpower:bonus}]"
+	"[{garrison.town_guards_levies_manpower:if}{p}{blt} Bonus from province levies: {garrison.town_guards_levies_manpower:bonus}]"
+	"[{garrison.peasant_squads:if}{p}{p}{clr:gold}Peasant defending squads:{/clr} {garrison.peasant_squads}{workers_icon}]"
+	"[{garrison.peasant_defenders_manpower:if}{p}{blt} Base manpower: {garrison.peasant_defenders_manpower}]"
+	"[{garrison.peasant_defenders_siege_defense_manpower:if}{p}{blt} Bonus from siege defense: {garrison.peasant_defenders_siege_defense_manpower:bonus}]"
+	"[{garrison.peasant_defenders_rs_garrison_manpower:if}{p}{blt} Bonus from realm: {garrison.peasant_defenders_rs_garrison_manpower:bonus}]"
+	"[{garrison.peasant_defenders_siege_defense_temp_manpower:if}{p}{blt} Bonus from siege defense: {garrison.peasant_defenders_siege_defense_temp_manpower:bonus}]"
+	"[{garrison.peasant_excess_guards_manpower:if}{p}{blt} Bonus from excess town guards: {garrison.peasant_excess_guards_manpower:bonus}]"
+	"[{garrison.peasant_excess_population_manpower:if}{p}{blt} Bonus from excess province population: {garrison.peasant_excess_population_manpower:bonus}]"
+	"[{garrison.peasant_levies_manpower:if}{p}{blt} Bonus from province levies: {garrison.peasant_levies_manpower:bonus}]"
+	"[{can_replenish_garrison:if}{p}{p}Click to heal garrison{p}{align:right}Cost: {garrison_heal_cost}]"
+	]
+}
+
+def HealGarrisonUnitTooltip : Tooltip
+{
+	//pinable = 0;
+	max_width = 300
+	text = $[
+		"[Click to heal this squad ({obj}){p}{align:right}Cost: {heal_cost}]"
+	]
+}
+
+def LocalRebelRiskTooltip : Tooltip
+{
+	caption = "Stability"
+	text = $[
+	"Various factors which add tension within the province. Low stability might lead to some of the province’s population becoming rebellious, while positive local happiness reduces the likelihood of this to happen."
+	"{p}{p}{b}Province stability:{/b} {rebellion_risk:bonus}{p}"
+	//"[{rebellion_risk:if}{p}{b}Province stability factors:{/b}{p}]"
+	"[{blt} Governor: {rebellion_risk_governor:bonus:nonzero}{p}]"
+	"[{blt} Disorder: {rebellion_risk_disorder:bonus:nonzero}{p}]"
+	"[{blt} Disloyal population: {rebellion_risk_disloyal_pop:bonus:nonzero}{p}]"
+	"[{blt} Religious tension: {rebellion_risk_religion:bonus:nonzero}{p}]"
+	"[{blt} Cultural tension: {rebellion_risk_culture:bonus:nonzero}{p}]"
+	"[{blt} Nearby rebel occupations: {rebellion_risk_rebel_occupations:bonus:nonzero}{p}]"
+	"[{blt} Rebellions: {rebellion_risk_rebel_leaders:bonus:nonzero}{p}]"
+	"[{blt} Town sacked recently: {rebellion_risk_castle_sacked:bonus:nonzero}{p}]"
+	"[{blt} Buildings: {rebellion_risk_buildings:bonus:nonzero}{p}]"
+	"[{blt} Kingdom stability: {rebellion_risk_kingdom:bonus:nonzero}{p}]"
+	"[{blt} Happiness: {rebellion_risk_happiness:bonus:nonzero}{p}]"
+	"[{blt} Patriarch: {rebellion_risk_patriarch:bonus:nonzero}{p}]"
+	"[{blt} Establish order: {rebellion_risk_establish_order:bonus:nonzero}{p}]"
+	]
+	
+}
+
+def MajorityAndCultureTooltip : Tooltip //Take this from WorkersTotalTooltip and display it in this new tooltip instead
+{
+	text = $[
+		"{clr:gold}Loyal to:{/clr} {realm.majority_kingdom} ({realm.majority_strength:F0}%)"
+		"{p}"
+		"{clr:gold}Culture:{/clr} {realm.majority_kingdom.culture_name}[, {realm.majority_kingdom.culture_group_name} Family]"
+	]
+	{
+		alt = $[
+			"{clr:gold}Province:{/clr} {realm}{p}"
+			"{clr:gold}Majority:{/clr} {realm.majority_strength:F1}% {realm.majority_kingdom} ({realm.majority_kingdom.culture_name}[({realm.majority_kingdom.culture_group_name})], {realm.majority_kingdom.religion}){p}"
+			"{clr:gold}Owner:{/clr} {kingdom} ({kingdom.culture_name}, {kingdom.religion}){p}"
+			"{clr:gold}Influencers:{/clr}{p}"
+			"{realm.majority_debug}"
+		]
+	}
+}
+
+def KingdomStanceTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "[{tooltip}]"
+}
+
+
+def KingdomRelationsPacks : Tooltip
+{
+	caption = "Pacts"
+	//!!! replace "this kingdom" with "{kigdom}"! (Currently, this returns our kingdom, not the selected one)
+	text = $[
+		"The amount of defensive pacts and invasion plans in which {target_kigdom} participates, where we are either rivals or fellow conspirators."
+		"{p}{p}Pacts against us: {negative_pacts}"
+		"{p}Pacts with us: {positive_pacts}"
+	]
+}
+
+def KingdomRelationship : Tooltip
+{
+	pinable = 0
+	text = $["{target_kigdom} is {relationship_key} towards our {kingdom.KingdomType}."
+	"{p}{b}Relations{/b}: {relationship}"]
+}
+
+def InvalidOfferTooltip : Tooltip
+{
+	text = "This offer cannot be completed at the moment."
+}
+
+def WarExhaustionTooltip : Tooltip
+{
+	text = "Prolonged wars tire the population, ultimately decreasing the stability of our {kingdom.KingdomType}. Reducing war exhaustion takes time and may only happen while no wars are active."
+}
+
+def EmperorVoteTooltip : Tooltip
+{
+	text = $[
+		"{i}{vote_reason}{/i}{p}"
+	    "[{p}Reasons in favor:{p}{pro_texts}{p}]"
+	    "[{p}Reasons against:{p}{con_texts}{p}]"
+		"[{p}Relations towards {claimant1}: {rel_key_claimant1}]"
+		"[{p}Relations towards {claimant2}: {rel_key_claimant2}]"
+	]
+}
+
+def EmperorVoteForTooltip : Tooltip
+{
+	SlantTexts
+	{
+		text VeryAgainst = "All royal advisors are unanimous that we should vote against {candidate}."
+		text Against = "Most royal advisors are unanimous that we should vote against {candidate}."
+		text SlightlyAgainst = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting against {candidate}"
+		text SlightlyFor = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting for {candidate}"
+		text For = "Most royal advisor are unanimous that we should support {candidate}."
+		text VeryFor = "All royal advisor are unanimous that we should support {candidate}."
+	}
+	caption = "Voting for {candidate}"
+	text = $["{slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{con_texts}]"
+		     "{p}{p}The vote will be with {vote_weight:bonus} weight."]
+}
+
+def EmperorVoteAgainstTooltip : Tooltip
+{
+	SlantTexts
+	{
+		text VeryAgainst = "All royal advisors are unanimous that we should vote against {candidate}."
+		text Against = "Most royal advisors are unanimous that we should vote against {candidate}."
+		text SlightlyAgainst = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting against {candidate}"
+		text SlightlyFor = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting for {candidate}"
+		text For = "Most royal advisor are unanimous that we should support {candidate}."
+		text VeryFor = "All royal advisor are unanimous that we should support {candidate}."
+	}
+	caption = "Voting against {candidate}"
+	text = $["{slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{con_texts}]"
+		     "{p}{p}The vote will be with {vote_weight:bonus} weight."]
+	//text = "Voting against {candidate} will put your kingdoms at war"
+}
+
+def EmperorVoteAbstainTooltip : Tooltip
+{
+	SlantTexts
+	{
+		text VeryAgainst = "All royal advisors are unanimous that we should vote against {candidate}."
+		text Against = "Most royal advisors are unanimous that we should vote against {candidate}."
+		text SlightlyAgainst = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting against {candidate}"
+		text SlightlyFor = "{plr_kingdom:s} royal advisors gravitate just a little more towards voting for {candidate}"
+		text For = "Most royal advisor are unanimous that we should support {candidate}."
+		text VeryFor = "All royal advisor are unanimous that we should support {candidate}."
+	}
+	caption = "Abastain from voting"
+	text = $["{c1_slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{c1_pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{c1_con_texts}]"
+		     "{p}{p}The vote will be with {c1_vote_weight:bonus} weight."
+		     "{p}{p}{c2_slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{c2_pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{c2_con_texts}]"
+		     "{p}{p}The vote will be with {c2_vote_weight:bonus} weight."]
+}
+
+def EmperorNextVoteTooltip : Tooltip
+{
+	text = "Proceed to next voter"
+}
+
+
+def GreatPowerEmperorVoteTooltip : Tooltip //in great powers window
+{
+	SlantTexts
+	{
+		text VeryAgainst = "They are strongly against {plr_kingdom.king} as Emperor of the World."
+		text Against = "They are against {plr_kingdom.king} as Emperor of the World."
+		text SlightlyAgainst = "They are slightly against {plr_kingdom.king} as Emperor of the World."
+		text SlightlyFor = "They slightly support {plr_kingdom.king} as for Emperor of the World."
+		text For = "They support {plr_kingdom.king} as Emperor of the World."
+		text VeryFor = "They strongly support {plr_kingdom.king} for Emperor of the World."
+	}
+	caption = "{voter}"
+	text = $["{slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{con_texts}]"
+		     "{p}{p}The vote will be with {vote_weight:bonus} weight."]
+}
+
+def EmperorGreatPowerVoteTooltip : Tooltip //in emperor window
+{
+	SlantTexts
+	{
+		text VeryAgainst = "They are strongly against {plr_kingdom.king} as Emperor of the World."
+		text Against = "They are against {plr_kingdom.king} as Emperor of the World."
+		text SlightlyAgainst = "They are slightly against {plr_kingdom.king} as Emperor of the World."
+		text SlightlyFor = "They slightly support {plr_kingdom.king} as for Emperor of the World."
+		text For = "They support {plr_kingdom.king} as Emperor of the World."
+		text VeryFor = "They strongly support {plr_kingdom.king} for Emperor of the World."
+	}
+	caption = "{voter}"
+	text = $["{slant_text}"
+		     "[{p}{p}Reasons in favor:{p}{pro_texts}]"
+		     "[{p}{p}Reasons against:{p}{con_texts}]"
+		     "{p}{p}The vote will be with {vote_weight:bonus} weight."]
+}
+
+def IncomePanelTooltip : HyperTextTooltip
+{
+	hypertext = IncomeTooltipHT
+}
+
+def IncomeDescriptionTooltip : HyperTextTooltip
+{
+	hypertext = IncomeDescriptionTooltipHT
+}
+
+def GreatPowersTooltip : Tooltip
+{
+	caption = "Great Powers and Rankings[ ({keybindings.great_powers_and_rankings})]"
+	text = $[
+	"An overview of the current great powers, along with all rankings and our accumulated fame."
+	"{p}{p}Fame: {kingdom.fame}"]
+}
+
+def GoodsVictoryTooltip : Tooltip
+{
+	caption = "Kingdom Advantages[ ({keybindings.kingdom_advantages})]"
+	text = $[
+	"An overview of all produced and imported goods, and the benefits they bring to our {kingdom.KingdomType}."
+	"{p}{p}Goods: {kingdom.num_goods}/{num_total_goods}"]
+}
+
+def GamePediaTooltip : Tooltip
+{
+	caption = "Royal Library[ ({keybindings.royal_library})]"
+	text = "A glossary explaining different aspects of the game."
+}
+
+def PorvinceOverview : Tooltip
+{
+	caption = "Province Overview[ ({keybindings.province_overview})]"
+	text = $["A ledger containing important information about {kingdom:s} provinces."
+	"{p}{p}Provinces: {kingdom.num_realms}"]
+}
+
+def PauseMenuTooltip : Tooltip
+{
+	text = "Pause Menu {clr:gold}(ESC){/clr}"
+}
+
+def ToggleAudioButtonTooltip : Tooltip
+{
+	text = "Toggle Audio[ {clr:gold}({keybindings.toggle_audio}){/clr}]"
+}
+
+def PaganBeliefTooltip : HyperTextTooltip
+{
+	hypertext = PaganBeliefTooltipHT
+}
+
+def ClaimInheritanceBtnUnavailableTooltip : Tooltip
+{
+	text = "You can't currently claim inheritance, because you have an ongoing offer."
+}
+
+def CrusadeTooltip : Tooltip
+{
+	text additional_text = $[
+		"{p}{obj.army.leader.status.status_text}"	
+		"{p}{p}{i}Double-click to show the crusade leader's location{/i}"
+	]
+	
+	visible_condition = (is_active)
+	switch_value = (obj.reason)
+	case helping_kingdom
+	{
+		caption = "{Crusade.caption.helping_kingdom}"
+		text = $[
+		"{Crusade.body.helping_kingdom}"
+		"{additional_text}"]
+	}
+	case forced
+	{
+		caption = "{Crusade.caption.forced}"
+		text = $[
+		"{Crusade.body.forced}"
+		"{additional_text}"]
+	}
+	case holy_lands
+	{
+		caption = "{Crusade.caption.holy_lands}"
+		text = $[
+		"{Crusade.body.holy_lands}"
+		"{additional_text}"]
+	}
+	case attack_infidels
+	{
+		caption = "{Crusade.caption.attack_infidels}"
+		text = $[
+		"{Crusade.body.attack_infidels}"
+		"{additional_text}"]
+	}
+	case default
+	{
+		caption = "{Crusade.caption.attack_infidels}"
+		text = $[
+		"{Crusade.body.attack_infidels}"
+		"{additional_text}"]
+	}
+}
+
+def NonOrthodoxOwnPatriarchTooltip : Tooltip
+{
+	text = $["[{obj.is_ecumenical_patriarch:if}We have Constantinople!{p}{p}]"
+	"[Effects from {obj}:{p}"
+	"{patriarch_effects}"
+	"|{obj.is_ecumenical_patriarch:if}The current head of the Orthodox Church is {obj}.|The current head of our Autocephaly is {obj}.]"
+	]
+}
+
+def InfluenceTooltip : Tooltip
+{
+	text = "The influence of our kingdom has a direct effect on the outcome of our diplomatic negotiations. The more influence we have, the higher likelihood of {kingdom} to accept some of our offers."
+}
+
+def MimimapFilterClickableArmiesTooltip : Tooltip
+{
+	text = "Click to [{is_disabled:if}enable|disable] clicking on these elements."
+}
+
+def MimimapFilterClickableNameplatesTooltip : Tooltip
+{
+	text = "Click to [{is_disabled:if}enable|disable] clicking on these elements."
+}
+
+def MimimapFilterClickableTownTooltip : Tooltip
+{
+	text = "Click to [{is_disabled:if}enable|disable] clicking on these elements."
+}
+
+def MimimapFilterClickableBattlesTooltip : Tooltip
+{
+	text = "Click to [{is_disabled:if}enable|disable] clicking on these elements."
+}
+
+def MimimapFilterArmiesTooltip : Tooltip
+{
+	text = "Toggle indications for kingdom armies, rebels, mercenaries and crusaders"
+}
+
+def MimimapFilterNameplatesTooltip : Tooltip
+{
+	text = "Toggle army and battle nameplates[ {clr:gold}({keybindings.toggle_nameplates}){/clr}]"
+}
+
+def MimimapFilterTownsTooltip : Tooltip
+{
+	text = "Toggle town indications"
+}
+
+
+def MimimapFilterBattlesTooltip : Tooltip
+{
+	text = "Toggle battle indications"
+}
+
+def MimimapToggleRealmsTooltip : Tooltip
+{
+	text = "Show provinces[ {clr:gold}({keybindings.toggle_selection_mode}){/clr}]"
+}
+
+def MimimapToggleKingdomsTooltip : Tooltip
+{
+	text = "Show kingdoms[ {clr:gold}({keybindings.toggle_selection_mode}){/clr}]"
+}
+
+def MinimapHomeTooltip : Tooltip
+{
+	text = "Focus on {kingdom:s} capital ({capital_realm})"
+}
+
+def ViewModeLegendTooltip : HyperTextTooltip
+{
+	hypertext = ViewModeLegendTooltipHT
+	pinable = true
+}
+
+def PlayerInfoTooltip : Tooltip
+{
+	caption = "{name}[ {is_local_player:if_not} <color=#{team_color}>({team_name}){/clr}]"
+	text = $[
+		"Score: {score}"
+		"[{p}Kingdom: {kingdom}]"
+		"[{has_generation_limit:if}{p}Royal family generation: {generations_passed}]"
+		"[{is_defeated:if}{p}Player is defeated][{is_eliminated:if} and cannot pick a new kingdom]"
+		"[{repicks_are_enabled:if}{p}Repicks left: {repicks_left}]"
+		"{p}{p}Status: {connection_status}"
+	]
+}
+
+def InvateFriendTooltip : Tooltip
+{
+	caption = "Empty Slot" //was "Invite Friend", but we don't have that functionality
+	text = "This slot hasn't been allocated by any player."
+}
+
+def WorldRadioCategoryTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{description}"
+}
+
+def CharacterAgeWarrningTooltip : Tooltip
+{
+	text = "Venerable characters are close to a natural death from old age. When a king is venerable, this has a negative impact on some diplomatic negotiations, like non-aggression pacts, royal marriages and Emperor of the World claims."
+}
+
+def KingdomGoldTooltip : HyperTextTooltip
+{
+	hypertext = KingdomGoldTooltipHT
+	
+	// caption = "Royal treasury"
+	// text = $[
+	// "The most fundamental currency of all is gold, directly or indirectly needed for almost all of a kingdom's actions - constructions, hiring units, knights' actions and many others.{p}"
+	// "Stockpiling a lot of gold results in inflation.{p}{p}"
+	// "Income: {kingdom_gold_income:bonus_no_sign:F0}{gold_icon}{p}" //income from treasury window
+	// "Expenses: {kingdom_gold_expenses:penalty_no_sign:F0}{gold_icon}{p}" //expenses from treasury window
+	// "{separator}{p}"
+	// "Balance: {kingdom_gold_balance:bonus:F0}{gold_icon}"] //balance from treasury window
+}
+
+def KingdomBooksTooltip : HyperTextTooltip
+{
+	hypertext = KingdomBooksTooltipHT
+	
+	// caption = "Books"
+	// text = $[
+	// "Acquiring and improving our knights' skills, as well as adopting traditions, requires books.{p}{p}"
+	// "Income: {kingdom_books_income:bonus}{books_icon}{p}"
+	// "Expenses: {kingdom_books_expenses:penalty_no_sign}{books_icon}{p}"
+	// "[Capacity: {max_books}]"]
+}
+
+def KingdomPietyTooltip : HyperTextTooltip
+{
+	hypertext = KingdomPietyTooltipHT
+	
+	// caption = "Religion"
+	// text = $[
+	// "Religious power enables the {kingdom.cleric_title:s} of our kingdom to perform their actions in support of the crown.{p}{p}"
+	// "Kingdom Religion: {religion.full_name}{p}" //Catholic, Orthodox, Sunni, Shia, Pagan
+	// "{religion.piety} income: {kingdom_piety_income:bonus}{piety_icon}{p}"
+	// "{religion.piety} expenses: {kingdom_piety_expenses:penalty_no_sign}{piety_icon}{p}"
+	// "[Capacity: {max_piety}]"] //takes the key for the resource, depending on the religion
+}
+
+def KingdomTradeTooltip : HyperTextTooltip
+{
+	hypertext = KingdomTradeTooltipHT
+	
+	// caption = "Commerce"
+	// text = $[
+	// "Used for maintaining trade activities with other kingdoms and colonies.{p}{p}"
+	// "Trade agreements signed: {trade_agreements_signed}{p}"
+	// //"Opened trade routes: {trade_routes_active} of {trade_agreements_signed}{p}" // <--- obsolete, as of current version of trade
+	// "Own merchants trading: {trading_merchants_count}"
+	// //"[{p}Buildings upkeep: {buildings_commerce_upkeep:penalty_no_sign}]"
+	// ]
+}
+
+def KingdomFoodIncome : HyperTextTooltip
+{
+	hypertext = KingdomFoodTooltipHT
+	
+	// caption = "Food income"
+	// text = $[
+	// 	"Lack of food results in revolt risk, slower population growth and slower filling of towns' reserves.{p}{p}"
+	// 	"Food production: {food_produced:bonus}{food_icon}{p}"
+	// 	"Import food: {food_import_amount:bonus}{food_icon}{p}"
+	// 	"Export food: {food_export_amount:penalty_no_sign}{food_icon}{p}"
+	// 	"Armies upkeep: {armies_upkeep_food:penalty_no_sign}{food_icon}{p}"
+	// 	"Garrison upkeep: {garrison_upkeep_food:penalty_no_sign}{food_icon}{p}"
+	// 	"___________{p}"
+	// 	"Kingdom food: {food:bonus}{food_icon}{p}"
+	// 	"Sufficiency: {sufficent_food:F0}%{p}"
+	// 	]
+}
+
+def KingdomLevyTooltip : HyperTextTooltip
+{
+	hypertext = KingdomLevyTooltipHT
+	
+	// caption = "Kingdom levies"
+	// text = $[
+	// "Kingdom's men, who have received military training and are ready to be mobilized as soldiers when such need arises. These are required and spent for recruiting non-militia squads and army equipment.{p}{p}"
+	// "Base income: {kingdom.ks_base_levy_income:bonus:F1}{levy_icon}{p}"
+	// "Royal Lands: {kingdom.incomes.levy.ROYAL_LANDS:bonus:F1}{levy_icon}{p}"
+	// "Provinces: {kingdom.incomes.levy.NON_ROYAL_LANDS:bonus:F1}{levy_icon}{p}"
+	// "Capacity: {max_levy}{p}"]
+}
+
+
+def GameSpeedButtonTooltip : Tooltip
+{
+	text = $[
+		"["
+			"{is_paused:if}{can_resume:if_not}Resuming is temporarily disabled[ ({resume_cooldown_timer:F0})]"
+		"|"
+			"Set game speed to x{speed_key}"
+		"]"
+		"[{speed_button_is_max:if} {clr:gold}(*){/clr}{p}{p}{i}{b}SHIFT + Click{/b} to set the game's speed to {max_speed}{/i}]"
+	]
+	//speed_key resolves to "xN", where N is the speed corresponding to the button that is being hovered
+	//resume_cooldown_timer is a float value showing the exact time left until resuming is possible (should be refreshed each second)
+}
+
+def GamePauseButtonTooltip : Tooltip
+{
+	text = $[
+		"["
+			"{can_pause:if}Pause {clr:gold}({keybindings.pause_game}){/clr}"
+		"|"
+			"{can_resume:if}Resume {clr:gold}({keybindings.pause_game}){/clr}"
+		"|"
+			"{is_paused:if_not}Pausing is temporarily disabled[ ({resume_cooldown_timer:F0})]"
+		"|"
+			"Resuming is temporarily disabled[ ({resume_cooldown_timer:F0})]"
+		"]"
+	]
+	//can_pause looks if the campaign var rule restricts pausing at the current moment
+	//pause_cooldown_timer is a float value showing the exact time left until pausing is possible (should be refreshed each second)
+}
+
+def GameSpeedTooltip : Tooltip
+{
+	text = "Game speed can be increased {clr:gold}({keybindings.speed_up_game}){/clr}, decreased {clr:gold}({keybindings.slow_down_game}){/clr} or paused {clr:gold}({keybindings.pause_game}){/clr}. Pressing {clr:gold}(*){/clr} will speed up the game to its maximum (x{max_speed})."
+}
+
+def UserPreferernceTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{description}"
+}
+
+def UserPreferernceDisabledWhileGameRunsTooltip : Tooltip
+{
+	text = "{clr:red}This setting can't be changed while the campaign is in progress.{p}Exit to main menu to make changes.{/clr}"
+}
+
+def UserPreferernceDisabledBecauseOfVsyncTooltip : Tooltip
+{
+	text = "{clr:red}FPS limit does not have an effect while V-Sync is turned on.{/clr}"
+}
+
+def UserPreferernceDisabledBecauseVolumeIsMutedTooltip : Tooltip
+{
+	text = "{description}{p}{p}{clr:red}When the game is muted, that also applies when it is out of focus.{/clr}"
+}
+
+def ChangingModSettingsDisabledWhileGameRunsTooltip : Tooltip
+{
+	text = "{clr:red}Mods cannot be switched on or off while a campaign is in progress.{p}Exit to main menu to make changes.{/clr}"
+}
+
+def HotkeyAssignedElsewhereTooltip : Tooltip
+{
+	text = "{clr:red}The key, which was previously set here, was assigned elsewhere.{/clr}"
+}
+
+def CastleViewBuildingTooltip : Tooltip
+{
+	text = "[{building_window_is_open:if}Hide Buildings|View Buildings]"
+}
+
+def CastleViewRecruitmentTooltip : Tooltip
+{
+	text = "[{recruitment_window_is_open:if}Hide|View available units]"
+}
+
+def CharacterReinforcementTooltip : Tooltip
+{
+	visible_condition = (obj.battle == null)
+	text = $["{obj} will join the battle after about {estimation_time} seconds.{p}"
+	"[{is_player_side:if}Click again to change reinforcements]"
+	]
+}
+
+def FillReinforcementTooltip : Tooltip
+{
+	text = "[{side_has_leader:if}No army is currently supporting {side_leader} of {side_leader.kingdom}.|No army leader is currently fighting for {side.kingdom}.][{is_player_side:if}[{p}{p}{can_add_reinforcements:if}Click to add a reinforcing army from the vicinity|{p}{p}No reinforcements are available in the vicinity]]"
+}
+
+def GameOwnedTooltip : Tooltip
+{
+	text = "{player} is the owner of this campaign"
+}
+
+def AllowOfflineTooltip : Tooltip
+{
+	text = "The campaign cannot be started while {player} is offline"
+}
+
+def GameHostTooltip : Tooltip
+{
+	text = "[{is_hosted:if}{player} is currently hosting this campaign|This campaign is currently offline.]"
+}
+
+def EnterBattleButtonNotLeader : Tooltip
+{
+	text = "Your army is only a supporter in this battle, you can't enter the battleview."
+}
+
+def EnterBattleButton : Tooltip
+{
+	text = "Enter the battleview and manually lead your squads against the enemy."
+}
+
+def SquadBuffTooltip : Tooltip
+{
+	caption = "[{caption}]"
+	text = $[
+	"[{description}{p}{p}]"
+	"[{has_effects:if}{b}Effects:{/b}{p}]"
+	"[{has_effects:if}{effects}]"]
+}
+
+def SquadBuffTooltipUnpinnable : SquadBuffTooltip
+{
+	pinable = 0
+}
+
+def SquadShootBuffsTooltip : Tooltip
+{
+	text = "[{has_shoot_advantage:if}Shooting at an advantage|{has_shoot_disadvantage:if}Shooting at a disadvantage|Shooting normally]"
+}
+
+def SquadShootBuffsTooltipUnpinnable : SquadShootBuffsTooltip
+{
+	pinable = 0
+}
+
+def RetreatFromBattleButton : Tooltip
+{
+	text = "Retreat"
+	pinable = 0
+}
+
+def LeaveBattleButton : Tooltip
+{
+	text = "Return to Siege"
+	pinable = 0
+}
+
+def StopActionButton : Tooltip
+{
+	text = "Stop moving[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def ShrinkFormationButton : Tooltip
+{
+	text = "Shrink Ranks (reduces enemy trample chance and increases morale)[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def ResetFormationButton : Tooltip
+{
+	text = "Regular Ranks[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def ExpandFormationButton : Tooltip
+{
+	text = "Widen Ranks[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def LineFormationButton : Tooltip
+{
+	text = "Assume square formation[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def TriangleFormationButton : Tooltip
+{
+	text = "Assume triangle formation[{squad_is_ours:if}[{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def HoldFireButton : Tooltip
+{
+	text = "Hold fire [{squad_is_ours:if}[[{is_on:if}(ON)|(OFF)]{p}{i}Click {clr:gold}{keybind}{/clr} to toggle{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def HoldGroundButton : Tooltip
+{
+	text = "Preserve formation [{squad_is_ours:if}[[{is_on:if}(ON)|(OFF)]{p}{i}Click {clr:gold}{keybind}{/clr} to toggle{/i}]|[{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]]"
+	pinable = 0
+}
+
+def DeployActionButton : Tooltip
+{
+	text = "[{can_deploy:if}Deploy|Pack] trebuchet[{squad_is_ours:if}[{is_deploy_blocked:if_not}{p}{i}Click {clr:gold}{keybind}{/clr} to perform{/i}|{is_deploying:if}{p}{i}{clr:red}Deployment in progress{/i}{/clr}|{is_packing:if}{p}{i}{clr:red}Packing in progress{/i}{/clr}|{p}{i}{clr:red}Cannot deploy among trees{/clr}{/i}]|{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]"
+	pinable = 0
+}
+
+def RunActionButton : Tooltip
+{
+	text = "{i}Click {clr:gold}({keybind}){/clr} to order the squad to run/charge at the opponent{/i}[{squad_is_ours:if_not}{p}{i}{clr:red}Cannot order foreign squads{/clr}{/i}]"
+	pinable = 0
+}
+
+def MarkTargetButton : Tooltip
+{
+	text = "Mark target [{squad_is_ours:if_not}[{is_on:if}(ON)|(OFF)]{p}{i}Click {clr:gold}{keybind}{/clr} to toggle{/i}]"
+	pinable = 0
+}
+
+def AttackStat : Tooltip
+{
+	text = "Attack"
+	pinable = 0
+}
+
+def AttackMultiStat : Tooltip
+{
+	text = "Melee/Ranged Attack"
+	pinable = 0
+}
+
+def DefenseStat : Tooltip
+{
+	text = "Defense"
+	pinable = 0
+}
+
+def DefenseMultiStat : Tooltip
+{
+	text = "Regular/Piercing Defense"
+	pinable = 0
+}
+
+def ShockDamageStat : Tooltip
+{
+	text = "Chance to shock"
+	pinable = 0
+}
+
+def ResilienceStat : Tooltip
+{
+	text = "Resilience"
+	pinable = 0
+}
+
+def MovementSpeedStat : Tooltip
+{
+	text = "Movement speed"
+	pinable = 0
+}
+
+def CavalryCounter : Tooltip
+{
+	text = "Strong against Cavalry units"
+}
+
+def CavalryCountered : Tooltip
+{
+	text = "Weak against Cavalry units"
+}
+
+def CamelCavalryCounter : Tooltip //!!! (not used, adding just in case)
+{
+	text = "Strong against Camel Cavalry units"
+}
+
+def CamelCavalryCountered : Tooltip //!!! (not used, adding just in case)
+{
+	text = "Weak against Camel Cavalry units"
+}
+
+def InfantryCounter : Tooltip
+{
+	text = "Strong against Infantry units"
+}
+
+def InfantryCountered : Tooltip
+{
+	text = "Weak against Infantry units"
+}
+
+def DefenseCounter : Tooltip
+{
+	text = "Strong against Defense units (spearmen, halberdiers and guards)"
+}
+
+def DefenseCountered : Tooltip
+{
+	text = "Weak against Defense units (spearmen, halberdiers and guards)"
+}
+
+def RangedCounter : Tooltip
+{
+	text = "Strong against Ranged units"
+}
+
+def RangedCountered : Tooltip
+{
+	text = "Weak against Ranged units"
+}
+
+def RamCounter : Tooltip
+{
+	text = "Strong against Battering rams"
+}
+
+def RamCountered : Tooltip //!!! (not gonna be used, adding just in case)
+{
+	text = "Weak against Battering rams"
+}
+
+def CatapultCounter : Tooltip
+{
+	text = "Strong against Catapults"
+}
+
+def CatapultCountered : Tooltip
+{
+	text = "Weak against Catapults"
+}
+
+def TrebuchetCounter : Tooltip
+{
+	text = "Strong against Trebuchets"
+}
+
+def TrebuchetCountered : Tooltip
+{
+	text = "Weak against Trebuchets"
+}
+
+def WallsAndTowersCounter : Tooltip
+{
+	text = "Strong against walls and towers"
+}
+
+def GateCounter : Tooltip
+{
+	text = "Strong against gates"
+}
+
+def ArmyCommandsButton : Tooltip
+{
+	text = "Army commands"
+	pinable = 0
+}
+
+def FiltersWindowButton : Tooltip
+{
+	text = "Filters"
+	pinable = 0
+}
+
+def CharacterAdviceTooltip : Tooltip
+{
+	caption = "{name:s} advice"
+	text = "{advise_reason}"
+}
+
+def MissingGoodsTooltip : Tooltip
+{
+	caption = "Missing Goods"
+	text = "[Some of our buildings have stopped functioning. To restore them, we need to regain the following goods: {missing_goods_list}|]"
+}
+
+def ObjectiveScoreTooltip : HyperTextTooltip
+{
+	hypertext = ObjectiveScoreTooltipHT
+}
+
+def SquadHealthTooltip : Tooltip
+{
+	text = "Squad health: {health}/{max_health}" //vars are placeholder, not sure what to put
+}
+
+def SquadHealthTooltipUnPinable : SquadHealthTooltip
+{
+	pinable = 0
+}
+
+def InitiativeTooltip : Tooltip
+{
+	caption = "Initiative"
+	text = $[
+	"{b}Time left:{/b} {seconds} seconds"
+	"{p}{b}Current initiative state:{/b}[{initiative_is_paused:if} Paused| Depleting]"
+	"{p}{p}{i}Initiative depletes while armies aren't fighting, no capture points are being taken and there are no attackers inside town's walls. "
+	"The side which has the initiative must achieve victory before the timer runs out. "
+	"Failure to do so will end the battle and resume the siege, leading to morale penalties for that side.{/i}"]
+}
+
+def ForeignProvinceInformationTooltip : Tooltip
+{
+	max_width = 450
+	caption = "Foreign province information"
+	text = "[{obj.realm.is_occupied:if}We have no reliable information about the province, as it is occupied by rebels.|Infiltrating {realm.kingdom} with a spy will reveal the defenses, stationed troops, garrison and constructed buildings of its provinces.]"
+}
+
+def ForeignTownFortificationsTooltip : Tooltip
+{
+	max_width = 450
+	caption = "Town fortifications ({castle.fortifications_level}/{castle.fortifications_max_level})"
+	text = "{castle.fortifications.description}"
+}
+
+def PlayerLobbyInfoTooltip : Tooltip
+{
+	text = "{connection_status}"
+	// player status keys:
+	// text playing = "Playing"
+	// text in_lobby = "In lobby"
+	// text disconnected = "Disconnected"
+	// text left = "Player has left the lobby" //unsure if it exists - ignore if there is no such indication
+	// text defeated = "Defeated"
+}
+
+def TeamIconTooltip : Tooltip
+{
+	text = $[
+		"[{team_based_game:if}Playing in {team}|[{coop_game:if}No teams (Cooperative campaign)|No teams (Free For All campaign)]][{can_change_team:if}{p}{p}{i}Click to change your team.{/i}]"
+	]
+}
+
+def MenuSaveGameTooltip : Tooltip
+{
+	text text = ""
+	switch_value = (reason)
+	case in_battle
+	{
+		text = "You cannot save a campaign while you are in a Tactical battle mode."
+	}
+	case save_in_progress
+	{
+		text = "The campaign is currently being saved. Try again in few seconds."
+	}
+}
+
+def MenuLoadGameTooltip : Tooltip
+{
+	text text = ""
+	switch_value = (reason)
+	case multiplayer_game
+	{
+		text = "You can load multiplayer campaign only by starting a new single or multiplayer campaign and then choosing save, instead of starting period."
+	}
+	case no_saved_games
+	{
+		text = "You have no saved campaigns."
+	}
+	case in_battle
+	{
+		text = "You cannot load a campaign while you are in a Tactical battle mode."
+	}
+	case save_in_progress
+	{
+		text = "The campaign is currently being saved. Try again in few seconds."
+	}
+}
+
+def BattleEstimationTooltip : Tooltip
+{
+	prefab = "Assets/UI/BattleView/UIP_BattleEstimationTooltip.prefab" //GUID:39e6113dcc6db2240b93022dac846797
+	pinable = 1
+}
+
+def CopyGameCodeTooltip : Tooltip
+{
+	text = "[{can_enter:if}Copy to clipboard.{p}Campaign code: {game_code}|Invitations are unavailable in started campaign.]"
+}
+
+def ProvinceOverviewRebelsTooltip : Tooltip
+{
+	text = "Rebel armies are currently present in {realm}"
+}
+
+def PlayerSlotActionTooltip : Tooltip
+{
+	caption = "{caption}"
+	text = "{description}"
+}
+
+def CampaignVersionIncompatibleTooltip : Tooltip
+{
+	text = "You cannot join this campaign due to a game version mismatch.[{p}{p}Campaign host's version: {campaign_game_version}{p}Your version: {player_game_version}]"
+}
+
+def PlayerVersionIncompatibleTooltip : Tooltip
+{
+	text = "This player is running a different version of the game[ ({player_game_version})]."
+}
+
+def ModCompatibilityIconTooltip : Tooltip
+{
+	text = "{description}"
+}

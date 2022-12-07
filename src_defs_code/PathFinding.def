@@ -1,0 +1,18 @@
+﻿def PathFinding
+{
+	float tile_size = 1
+	float max_radius = 0
+	int max_slope = 30
+	float slope_avoidance = 10
+	float slope_power = 2
+	float river_avoidance = 15
+	float coast_avoidance = 255
+	float road_stickiness = 1.25
+	bool towns_passable = true
+	int base_weight = 2
+	int estimate_weight = 2
+	int max_steps = 100000
+	bool multithreaded = true
+}
+
+PathFindings

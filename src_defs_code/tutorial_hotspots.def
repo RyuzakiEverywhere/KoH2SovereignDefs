@@ -1,0 +1,2065 @@
+﻿//useful console commands:
+// "?? ui.tooltip_obj_path": see the hierarchy path of current tooltip object
+// "?? ui.picked_element_path": see the hierarchy path of currently pointed UI element
+// "watch ui.main_tooltip.tutorial_hotspot_def": watch the currently pointed tutorial hotspot def
+
+def TutorialHotspot
+{
+	//-------------- matching
+	// used to determines whether this def matches an actual hotspot
+	// defs are matched from top to bottom (the base def is excluded)
+	
+	// path is the path in hierarchy
+	string path_mask = "*"
+	
+	// optional, match by tooltip def id
+	string tooltip_def_mask = "*"
+	
+	// optional,path is the path in hierarchy
+	string show_green_highlight_until_clicked = ""
+	
+	// optional expression to check if hotspot matches this def
+	//bool match = true
+	
+	//-------------- highlighting
+	
+	// how long player needs to hold the ALT key to show the tutorial hotspots
+	hold_alt_time = 0.5
+	
+	// how long the tooltip should be visible to be considered seen
+	seen_delay = 2
+	
+	// optional expression to hide the hotspot (if false)
+	//bool visible = true 
+	
+	// optional expression to show the hotspot even if alt is not held (visible must be true)
+	//bool force_visible = false
+	
+	// highlight prefabs	
+	prefab highlight_prefab = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight.prefab" //GUID:d1cdcaadd4bb38545aead5ac29879bf4
+	prefab highlight_prefab_green = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight_Green.prefab" //GUID:98eeb817aba166f48b55a447a72ebed5
+	prefab highlight_prefab_seen = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight_Seen.prefab" //GUID:bb097322c5282f14cb272c3a7e678da0
+	
+	//-------------- tooltip
+	
+	def tooltip : Tooltip
+	{
+		caption = ""
+		text = ""
+		{
+			alt = $[
+				"path: {ui.tooltip_obj_path:#}"
+				"{p}hotspot def: [{ui.main_tooltip.tutorial_hotspot_def_id:#}|null]"
+				"{p}tooltip def: [{ui.main_tooltip.tooltip_def_id:#}|null]"
+				"{p}obj: [{ui.main_tooltip.OBJ}|null]"
+				"{p}vars: [{p}{ui.tooltip_vars_dump}|null]"
+			]
+		}
+		pinable = 1
+	}
+}
+
+template DisabledTutorialHotspot : TutorialHotspot
+{
+	highlight_prefab = null
+	highlight_prefab_seen = null
+	mouse_transparent = true
+}
+
+
+// ----------- IMPORTANT BUTTONS --------------
+
+def EmptyRoyalCourtSlotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot/tut_FirstFreeSlot"
+	show_green_highlight_until_clicked = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot/id_HireGroup/id_Normal"
+}
+
+def ClassLevelIconTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/Group_Statuses/id_CustomActionsContainer/UIP_CourtMemberRankActionIcon(Clone)"
+	show_green_highlight_until_clicked = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/Group_Statuses/id_CustomActionsContainer/UIP_CourtMemberRankActionIcon(Clone)/id_NewSkill"
+	highlight_prefab_green = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight_GreenCircle.prefab" //GUID:71134e4c70806cd4aa3b06a833dbfd7c
+}
+
+def BuildingSlotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Left/Group_Buildings/id_Buildings/id_BuildingSlots/*/tut_FirstFreeSlot"
+	show_green_highlight_until_clicked = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Left/Group_Buildings/id_Buildings/id_BuildingSlots/*/id_BuildingSlot/Group_Icon/*"
+}
+
+def EmptyGovernorSlotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/id_Governer/Group_Empty/tut_FirstClickHighlight"
+	show_green_highlight_until_clicked = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/id_Governer/Group_Empty/*"
+	highlight_prefab_green = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight_GreenCircle.prefab" //GUID:71134e4c70806cd4aa3b06a833dbfd7c
+}
+
+def EmptyUnitSlotInTownTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/id_GarissonSlots/id_UnitSlots/UIP_GarrisonSlot_Round(Clone)/tut_FirstFreeSlot"
+	show_green_highlight_until_clicked = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/id_GarissonSlots/id_UnitSlots/UIP_GarrisonSlot_Round(Clone)/*"
+	highlight_prefab_green = "Assets/UI/Elements/Tutorial/UIP_TutorialHighlight_GreenCircle.prefab" //GUID:71134e4c70806cd4aa3b06a833dbfd7c
+}
+
+def EmptyTraditionSlotInTownTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Traditions/id_Traditions/id_TraditionSlotsContainer/id_TraditionSlotPrototype/tut_FirstFreeSlot"
+	show_green_highlight_until_clicked = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Traditions/id_Traditions/id_TraditionSlotsContainer/id_TraditionSlotPrototype/id_TraditionIcon/id_Group_Empty/*"
+}
+
+
+// ---------- MAIN HUD -----------
+
+def KingRoyalCourtSlotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_KingSlot/id_CharacterGroup/UIP_CharacterIcon_RoyalCourt(Clone)"
+	force_visible = (ui.tutorial_message.message_def_id == "KingTutorialMessage")
+	tooltip
+	{
+		caption = "Your King"
+		text = $["This is the ruler of your kingdom. Kings are usually more adept at performing certain actions and can affect various interactions and outcomes via their abilities."
+		"{p}Unlike other knights, the king's slot in the royal court cannot be moved."]
+	}
+}
+
+
+
+def OccupiedRoyalCourtSlotTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot/id_CharacterGroup/UIP_CharacterIcon_RoyalCourt(Clone)"
+	tooltip
+	{
+		caption = "Royal Court Member"
+		text = "This is a member of your Royal Court. Click to see possible interactions."
+	}
+}
+
+// def RoyalCourtSlotTutorialHotspot : DisabledTutorialHotspot
+// {
+// 	path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot*"
+// }
+
+def RoyalCourtTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/RoyalCourt/Background"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalCourtTutorialMessage")
+	tooltip
+	{
+		caption = "Royal Court"
+		text = $["Knights in your kingdom reside and perform their duties within the royal court. In rare cases, visiting characters from other kingdoms may also enter your court - for example, the Pope."
+		"{p}{p}To assign a new knight, click on an empty slot. Hired knights can also be moved to a different slot by drag and drop (except for the King)."]
+	}
+}
+
+def DiplomacyOfferAreaHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/id_ImportantMessages/id_Dynamic/id_IOIcons"
+	force_visible = (ui.tutorial_message.message_def_id == "DiplomacyOffersTutorialMessage")
+	tooltip
+	{
+		caption = "Diplomatic offers"
+		text = $["This is where diplomatic messages sent by other kingdoms are displayed[{is_multiplayer:if}, in addition to pending offers sent to other players.|.]"
+		"{p}{p}Click on an offer to view it, or right-click to dismiss it."]
+	}
+}
+
+def KingdomFameHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/KingdomFame/HitBox"
+	tooltip
+	{
+		caption = "Kingdom fame"
+		text = $["The fame of your kingdom is displayed here, showing its relative power compared to the rest of the kingdoms in the world."
+		"{p}{p}Click to view all great powers and rankings."]
+	}
+}
+
+// def CrownAutnorityBarHotspot : TutorialHotspot //!!! FIX when proper area can be recognized without hiding the other tooltip
+// {
+// 	path_mask = "UI/Canvas/Top Area/AutorityAndOppinions/CrownAuthority"
+// 	tooltip
+// 	{
+// 		caption = "Crown Authority amount"
+// 		text = "Crown Authority amount description"
+// 	}
+// }
+
+def CrownAuthorityButtonHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/AutorityAndOppinions/CrownAuthority/id_Icon"
+	force_visible = (ui.tutorial_message.message_def_id == "CrownAuthorityTutorialMessage")
+	tooltip
+	{
+		caption = "Crown Authority"
+		text = $["Crown authority is a valuable representation of the kingdom's hold over its people. It can change depending on various events and affects your kingdom's tax income, stability, espionage defense and corruption."
+		"{p}{p}Gold can be spent to increase Crown authority by clicking on the highlighted icon."]
+	}
+}
+
+def OpinionsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/AutorityAndOppinions/KingdomOppinions/id_IconContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "KingdomOpinionsTutorialMessage")
+	tooltip
+	{
+		caption = "Opinions"
+		text = "The opinions of the most important social casts of your kingdom are shown here. Various decisions you make can affect the opinion of each group, which can be detrimental to many facets of your economical, diplomatic or military development."
+	}
+}
+
+def KingdomResourcesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Economy/tutorial_hotspot"
+	force_visible = (ui.tutorial_message.message_def_id == "KingdomResourcesTutorialMessage")
+	tooltip
+	{
+		caption = "Kingdom resources"
+		text = $[
+		"Your kingdom's main resources are listed here - namely gold, books, religion, commerce, food and levies."
+		"These are mainly produced by your provinces, but also affected by knight skills, traditions, opinions and so on."
+		]
+	}
+}
+
+def KingdomResourcesDisabledHotspots : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Economy/*"
+}
+
+def KingdomCrestLeftHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/id_King_Left/id_KingdomCrest/id_Primary"
+	tooltip
+	{
+		caption = "Kingdom crest"
+		text = "Shows the coat of arms of your kingdom. Any crest in the game can be clicked, which will select the kingdom which bears it."
+	}
+}
+
+def KingdomCrestRightHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/id_King_Right/id_KingdomCrest/id_Primary"
+	tooltip
+	{
+		caption = "Kingdom crest"
+		text = "{KingdomCrestLeftHotspot.tooltip.text}"
+	}
+}
+
+def DropdownMessageIconTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Left/id_MessageIcons/*"
+	tooltip
+	{
+		caption = "Message"
+		text = $["Events related to your kingdom are displayed here. These can range from trivial occasions to major events requiring your attention."
+		"{p}{p}Messages can be opened ({clr:gold}LMB{/clr}) or dismissed ({clr:gold}RMB{/clr}).{p}For multiple stacked messages, click ({clr:gold}Shift{/clr}) + ({clr:gold}RMB{/clr}) to dismiss them all.{p}If a message points to a location on the map, double-click to view it."]
+	}
+}
+
+def OngoingMessageIconTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Right/id_OngoingIcons/*"
+	tooltip
+	{
+		caption = "Ongoing activities"
+		text = $["Various activities within your kingdom can be shown here, including buildings/upgrades in development, kingdom actions and battles in which your armies participate."
+		"{p}{p}Each element can be clicked in order to be selected."]
+	}
+}
+
+def PVFiltersHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Right/id_ViewModeButtons"
+	tooltip
+	{
+		caption = "Political view modes"
+		text = $["Each political view shows different information related to all kingdoms in the world."
+		"{p}Click on any button to open the political view, with the given view highlighted."]
+	}
+}
+
+def MinimapTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Right/id_Minimap"
+	tooltip
+	{
+		caption = "Minimap"
+		text = "The minimap can be zoomed-in/zoomed-out (mouse scroll).{p}When zoomed, the area can also be panned (MMB)."
+	}
+}
+
+def GreatPowersHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_PrestigeVictory"
+	force_visible = (ui.tutorial_message.message_def_id == "GreatPowersTutorialMessage")
+	tooltip
+	{
+		caption = "Great powers and rankings"
+		text = "One of several ways to claim victory is to achieve the 'Emperor of the World' title. Only great powers may state their claim, and even then the rest of the world might not so willing to support them."
+	}
+}
+
+def AdvantagesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_EconomyVictory"
+	force_visible = (ui.tutorial_message.message_def_id == "AdvantagesTutorialMessage")
+	tooltip
+	{
+		caption = "Advantages"
+		text = "One of several ways to claim victory is to state your kingdom's commercial and economical prowess, by producing/importing all goods."
+	}
+}
+
+def VictoryConditonsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/tut_VictoryConditons"
+	force_visible = (ui.tutorial_message.message_def_id == "VictoryConditonsTutorialMessage")
+}
+
+def RoyalFamilyHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_ButtonRoyalFamily"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalFamilyButtonTutorialMessage")
+	tooltip
+	{
+		caption = "Royal Family"
+		text = "This is where your king, his queen, their children and all important relatives reside."
+	}
+}
+
+def WarsAndPactsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_ButtonWars"
+	force_visible = (ui.tutorial_message.message_def_id == "WarsAndPactsButtonTutorialMessage")
+	tooltip
+	{
+		caption = "Wars and Pacts"
+		text = "Here you can inspect all wars and pacts in which your kingdom is part of."
+	}
+}
+
+def PactsAgainstUsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PactsAgainstContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "PactAgainstUsTutorialMessage")
+	tooltip
+	{
+		caption = "Pacts against us"
+		text = "Here you can inspect all defensive pacts and invasion plans, that other kingdoms have formed against you."
+	}
+}
+
+def PactsOurPactsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PactsContainer/tut_area"
+	tooltip
+	{
+		caption = "Our Pacts"
+		text = "Here you can inspect all defensive pacts and invasion plans, that your diplomats maintain against other kingdoms."
+	}
+}
+
+def ProvinceOverviewHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_ButtonProvinces"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceOverviewButtonTutorialMessage")
+	tooltip
+	{
+		caption = "Province overview"
+		text = "Detailed information about all of your kingdom's provinces can be seen here."
+	}
+}
+
+def GamepediaHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/id_ButtonGamepedia"
+	force_visible = (ui.tutorial_message.message_def_id == "HelpAndHotspotsTutorialMessage")
+	tooltip
+	{
+		caption = "Royal Library"
+		text = "An extensive ledger explaining all aspects of the game can be accessed from here."
+	}
+}
+
+def TimeAndSettingsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/tutorial_hotspot"
+	force_visible = (ui.tutorial_message.message_def_id == "TimeAndSettingsTutorialMessage")
+	tooltip
+	{
+		caption = "Settings and time manipulation"
+		text = $["Time can be paused, sped up or slowed down by interacting with this area. The (+) and (-) keys can also be used to manipulate time at more precise increments. Maximum game {noparse}speed{/noparse} can quickly be achieved by pressing (*)."
+		"[{p}{p}{is_multiplayer:if}Depending on the campaign's rules, time manipulation might be restricted for certain players.]"]
+	}
+}
+
+def LeftMinimapDisabledHotspots : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/Minimap_Left/*"
+}
+
+def EventLoggerHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_EventLogger/id_DataContainer/id_Background"
+	tooltip
+	{
+		caption = "Event logger"
+		text = "This area tracks all important events which happen throughout the world."
+	}
+}
+
+def EventLoggerDisabledHotspots : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_EventLogger/*"
+}
+
+// ---------- AUDIENCE -----------
+
+def AudienceButtonsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/Audience*Buttons"
+	force_visible = (ui.tutorial_message.message_def_id == "AudienceButtonsTutorialIntroMessage")
+	tooltip
+	{
+		caption = "Audience offers"
+		text = "These are the interactions you may perform while in an audience. Clicking on some elements expands them to show additional offers."
+	}
+}
+
+def AudienceButtonTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/Audience*Buttons/*"
+	tooltip
+	{
+		caption = "Audience Button"
+		text = "Audience button description"
+	}
+}
+
+def AudienceStancesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/Audience(Clone)/Group_King/id_Relations/id_StanceIcons"
+	force_visible = (ui.tutorial_message.message_def_id == "AudienceStancesMessage")
+	tooltip
+	{
+		caption = "Stances"
+		text = "Your current stances with the selected kingdom are shown here. When at peace, these can include trade, non-aggression, royal marriage and vassalage/sovereignty."
+	}
+}
+
+def AudienceRelationshipTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/Audience(Clone)/Group_King/id_Relations/id_RelationBar"
+	force_visible = (ui.tutorial_message.message_def_id == "AudienceRelationshipMessage")
+	tooltip
+	{
+		caption = "Relations"
+		text = "Forming new stances improves your relations, along with landing other successful diplomatic offers. Many events that happen outside of the audience can also affect your relations with various kingdoms."
+	}
+}
+
+// ---------- KNIGHT ACTIONS AND STATUSES -----------
+
+def KnightStatusesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/Group_Statuses"
+	force_visible = (ui.tutorial_message.message_def_id == "KnightStatusesTutorialMessage")
+	tooltip
+	{
+		caption = "Statuses"
+		text = "These are the current occupations of a knight. Statuses may have an upkeep and can potentially stop a knight from performing other actions. Some statuses can be clicked, either to be cancelled or to reveal more actions related to them."
+	}
+}
+
+def KnightLevelHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/Group_Statuses/id_CustomActionsContainer/UIP_CourtMemberRankActionIcon(Clone)/id_ClassLevel"
+	force_visible = (ui.tutorial_message.message_def_id == "KnightLevelTutorialMessage")
+	tooltip
+	{
+		caption = "Level"
+		text = $["A knight's level is determined by what skills he possesses and how skilled he is at each one."
+		"{p}{p}Clicking on the level of a knight shows his skills."]
+	}
+}
+
+def KnightActionsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_ActionsAndOpportunities/id_ActionsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "KnightActionsTutorialMessage")
+	tooltip
+	{
+		caption = "Actions"
+		text = "Each knight can perform a set of actions, depending on their class. They usually have a cost, can have multiple outcomes and may take some time to be performed. Some actions are indefinite, putting knights in active states which can be interrupted at any time."
+	}
+}
+
+// ---------- KNIGHT OPPORTUNITIES -----------
+
+def KnightOpportunitiesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_ActionsAndOpportunities/id_CourtMemberOpportunityActions"
+	force_visible = (ui.tutorial_message.message_def_id == "OpportunitiesTutorialMessage")
+	tooltip
+	{
+		caption = "Opportunities"
+		text = "These are situational actions which can temporarily appear, depending on various conditions. An opportunity may disappear as time passes, or if it is no longer valid."
+	}
+}
+
+def KnightActionsAndOpportunitiesDisabledHotspots : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_ActionsAndOpportunities/*"
+}
+
+// ---------- KNIGHT SKILLS -----------
+
+def SkillChoicesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_SubSelectionContainer/UIP_CourtMemberSkills(Clone)/id_SkillOptions"
+	force_visible = (ui.tutorial_message.message_def_id == "SkillChoicesTutorialMessage")
+	tooltip
+	{
+		caption = "Available skills"
+		text = "One of several randomly chosen skills can be learned by a knight, upon each learning stage."
+	}
+}
+
+def PrimarySkillsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_SubSelectionContainer/UIP_CourtMemberSkills(Clone)/Group_Skills/id_PrimarySkillsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "PrimarySkillsTutorialMessage")
+	tooltip
+	{
+		caption = "Primary Skills"
+		text = "A knight may learn up to three skills that are primary to his class (hinted by their color, in relation to the knight's class)."
+	}
+}
+
+def SecondarySkillsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_SubSelectionContainer/UIP_CourtMemberSkills(Clone)/Group_Skills/id_SecondarySkillsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "SecondarySkillsTutorialMessage")
+	tooltip
+	{
+		caption = "Secondary Skills"
+		text = "A knight may learn up to two skills which are primary to other classes. These are considered secondary and are often less powerful, but may still grant effects unique to the given class."
+	}
+}
+
+// ---------- PROVINCE SELECTION -----------
+
+def GovernorTownSlotHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/id_Governer"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceGovernorTutorialMessage")
+	tooltip
+	{
+		caption = "Governor"
+		text = "A town's governor is an essential position that can be assigned to any knight in your royal court. Governors provide access to a province's entire production and grant various bonuses, based on their class and the province's specifics."
+	}
+}
+
+def ProvincePopulationHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/id_Population"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvincePopulationTutorialMessage")
+	tooltip
+	{
+		caption = "Population"
+		text = "Each province contains an amount of population that can be hired as armed troops. Occasionally, a portion of the population may rebel, if stability within the realm and throughout the kingdom is low."
+	}
+}
+
+def ProvinceIncomeHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/id_KingdomResources"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceIncomeTutorialMessage")
+	tooltip
+	{
+		caption = "Province income"
+		text = "These are all resources that a province yields. Your kingdom collects the earnings of all provinces within its territory, as long as they are not in disorder."
+	}
+}
+
+def ProvinceFeaturesAndGoodsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Center/ProvincesAndFeatures_TutorialHotspot"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceFeaturesAndGoodsTutorialMessage")
+	tooltip
+	{
+		caption = "Province features and goods"
+		text = "Each province can have numerous province features within it, which unlock various types of buildings. These buildings can then produce various goods, which are displayed here and distributed within your entire kingdom."
+	}
+}
+
+def BuildingSlotsAllHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Left/Group_Buildings"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceBuildingsTutorialMessage")
+	tooltip
+	{
+		caption = "Building slots"
+		text = "A province may house up to 8 buildings. Click on an empty slot to browse all structures which may be constructed in this province, or expand your building capabilities by investing gold to reveal a locked slot."
+	}
+}
+
+def TownStatusesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow*/GroupStattuses"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceStatesTutorialMessage")
+	tooltip
+	{
+		caption = "Town states"
+		text = "A town's temporary states are shown here. These can indicate if a town has fame, is an important trade center or is suffering from disorder."
+	}
+}
+
+def FortificationsUpgradeHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/id_Fortifications/id_Citadel"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceFortificationsTutorialMessage")
+	tooltip
+	{
+		caption = "Fortifications"
+		text = "A town's fortifications consist of walls and towers which can be upgraded. Each level of fortification grants an additional amount of siege defense to a town."
+	}
+}
+
+def GarrisonHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/id_GarissonSlots/tut_UnitSlots"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceGarrisonTutorialMessage")
+	tooltip
+	{
+		caption = "Garrison"
+		text = "A town's garrison can house any types of troops, which participate as defenders in siege battles."
+	}
+}
+
+def GarrisonManpowerHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/id_GarissonSlots/id_GarrisonSummary"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceGarrisonManpowerTutorialMessage")
+	tooltip
+	{
+		caption = "Garrison and guards"
+		text = "Shows the manpower of units stationed in the garrison, in addition to the amount of guards which are defending the province. Clicking on this element can heal any wounded garrison troops."
+	}
+}
+
+def VisitingArmyHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)/Group_Right/tut_VisitingArmyContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "ProvinceVisitingArmyTutorialMessage")
+	tooltip
+	{
+		caption = "Visiting army"
+		text = "Army leaders may enter and exit the town, along with their troops. Once stationed, they act as a defensive force during sieges, alongside the garrison."
+	}
+}
+
+// ---------- BUILDINGS DETAILED -----------
+
+def DistrictBuildingsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_CastleBuildWindow(Clone)/id_Top/*/*id_BuildingsPanel"
+	force_visible = (ui.tutorial_message.message_def_id == "BuildingsDistrictsTutorialMessage")
+	tooltip
+	{
+		caption = "District"
+		text = "Each district contains buildings which are tied to a specific group of settlements - {Keep:link}castles{/link}, {Village:link}villages{/link}, religious settlements, {Farm:link}crop farms{/link} and coastal settlements. These districts (with the exception of sea shore, which only appears in coastal lands) are available in all provinces."
+	}
+}
+
+def DistrictHeaderHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_CastleBuildWindow(Clone)/id_Top/*/*id_DistrictCaption"
+	force_visible = (ui.tutorial_message.message_def_id == "BuildingsSettlementsTutorialMessage")
+	tooltip
+	{
+		caption = "Settlement count"
+		text = "The numbers in this area show how many settlements of a single type are present within a province."
+	}
+}
+
+def CommonBuildingsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_CastleBuildWindow(Clone)/Bottom/id_Common"
+	force_visible = (ui.tutorial_message.message_def_id == "BuildingsCrafts1TutorialMessage")
+	tooltip
+	{
+		caption = "Crafts and industries"
+		text = "Some buildings are tied to specific province features within this realm. Most of them allow the production of several goods, via their upgrades."
+	}
+}
+
+def SpecialBuildingsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_CastleBuildWindow(Clone)/Bottom/id_PF"
+	force_visible = (ui.tutorial_message.message_def_id == "BuildingsCrafts2TutorialMessage")
+	tooltip
+	{
+		caption = "{CommonBuildingsHotspot.tooltip.caption}"
+		text = "These are also certain buildings that are tied to province features and produce goods, but do not have any upgrades."
+	}
+}
+
+def BuildingUpgradesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_BuildingWindow(Clone)/HGroup/AlighnCenter/id_Upgrades"
+	force_visible = (ui.tutorial_message.message_def_id == "Upgrades1TutorialMessage")
+	tooltip
+	{
+		caption = "Upgrades"
+		text = "Each building may contain a set of upgrades. Upgrades can only be built once, giving their effects in all provinces which have the corresponding building."
+	}
+}
+
+// ---------- MESSAGE WINDOWS -----------
+
+def MessageButtonsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/*Buttons"
+	tooltip
+	{
+		caption = "Message Actions"
+		text = "Each message brings a set of actions that you may wish perform. Simply dismissing a message is always an option, but more specific interactions may also appear - for example, holding a feast to celebrate a newborn child, or activating an opportunity you've just received."
+	}
+}
+
+def MessageButtonTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/*Buttons/*"
+	tooltip
+	{
+		caption = "Message Button"
+		text = "Message button description"
+	}
+}
+
+// ---------- KINGDOM SELECTION -----------
+
+def OtherKingdomCentralAreaTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_KingdomWindow_Other(Clone)/Group_Ruler"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherKingdomCenterAreaTutorialMessage")
+	tooltip
+	{
+		caption = "King, stances and relations"
+		text = $["When a foreign kingdom is selected, this space contains information about your relations, your influence over its people and the stances between your nations."
+		" Diplomatic negotiations with a foreign kingdom can be initiated by clicking on the {b}Audience{/b} button."]
+	}
+}
+
+def OtherKingdomRoyalFamilyTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_KingdomWindow_Other(Clone)/id_RoyalFamily"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherKingdomRoyalFamilyTutorialMessage")
+	tooltip
+	{
+		caption = "Royal Family"
+		text = $["The queen and royal children of the selected kingdom can be seen here."
+		" Your own princes and princesses may also appear alongside their spouses, in case you have royal ties with the selected kingdom."]
+	}
+}
+
+def OtherKingdomPoliticsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_KingdomWindow_Other(Clone)/id_Politics"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherKingdomPoliticsTutorialMessage")
+	tooltip
+	{
+		caption = "Politics"
+		text = "As the game progresses and relations change, each kingdom starts having some friends and threats. In case war occurs, these can grow into allies or enemies, which may later become vassals or sovereigns."
+	}
+}
+
+// ---------- PROVINCE SELECTION (FOREIGN) -----------
+
+def OtherProvinceCentralAreaTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindowOther(Clone)/Group_Center/tut_ForeignProvinceMidArea"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherProvinceCenterAreaTutorialMessage")
+	tooltip
+	{
+		caption = "Province income and features"
+		text = "This space shows the resources and goods which are currently produced by this province, in addition to the province features in its territory."
+	}
+}
+
+def OtherProvinceOwnerFlagTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindowOther(Clone)/Group_Crest_Owner"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherProvinceOwnerFlagTutorialMessage")
+	tooltip
+	{
+		caption = "Province owner"
+		text = "This shows which kingdom currently owns the province. The flag can be clicked, which will select the given kingdom."
+	}
+}
+
+def OtherProvinceOccupierFlagTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindowOther(Clone)/Group_Crest_Occupier"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherProvinceOccupierFlagTutorialMessage")
+	tooltip
+	{
+		caption = "Province occupier"
+		text = "The occupant of a province normally coincides with the kingdom owner, unless rebels have besieged the town and temporarily hold control over it."
+	}
+}
+
+def OtherProvinceSendSpyTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindowOther(Clone)/*/id_NoSpy"
+	force_visible = (ui.tutorial_message.message_def_id == "OtherProvinceSendSpyTutorialMessage")
+	tooltip
+	{
+		caption = "Gaining vision with a spy"
+		text = "Infiltrating the province's kingdom will reveal additional information about its buildings, defending troops, food and siege defense. However, lands occupied by rebels cannot be spied on."
+	}
+}
+
+// ---------- ROYAL FAMILY -----------
+def RoyalFamilyKingTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/King_Frame_Ornaments/id_KingIcon"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalFamilyKingTutorialMessage")
+	tooltip
+	{
+		caption = "King"
+		text = "This is where your king resides."
+	}
+}
+
+def RoyalFamilyKingAbilitiesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/id_KingAbilities"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalFamilyKingAbilitiesTutorialMessage")
+	tooltip
+	{
+		caption = "King abilities"
+		text = "Each king has a set of abilities which come in play in various actions and events. Princes also have abilities, so it's important to keep track of those when thinking about who should succeed the crown."
+	}
+}
+
+def RoyalFamilyQueenTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/Queen/queen_hotspot"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalFamilyQueenTutorialMessage")
+	tooltip
+	{
+		caption = "Queen"
+		text = "This is where your queen resides. As she also possesses abilities, those are added to your king's ones."
+	}
+}
+
+def RoyalFamilyChildrenTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/Group_Children/id_ChildrenContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "RoyalChildrenTutorialMessage")
+	tooltip
+	{
+		caption = "Royal children"
+		text = "The princes and princesses of {kingdom} reside here."
+	}
+}
+
+def RoyalFamilySpousesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/Group_Children/SpouseEmptySlots"
+	force_visible = (ui.tutorial_message.message_def_id == "SpousesTutorialMessage")
+	tooltip
+	{
+		caption = "Spouses"
+		text = "Each one of your princes and princesses can be wed to a noble from another kingdom, giving you royal ties with their nations, potential rights to claim inheritance, effects in espionage and so on."
+	}
+}
+
+def AssignHeirTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/Group_Children/id_HairSelectionButtonsContianer"
+	force_visible = (ui.tutorial_message.message_def_id == "AssignHeirTutorialMessage")
+	tooltip
+	{
+		caption = "Assigning an heir"
+		text = "Any prince of yours can be assigned as the heir of {kingdom}, as long as he is at least Juvenile. Repercussions are heavy if the king perishes without a successor."
+	}
+}
+
+def ImportantRelativesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Royal_Family/Group_Relatives"
+	force_visible = (ui.tutorial_message.message_def_id == "ImportantRelativesTutorialMessage")
+	tooltip
+	{
+		caption = "Important relatives"
+		text = "Nobles which were part of the previous royal family of {kingdom} are displayed here. These knights may succeed the crown, if there are no eligible princes. Each important relative also grants various bonuses to his kingdom."
+	}
+}
+
+def RoyalFamilyTraditionsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)/Group_Traditions/id_Traditions/id_TraditionSlotsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "TraditionsTutorialMessage")
+	tooltip
+	{
+		caption = "Traditions"
+		text = "When each knight learns a skill at its fullest, it can be adopted as a tradition. This is an important part of the development of your kingdom, as each tradition brings many benefits and new possibilities."
+	}
+}
+
+// ---------- GREAT POWERS & RANKINGS -----------
+def RankingsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)/id_RankingCategoriesContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "RankingsTutorialMessage")
+	tooltip
+	{
+		caption = "Rankings"
+		text = "All kingdoms compete with eachother in various rankings. The higher up you are in a leaderboard, the more fame you gain."
+	}
+}
+
+def AdditionalFameSourcesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)/id_AdditinalFameSources"
+	force_visible = (ui.tutorial_message.message_def_id == "AdditionalFameSourcesTutorialMessage")
+	tooltip
+	{
+		caption = "Additional fame sources"
+		text = "Apart from competing in rankings, various other factors may increase your kingdom's fame. Owning vassals, controlling the ecumenical patriarch, being a caliphate or having traditions that grant you additional fame are a few examples."
+	}
+}
+
+def EmperorOfTheWorldButtonTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)/id_Victory/id_ButtonVictory"
+	force_visible = (ui.tutorial_message.message_def_id == "EmperorOfTheWorldButtonTutorialMessage")
+	tooltip
+	{
+		caption = "Claim Victory"
+		text = "Once you've accumulated enough fame and established yourself as a great power, you may attempt to claim victory by initiating a vote for becoming Emperor of the World. But beware - being chosen is not an easy task, as the rest of the great powers may deny your claims for various reasons."
+	}
+}
+
+def GreatPowersTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)/Group_GreatPowers/tut_GreatPowersContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "GreatPowersFlagsTutorialMessage")
+	tooltip
+	{
+		caption = "Great Powers"
+		text = "To be considered a great power, you must be amongst the kingdoms with the highest amount of accumulated fame. Each great power benefits from various bonuses, ranging from increased army morale to higher influence during diplomatic negotiations."
+	}
+}
+
+def GreatPowersDisableTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)/Group_GreatPowers/*"
+}
+
+// ---------- ADVANTAGES -----------
+def AdvantageCategoriesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_KingdomAdvantagesWindow(Clone)/GroupDynamic/id_KingdomAdvantage"
+	force_visible = (ui.tutorial_message.message_def_id == "AdvantageCategoriesTutorialMessage")
+	tooltip
+	{
+		caption = "Kingdom Advantages"
+		text = "Having access to various goods grants you progress in eight separate advantages. An advantage is completed once you produce or import all goods associated with it. Completed advantages grant your kingdom unique sets of bonuses."
+	}
+}
+
+def GoodsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_KingdomAdvantagesWindow(Clone)/GroupDynamic/VGroup/id_GoodsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "GoodsTutorialMessage")
+	tooltip
+	{
+		caption = "Goods"
+		text = "Goods can be produced by various buildings and upgrades. They can also be imported via merchants sent in foreign kingdoms, for the right amount of gold and commerce upkeep. Once a kingdom gains access to a good, it is available throughout all of its provinces."
+	}
+}
+
+def AdvantagesVictoryHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_KingdomAdvantagesWindow(Clone)/GroupDynamic/id_Victory/id_ButtonVictory"
+	force_visible = (ui.tutorial_message.message_def_id == "AdvantagesVictoryTutorialMessage")
+	tooltip
+	{
+		caption = "Advantages victory"
+		text = "Once your kingdom has access to all goods, either by producing or importing them, you may claim victory. Unlike the Emperor of the World vote, the advantages victory is achieved instantaneously and cannot fail."
+	}
+}
+
+// ---------- WARS & PACTS -----------
+def WarsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/Id_WarsListContainer/Scroll View/Viewport/id_WarsContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "WarsTutorialMessage")
+	tooltip
+	{
+		caption = "Wars"
+		text = "All active wars in which your kingdom participates are displayed here. Each war shows a list of supporters, the current war score and the balance of power between both sides."
+	}
+}
+
+def WarExhaustionHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/Id_WarsListContainer/id_WarExhaustion/Icon"
+	force_visible = (ui.tutorial_message.message_def_id == "WarExhaustionTutorialMessage")
+	tooltip
+	{
+		caption = "War exhaustion"
+		text = "Waging multiple wars for a long time increases your kingdom's war exhaustion, which hinders the stability of your provinces. The only way to reduce accumulated war exhaustion is to not be part of any wars for some time."
+	}
+}
+
+def WarWindowFriendsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/id_Overview/FriendsAndThreats/id_FriendsCrests"
+	force_visible = (ui.tutorial_message.message_def_id == "WarWindowFriendsTutorialMessage")
+	tooltip
+	{
+		caption = "Friends"
+		text = "These are the kingdoms with which you maintain the highest relations."
+	}
+}
+
+def WarWindowEnemiesHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/id_Overview/FriendsAndThreats/id_EnemiesCrests"
+	force_visible = (ui.tutorial_message.message_def_id == "WarWindowEnemiesTutorialMessage")
+	tooltip
+	{
+		caption = "Threats"
+		text = "These are the kingdoms with which you maintain the lowest relations."
+	}
+}
+
+def WarWindowOurPactsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/id_Overview/Pacts/id_OurPacts"
+	force_visible = (ui.tutorial_message.message_def_id == "WarWindowOurPactsTutorialMessage")
+	tooltip
+	{
+		caption = "Our pacts"
+		text = "Defensive pacts and invasion plans in which your kingdom participates, either as a leader or a supporter, are listed here."
+	}
+}
+
+def WarWindowEnemyPactsHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)/id_Overview/Pacts/id_PactsAgainstUs"
+	force_visible = (ui.tutorial_message.message_def_id == "WarWindowEnemyPactsTutorialMessage")
+	tooltip
+	{
+		caption = "Pacts against us"
+		text = "Foreign defensive pacts and invasion plans against your kingdom are listed here."
+	}
+}
+
+// ---------- OTHER -----------
+
+def OwnPrisonerTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot/id_CharacterGroup/UIP_CharacterIcon_RoyalCourt(Clone)/Group_Populated/tut_prisoner_area"
+	force_visible = (ui.tutorial_message.message_def_id == "OwnPrisoner1TutorialMessage" || ui.tutorial_message.message_def_id == "OwnPrisoner2TutorialMessage")
+	tooltip
+	{
+		caption = "Own Prisoner"
+		text = "Your knight has been captured by another kingdom! He can be ransomed (for the right price) or abandoned."
+	}
+}
+
+def RoyalDungeonHotspotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PrisonersContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "ForeignPrisonerTutorialMessage")
+	tooltip
+	{
+		caption = "Royal Dungeon"
+		text = $["Foreign knights that you've caught are situated in the royal dungeon."
+		"{p}{p}Click on a prisoner to view the actions associated with him."]
+	}
+}
+
+def WarsFloatingHotspotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_WarsContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "WarTutorialMessage")
+	tooltip
+	{
+		caption = "Wars"
+		text = $["These are the wars in which you currently participate, either as a leader or as a supporter to another kingdom."
+		"{p}{p}Click on a war to view detailed information about it."]
+	}
+}
+
+def RebellionsHotspotTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_RebelsContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "RebellionsTutorialMessage")
+	tooltip
+	{
+		caption = "Rebellions"
+		text = $["These are the rebellions which currently plague your kingdom. They can be dealt with by defeating their leaders."
+		"{p}{p}Click on a rebellion to view detailed information about it."]
+	}
+}
+
+def CrusadeTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_CrusadeContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "CrusadeTutorialMessage")
+	tooltip
+	{
+		caption = "Crusade"
+		text = $["Crusades are called by the Papacy, appointing a marshal from a Catholic kingdom to march against a Muslim or Pagan target."
+		"{p}{p}Click on the crusade to select its army."]
+	}
+}
+
+def JihadTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_ThirdPartyJihadsContainer/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "JihadTutorialMessage")
+	tooltip
+	{
+		caption = "Jihad"
+		text = "Jihads are holy wars led by Islamic kingdoms against a Christian or Pagan target. Kingdoms of any religion may join either side."
+	}
+}
+
+def OurPactsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PactsContainer/tut_area"
+	//force_visible = (ui.tutorial_message.message_def_id == "PactsTutorialMessage")
+	tooltip
+	{
+		caption = "Pacts"
+		text = $["Defensive pacts and invasion pacts organized by our diplomats can be viewed here."
+		"{p}{p}Click on a pact to view more detailed information about it."]
+	}
+}
+
+def MercenariesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_LoyalMercenaries/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "MercenariesTutorialMessage")
+	tooltip
+	{
+		caption = "Mercenaries"
+		text = $["These are the hired mercenary armies that march under our kingdom's banners. Armies of ours that have lost their leader are also considered mercenary forces."
+		"{p}{p}Click on a mercenary to view detailed information about it."]
+	}
+}
+
+def HeadlessArmiesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_LoyalMercenaries/*/id_Leaderless/id_Icon"
+	force_visible = (ui.tutorial_message.message_def_id == "HeadlessArmyTutorialMessage")
+	tooltip
+	{
+		caption = "Abandoned kingdom armies"
+		text = $["When army leaders die due to unforeseen events outside battle, their troops become mercenaries. They still hold some allegiance to their former commander and will join another army leader from his kingdom for free. However, foreign armies may also hire these troops by paying gold."
+		"{p}{p}If one of your marshals is chosen to lead a crusade, his troops will also be left behind as a mercenary camp."]
+	}
+}
+
+def PatriarchTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PatriarchContianer/tut_area"
+	//force_visible = (ui.tutorial_message.message_def_id == "MercenariesTutorialMessage")
+	tooltip
+	{
+		caption = "Ecumenical Patriarch"
+		text = "Your kingdom currently has control over the Ecumenical Patriarch, due to your control over the great province of Constantinople."
+	}
+}
+
+def MissingGoodsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_MissingGoodsContainer/UIP_MissingGoodsIcon(Clone)"
+	force_visible = (ui.tutorial_message.message_def_id == "MissingGoodsTutorialMessage")
+	tooltip
+	{
+		caption = "Missing goods"
+		text = "Your kingdom has lost control over some goods! As a result, buildings which are dependant on them have stopped functioning.{p}{p}Hovering on this icon will show which goods are missing."
+	}
+}
+
+// def FloatingElementsHotspot : TutorialHotspot
+// {
+// 	path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/*"
+// 	tooltip
+// 	{
+// 		caption = "Important element"
+// 		text = "This space can display active wars, prisoners, rebels, mercenaries and the patriarch. Some world events might also be highlighted here, such as crusades and jihads."
+// 	}
+// }
+
+// ---------- ARMY SELECTION -----------
+def ArmyLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/Group_Info/tut_ArmyLeader"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmyLeaderTutorialMessage")
+	tooltip
+	{
+		caption = "Army leader"
+		text = $["Most armies are led by a knight, who can affect the attributes of all units under his command depending on his skills."
+		"{p}{p}Clicking ({clr:gold}{keybindings.focus_selection}{/clr}) focuses your camera on the selected army."]
+	}
+}
+
+def ArmyUnitsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/id_GorupUnits"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmyUnitsTutorialMessage")
+	tooltip
+	{
+		caption = "Army units"
+		text = "These are all squads under the command of the army leader. Marshals, kings and shamans can lead up to 8 squads, while non-marshal knights may only lead up to 5."
+	}
+}
+
+def ArmyMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/Group_Info/Group_Morale"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmyMoraleTutorialMessage")
+	tooltip
+	{
+		caption = "Army morale"
+		text = "Morale can decide many battles, as it determines the likelihood of individual squads to surrender. Many factors can affect an army's morale both positively (for example, fighting in home territory) and negatively (roaming territories with multiple {Keep:link}castles{/link})."
+	}
+}
+
+def ArmyManpowerTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/Group_Info/tut_ArmyManpower"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmyManpowerTutorialMessage")
+	tooltip
+	{
+		caption = "Army manpower"
+		text = "This is the overall amount of troops commanded by the army leader. Different units have different squad sizes, which can additionally be affected by the army leader's skills, the levies positioned his governed realms and so on."
+	}
+}
+
+def ArmySuppliesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/tut_ArmyFood"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmySuppliesTutorialMessage")
+	tooltip
+	{
+		caption = "Army supplies and upkeep"
+		text = "Supplies deplete as an army marches, depending on its location - for example, exiting homelands increases consumption, while being in home towns nullifies it. A total lack of supplies will hinder army's travel speed and squads' stamina and morale.{p}{p}Hovering on this element will also display the army's current food upkeep."
+	}
+}
+
+def ArmyEquipmentTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*/Group_Info/tut_ArmyEquipment"
+	force_visible = (ui.tutorial_message.message_def_id == "ArmyEquipmentTutorialMessage")
+	tooltip
+	{
+		caption = "Army equipment"
+		text = "Every army may carry various types of equipment, ranging from siege machinery to army upgrades that bring additional troops and supplies."
+	}
+}
+
+// ---------- SIEGE BATTLE SELECTION -----------
+def SiegeBattleHeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Center/Background_SiegeBattleName/id_Name"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeIntroTutorialMessage")
+	tooltip
+	{
+		caption = "Siege battle"
+		text = $["The main way of conquering a town or {Keep:link}castle{/link} is by besieging it. Sieges are long battles of attrition, requiring careful planning on both the offensive and defensive side."
+		"{p}{p}Clicking ({clr:gold}{keybindings.focus_selection}{/clr}) focuses your camera on the selected siege."]
+	}
+}
+
+def SiegeBattleArmyLeadersTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Info/id_LeaderSide*/tut_ArmyLeaders"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeArmyLeadersTutorialMessage")
+	tooltip
+	{
+		caption = "Army Leaders"
+		text = "Each siege battle may have up to two army leaders on each side, fighting against the opponent's pair. Outside armies which come to the defender's aid will break the siege immediately, resulting in a direct battle to settle the conflict."
+	}
+}
+
+def SiegeDefenderResilienceTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id*/Group_Info/id_LeaderSide*/id_SiegeBars/id_ResilienceContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeDefenderResilienceTutorialMessage")
+	tooltip
+	{
+		caption = "Resilience"
+		text = "Resilience represents the defending side's will to fight back the opposition. If the resilience of a town or {Keep:link}castle{/link} fully depletes, the defenders may open the gates and surrender their homeland to the attacking force."
+	}
+}
+
+def SiegeDefenderSiegeDefenseTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id*/Group_Info/id_LeaderSide*/id_SiegeBars/id_SiegeDefenseContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeDefenderSiegeDefenseTutorialMessage")
+	tooltip
+	{
+		caption = "Siege Defense"
+		text = "Siege defense represents the overall fortifications of a town or {Keep:link}castle{/link}. If this value is depleted below 50%, the attacker may mount an assault to conquer the objective quickly."
+	}
+}
+
+def SiegeAttackerSuppliesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id*/Group_Info/id_LeaderSide*/id_ArmyFoodSiege/tut_ArmySupplies_Siege"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeAttackerSuppliesTutorialMessage")
+	tooltip
+	{
+		caption = "Army Supplies"
+		text = "An army must have some supplies in order to be able to start a siege battle. Supplies gradually deplete while the siege takes place, with full depletion hindering the army's morale, stamina and damage taken."
+	}
+}
+
+def SiegeDefenderFoodTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Info/id_LeaderSide*/id_CastleFood/id_Food"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeDefenderFoodTutorialMessage")
+	tooltip
+	{
+		caption = "Defender's Food"
+		text = "Defending forces have a limited amount of food reserves. Rations deplete while the siege takes place and if they run out, the morale and stamina of all defenders take a hit."
+	}
+}
+
+def SiegeBattlePlayerActionsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_PlayerActions/*"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeBattlePlayerActionsTutorialMessage")
+	tooltip
+	{
+		caption = "Siege actions"
+		text = "Various actions can be performed by both sides during siege battles. Attackers may mount an assault or lift their siege, while defenders may break the siege from the inside at any time."
+	}
+}
+
+def SiegeBattleArmyMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Info/id_LeaderSide*/Group_Morale/id_Morale"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeBattleArmyMoraleTutorialMessage")
+	tooltip
+	{
+		caption = "{ArmyMoraleTutorialHotspot.tooltip.caption}"
+		text = "{ArmyMoraleTutorialHotspot.tooltip.text}"
+	}
+}
+
+def SiegeBattleArmyManpowerTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Info/id_LeaderSide*/tut_ArmyManpower"
+	force_visible = (ui.tutorial_message.message_def_id == "SiegeBattleArmyManpowerTutorialMessage")
+	tooltip
+	{
+		caption = "{ArmyManpowerTutorialHotspot.tooltip.caption}"
+		text = "Manpower represents the number of troops fighting on each side. Defenders have a few key advantages: Towns can benefit from garrison troops, while {Keep:link}castles{/link} gain the support auxiliary units spawned by the province's population and levies."
+	}
+}
+
+// ---------- BATTLE PREPARATION -----------
+def BattlePreparationTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Preparation/Group_PreparationProgress"
+	force_visible = (ui.tutorial_message.message_def_id == "BattlePreparationTutorialMessage")
+	tooltip
+	{
+		caption = "Battle Preparation"
+		text = "There is a brief period of time for preparation, before the start of each battle. One-sided battles against small armies take less time to prepare.[{is_multiplayer:if} The clash will begin in simulated form once the timer ends.| You can choose to start the battle in simulated form (which will occur once this timer ends), or to control your troops direcly in a real-time battle scenario.]"
+	}
+}
+
+// ---------- FIELD BATTLE SELECTION -----------
+def FieldBattleHeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Center/Background_BattleName/id_Name"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleIntroTutorialMessage")
+	tooltip
+	{
+		caption = "Battles"
+		text = $["Different types of battles can occur, depending on the location of the encounter. Armies may clash on the field, while pillaging a settlement, by manually assaulting a town or by breaking an ongoing siege."
+		"{p}{p}Clicking ({clr:gold}{keybindings.focus_selection}{/clr}) focuses your camera on the selected battle."]
+		
+	}
+}
+
+def FieldBattleArmyLeadersTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Info/id_LeaderSide*/tut_ArmyLeaders"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleArmyLeadersTutorialMessage")
+	tooltip
+	{
+		caption = "Army leaders"
+		text = "Field battles are fought between two main army leaders of opposing kingdoms. Each side of the battle can be reinforced by one additional friendly army at any time."
+	}
+}
+
+def FieldBattleEstimationTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Center/id_estimation/tut_BattleEstimation"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleEstimationTutorialMessage")
+	tooltip
+	{
+		caption = "Battle estimation"
+		text = "This shows the current balance of power between both armies. As morale can change rapidly with more troops dying, a battle's estimation can quickly swing from one side to the other."
+	}
+}
+
+def FieldBattleArmyMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Info/id_LeaderSide*/Group_Morale/id_Morale"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleArmyMoraleTutorialMessage")
+	tooltip
+	{
+		caption = "{ArmyMoraleTutorialHotspot.tooltip.caption}"
+		text = "{ArmyMoraleTutorialHotspot.tooltip.text}"
+	}
+}
+
+def FieldBattleArmyManpowerTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Info/id_LeaderSide*/tut_ArmyManpower"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleArmyManpowerTutorialMessage")
+	tooltip
+	{
+		caption = "{ArmyManpowerTutorialHotspot.tooltip.caption}"
+		text = "Manpower represents the amount of troops fighting on each side. If the battle is fought on the grounds of a settlement, local defenders might join depending on the amount of guards and population within said settlement."
+	}
+}
+
+def FieldBattleArmySuppliesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/tut_ArmySupplies"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleArmySuppliesTutorialMessage")
+	tooltip
+	{
+		caption = "{ArmySuppliesTutorialHotspot.tooltip.caption}"
+		text = "Each army's supplies deplete slowly during fights. If a leader and his troop run out of supplies completely, they'd suffer from reduced morale and stamina for the duration of the battle."
+	}
+}
+
+def FieldBattleTerrainBonusesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Ongoing/Background/Footer"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattleTerrainBonusesTutorialMessage")
+	tooltip
+	{
+		caption = "Terrain bonuses"
+		text = "Different terrains grant different bonuses and negatives to certain units. Surveying the area before plunging into battle can often times be a deciding factor in field battles."
+	}
+}
+
+def FieldBattlePlayerActionsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_PlayerActions/id_Retreat"
+	force_visible = (ui.tutorial_message.message_def_id == "FieldBattlePlayerActionsTutorialMessage")
+	tooltip
+	{
+		caption = "Retreating"
+		text = "Both sides of the battle can retreat at any time, which will lead to casualties and penalties to morale."
+	}
+}
+
+def PillageIndicationTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Ongoing/Group_Center/id_PlunderProgressContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "PillageTutorialMessage")
+	tooltip
+	{
+		caption = "Pillage progress"
+		text = "This bar shows when the army will complete its pillage. Armies do not suffer casualties while plundering, but can be interrupted by foreign armies, which will trigger a battle."
+	}
+}
+
+// ---------- REBEL SELECTION -----------
+def RebelLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Info/id_RebelLeader"
+	//force_visible = (ui.tutorial_message.message_def_id == "")
+	tooltip
+	{
+		caption = "Rebel leader"
+		text = $["Rebel armies which are headed by a knight are dangerous and should be handled with caution. These can either be leaders of a rebellion, or rebel generals. Defeating a leader can end his rebellion, unless there is a general who can replace him."
+		"{p}{p}Clicking ({clr:gold}{keybindings.focus_selection}{/clr}) focuses your camera on the selected rebel."]
+	}
+}
+
+def RebelMobTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Info/id_LeaderlessIcon"
+	//force_visible = (ui.tutorial_message.message_def_id == "")
+	tooltip
+	{
+		caption = "Leaderless rebels"
+		text = "Most basic rebel armies can be recognized by their lack of leadership. These are ordinary rebel mobs that support a rebellion in the vicinity."
+	}
+}
+
+def RebelTypeTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Icon/id_Icon"
+	force_visible = (ui.tutorial_message.message_def_id == "RebelTypesTutorialMessage")
+	tooltip
+	{
+		caption = "Rebel types"
+		text = "A rebel army can either be an ordinary rebel mob, a general or a rebellion leader. If a rebel is part of a loyalist rebellion, he also holds an allegiance to a kingdom and may conquer lands in its name."
+	}
+}
+
+def RebelUnitsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Units"
+	force_visible = (ui.tutorial_message.message_def_id == "RebelUnitsTutorialMessage")
+	tooltip
+	{
+		caption = "Rebel army troops"
+		text = "Rebel uprisings consist of troops that can be recruited in the province and its surroundings. As a rebel gains additional levels, he amasses more and better units."
+	}
+}
+
+def RebelManpowerTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Info/tut_RebelManpower"
+	force_visible = (ui.tutorial_message.message_def_id == "RebelManpowerTutorialMessage")
+	tooltip
+	{
+		caption = "Rebel manpower"
+		text = "This shows the amount of troops fighting under the rebel's banners. Rebel armies are not to be underestimated, as they have high base manpower which increases with each rebel level."
+	}
+}
+
+def RebelMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor(Clone)/Group_Info/Group_Morale/id_ArmyMorale"
+	force_visible = (ui.tutorial_message.message_def_id == "RebelMoraleTutorialMessage")
+	tooltip
+	{
+		caption = "Rebel morale"
+		text = "Rebel armies gain higher morale as they level up and become famous. In addition, their morale increases as the rebellion they are part of increases in strength."
+	}
+}
+
+// ---------- MERCENARY SELECTION -----------
+def MercenaryVisitingArmyTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_Normal/HGroup/Description/Backgroud"
+	force_visible = (ui.tutorial_message.message_def_id == "MercenaryVisitingArmyTutorialMessage")
+	tooltip
+	{
+		caption = "Visiting a mercenary camp"
+		text = $["Mercenaries can be interacted with by sending knights to their location. Only one knight can be stationed alongside a mercenary at any given time."
+		"{p}{p}Clicking ({clr:gold}{keybindings.focus_selection}{/clr}) focuses your camera on the selected mercenary."]
+	}
+}
+
+def MercenaryUnitsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/id_Group_MercUnits"
+	force_visible = (ui.tutorial_message.message_def_id == "MercenaryUnitsTutorialMessage")
+	tooltip
+	{
+		caption = "Mercenary troops"
+		text = "As long as the entire mercenary army isn't hired, its individual units can be purchased by any visiting army. Mercenary camps disappear when all of their units are purchased."
+	}
+}
+
+def HireMercenaryTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_*/id_HireKingdom"
+	force_visible = (ui.tutorial_message.message_def_id == "HireMercenaryTutorialMessage")
+	tooltip
+	{
+		caption = "Hiring mercenaries"
+		text = "By spending a hefty amount of gold, a knight may also hire the entire mercenary retinue. Hired mercenaries fight for the knight's kingdom and may be ordered to perform various commands."
+	}
+}
+
+def ForceOutMercenaryTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_*/id_Dismiss"
+	force_visible = (ui.tutorial_message.message_def_id == "ForceOutMercenaryTutorialMessage")
+	tooltip
+	{
+		caption = "Forcing mercenaries out"
+		text = "Mercenaries which are left unattended for a long time may not only relocate to another province, but also turn into rebels. That is why forcing them out of your lands can sometimes be of use."
+	}
+}
+
+def MercenaryCommandsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_Hired/CommandButtons"
+	force_visible = (ui.tutorial_message.message_def_id == "HiredMercenaryTutorialMessage")
+	tooltip
+	{
+		caption = "Hired mercenary commands"
+		text = "Hired mercenaries can be ordered to perform various duties for their kingdom, without the need of a knight being stationed alongside them. A mercenary will attempt to follow its orders strictly, but it may also decide to deviate and attack nearby hostiles from time to time."
+	}
+}
+
+// ---------- OTHER -----------
+
+def TextLinkTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "*/LinkTooltip"
+}
+
+def FPSTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/Top Area/FPSText"
+}
+
+def WatchesTutorialHotspot : DisabledTutorialHotspot
+{
+	path_mask = "UI/Canvas/*/UIP_Watches*"
+}
+
+// ---------------------------------
+// ---------- BATTLEVIEW -----------
+// ---------------------------------
+
+// ---------- BATTLEVIEW BOTTOM AREA -----------
+// def BattleViewArmyAreaTutorialHotspot : TutorialHotspot
+// {
+// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/tut_area"
+// 	force_visible = (ui.tutorial_message.message_def_id == "BattleViewMainArmyTutorialMessage")
+// 	tooltip
+// 	{
+// 		caption = "Your troops"
+// 		text = "Armies which fight on your side are visualized here, consisting of their leader and all troops under their command. Local defenders are also shown on the right-most side, in case you participate as a defender during an assault or break siege battle."
+// 	}
+// }
+
+def BattleViewMainArmyTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/id_OwnArmyWindow/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewMainArmyTutorialMessage")
+	tooltip
+	{
+		caption = "Main Army"
+		text = "This is your main army, consisting of its leader and all troops under his command. Each squad can be selected and controlled individually."
+	}
+}
+
+def BattleViewSupportingArmyTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/id_SupportingArmyWindow/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSupportingArmyTutorialMessage")
+	tooltip
+	{
+		caption = "Supporting Army"
+		text = "Your main army may be supported by an additional one. Its troops can be part of your kingdom, or controlled by a friendly nation which has decided to join your ranks and help you in your fight."
+	}
+}
+
+def BattleViewLocalDefendersTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/id_GarrisonArmyWindow/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewLocalDefendersTutorialMessage")
+	tooltip
+	{
+		caption = "Local Defenders"
+		text = "Troops gathered from the vicinity can also join the battle to fight on your side, in defense of the region. Some of these squads come from the local population. During sieges, your garrison and town guards also join the battle."
+	}
+}
+
+// ---------- BATTLEVIEW TOP AREA -----------
+def BattleViewTopEnemyArmyLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character2/*/id_CharacterIcon"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewWinConditionKillLeaderTutorialMessage")
+	tooltip
+	{
+		caption = "Enemy Leader"
+		text = "This is the general of the main enemy army. Killing him can grant you sudden victory, making him a valuable target. When a reinforcing army is present, its leader must also be slain to achieve victory."
+	}
+}
+
+def BattleViewTopEnemyReinforcingLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character2/icon_supporter"
+	tooltip
+	{
+		caption = "Enemy Supporter"
+		text = "Another army may fight alongside the enemy's main one, either from the beginning of the fight or by reinforcing it after some time passes."
+	}
+}
+
+def BattleViewTopOurArmyLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character1/icon/id_CharacterIcon"
+	tooltip
+	{
+		caption = "Our Leader"
+		text = "This is the general of your main army. Keeping him alive is of utmost importance, as his death can cost you the battle."
+	}
+}
+
+def BattleViewTopOurReinforcingLeaderTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character1/icon_supporter/id_CharacterIcon"
+	tooltip
+	{
+		caption = "Our Supporter"
+		text = "Another army may fight alongside our leading one, either from the beginning of the fight or by reinforcing it after some time passes."
+	}
+}
+
+// def BattleViewTopArmyLeadersTutorialHotspot : TutorialHotspot
+// {
+// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character*/icon*"
+// 	force_visible = (ui.tutorial_message.message_def_id == "BattleViewTopArmyLeadersTutorialMessage")
+// 	tooltip
+// 	{
+// 		caption = "Army Leaders"
+// 		text = "These are the knights which lead each army on both sides of the battle. Just like in world view, knights affect their troops with any skills that they might possess."
+// 	}
+// }
+
+def BattleViewTopEstimationTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_estimation"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewWinConditionDefeatOpponentsTutorialMessage")
+	tooltip
+	{
+		caption = "Battle estimation"
+		text = "This bar represents the balance of power of both armies, taking into account their manpower and each squad's statistics."
+	}
+}
+
+def BattleViewTopMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/*/id_morale"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewWinConditionMorale2TutorialMessage")
+	tooltip
+	{
+		caption = "Army Morale"
+		text = "Here, you can see each army's overall morale. If it lowers too much for one side, it may even lead to surrender."
+	}
+}
+
+def BattleViewTopInitiativeTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character*/id_barsContainer/initiative/id_InitiativeContainer/IdleContainer/id_InitiativeRadialContainer/id_Initiative"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewTopInitiativeTutorialMessage")
+	tooltip
+	{
+		caption = "Army Initiative"
+		text = "Armies which are the instigators of the battle gain initiative. This can apply when you assault a town, or when you break your opponent's siege."
+	}
+}
+
+def BattleViewTopCapturePointsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_CapturePoints/*/UIP_CapturePoint(Clone)/id_Background"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewWinConditionCapturePoints1TutorialMessage")
+	tooltip
+	{
+		caption = "Capture Points"
+		text = "Army camps, wall towers and various landmarks within a town can be captured by any side. Controlling all capture points leads to instant victory."
+	}
+}
+
+// def BattleViewTopBattleTypeTutorialHotspot : TutorialHotspot //!!! Probably unnecessary.
+// {
+// 	path_mask = ""
+// 	force_visible = (ui.tutorial_message.message_def_id == "BattleViewTopBattleTypeTutorialMessage")
+// 	tooltip
+// 	{
+// 		caption = "Battle type"
+// 		text = "This is the battle type."
+// 	}
+// }
+
+// ---------- BATTLEVIEW BOTTOM RIGHT AREA -----------
+def BattleViewMinimapTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_Minimap/id_MinimapRect"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewMinimapTutorialMessage")
+	tooltip
+	{
+		caption = "Minimap"
+		text = "Army squads, leaders and capture points can be seen on the minimap. It can be zoomed-in/zoomed-out (mouse scroll) and panned (hold MMB)."
+	}
+}
+
+def BattleViewTimeControlsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_TimePanel"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewTimeControlsTutorialMessage")
+	tooltip
+	{
+		caption = "Settings and time manipulation"
+		text = "Time can be paused, sped up or slowed down by interacting with this area. The (+) and (-) keys can also be used to manipulate time at more precise increments. Maximum game {noparse}speed{/noparse} can quickly be achieved by pressing (*)."
+	}
+}
+
+def BattleViewFiltersTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_HelpersContainer/id_FiltersButton"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewFiltersTutorialMessage")
+	tooltip
+	{
+		caption = "Visibility filters"
+		text = "Most interface elements on the battlefield, such as army plates, flags and selections, can be turned on or off. All available options can be accessed from here."
+	}
+}
+
+def BattleViewHelpTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_HelpersContainer/id_ArmyCommandsButton"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewHelpTutorialMessage")
+	tooltip
+	{
+		caption = "Squad commands"
+		text = "There are many useful hotkeys that can be used when commanding your troops. Information about those can be accessed from here."
+	}
+}
+
+// ---------- BATTLEVIEW TOP LEFT AREA -----------
+def BattleViewRetreatButtonTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleQuitOptions/id_btn_Retreat"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewRetreatButtonTutorialMessage")
+	tooltip
+	{
+		caption = "Retreating"
+		text = "If things go sour, you can always retreat. Just like in simulated battles, retreating ends the tactical battle and causes your troops to suffer damage, which may lead to some of them dying."
+	}
+}
+
+// ---------- BATTLEVIEW SQUAD SELECTION -----------
+def BattleViewSelectionSquadTypeTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadTypeIcon/tut_area"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadTypeTutorialMessage")
+	tooltip
+	{
+		caption = "Squad type and stamina"
+		text = $["The icon in the middle shows the squad's type, while the circular bar around it indicates its current stamina. Stamina depletes while troops are running and fighting, and fills up when they are idle or walking. Siege machinery units have no stamina."
+		"{p}{p}{clr:gold}Ctrl + LMB{/clr} on this icon to select all squads of the same type."]
+	}
+}
+
+def BattleViewSelectionCommandsTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_ArmyActions"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSelectionCommandsTutorialMessage")
+	tooltip
+	{
+		caption = "Troop orders"
+		text = "You can order your squads to assume different formations, act aggressively or defensively depending on the preserve formation command, hold fire and so on. Siege machinery such as Trebuchets have their own set of commands."
+	}
+}
+
+def BattleViewSelectionSquadAttributesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadStats"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadAttributesTutorialMessage")
+	tooltip
+	{
+		caption = "Squad attributes"
+		text = "A squad's most vital attributes are shown here. These include attack, defense, shock damage, resilience and movement speed. Hovering on the squad's icon displays a tooltip, which shows more detailed information about all of its attributes."
+	}
+}
+
+def BattleViewSelectionMarkTargetTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_MarkTarget/id_MarkTargetButton"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewMarkTargetTutorialMessage")
+	tooltip
+	{
+		caption = "Mark target"
+		text = "You can mark any enemy squad as a high-value target by clicking on this icon. Your ranged troops will attempt to open fire on marked squads, when left without direct commands."
+	}
+}
+
+// def BattleViewSelectionSquadBarsTutorialHotspot : TutorialHotspot
+// {
+// 	//path_mask = "UIBattle/Canvas/id_BattleHud/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/tut_area"
+// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/tut_area"
+// 	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadBarsTutorialMessage")
+// 	tooltip
+// 	{
+// 		caption = "Morale, health and stamina"
+// 		text = "These bars provide vital information about the squad's current state. Siege units are not affected by morale and stamina."
+// 	}
+// }
+
+// def BattleViewSelectionSquadStatusesTutorialHotspot : TutorialHotspot
+// {
+// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatuses"
+// 	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadStatusesTutorialMessage")
+// 	tooltip
+// 	{
+// 		caption = "Squad statuses"
+// 		text = "Squad statuses description."
+// 	}
+// }
+
+// ---------- BATTLEVIEW OTHER (EMERGENT) -----------
+def BattleViewSelectionBarsMoraleTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_Morale/id_MoraleContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadMoraleTutorialMessage")
+	tooltip
+	{
+		caption = "Squad morale"
+		text = "Morale is an important attribute possessed by all types of units, except siege machinery. Low morale can lead to troops retreating temporarily, while full depletion will force the entire squad to flee permanently.{p}{p}Various things affect morale, both temporarily and permanently, which can be seen by hovering on this bar."
+	}
+}
+
+def BattleViewSelectionBarsHealthTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_HealthContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadHealthTutorialMessage")
+	tooltip
+	{
+		caption = "Squad health"
+		text = "This bar shows how many of this squad's troops are currently alive. You can change how health is shown, in relation to the squad's manpower, from the 'Army Commands' menu on the right side of the screen."
+	}
+}
+
+def BattleViewSelectionBarsStaminaTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_StaminaContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadStaminaTutorialMessage")
+	tooltip
+	{
+		caption = "Squad stamina"
+		text = "Stamina depletes while troops are running and fighting, and fills up when they are idle. Running and charging are not possible when stamina is too low."
+	}
+}
+
+def BattleViewSelectionSiegeHealthTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SiegeMachineStatsContainer/id_MachineHealthContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSiegeHealthTutorialMessage")
+	tooltip
+	{
+		caption = "Siege machinery health"
+		text = "Siege units are not affected by morale, nor stamina, and only have their health bar visualized."
+	}
+}
+
+def BattleViewSelectionTrebuchetDeploymentTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SiegeMachineStatsContainer/id_DeploymentContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewTrebuchetDeploymentTutorialMessage")
+	tooltip
+	{
+		caption = "Trebuchet deployment"
+		text = "A trebuchet is fully deployed and can start shooting when this bar is fully filled. When a trebuchet is ordered to pack, the bar starts to slowly deplete."
+	}
+}
+
+def BattleViewArmyInventoryTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/*/id_SiegeEquipmentContainer"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewArmyInventoryTutorialMessage")
+	tooltip
+	{
+		caption = "Army Inventory"
+		text = "Siege machinery such as trebuchets, catapults and battering rams are displayed in this area. Bonuses to manpower and additional supply reserves are also displayed here."
+	}
+}
+
+def BattleViewArmyStateTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_Buff/id_StatusBackground/tut_area"
+	//"UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_SquadStatuses/UIP_SquadStatus(Clone)"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewArmyStateTutorialMessage")
+	tooltip
+	{
+		caption = "Squad States"
+		text = "Each squad on the battlefield can benefit or suffer from a set of temporary states. For example, units are susceptible to retreating and fleeing while having low morale, but are also temporarily invigorated when seeing nearby enemies flee. This area also shows when a squad is retreating."
+	}
+}
+
+def BattleViewSquadClimbingTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_SquadTypeIcon/id_Ladder"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadClimbingTutorialMessage")
+	tooltip
+	{
+		caption = "Climbing"
+		text = "Squads take increased damage from enemies while climbing walls, making them vulnerable targets."
+	}
+}
+
+def BattleViewSquadAmongTreesTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_SquadTypeIcon/id_Forest"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadInForestTutorialMessage")
+	tooltip
+	{
+		caption = "Among trees"
+		text = "Squads situated in wooded areas are well defended against incoming archer volleys.{p}Cavalry squads also deal reduced damage, while fighting among trees.{p}Trebuchets and catapults cannot deploy and shoot while they are among trees."
+	}
+}
+
+def BattleViewSquadRetreatingTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_RetreatIcon"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadRetreatingTutorialMessage")
+	tooltip
+	{
+		caption = "Retreating Squads"
+		text = "A squad may retreat, once it starts losing troops and takes a hit to its morale. Retreating squads will eventually return to the battlefield, but can't be controlled while they are running away."
+	}
+}
+
+def BattleViewSquadFleeingTutorialHotspot : TutorialHotspot
+{
+	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_FleeingIcon"
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewSquadFleeingTutorialMessage")
+	tooltip
+	{
+		caption = "Fleeing Squads"
+		text = "A squad will flee once it loses too much morale and takes too many casualties. Fleeing squads are no different than dead ones, since you have no control over them for the remainder of the battle."
+	}
+}
+
+def BattleViewIncomingReinforcementsTutorialHotspot : TutorialHotspot
+{
+	path_mask = ""
+	force_visible = (ui.tutorial_message.message_def_id == "BattleViewIncomingReinforcementsTutorialMessage")
+	tooltip
+	{
+		caption = "Incoming Reinforcements"
+		text = "Armies which are close-by in the world may arrive at any time during the battle and support either side. The progress bar underneath the reinforcing army leader's portrait indicates how soon the reiforcements will arrive."
+	}
+}
+
+// ----------------------------
+// ---------- DEBUG -----------
+// ----------------------------
+
+// for debugging (see all tutorial hotspots with Ctrl)
+def AnyTutorialHotspot : TutorialHotspot
+{
+	visible = (ctrl)
+	path_mask = "*"
+	//highlight_prefab : highlight_prefab_seen
+	highlight_prefab_seen : highlight_prefab
+	tooltip
+	{
+		text = "{TutorialHotspot.tooltip.text:alt}"
+	}
+}
+
+// DO NOT ADD ANY DEFS BELLOW THIS LINE!

@@ -1,0 +1,1151 @@
+﻿template Upgrade : Building
+{
+	bool is_upgrade = true
+	
+	ai_eval = 2000
+	
+	texts
+	{
+		build_prompts
+		{
+			text Available = "Click to make {building}." //" It will appear in each {building.upgrade_of} in our kingdom."
+			text NoParentNoRequirements = "{availability_color}Requirements and prerequisites are not met.{/availability_color}"
+			text NoRequirements = "{availability_color}Requirements are not met.{/availability_color}"
+			text NoParent = "{availability_color}We don't have the prerequisites for {building.name}.{/availability_color}"
+			text AnotherBuildInProgress = "We must first finish upgrading[ {kingdom.upgrading_in_same_district}]."
+			text UnderConstruction = "We are currently upgrading {building}."
+			text CannotAfford = "We lack the resources for {building}."
+			text AlreadyBuilt = "{availability_color}{q}{building.name}{q} upgrade is now available in every {building.upgrade_of} in our kingdom.{/availability_color}"
+		}
+	}
+	
+	availability_texts
+	{
+		text Available_1 = "We have {availability_color}{name}{/availability_color} in {availability_castle_1}."
+		text Available_2 = "We have {availability_color}{name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text Available_3 = "We have {availability_color}{name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text Available_many = "We have {availability_color}{name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text Available_all = "We have {availability_color}{name}{/availability_color} in all of our our provinces."
+		
+		text DirectlyObtainable_1 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1}."
+		text DirectlyObtainable_2 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text DirectlyObtainable_3 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text DirectlyObtainable_many = "We can make {availability_color}{name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text DirectlyObtainable_all = "We can make {availability_color}{name}{/availability_color} in all of our our provinces."
+		
+		text IndirectlyObtainable_1 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1}, but we need to develop other provinces first."
+		text IndirectlyObtainable_2 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to develop other provinces first."
+		text IndirectlyObtainable_3 = "We can make {availability_color}{name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to develop other provinces first."
+		text IndirectlyObtainable_many = "We can make {availability_color}{name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to develop other provinces first."
+		text IndirectlyObtainable_all = "We can make {availability_color}{name}{/availability_color} in all of our our provinces, but we need to develop some provinces first."
+		
+		text Impossible_0 = "We cannot make {availability_color}{name}{/availability_color} in any of our provinces."
+		text Impossible_1 = "We could make {availability_color}{name}{/availability_color} in {availability_castle_1}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_2 = "We could make {availability_color}{name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_3 = "We could make {availability_color}{name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to gain access to resources outside our kingdom first."
+		text Impossible_many = "We could make {availability_color}{name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to gain access to resources outside our kingdom first."
+		text Impossible_all = "We could make {availability_color}{name}{/availability_color} in all of our our provinces, but we need to gain access to resources outside our kingdom first."
+	}
+	
+}
+
+//-------------------------------------- SHARED
+
+def Warehouse : Upgrade
+{
+	name = "Warehouses"
+	flavor = "A storing facility, used for stockpiling local and foreign trade goods."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Warehouse.tga:UI_Structure_Icon_Warehouse#2" //GUID:b230f0f3048f7dd4a854b834ef4e3bcc
+}
+
+def Docks : Upgrade
+{
+	name = "Docks"
+	flavor = "Docks can facilitated the needs of smaller ships and boats, usually owned by local traders and fishermen."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Docks.tga:UI_Structure_Icon_Docks#2" //GUID:29d9ce69ba8901341b6dc069b84778b4
+}
+
+def Butcher : Upgrade
+{
+	name = "Butchers"
+	flavor = "Deals with cutting and preparing fresh meat from the province's livestock."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SheepButcher.tga:UI_Structure_Icon_SheepButcher#2" //GUID:44fd3294a11c3934e9bb83007ff634db
+}
+
+def Tannery : Upgrade
+{
+	name = "Tanneries"
+	flavor = "Tanning animal skin and hides is needed for production of durable leather, having important civil and military usages."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SheepTannery.tga:UI_Structure_Icon_SheepTannery#2" //GUID:06e3eab09e8448b41ae14a7b3cbb9387
+}
+
+def MinersShacks : Upgrade
+{
+	name = "Miner's Shacks"
+	flavor = "Additional structures for the miners, allowing them to rest on site and work longer in the mines."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MinersShack.tga:UI_Structure_Icon_MinersShack#2" //GUID:977fe60d84ef8a7408c5f46f2d0d2f7b
+}
+
+def Machinery : Upgrade
+{
+	name = "Machinery"
+	flavor = "Equipment for heavy-duty work, boosting constructions throughout the province."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Machinery.tga:UI_Structure_Icon_Machinery#2" //GUID:40c271a5f5fbb9c45a319f21644484a5
+}
+
+// def Minthouse : Upgrade
+// {
+// 	name = "Mint House"
+// 	flavor = "A facility if great importance, dedicated to manufatrucing coins bearing the silhouettes of important historical figures."
+
+// 	production
+// 	{
+// 		All { gold = 1 }
+// 		Town { trade = 2 }
+// 	}
+
+// 	cost = "3500g 3000h"
+// }
+
+def Artillery : Upgrade
+{
+	name = "Artillery"
+	flavor = "Massive cannons capable of wreaking havoc to any types of opposing force. Firepower of such magnitude puts fear into the hearts of all who stand before it."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Artillery_Castles.tga:UI_Structure_Icon_Artillery_Castles#2" //GUID:3caeabc415e84d04bb10f792b84783ac
+	
+	ai_category = "Military"
+}
+
+def Fletcher : Upgrade
+{
+	name = "Fletchers"
+	flavor = "Fletchers are skilled in crafting arrows and balancing them aerodynamically for distant and precise shots."
+	add_tooltip = "{blt} Enables recruiting {clr:enables_color}light ranged units{/clr}{p}{blt} Required for training all {clr:enables_color}ranged units{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Fletcher.tga:UI_Structure_Icon_Fletcher#2" //GUID:c1b35e3e7d66cba43823afc781c63285
+	
+	ai_eval = 100000
+	ai_category = "Military"
+	ai_urgent = true
+}
+
+def WatchTowers : Upgrade
+{
+	name = "Watch Towers"
+	flavor = "Defensive structures on well-selected positions in settlements and other places throughout the province, hindering the advancement of enemy armies."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_WatchTowers.tga:UI_Structure_Icon_WatchTowers#2" //GUID:f0ab4cb600cc3c6449f4769c892d57bd
+	
+	ai_category = "Military"
+}
+
+// Churches
+
+def Orphanage : Upgrade
+{
+	name = "Orphanages"
+	flavor = "Thanks to the the care of the godly servants, orphans can grow and learn here, eventually becoming a functional members of the society."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Orphanage.tga:UI_Structure_Icon_Orphanage#2" //GUID:0a88027edc9065f43aa3b4e60c65b75b
+}
+
+def Schools : Upgrade
+{
+	name = "Schools"
+	flavor = "Basic education for the common folk is provided here, improving their profficiency in everyday life."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_School.tga:UI_Structure_Icon_School#2" //GUID:20b12f2617600e5428a7f1129c8d2558
+}
+
+def InkMaker : Upgrade
+{
+	name = "Ink Makers"
+	flavor = "Ink is made here by precise mixing of scarped carbon, gum, vinegar and various other components."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_InkMaker.tga:UI_Structure_Icon_InkMaker#2" //GUID:892cb53a2bd2e914091a00f8e31d4f1a
+}
+
+def SmallLibrary : Upgrade
+{
+	name = "Libraries"
+	flavor = "A small establishment run by hard-working scholars and holy men, providing enlightenment to the local population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SmallLibrary_Christian.tga:UI_Structure_Icon_SmallLibrary_Christian#2" //GUID:12bdc99ce0dd0de4c81e1ecd13295cde
+}
+
+def Aqueduct : Upgrade
+{
+	name = "Aqueducts"
+	flavor = "Massive watering channels passing above and below ground. This architectural marvel provides fresh flowing water to the people, improving hygiene and satisfying most basic needs."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Aqueaduct_Christian.tga:UI_Structure_Icon_Aqueaduct_Christian#2" //GUID:876bc9e86254f134387cc637c77caf64
+}
+def PublicBaths : Upgrade
+{
+	name = "Public Baths"
+	flavor = "A gathering place for relaxation, gossip and plotting."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_PublicBaths_Muslim.tga:UI_Structure_Icon_PublicBaths_Muslim#2" //GUID:5f673ce71c628bc4494b8953a930c28a
+}
+
+def LargeHouses : Upgrade
+{
+	name = "Large Houses"
+	flavor = "Bigger and sturdier dwellings, which greatly increase the housing capacity of a town."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_LargeHouses_Christian.tga:UI_Structure_Icon_LargeHouses_Christian#2" //GUID:3c2c4d29dba3841448c8bb5ddc928bbe
+	ai_eval = 10000
+}
+
+def AuctionMarket : Upgrade
+{
+	name = "Auction Markets"
+	flavor = "Central markets in large towns, where common people are free to sell all kinds of goods - handcrafted items, foods, livestock, furniture - one can find everything there."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_AuctionMarket.tga:UI_Structure_Icon_AuctionMarket#2" //GUID:d587d6a403fe28344a5a0221d6e52b3a
+}
+
+//-------------------------------------- Cathedral
+def Apothecary : Upgrade
+{
+	name = "Apothecaries"
+	flavor = "Medicine is prepared here from various herbs and substances, providing the basic healthcare for the population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Apothecary.tga:UI_Structure_Icon_Apothecary#2" //GUID:20f8ad457b409e44db2589d9739ea4dd
+}
+
+def Hospital : Upgrade
+{
+	name = "Hospitals"
+	flavor = "A large scale healthcare establishment, improving the province's life expectancy and the general well-being of the population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Hospital.tga:UI_Structure_Icon_Hospital#2" //GUID:c654cc32eb9f489429550e17125c688c
+}
+
+
+
+def ArtsSchool : Upgrade
+{
+	name = "Art Schools"
+	flavor = "Finest arts are taught and practiced within this prestigious establishement."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ArtSchool.tga:UI_Structure_Icon_ArtSchool#2" //GUID:0f87d18486d8e2c44ac9fd51893ab403
+}
+
+//-------------------------------------- University
+def TranslatorsChambers : Upgrade
+{
+	name = "Translators Chambers"
+	flavor = "A place where scholars translate books of foreign language, to preserve and spread the culture and wisdom within the province."
+}
+
+def Observatory : Upgrade
+{
+	name = "Observatories"
+	flavor = "Observes and studies the stars and how astronomy can be used in navigation. Scholars here aid and guide the production of compasses."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Observatory_Christian.tga:UI_Structure_Icon_Observatory_Christian#2" //GUID:5cf6e91ddf4fdf04db5fc4285e2d7f94
+}
+
+def GreatLibrary : Upgrade
+{
+	name = "Great Library"
+	flavor = "Home of the greatest treasure of all - the knowledge of wisemen, studied and written century after century."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GreatLibrary_Christian.tga:UI_Structure_Icon_GreatLibrary_Christian#2" //GUID:1390fa707d52dc146b0d2d7a1d5fe991
+}
+
+def AlchemistLab : Upgrade
+{
+	name = "Alchemist Labs"
+	flavor = "A place of scientific exploration, aimed at discovering new materials by the means of transmutation. Black powder is one of the most useful compounds, produced here."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_AlchemistLab_Christian.tga:UI_Structure_Icon_AlchemistLab_Christian#2" //GUID:3a74c92b19f161c439176ad0dc09afe4
+}
+
+//-------------------------------------- Housing
+def Brothels : Upgrade
+{
+	name = "Brothels"
+	flavor = "Local businesses, often confined within in a single district, that provide intimacy and pleasures for men and women. These places are often shunned for their impure nature, yet persist in most well-developed town."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Brothels.tga:UI_Structure_Icon_Brothels#2" //GUID:0efbfef84845e9d40b81082f8d642252
+}
+
+def EnclosedGardens : Upgrade
+{
+	name = "Enclosed gardens"
+	flavor = "Well decorated inner gardens, providing delightful place for the larger families to rest, chat and play."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_EnclosedGardens.tga:UI_Structure_Icon_EnclosedGardens#2" //GUID:08e91ccd93cf90241b181025885e9903
+}
+
+//-------------------------------------- Flax Fields
+def OilPress : Upgrade
+{
+	name = "Oil Presses"
+	flavor = "Valuable oil is produced here, used in numerous spheres from cooking through arts to industry."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_OilPress.tga:UI_Structure_Icon_OilPress#2" //GUID:39c95ea985822b54fb0411f43c5566c1
+}
+
+def FlaxWeaver : Upgrade
+{
+	name = "Flax Weavers"
+	flavor = "Produces woven textiles and canvases, which can be used for strengthening army tents or as general construction materials."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FlaxWeaver.tga:UI_Structure_Icon_FlaxWeaver#2" //GUID:ec1d75644c5e9e849ad728e835329862
+}
+
+def CanvasMaker : Upgrade
+{
+	name = "Canvas Makers"
+	flavor = "Strong woven textiles and canvases are used in constructions, making tents, ship sails and many others."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CanvasMaker.tga:UI_Structure_Icon_CanvasMaker#2" //GUID:a3cc69c1bcdec8849be7621b6c381441
+}
+
+def Ropewalk : Upgrade
+{
+	name = "Ropewalks"
+	flavor = "Long flax strands are twisted together into ropes, used in constructions and supporting the sails of ships and boats in the province."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Ropework.tga:UI_Structure_Icon_Ropework#2" //GUID:8393e39aec234dc4b822f00a21066a12
+}
+
+//-------------------------------------- Herbal Gardens
+def HerbalistShacks : Upgrade
+{
+	name = "Herbalist Shacks"
+	flavor = "Buildings in the countryside where various gardening equipment is kept, needed for growing and gathering a wide plethora of herbs."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HerbalistShack.tga:UI_Structure_Icon_HerbalistShack#2" //GUID:f830b9ac955e7ec4e87cb680e1f2ac60
+}
+
+def Apiary : Upgrade
+{
+	name = "Apiaries"
+	flavor = "Small plots of land where beehives are kept and looked after. Bees are an essential source of delicious and healthy honey, while also providing beeswax."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Apiary.tga:UI_Structure_Icon_Apiary#2" //GUID:69fa254226671c64187841d7fe13ce34
+}
+
+def SpiceShop : Upgrade
+{
+	name = "Spice Shops"
+	flavor = "A shop where spices are dried, prepared, mixed and sold. The aroma of certain spices brings travelers from distant kingdoms, thus boosting trade within the province."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SpiceShop.tga:UI_Structure_Icon_SpiceShop#2" //GUID:604041d95b79e6d4b843a38e663f153f
+}
+
+def CandleMaker : Upgrade
+{
+	name = "Candle Makers"
+	flavor = "Candles are made here out of wax, for the various needs of religious ceremonies, scholars and common folk."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CandleMaker.tga:UI_Structure_Icon_CandleMaker#2" //GUID:5f68b43a0c3c2a34288ffb1cc95fb1e9
+}
+
+def DyeWorkshop : Upgrade
+{
+	name = "Dye Workshops"
+	flavor = "Various kinds of coloured pigments, that can be applied to clothes, glasswork and other items, are made here."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_DyeWorkshop.tga:UI_Structure_Icon_DyeWorkshop#2" //GUID:3704a008b2477f44ca960ebb27a1b11f
+}
+
+//-------------------------------------- Vineyards
+def SunDryingGrapes : Upgrade
+{
+	name = "Grape Sun Drying"
+	flavor = "Large drying racks exposed to the warm light of the sun, where excess yield of grapes are positioned to be turned into long-lasting raisins."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SunDryingGrapes.tga:UI_Structure_Icon_SunDryingGrapes#2" //GUID:000424e1da0aea34bae3fb216b403a17
+}
+
+def GrapePress : Upgrade
+{
+	name = "Grape Presses"
+	flavor = "Extracting juice from grapes is done before primary fermentation of the wine."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GrapePres.tga:UI_Structure_Icon_GrapePres#2" //GUID:fc8fc0b55240a2948bbeef298d7461ff
+}
+
+def Winery : Upgrade
+{
+	name = "Wineries"
+	flavor = "Winemakers prepare and properly store wine here, until it is well fermented, aged and ready for distribution."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Winery.tga:UI_Structure_Icon_Winery#2" //GUID:3cc82ec27b7085649841e606856fd774
+}
+
+def Distillery : Upgrade
+{
+	name = "Distilleries"
+	flavor = "A place where spirits are destilled for the enjoyment of the population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Distillery.tga:UI_Structure_Icon_Distillery#2" //GUID:273da72160732024ea50fd7af29364be
+}
+
+//-------------------------------------- Sheep
+def SpinningMill : Upgrade
+{
+	name = "Spinning Mills"
+	flavor = "Yarn, turned into wool, is valuable both for satisfying the needs of the local population and for trading purposes."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SpinningMill.tga:UI_Structure_Icon_SpinningMill#2" //GUID:d8283fbc63071f54f9da095376fde188
+}
+
+def Butcher_Sheep : Butcher
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SheepButcher.tga:UI_Structure_Icon_SheepButcher#2" //GUID:44fd3294a11c3934e9bb83007ff634db
+}
+
+def WoolWeaver : Upgrade
+{
+	name = "Wool Weavers"
+	flavor = "A varied assortment of garments is produced here, satisfying the local population's clothing needs."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_WoolWeaver.tga:UI_Structure_Icon_WoolWeaver#2" //GUID:fb0a19997a4d736439a3d46ab85b7fa9
+}
+
+def Tannery_Sheep : Tannery
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SheepTannery.tga:UI_Structure_Icon_SheepTannery#2" //GUID:06e3eab09e8448b41ae14a7b3cbb9387
+}
+
+def ParchmentMaker : Upgrade
+{
+	name = "Parchment Makers"
+	flavor = "Prepared skin is streched, smoothened and finally turned into parchment, ready for the scribes and scholars to write upon."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ParchmentMaker.tga:UI_Structure_Icon_ParchmentMaker#2" //GUID:17fc92f4db225c74396bb8e328c31b6a
+}
+
+//-------------------------------------- Cattle
+def CattleMarket : Upgrade
+{
+	name = "Cattle Markets"
+	flavor = "A market where draft oxen are sold to local farmers. These animals are essential for transporting stock and heavy shipments of foreign goods."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CattleMarket.tga:UI_Structure_Icon_CattleMarket#2" //GUID:6a72fccfed238f34b9e922acec732dd9
+}
+
+def Butcher_Cattle : Butcher
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CattleButcher.tga:UI_Structure_Icon_CattleButcher#2" //GUID:097ddaf3d3d196e4da040f43e14ad3de
+}
+
+def DairyShop : Upgrade
+{
+	name = "Dairy Shops"
+	flavor = "A place where fresh milk is turned into many types of dairy products, which are then prepared to be bought and sold."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_DairyShop.tga:UI_Structure_Icon_DairyShop#2" //GUID:3a963f927a22dfd4182353fbbec29fba
+}
+
+def Tannery_Cattle : Tannery
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CattleTannery.tga:UI_Structure_Icon_CattleTannery#2" //GUID:d3cbf9b65fafe114980c51ad93b78470
+}
+
+def SausageMaker : Upgrade
+{
+	name = "Sausage Makers"
+	flavor = "Flavoring and conservation of meat ensures that the local populaion will be well fed with delicious and diverse food throughout the year."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SausageMaker.tga:UI_Structure_Icon_SausageMaker#2" //GUID:85f2a2173b1fdf04c9048047086b5983
+}
+
+//-------------------------------------- Stud Farm
+def HorseMarket : Upgrade
+{
+	name = "Horse Markets"
+	flavor = "A place where well-trained horses are sold. Many of these specimens may end up as faithful companions to both farmers and highborn knights."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Horsemarket.tga:UI_Structure_Icon_Horsemarket#2" //GUID:5ea591ecbe4987b4497ab527b3458c10
+}
+
+def Farrier : Upgrade
+{
+	name = "Farriers"
+	flavor = "A craftsman, specialized in trimming and balancing horses' hooves, as well as placing shoes when necessary."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Farrier.tga:UI_Structure_Icon_Farrier#2" //GUID:b4d952b7238f7e148a1858ffd314cfa9
+}
+
+def SaddlersShop : Upgrade
+{
+	name = "Saddling Shops"
+	flavor = "Craftsmen specialized in making comfortable saddles, fit for long journeys and carrying more weight while riding."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SaddlersShop.tga:UI_Structure_Icon_SaddlersShop#2" //GUID:d82e69dff50048049aec3441fb5eae73
+}
+
+def WarhorseBreed : Upgrade
+{
+	name = "Warhorse Breeds"
+	flavor = "Finest destriers are bred within the province, enabling the establishment of war stables throughout the kingdom."
+	//add_tooltip = "Enables {clr:enables_color}elite cavalry{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_WarhorseBreed.tga:UI_Structure_Icon_WarhorseBreed#2" //GUID:f1a9e3416c6845b42920bc3d197510e2
+}
+
+//-------------------------------------- Woodworking
+def Sawmill : Upgrade
+{
+	name = "Sawmills"
+	flavor = "Processed wooden material is needed for construction of furniture, buildings, machinery and many other."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Sawmill.tga:UI_Structure_Icon_Sawmill#2" //GUID:6e5d9b9e1ff5d7946a2c7619a9e10f78
+	
+	battleview_type = "Props/Machinery"
+}
+
+def TarPit : Upgrade
+{
+	name = "Tar Pits"
+	flavor = "Tar, made from dark wood, is used for crafting, constructing and repairing roads and buildings, as well as a water repellent coating for boats and roofs."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TarPit.tga:UI_Structure_Icon_TarPit#2" //GUID:74fa78491891b4342893395d7e2ed852
+}
+
+def ColliersKiln : Upgrade
+{
+	name = "Collier Kilns"
+	flavor = "Charcoal burning produces high temperatures and is valuable for production process like glassworking, smelting and others."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ColliersKiln.tga:UI_Structure_Icon_ColliersKiln#2" //GUID:ab72a12a73dc590468eac451afb7aaea
+}
+
+def CoopersShop : Upgrade
+{
+	name = "Cooper workshops"
+	flavor = "All kinds of wooden containers are made here, useful in storaging and transportation of goods."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CoopersWorkshop.tga:UI_Structure_Icon_CoopersWorkshop#2" //GUID:8c3698617bfb41a4ab1a07acaaa94610
+}
+
+def Glassworks : Upgrade
+{
+	name = "Glassworks"
+	flavor = "The forest glass is a much desired commodity, used both for basic needs and the famous stained-glass artworks."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Glassworks.tga:UI_Structure_Icon_Glassworks#2" //GUID:4d28a1f17e212d046911d9ca3353ee39
+}
+
+def MasterJoiner : Upgrade
+{
+	name = "Master Joiners"
+	flavor = "Master joiners are skillful artisan, who craft fine and sometimes ornameted furniture and woodwork for the households."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MasterJoiner.tga:UI_Structure_Icon_MasterJoiner#2" //GUID:e6dc5ec74def63e45a58e0eeff4cffad
+}
+
+//-------------------------------------- Harbor
+def Docks_Harbor : Docks
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Docks.tga:UI_Structure_Icon_Docks#2" //GUID:29d9ce69ba8901341b6dc069b84778b4
+}
+
+def Warehouse_Harbor : Warehouse
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Warehouse.tga:UI_Structure_Icon_Warehouse#2" //GUID:b230f0f3048f7dd4a854b834ef4e3bcc
+}
+
+def FishMarket : Upgrade
+{
+	name = "Fish Markets"
+	flavor = "Specialized market, where fish and other sea food are sold, fresh or dried."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FishMarket.tga:UI_Structure_Icon_FishMarket#2" //GUID:8b574e02848b7d14e9cd5d528274883b
+}
+
+//-------------------------------------- Pirate Haven
+def FilthyTavern : Upgrade
+{
+	name = "Filthy Taverns"
+	flavor = "An ill-reputed place, where necessary arrangements with the shadier echelons of the society can be made."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_FilthyTavern.tga:UI_Structure_Icon_FilthyTavern#2" //GUID:e58912e5875f58549b9a336964d392f3
+}
+
+def HostagesTower : Upgrade
+{
+	name = "Hostage Towers"
+	flavor = "Heavily guarded towers where prisoners of war are locked up, questioned and when the situation requires it - even tortured. These looming forts increase the capacity of a kingdom's dungeon for important prisoners."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HostagesTower.tga:UI_Structure_Icon_HostagesTower#2" //GUID:ecbf87bc7edad0a469a590ca805031e8
+}
+
+def SlaveMarket : Upgrade
+{
+	name = "Slave Markets"
+	flavor = "A place where slaves from within the kingdom and beyond are sold to landowners and prominent knights."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SlaveMarket.tga:UI_Structure_Icon_SlaveMarket#2" //GUID:fec205ac82faeea4e965792de74e480a
+}
+
+//-------------------------------------- Admiralty
+def Cartographer : Upgrade
+{
+	name = "Cartographers"
+	flavor = "Cartography plays an important role in improving seaborne trade and the navigational capabilities of a kingdom's fleets."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Cartographer.tga:UI_Structure_Icon_Cartographer#2" //GUID:d75e56d43347b354283dc227ec2f6f23
+}
+
+def CoastalGuards : Upgrade
+{
+	name = "Coastal Guards"
+	flavor = "Province guards stationed along the coastline, safeguarding the realm's against incoming hostile ships."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CoastalGuards.tga:UI_Structure_Icon_CoastalGuards#2" //GUID:500e10b9ef56e1a4b91ea048f4de5b27
+}
+
+def Artillery_Ships : Artillery
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Artillery_Castles.tga:UI_Structure_Icon_Artillery_Castles#2" //GUID:3caeabc415e84d04bb10f792b84783ac
+}
+
+//-------------------------------------- Shipyard
+def WoodenCrane : Upgrade
+{
+	name = "Wooden Cranes"
+	flavor = "Massive wooden contraptions used to elevate and lower heavy objects, mostly during big constructions."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_WoodenCrane.tga:UI_Structure_Icon_WoodenCrane#2" //GUID:1bc9ffed750814c4e915e817af0fea63
+}
+
+def SailMaker : Upgrade
+{
+	name = "Sailmakers"
+	flavor = "Craftsmen adept in producing and distributing cloth sails for all ships in the realm."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SailMaker.tga:UI_Structure_Icon_SailMaker#2" //GUID:858d0dbecfc34774a9bc860187afcad6
+}
+
+def ShipJoiner : Upgrade
+{
+	name = "Ship Joiners"
+	flavor = "Ship joiners are skillful artisans who craft fine and sturdy sails, able to withstand strong winds and numerous voyages."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ShipJoiner.tga:UI_Structure_Icon_ShipJoiner#2" //GUID:b7a1c2b8a7be61043a31bcfc1d6fbdfc
+}
+
+//-------------------------------------- Trade Port
+def TradeCompanies : Upgrade
+{
+	name = "Trade Companies"
+	flavor = "Organizations, owned and governed by local merchants with the blessing of the ruler, aimed at overseeing and maintaining proper trade within kingdom."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TradeCompanies.tga:UI_Structure_Icon_TradeCompanies#2" //GUID:c829e1d9c1f559b46aa6169c2982aa1c
+}
+
+def Expeditions : Upgrade
+{
+	name = "Expeditions"
+	flavor = "Long-lasting voyages led by experienced sailors. These explorers often enter uncharted waters, in hope of finding vast and fertile lands and native people to trade with or enslave."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Expeditions.tga:UI_Structure_Icon_Expeditions#2" //GUID:bfbd557f80b074b4e9ce7c049c950c14
+}
+
+def TradeColonies : Upgrade
+{
+	name = "Trade Colonies"
+	flavor = "Trade outposts, that provide valuable exotic goods from distant shores across the seas."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TradeColonies.tga:UI_Structure_Icon_TradeColonies#2" //GUID:8df24f9fc35857442b06461a179e81a5
+}
+
+//--------------------------------------- HillFort
+def WatchTowers_HillFort : WatchTowers
+def Fletcher_HillFort : Fletcher
+
+def MountainHamlet : Upgrade
+{
+	name = "Mountain Hamlets"
+	flavor = "Small settlements high up the mountains, usually inhabited by few people and plentiful livestock."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MountainHamlets.tga:UI_Structure_Icon_MountainHamlets#2" //GUID:7fc7ffb1a26220b4fa2625569dda56ff
+}
+
+def MountainPassGuard : Upgrade
+{
+	name = "Mountain Pass Guards"
+	flavor = "Regular patrols watching over the narrowest passages in the mountains, ready to delay greatly any invasion through their border defenses."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MountainPassGuards.tga:UI_Structure_Icon_MountainPassGuards#2" //GUID:4db8cfeb5d63bfa4b97e9b1232dab538
+}
+
+
+//-------------------------------------- Barracks
+def TownGuardsQuarters : Upgrade
+{
+	name = "Townguards Quarters"
+	flavor = "Well trained soldiers, stationed in the town and best prepared for siege defenses."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TownGuardsQuarters.tga:UI_Structure_Icon_TownGuardsQuarters#2" //GUID:aad5edb51f1398f4fb75c0a35fccd4ce
+	ai_category = "Military"
+}
+
+def Fletcher_Barracks : Fletcher
+
+def Swordsmith : Upgrade
+{
+	name = "Swordsmiths"
+	flavor = "Craftsmen, specialized in smithing and maintaining making swords and other sharp bladed weapons for the army."
+	add_tooltip = "{blt} Enables recruiting {clr:enables_color}light infantry units{/clr}{p}{blt} Required for recruiting some {clr:enables_color}heavy and elite units{/clr}"
+	
+	ai_eval = 100000
+	ai_category = "Military"
+	ai_urgent = true
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Swordsmith.tga:UI_Structure_Icon_Swordsmith#2" //GUID:15d552513c94d3c49b3cf66bcd072f3f
+}
+
+def Spearmaker : Upgrade
+{
+	name = "Spearmakers"
+	flavor = "Blacksmiths, specialized in making spear, halberds, voulges, bardiches and all kinds of polearms for the army."
+	add_tooltip = "{blt} Enables recruiting {clr:enables_color}light defense units{/clr}{p}{blt} Required for recruiting some {clr:enables_color}heavy and elite units{/clr}"
+	
+	ai_eval = 10000
+	ai_category = "Military"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Spearmaker.tga:UI_Structure_Icon_Spearmaker#2" //GUID:f9973485f39760f4c990b20bdfab14e6
+}
+
+def SiegeWorkshop : Upgrade
+{
+	name = "Siege Workshops"
+	flavor = "Here siege engines and machinery is crafted, useful for both offensive and defensive purposes."
+	add_tooltip = "{blt} Enables constructing {clr:enables_color}siege equipment{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SiegeWorkshop.tga:UI_Structure_Icon_SiegeWorkshop#2" //GUID:3dfcde2af650e3c4f8fd226978f3c7c7
+	
+	ai_category = "Military"
+}
+
+def Stables : Upgrade
+{
+	name = "Stables"
+	flavor = "A place where draft horses and destriers are kept and trained, mainly for military purposes."
+	add_tooltip = "{blt} Required for recruiting horse-riding {clr:enables_color}non-elite cavalry units{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Stables.tga:UI_Structure_Icon_Stables#2" //GUID:ba622a2149238b04ca40b0d5f3290e24
+	
+	ai_category = "Military"
+	ai_eval = 20000
+}
+
+//-------------------------------------- Royal Armory
+def MasterWeaponsmith : Upgrade
+{
+	name = "Master Weaponsmiths"
+	flavor = "The finest blacksmiths, specialized in crafting the deadliest weapons for the elite army divisions."
+	add_tooltip = "{blt} Required for recruiting some {clr:enables_color}elite units{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MasterWeaponsmith.tga:UI_Structure_Icon_MasterWeaponsmith#2" //GUID:c1c628dc6ccb2bd439baa798109964e4
+	
+	ai_category = "Military"
+	ai_eval = (kingdom.HeavyArmorsmith and 5000)
+}
+
+def HeavyArmorsmith : Upgrade
+{
+	name = "Heavy Armorsmiths"
+	flavor = "Craftsmen, skilled both in working with steel and leather, create durable armor for elite soldiers, that will protect their bodies in combat, but also allow freedom of movement."
+	add_tooltip = "{blt} Required for recruiting all {clr:enables_color}heavy units{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HeavyArmorsmith.tga:UI_Structure_Icon_HeavyArmorsmith#2" //GUID:030c2f107d4cd2f489ce015e72e48cb6
+	
+	ai_category = "Military"
+	ai_eval = 100000
+	ai_urgent = true
+}
+
+def MasterArmorer : Upgrade
+{
+	name = "Master Armorers"
+	flavor = "Highly skilled smiths, renowned for their expertise in creating armors fit to be worn by kings."
+	add_tooltip = "{blt} Required for recruiting some {clr:enables_color}elite units{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MasterArmorer.tga:UI_Structure_Icon_MasterArmorer#2" //GUID:72624043deeac5041bbc0f0385a8ea84
+	
+	ai_category = "Military"
+	ai_eval = (kingdom.HeavyArmorsmith and 5000)
+}
+
+def WarStables : Upgrade
+{
+	name = "War Stables"
+	flavor = "Finest destriers are bred within the province, enabling the establishment of war stables throughout the kingdom."
+	add_tooltip = "{blt} Required for recruiting {clr:enables_color}elite cavalry{/clr}"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_WarStables.tga:UI_Structure_Icon_WarStables#2" //GUID:4614b122faea18e4582c4fdd671c9e5a
+	
+	ai_category = "Military"
+	ai_eval = (kingdom.HeavyArmorsmith and 5000)
+}
+
+//-------------------------------------- Lords Castles
+def WatchTowers_Castles : WatchTowers
+
+def Fiefs : Upgrade
+{
+	name = "Fiefs"
+	flavor = "Governing by granting property and rights to the local landlords in exchange of their feudal allegiance and fees, as well as troops when the kingdom demands such."
+	add_tooltip = "{blt} {clr:enables_color}Militia Troops{/clr} start at rank 1 and cost no gold"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Fiefs.tga:UI_Structure_Icon_Fiefs#2" //GUID:6304b7fdaa6660b4da0056f269f95e6e
+	
+	ai_category = "Military"
+}
+
+def CastleGuards : Upgrade
+{
+	name = "Castle Guards"
+	flavor = "Organizes local armed forces, mustering a sizable defensive force in case of siege battles."
+	add_tooltip = "{blt} Province guards are improved"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TowerGarrison.tga:UI_Structure_Icon_TowerGarrison#2" //GUID:934d84115387b6b4d887e68cd7d035ab
+	
+	ai_category = "Military"
+}
+
+def LargeKeeps : Upgrade
+{
+	name = "Large Keeps"
+	flavor = "Large defensive structures and training grounds in keeps, increasing the overall capabilities of defense and mobilization in a province."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_LargeKeeps.tga:UI_Structure_Icon_LargeKeeps#2" //GUID:43a06b9711163d743be12ec9fcfc18b4
+	
+	ai_category = "Military"
+}
+
+def Artillery_Castles : Artillery
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Artillery_Castles.tga:UI_Structure_Icon_Artillery_Castles#2" //GUID:3caeabc415e84d04bb10f792b84783ac
+}
+
+//-------------------------------------- Royal Palace
+def QueensChambers : Upgrade
+{
+	name = "Queens Chambers"
+	flavor = "A large section of a royal palace, dedicated to the queen and her maidens."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_QueensChambers.tga:UI_Structure_Icon_QueensChambers#2" //GUID:688d01ac4fc5a4a4b9d5f48dcefe04c9
+}
+
+def Harem : Upgrade
+{
+	name = "Harems"
+	flavor = "Part of a palace, reserved for wives, concubines, and female servants of a Muslim ruler."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Harem.tga:UI_Structure_Icon_Harem#2" //GUID:ae8402254307a7f4098696e418aac98e
+}
+
+def RoyalGuardQuarters : Upgrade
+{
+	name = "Royal Guard Quarters"
+	flavor = "A place where only to most elite soldiers reside and train, in order to ensure the safety of the ruler and the royal palace."
+	add_tooltip = "{blt} Province guards are improved"
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CastleGuards.tga:UI_Structure_Icon_CastleGuards#2" //GUID:38c0caaaf283f9340b3e7b3ae563cef2
+}
+
+def GreatHall : Upgrade
+{
+	name = "Great Halls"
+	flavor = "Large and luxurious hall in the palace, where royal events are held, as well as important diplomatic and political meetings."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GreatHall.tga:UI_Structure_Icon_GreatHall#2" //GUID:a64410b9eab08f9468d2a9b25c25a69a
+}
+
+def SeatOfPower : Upgrade
+{
+	name = "Seats of Power"
+	flavor = "Imporant matters of the kingdom are discussed and resolved here, making this region central and important for the kingdom."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_SeatOfPower.tga:UI_Structure_SeatOfPower#2" //GUID:4526383ba2086e64489e205d53c46a93
+}
+
+//-------------------------------------- Market Square
+def ScribesOffice : Upgrade
+{
+	name = "Scribe Offices"
+	flavor = "Scribes are responsible for the paperwork and documentation in complex processes."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ScribesOffice.tga:UI_Structure_Icon_ScribesOffice#2" //GUID:ab3dc5b23bf99a640b72192498cf76f5
+}
+
+def Inns : Upgrade
+{
+	name = "Inns"
+	flavor = "A place of enjoyment for common folk, providing sleeping quarters for travellers and foreign workers as well."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Inn.tga:UI_Structure_Icon_Inn#2" //GUID:5bde00c2b33c2d046a05e1b6b9afd9c4
+}
+
+def TaxCollector : Upgrade
+{
+	name = "Tax Collectors"
+	flavor = "Tax collectors are tasked with the important job of collecting tithes from the province's population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TaxCollector.tga:UI_Structure_Icon_TaxCollector#2" //GUID:e4ec19cd3c4edcd4892279046cdbab7f
+}
+
+def Courthouse : Upgrade
+{
+	name = "Courthouses"
+	flavor = "Laws and justice play important role in establishing local stability and prosperity."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Courthouse.tga:UI_Structure_Icon_Courthouse#2" //GUID:a7c06507759412748ab3924c1442da94
+}
+
+//-------------------------------------- Village Militia
+def TrainingGrounds : Upgrade
+{
+	name = "Training Grounds"
+	flavor = "Basic combat training is done in the training grounds, aiming to prepare the ordinary villagers and citizens to defend themselves and their lands in direst situations."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TrainingGrounds.tga:UI_Structure_Icon_TrainingGrounds#2" //GUID:6caccb91ab7d8fc42bbc38d4a4b31aa1
+}
+
+def TownWatch : Upgrade
+{
+	name = "Town Watches"
+	flavor = "Organizes local armed forces. Offers basic defense against unexpected attacks."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TownWatch.tga:UI_Structure_Icon_TownWatch#2" //GUID:1a6e044b6de38554087fc06118a5bc99
+}
+
+//-------------------------------------- RiverTrade
+
+def Docks_RiverTrade : Docks
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Docks.tga:UI_Structure_Icon_Docks#2" //GUID:29d9ce69ba8901341b6dc069b84778b4
+}
+
+def AnglersHuts : Upgrade
+{
+	name = "Anglers Huts"
+	flavor = "Small buildings near the river banks, facilitating the tools and needs of local fishermen."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_AnglersHuts.tga:UI_Structure_Icon_AnglersHuts#2" //GUID:ec4ef67c8cfe39148b09a9a8148a6ead
+}
+
+def Warehouse_RiverTrade : Warehouse
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Warehouse.tga:UI_Structure_Icon_Warehouse#2" //GUID:b230f0f3048f7dd4a854b834ef4e3bcc
+}
+
+def Boatwright : Upgrade
+{
+	name = "Boatwrights"
+	flavor = "Artisans, skilled in making traditional wooden boats, suitable for fishing, river trade and transportation."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Boatwright.tga:UI_Structure_Icon_Boatwright#2" //GUID:1d8cc853c74c3e841819762aac0b7f59
+}
+
+//-------------------------------------- Artisans Square
+def ShoemakersShop : Upgrade
+{
+	name = "Shoemaking Shops"
+	flavor = "An atelier where fine boots are produced from finest leather and furs."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ShoemakersShop.tga:UI_Structure_Icon_ShoemakersShop#2" //GUID:76d2b91679ac2fe4587cba83dc565d53
+}
+
+def JewellersShop : Upgrade
+{
+	name = "Jewellery Shops"
+	flavor = "An atelier for artisans, crafting and selling gorgeous jewellery, made by gemstones and precious metals."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_JewelersShop.tga:UI_Structure_Icon_JewelersShop#2" //GUID:9185e5623a14dea469507f5935b3f922
+}
+
+def TailorsShop : Upgrade
+{
+	name = "Tailoring Shops"
+	flavor = "An atelier where tailors practice their craft, sewing clothes for the population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TailorsShop.tga:UI_Structure_Icon_TailorsShop#2" //GUID:a48e5f3bbb187854d9d6e111f03ed3a2
+}
+
+def RugsWeaver : Upgrade
+{
+	name = "Rug Weavers"
+	flavor = "Beautiful warm carpets are produced here, making the local home cosier and being a desired trade good."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_RugsWeaver.tga:UI_Structure_Icon_RugsWeaver#2" //GUID:43d5f1aab7bd9a44c8cd7e6cb4cb40e4
+}
+
+//-------------------------------------- Merchants Guild
+def TownsCharter : Upgrade
+{
+	name = "Town Charters"
+	flavor = "Focusing on enlargment of the villages and towns significantly boosts the development of the provinces."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TownCharter.tga:UI_Structure_Icon_TownCharter#2" //GUID:5d4e66b004f11f740affa084800c3c5d
+}
+
+def Muhtasib : Upgrade
+{
+	name = "Muhtasibs"
+	flavor = "Muhtasibs are given authority, men and resources for the local development of bazaars and trade, as well as to ensure that public businesses follow the law accordingly."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Muhtasib.tga:UI_Structure_Icon_Muhtasib#2" //GUID:09c50291e4bda8044bfd932acf223896
+}
+
+def TradeFair : Upgrade
+{
+	name = "Trade Fairs"
+	flavor = "Where delicious food and beverages are abundant, fairs provide enjoyment for the common folk and more gold to be collected from taxes."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TradeFair.tga:UI_Structure_Icon_TradeFair#2" //GUID:cd206de1574d3924db5bb29a778dee70
+}
+
+def Caravanserai : Upgrade
+{
+	name = "Caravanserai"
+	flavor = "A gathering place for traveling traders, where exotic stock is exchanged and commerce flourishes."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Caravanserai.tga:UI_Structure_Icon_Caravanserai#2" //GUID:be0adee6b3adc8d409d9ef1f1c5f9e31
+}
+
+def Bazaar : Upgrade
+{
+	name = "Bazaars"
+	flavor = "Enclosed markets, colorful and lively, filled with shops for various exotic and exquit items, like jewellery, fine clothes and textiles and others."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Bazaar.tga:UI_Structure_Icon_Bazaar#2" //GUID:f616d105efd5c30478402db4086cab33
+}
+
+def MerchantBank : Upgrade
+{
+	name = "Merchant Banks"
+	flavor = "Merchants and bankers are eager to help funding expensive financial endevours like grain production and trade, distant expedions and others. For a small percentage of the profit, of course."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Bank.tga:UI_Structure_Icon_Bank#2" //GUID:f5699328036c94945ac67f553cc88a14
+}
+
+def AuctionMarket_Christian : AuctionMarket
+def AuctionMarket_Muslim : AuctionMarket
+
+//-------------------------------------- Church
+def InkMaker_Christian : InkMaker
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_InkMaker.tga:UI_Structure_Icon_InkMaker#2" //GUID:892cb53a2bd2e914091a00f8e31d4f1a
+}
+def InkMaker_Muslim : InkMaker
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_InkMaker.tga:UI_Structure_Icon_InkMaker#2" //GUID:892cb53a2bd2e914091a00f8e31d4f1a
+}
+def InkMaker_Pagan : InkMaker
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_InkMaker.tga:UI_Structure_Icon_InkMaker#2" //GUID:892cb53a2bd2e914091a00f8e31d4f1a
+}
+
+def SmallLibrary_Christian : SmallLibrary
+def SmallLibrary_Muslim : SmallLibrary
+def SmallLibrary_Pagan : SmallLibrary
+
+
+def ChristianCeremonies : Upgrade
+{
+	name = "Ceremonies"
+	flavor = "Holy Christian rituals from daily prayers and confessions to grand annual celebrations and traditions."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Ceremonies_Christian.tga:UI_Structure_Icon_Ceremonies_Christian#2" //GUID:44b8eb3c5c9d4fe479f6c7d25fe0ceb7
+}
+
+def MuslimCeremonies : Upgrade
+{
+	name = "Ceremonies"
+	flavor = "Traditional Isliamic rituals and practices, from Shahada and burials to the daily performances of Salah."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Ceremonies_Muslim.tga:UI_Structure_Icon_Ceremonies_Muslim#2" //GUID:30d6198a43515ae40a4c5ed6dd09a826
+}
+
+def PaganCeremonies : Upgrade
+{
+	name = "Rituals"
+	flavor = "Holy rituals done to gain the favor of the gods, usually performed with hopes of rain, health, fertility and victory in battles."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Ceremonies_Pagan.tga:UI_Structure_Icon_Ceremonies_Pagan#2" //GUID:7b5108a141de04d468ad59de4858b120
+}
+
+//-------------------------------------- Cathedral
+def Apothecary_Christian : Apothecary
+def Apothecary_Muslim : Apothecary
+def Apothecary_Pagan : Apothecary
+
+def Orphanage_Christian : Orphanage
+def Orphanage_Muslim : Orphanage
+
+def Hospital_Christian : Hospital
+def Hospital_Muslim : Hospital
+
+def Schools_Christian : Schools
+def Schools_Muslim : Schools
+
+def ArtsSchool_Christian : ArtsSchool
+def ArtsSchool_Muslim : ArtsSchool
+
+def ChristianDecoration : Upgrade
+{
+	name = "Decorations"
+	flavor = "Luxurious decorations, pleasing the eyes and warming the souls."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Decoration_Christian.tga:UI_Structure_Icon_Decoration_Christian#2" //GUID:ca40c9ffeff5f2c4daaf0226d19f62ce
+}
+
+def MuslimDecoration : Upgrade
+{
+	name = "Decorations"
+	flavor = "Luxurious decorations, pleasing the eyes and warming the souls."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Decoration_Muslim.tga:UI_Structure_Icon_Decoration_Muslim#2" //GUID:33ad899dfe033914aa9e2814b61bafc0
+}
+
+//-------------------------------------- University
+def TranslatorsChambers_Christian : TranslatorsChambers
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TranslatorsChambers_Christian.tga:UI_Structure_Icon_TranslatorsChambers_Christian#2" //GUID:05ac8eaad77ef524dbcb7b5f93b1ccf7
+}
+def TranslatorsChambers_Muslim : TranslatorsChambers
+{
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_TranslatorsChambers_Christian.tga:UI_Structure_Icon_TranslatorsChambers_Christian#2" //GUID:05ac8eaad77ef524dbcb7b5f93b1ccf7
+}
+
+def Observatory_Christian : Observatory
+def Observatory_Muslim : Observatory
+
+def GreatLibrary_Christian : GreatLibrary
+def GreatLibrary_Muslim : GreatLibrary
+
+def AlchemistLab_Christian : AlchemistLab
+def AlchemistLab_Muslim : AlchemistLab
+
+
+//-------------------------------------- Crops Farming
+def CropsRotation : Upgrade
+{
+	name = "Crops Rotation"
+	flavor = "Well planned and organized crop planting of different crops sequentially on the same plot of land to preserve the soil's health and fertility."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_CropsRotation.tga:UI_Structure_Icon_CropsRotation#2" //GUID:26052cdcb856f594782b362358f759c9
+}
+
+def ManurePits : Upgrade
+{
+	name = "Manure Pits"
+	flavor = "Fertilizing the soil, most of all with natural livestock manure, is necessary for ensuring a good harvest year after year."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_ManurePits.tga:UI_Structure_Icon_ManurePits#2" //GUID:e4376123d63523d45867ff5586e0acbd
+}
+
+
+def HeavyPloughsWorkshop : Upgrade
+{
+	name = "Heavy Ploughs"
+	flavor = "Draft animals are fundamental for agriculture and well made ploughs improve their efficiency, thus increasing the farmlands' yield."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_HeavyPloughsWorkshop.tga:UI_Structure_Icon_HeavyPloughsWorkshop#2" //GUID:a929b84f99d57014386acf56c97bad26
+}
+
+//-------------------------------------- Windmills
+def Granary : Upgrade
+{
+	name = "Granaries"
+	flavor = "These facilities store the town's food supplies, which play an important role in sieges and supplying armies."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Granary.tga:UI_Structure_Icon_Granary#2" //GUID:b4fee903d1779da46a0710663f7b4d58
+}
+
+def DryingOvens : Upgrade
+{
+	name = "Drying ovens"
+	flavor = "These ovens are especially valuable when the grain is harvested in rainy days. Drying before storage prevents spoilage, caused by moisture and mold."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_DryingOvens.tga:UI_Structure_Icon_DryingOvens#2" //GUID:14eb0542663b8364ea2c0432b622a84c
+}
+
+def GrainTrade : Upgrade
+{
+	name = "Grain Trade"
+	flavor = "Trading with grain is one of the most stable and beneficial commercial endevours a kingdom with rich soil can undertake, as food is always a desired resource."
+	
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_GrainMarket.tga:UI_Structure_Icon_GrainMarket#2" //GUID:e664d63d2b4422a49994036778c02a99
+}
+
+//-------------------------------------- Food Market
+def Tavern : Upgrade
+{
+	name = "Taverns"
+	flavor = "A good ale bolsters happiness and prosperity, for peasants and nobles alike."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Tavern.tga:UI_Structure_Icon_Tavern#2" //GUID:969f5551d319bb946a6126d111e03dbf
+}
+
+def Bakery : Upgrade
+{
+	name = "Bakeries"
+	flavor = "Bread and other baked goods are prepared here, providing delicious food for the province's population."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Bakery.tga:UI_Structure_Icon_Bakery#2" //GUID:f24fcb7c64a1a3e4590f3cbc47ea5c8c
+}
+
+def Alehouse : Upgrade
+{
+	name = "Breweries"
+	flavor = "There is always a demand for high quality ale - desinfected, nutritious and flavored with hops and various other spices."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_Alehouse.tga:UI_Structure_Icon_Alehouse#2" //GUID:8ee51891d9c046541a058515a5991061
+}
+
+//-------------------------------------- Quarry
+def Machinery_Quarry : Machinery
+{
+}
+
+def MinersShacks_Quarry : MinersShacks
+{
+}
+
+def StoneCutters : Upgrade
+{
+	name = "Stone Cutters"
+	flavor = "Workers, specialized in cutting, shaping and curving stone blocks in a quarry, to prepare them for furher usage."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_StoneCutters.tga:UI_Structure_Icon_StoneCutters#2" //GUID:98e818073c5fba14286642db05c20e22
+}
+
+def SculpturesShop : Upgrade
+{
+	name = "Sculptures shop"
+	flavor = "Skilled artists present their fabulous sculptures and bas-reliefs in these shops."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_SculpturesShop.tga:UI_Structure_Icon_SculpturesShop#2" //GUID:b678d569693c5134d8d5dfec03c663c3
+}
+
+def MasonsGuild : Upgrade
+{
+	name = "Masons Guilds"
+	flavor = "A prestigious organization of craftsmen, skilled in cutting, dressing and laying stone."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_MasonsGuild.tga:UI_Structure_Icon_MasonsGuild#2" //GUID:33467bdc268bd504d9b4f17e21436f64
+}
+
+//-------------------------------------- Mine
+def Machinery_Mine : Machinery
+{
+}
+
+def MinersShacks_Mine : MinersShacks
+{
+}
+
+def BlastFurnace : Upgrade
+{
+	name = "Blast Furnaces"
+	flavor = "Quality steel for the province's armed forces is produced here, as well as for the master bladesmith and armorers of the entire kingdom."
+	icon = "Assets/UI/Elements/Buildings/Icons/UI_Structure_Icon_BlastFurnace.tga:UI_Structure_Icon_BlastFurnace#2" //GUID:10667cf19d2fe764a914d27cd27a4e7a
+	
+	battleview_type = "Props/Furnace"
+}
+
+//-------------------------------------- Silver/Gold Smelting
+// def Minthouse_Silver : Minthouse
+
+// def Minthouse_Gold : Minthouse

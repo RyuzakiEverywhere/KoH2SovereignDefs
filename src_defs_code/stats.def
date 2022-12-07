@@ -1,0 +1,2657 @@
+﻿def Stats
+{
+	text mod_text = "{value} [{zero_value:if}{clr:gray}]{name}[{stat_def.hide_multiplier:if_not} {clr:gray}(x{multiplier}){/clr}][{mod_def.per_level_value:if}, depends on character level][ {condition_text}][{zero_value:if}{/clr}]"
+	text base_value_text = "    [{mod_name}|Base]: {value}"
+	text mod_factor_text = "    {mod_name}: {value:bonus}"
+}
+
+//stat-like bonuses gained instantly
+def InstantBonuses
+{
+	text mod_text = "{value} {name} (instant)"
+	
+	crown_authority
+	{
+		text name = "crown authority"
+	}
+	gain_gold
+	{
+		text name = "{gold_icon}"
+	}
+	rel_change_with_papacy
+	{
+		text name = "relations with Papacy"
+	}
+	rel_change_with_all_orthodox
+	{
+		text name = "relations with all orthodox kingdoms"
+	}
+	rebels_repent_chance_perc
+	{
+		text name = "chance for all rebels to repent"
+	}
+	deepen_orthodox_hostilities_perc
+	{
+		text name = "deepen orthodox hostilities"
+	}
+	
+}
+
+def CharacterStats : Stats = "cs_"
+{
+	stat cs_debug
+	{
+		text name = "Character Debug Stat"
+	}
+	
+	stat cs_imprison_in_battle_chance = 60
+	stat cs_imprison_in_battle_retreat_chance = (cs_imprison_in_battle_chance / 8)
+	stat cs_merchant_opinion_penalty_on_destroyed_commercial_building_chance = 30
+	stat cs_clergy_opinion_penalty_on_battle_defeat = 20
+	
+	// from skills
+	stat cs_king_army_morale
+	{
+		text name = "king army morale"	
+		text base_mod_name = "Led by the [{kingdom.king.title}|King]"
+	}
+	stat cs_join_rebel_chance
+	stat cs_mass_escape_chance
+	stat cs_happiness_boost
+	{
+		text name = "happiness in governed town"
+	}
+	stat cs_happiness_boost_neighbors
+	{
+		text name = "happiness in all neighbors around governed town"
+	} 
+	stat cs_morale_boost
+	stat cs_rebels_nerf
+	stat cs_mercenary_price_reduction_perc
+	{
+		mod kingdom = "ks_mercenary_price_reduction_perc"
+		text name = "cheaper cost for hiring mercenaries"
+		penalty = true
+		//show_plus_sign = false
+	}
+	stat cs_agents_boost = 20
+
+	stat cs_enemy_rebels_morale = 0
+	{
+		text name = "enemy rebels morale"	
+		penalty = true
+		mod kingdom = "ks_enemy_rebels_morale"
+	}
+
+	stat cs_army_morale_in_sea = -5
+	{
+		text name = "Army morale in the sea"
+	}
+	
+	stat cs_army_morale = 15
+	{
+		text name = "army morale"
+		text base_mod_name = "Base army morale"
+		max = 30
+		mod kingdom = "ks_army_morale"
+		mod own_realm = #CalcMoraleInOwnRealm { text mod_name = "In home lands" } // +5
+		mod allied_realm = #CalcMoraleInAlliedRealm { text mod_name = "In allied lands" } // 0
+		mod neutral_realm = #CalcMoraleInNeutralRealm { text mod_name = "In neutral lands" } // -3
+		mod enemy_realm = #CalcMoraleInEnemyRealm { text mod_name = "On enemy soil" } // -3 or worse
+		mod realm_keeps = #CalcMoraleEnemyRealmKeeps { text mod_name = "Castles in province" } // -1 per keep
+		mod restoring_papacy = #CalcMoraleRestorePapacy { text mod_name = "Restoring Papacy" }
+		mod king_warfare_ability = #CalcMoraleKingWarfareAbility { text mod_name = "King Warfare ability" }
+		mod no_supplies = (army.no_supplies * (army.is_home * -3 + !army.is_home * -5)) { text mod_name = "Ran out of supplies" }
+		mod is_king = (is_king * 5) { text mod_name = "King leading army" }
+		mod is_prince = (is_prince * 2) { text mod_name = "Prince leading army" }
+		mod is_marshal = (-3 * !is_marshal) { text mod_name = "Non marshal leading army"}
+		mod in_sea_navigation = #CalcMoraleNavigationSkill { text mod_name = "In the sea" }
+		mod realm_same_pop_majority = #CalcMoralePopMajorityBonus { text mod_name = "Realm is same pop majority as army kingdom" }
+		mod jihad_against_realm_owner = #CalcMoraleJihad { text mod_name = "Jihad" }// in own realm and realm of jihad enemies
+	}
+
+	stat cs_troops_resilience
+	{
+		text name = "squads resilience"
+		mod kingdoms = "ks_troops_resilience"
+	}
+
+	stat cs_troops_shock
+	{
+		text name = "squads chance to shock"
+		mod kingdom = "ks_troops_shock"
+	}
+
+	stat cs_defense_troops_resilience //!!! not implemented
+	{
+		text name = "defense squads resilience"
+	}
+	
+	stat cs_sieging_troops_defense_perc = 0 //!!! not implemented
+	{
+		text name = "squads defense when sieging enemy towns"
+	}
+	stat cs_rebel_morale = 15
+	{
+		text name = "rebel morale"
+		text base_mod_name = "Base rebel morale"
+		max = 30
+		mod kingdom_in = (kingdom_in.ks_rebel_morale) { text mod_name = "Kingdom-wide rebel morale" }
+		// all of the paramaters for these are in def Morale
+		mod rebellion_rank = #CalcRebellionRankMorale { text mod_name = "Rebellion rank" }
+		mod famous_bonus = #CalcRebellionFamousMorale { text mod_name = "Famous" }
+		mod keeps = #CalcMoraleEnemyRealmKeeps { text mod_name = "Castles in province" }
+		mod occupied_realms = #CalcRebelOccupiedRealmsMorale  { text mod_name = "Occupied realms" }
+		mod camping = #CalcCampingMorale { text mod_name = "Camping" }
+	}
+	
+	stat cs_crusader_morale = 15
+	{
+		text name = "crusader morale"
+		text base_mod_name = "Leading crusade"
+		max = 30
+		// all of the paramaters for these are in def Morale
+		//mod realm_in_hostile = #CalcHostileRealmCrusaderMorale { text mod_name = "On enemy soil" }
+		mod keeps = #CalcMoraleEnemyRealmKeeps { text mod_name = "Castles in province" }
+		mod camping = #CalcCampingMorale { text mod_name = "Camping" }
+		mod level = (class_level) { text mod_name = "Leader level" }
+	}
+	
+	stat cs_kingdom_influence
+	{
+		//mod kingInfluence = #CalcKInfluenceKing
+		mod diplomatInfluence = #CalcKInfluenceDiplomat
+	}
+	
+	stat cs_ranged_CTH_perc = 0
+	{
+		mod kingdom = "ks_ranged_CTH_perc"
+		text name = "ranged squads attack"
+	}
+	stat cs_ranged_range_perc = 0
+	{
+		text name = "ranged squads range"
+	}
+	stat cs_siege_attrition_damage
+	{
+		text name = "siege attrition damage"
+	}
+	stat cs_siegecraft_skill_bonus
+	
+	
+	// stat cs_army_slot_bonus
+	// {
+	// 	text name = "maximum army squads"
+	// 	mod kingdom = "ks_army_slot_bonus" //(kingdom.army_slot_bonus)
+	// }
+
+	stat cs_army_item_bonus
+	{
+		text name = "maximum army inventory slots"
+		mod kingdom = "ks_army_item_bonus" //(kingdom.ks_army_item_bonus)
+	}
+
+	stat cs_squad_size_perc = 0
+	{
+		text name = "army manpower"
+		mod kingdom = "ks_squad_size_perc"
+		{
+			condition = (!is_crusader)
+		}
+		mod rebel = #RebelSquadSizePerc
+		{
+			text mod_name = "Leader is rebel"
+		}
+		mod king = "cs_king_squad_size_perc"
+		{
+			condition = (!is_crusader)
+		}
+		mod crusader = "cs_crusader_squad_size_perc"
+		mod level = "cs_level_squad_size_perc"
+		{
+			condition = (!is_rebel)
+		}
+	}
+
+	stat cs_level_squad_size_perc = 0
+	{
+		// for some reason i couldn't write this with cases, it broke the entire stat
+		// so for now it's 1 if not crusader, 1 + 9 = 10 if crusader
+		mod level = (class_level * (1 + is_crusader * 9 + is_mercenary * 7)) 
+		{
+			text mod_name = "From leader level"
+		}
+		text name = "manpower bonus from character level"
+	}
+	
+	stat cs_infantry_squad_size_perc = 0
+	{
+		text name = "infantry and defense squads manpower"
+		mod kingdom = "ks_infantry_squad_size_perc"
+	}
+
+	stat cs_ranged_squad_size_perc = 0
+	{
+		text name = "ranged squads manpower"
+		mod kingdom = "ks_ranged_squad_size_perc"
+	}
+	
+	stat cs_mounted_squad_size_perc = 0
+	{
+		text name = "cavalry manpower"
+		mod kingdom = "ks_mounted_squad_size_perc"	
+	}
+	
+	stat cs_natural_terrain_bonus_perc = 0
+	{
+		text name = "natural terrain bonuses"
+	}
+	
+	stat cs_retreat_penalty_decrease_perc = 0
+	{
+		text name = "reduced penalties from retreating"
+		max = 75 //prevent permanent running
+	}
+	
+	stat cs_melee_CTH_perc = 0 // infantry/defense/militia/cavalry, no archers, no horse archers
+	{
+		text name = "melee squads attack"
+		mod kingdom = "ks_melee_CTH_perc"
+	}
+
+	stat cs_infantry_CTH_perc = 0 // infantry/defense/militia, no archers, no cavalry
+	{
+		text name = "infantry and defense melee attack"
+		mod kingdom = "ks_infantry_CTH_perc"
+	}
+	
+	stat cs_cavalry_CTH_perc = 0
+	{
+		mod kingdom = "ks_cavalry_CTH_perc"
+		text name = "cavalry squads attack"
+	}
+	stat cs_heavy_cavalry_CTH_perc = 0
+	{
+		mod kingdom = "ks_heavy_cavalry_CTH_perc"
+		text name = "cavalry squads attack"
+	}
+	stat cs_heavy_cavalry_trample_chance_perc
+	{
+		mod kingdom = "ks_heavy_cavalry_trample_chance_perc"
+		text name = "heavy cavalry trample chance"
+	}
+	stat cs_cavalry_discount_perc
+	{
+		mod kingdom = "ks_cavalry_discount_perc"
+		text name = "cavalry discount"
+	}
+	stat cs_cavalry_resilience
+	{
+		mod kingdom = "ks_cavalry_resilience"
+		text name = "cavalry resilience"
+	}
+	stat cs_camels_CTH_perc
+	{
+		mod kingdom = "ks_camels_CTH_perc"
+		text name = "camel cavalry attack"
+	}
+	stat cs_camels_discount_perc
+	{
+		mod kingdom = "ks_camels_discount_perc"
+		text name = "camel cavalry cost reduction"
+	}
+	stat cs_camels_resilience
+	{
+		mod kingdom = "ks_camels_resilience"
+		text name = "camel cavalry resilience"
+	}
+	stat cs_heavy_unit_defense_flat
+	{
+		mod kingdom = "ks_heavy_unit_defense_flat"
+		text name = "heavy squads defense"
+	}
+	stat cs_defense_flat
+	{
+		mod kingdom = "ks_defense_flat"
+		text name = "squads defense"
+	}
+	stat cs_elite_unit_defense_flat
+	{
+		mod kingdom = "ks_elite_unit_defense_flat"
+		text name = "elite squads defense"
+	}
+	stat cs_cavalry_charge_shock_perc = 0
+	{
+		text name = "cavalry squads shock damage upon charge"
+	}
+	
+	stat cs_infantry_defense = 0
+	{
+		text name = "infantry and spearmen defense"
+		mod kingdom = "ks_infantry_defense"
+	}
+
+	stat cs_army_defense_perc
+	{
+		text name = "squads defense"
+		mod kingdom = "ks_army_defense_perc"
+	}
+
+	stat cs_siege_attack = 0
+	{
+		text name = "Siege attack"
+		mod kingdom = "ks_siege_attack"
+	}
+
+	stat cs_base_siege_damage_perc
+	{
+		text name = "army's base siege damage"
+		mod kingdom = "ks_base_siege_damage_perc"
+	}
+	stat cs_siege_equipment_siege_damage_perc
+	{
+		text name = "siege equipment siege damage"
+		mod kingdom = "ks_siege_equipment_siege_damage_perc"
+	}
+	stat cs_horse_cavalry_CTH_perc
+	{
+		text name = "horse cavalry attack"
+		mod kingdom  = "ks_horse_cavalry_CTH_perc"
+	}
+	stat cs_horse_cavalry_discount_perc
+	{
+		text name = "horse cavalry cost reduction"
+		mod kingdom  = "ks_horse_cavalry_discount_perc"
+	}
+	stat cs_horse_cavalry_resilience
+	{
+		text name = "horse cavalry resilience"
+		mod kingdom  = "ks_horse_cavalry_resilience"
+	}
+	stat cs_siege_equipment_cth_perc
+	{
+		text name = "siege equipment attack"
+		mod kingdom = "ks_siege_equipment_cth_perc"
+	}
+	stat cs_siege_equipment_health_perc
+	{
+		text name = "siege equipment health"
+		mod kingdom = "ks_siege_equipment_health_perc"
+	}
+
+	stat cs_siege_equipment_discount_perc
+	{
+		text name = "siege equipment cost reduction"
+		mod kingdom = "ks_siege_equipment_discount_perc"
+	}
+
+	stat cs_siege_attack_perc = 0
+	{
+		text name = "siege attack"
+		mod kingdom = "ks_siege_attack_perc"
+	}
+	
+	stat cs_siege_defense //!!! placeholder
+	{
+		text name = "siege defense"
+		mod kingdom = "ks_siege_defense"
+	}
+	
+	stat cs_unlock_trebuchets
+	{
+		text mod_text = "Allows construction of trebuchets"
+	}
+
+	stat cs_unlock_catapults
+	{
+		text mod_text = "Allows construction of catapults"	
+	}
+	
+	stat cs_salvo_capacity_bonus_perc = 0
+	{
+		mod kingdom = "ks_salvo_capacity_bonus_perc"
+		text name = "ranged squads salvo capacity"
+	}
+
+	stat cs_army_stamina_perc
+	{
+		text name = "army stamina"
+	}
+
+	stat cs_troop_experience_gain_rate_perc
+	{
+		text name = "faster squads' experience gain"
+		mod kingdom = "ks_troop_experience_gain_rate_perc"
+		show_plus_sign = false //e.g. result = "20% faster troop experience gain rate"
+	}
+
+	stat cs_friendly_fire_reduction_perc
+	{
+		text name = "friendly fire damage reduction"
+	}
+
+	stat cs_army_defense_during_siege_perc
+	{
+		text name = "defense when defending during siege, assault and break-siege battles"
+	}
+
+	stat cs_hunting_incident_chance_perc
+	{
+		text name = "chance for 'Hunting Incident' plot to succeed"
+	}
+
+	stat cs_pillage_gold_perc
+	{
+		mod kingdom = "ks_pillage_gold_perc"
+		text name = "{gold_icon} from pillaging"
+	}
+
+	stat cs_gold_from_rebellions_perc
+	{
+		text name = "{gold_icon} from defeated rebels"
+	}
+
+	stat cs_naval_CTH
+	{
+		mod kingdom = "ks_naval_CTH"
+		text name = "naval strength"
+	}
+
+	stat cs_ships_level
+	{
+		text name = "ship level"
+		min = 0
+		max = 2
+	}
+
+	stat cs_ships_speed_perc
+	{
+		mod kingdom = "ks_ships_speed_perc"
+		text name = "ship sailing speed"
+	}
+
+	stat cs_army_speed_world_perc
+	{
+		mod kingdom = "ks_army_speed_world_perc"
+		mod out_of_supplies = (army.no_supplies * -15)
+		text name = "army travel speed"
+		max = 30
+	}
+
+	stat cs_gold_per_coastal_where_trading
+	{
+		float max_sum = 100
+		text name = "{gold_icon} per coastal town where merchant is trading"
+		multiplier = (mission_kingdom.coastal_realms_count)
+		hide_multiplier = (!owner.mission_kingdom)
+	}
+
+	stat cs_settlement_recovery_perc
+	{
+		text name = "faster recovery of burned settlements"
+		show_plus_sign = false
+	}
+
+	stat cs_build_cost_discount_perc
+	{
+		text name = "cheaper building costs"
+		show_plus_sign = false
+	}
+
+	stat cs_upgrade_cost_discount_perc
+	{
+		text name = "cheaper upgrade costs"
+		show_plus_sign = false
+	}
+
+	stat cs_army_supply_usage_perc
+	{
+		text name = "usage of army's supplies"
+		penalty = true
+	}
+
+	stat cs_base_trading_income = 0
+	{
+		text name = "{gold_icon} base merchant trade income"
+		mod kingdom = "ks_base_trading_income"
+	}
+
+	stat cs_trade_income_perc = 0
+	{
+		text name = "{gold_icon} merchant trade income"
+	}
+
+	stat cs_export_food_gold_increase_perc
+	{
+		text name = "{gold_icon} from food export"
+	}
+
+	stat cs_bribe_cost_upkeep_reduction_perc
+	{
+		text name = "lower price and upkeep for bribing of knights"
+		show_plus_sign = false
+		max = 75
+	}
+
+	stat cs_allow_bribe_princes
+	{
+		text mod_text = "Allow princes to be bribed"
+		show_plus_sign = false
+		max = 1
+	}
+
+	stat cs_diplomat_actions_upkeep_reduction_perc
+	{
+		show_plus_sign = false
+		text name = "lower action and upkeep costs"
+	}
+
+	stat cs_defpact_invplan_cost_and_upkeep_reduction_perc
+	{
+		show_plus_sign = false
+		text name = "lower upkeep and cost for defensive pact and invasion plan"
+	}
+
+	stat cs_hire_knight_cost_discount_perc
+	{
+		text name = "cheaper price for hiring knights"
+		show_plus_sign = false
+	}
+
+	stat cs_murder_plots_CTS_perc
+	{
+		text name = "chance for Murder Plots to succeed"
+		mod kingdom = "ks_own_murder_plots_CTS_perc"
+	}
+
+	stat cs_plotting_cost_perc
+	{
+		text name = "plotting cost"
+		penalty = true
+		min = -75
+	}
+
+	stat cs_intrigue_cost_perc
+	{
+		text name = "time for plotting"
+		penalty = true
+		mod kingdom = "ks_intrigue_cost_perc"
+		min = -75
+	}
+
+	stat cs_spy_reveal_chance_reduction_perc
+	{
+		text name = "lower spy actions reveal chance"
+		show_plus_sign = false
+		mod kingdom = "ks_plot_reveal_chance_reduction_perc"
+	}
+
+	stat cs_spy_return_reveal_chance_negation
+	{
+		text mod_text = "Can't be revealed when returning to kingdoms where spy was compromised"
+	}
+
+	stat cs_witch_hunt_efficiency_perc
+	{
+		text name = "increased chance of success in Witch hunt"
+	}
+
+	stat cs_bribe_CTS_perc
+	{
+		text name = "chance for bribing to succeed"
+		mod kingdom = "ks_bribe_CTS_perc"
+	}
+
+	stat cs_princes_skill_upgrade// true/false value
+	{
+		text mod_text = "Princes learn their skills at level 3"
+		mod kingdom = "ks_princes_skill_upgrade"	
+	}
+
+	stat cs_influence // !!! not implemented
+	{
+		text name = "influence"
+	}
+
+	stat cs_culture_per_governed_monastery //religious settlement //!!! not implemented
+	{
+		text name = "cultural power per governed [{kingdom.religious_settlement_name}|Religious Settlement]"
+		multiplier = (realm.religious_settlements_count * (realm.religious_settlement_type == kingdom.religious_settlement_type))
+	}
+
+	stat cs_conversion_rate_perc
+	{
+		mod kingdom = "ks_convert_religion_duration_reduction_perc"
+		text name = "religion conversion rate"
+		max = 75
+	}
+
+	stat cs_convert_chance_after_siege_perc
+	{
+		mod kingdom = "ks_convert_chance_after_siege_perc"
+		text name = "chance to convert religion of occupied towns after siege"
+	}
+
+	stat cs_help_the_weak_stability
+	{
+		text name = "stability while in 'Helping the Weak' state"
+	}
+
+	stat cs_help_the_weak_cleric_effect
+	{
+		min = 0
+		max = 1
+		text mod_text = "Adds [{kingdom.cleric_title}|cleric] level to 'Commit to Charity' effect"
+	}
+
+	stat cs_army_refill_cost_perc
+	{
+		mod kingdom = "ks_army_refill_cost_perc"
+		text name = "cost for refilling squads"
+		penalty = true
+		min = -75
+	}
+
+	stat cs_mission_passive_rel_increase = 0
+	{
+		text name = "increase of relations (per minute), while on a mission"
+		multiplier = (!!mission_kingdom)
+		hide_multiplier = true
+	}
+
+	stat cs_diplomat_improve_relations_perc
+	{
+		text name = "more effective Improve relations action"
+	}
+
+	stat cs_diplomat_improve_opinions_CTS
+	{
+		text name = "chance to successfully Improve opinions"
+	}
+
+	stat cs_ruin_relations_perc = 0
+	{
+		text name = "more effective Ruin relations action"
+	}
+
+	stat cs_establish_order_CTS = 0
+	{
+		text name = "additional chance to succeed in 'Establish order' action"
+	}
+
+	stat cs_peace_negotiations_relations_upon_fail //!!! not implemented
+	{
+		text mod_text = "Even if Peace Negotiations fail, relations is increased by {value}"
+	}
+
+	stat cs_influence_per_governed_keep
+	{
+		text name = "influence per governed castle"
+		multiplier = (realm.keeps_count)
+	}
+
+	stat cs_king_squad_size_perc
+	{
+		text name = "[{kingdom.king.title}|King] army"
+	}
+
+	stat cs_crusader_squad_size_perc
+	{
+		text name = "Crusader army"
+	}
+
+	stat cs_support_pretender_cost_reduction_perc
+	{
+		text mod_text = "Support Pretender cost and upkeep are {value} cheaper"
+	}
+
+	stat cs_important_relative_marshal_morale_bonus = (is_at_least_juvenile && is_marshal && is_important_relative && !is_rebel)
+	{
+		text name = "Important relative marshal bonus"
+	}
+
+	stat cs_important_relative_merchant_gold_bonus = ((is_at_least_juvenile && is_merchant && is_important_relative && !is_rebel) * 10)
+	{
+		text name = "Important relative merchant bonus"
+	}
+	stat cs_important_relative_cleric_books_bonus = ((is_at_least_juvenile && is_cleric && is_important_relative&& !is_rebel) * 5)
+	{
+		text name = "Important relative {kingdom.cleric_title} bonus"
+	}
+	stat cs_important_relative_diplomat_influence_bonus = ((is_at_least_juvenile && is_diplomat && is_important_relative && !is_rebel) * 50)
+	{
+		text name = "Important relative diplomat bonus"
+	}
+	stat cs_important_relative_spy_espionage_defense_bonus = ((is_at_least_juvenile && is_spy && is_important_relative && !is_rebel) * 5)
+	{
+		text name = "Important relative spy bonus"
+	}
+	stat cs_spy_governor_stability_per_keep = 0
+	{
+		text name = "kingdom stability per Castle"
+		multiplier = (realm.keeps_count)
+	}
+	stat cs_spy_governor_stability_per_village = 0
+	{
+		text name = "kingdom stability per Village"
+		multiplier = (realm.villages_count)
+	}
+	stat cs_spy_governor_espionage_defense_bonus_per_keep = 0
+	{
+		text name = "espionage defense per Castle"
+		multiplier = (realm.keeps_count)
+	}
+
+	stat cs_sow_dissent_chance
+	{
+		mod kingdom = "ks_sow_dissent_chance"
+		text name = "more effective sow dissent"
+	}
+}
+
+def RealmStats : Stats = "rs_"
+{
+	stat rs_debug
+	{
+		text name = "Realm Debug Stat"
+	}
+
+	
+	stat rs_happiness = 0
+	{
+		text name = "happiness"
+		min = -20
+		max = 20
+		//mod wars = (kingdom.war_happiness) <--- OBSOLETE
+		mod governor_leadership = (castle.governor.cs_happiness_boost)
+		mod governor_cl = (rs_governor_happiness_from_CL)
+		mod neighboring_governors = #HappinessFromNeighboringGovernors
+		mod garrison_units = (rs_happiness_per_garrison_unit * num_garrison_units)
+		mod orthodox = (kingdom.ks_happines_in_orthodox_provinces * is_orthodox)
+		mod kingdom = "ks_happiness" //(kingdom.ks_happiness)
+		//mod medieval_fairs_idea = #MedievalFairsIdeaHappiness
+	}
+	
+	stat rs_happiness_per_garrison_unit = 0.5
+	
+	stat rs_religious_tension = 0 //!!! not implemented
+	stat rs_cultural_tension = 0 //!!! not implemented
+	
+	stat rs_rebellion_risk_total_bonus = 0
+	{
+		mod kingdom = "ks_rebellion_risk_total_bonus"
+	}
+	
+	stat rs_rebel_spawn_chance_bonus = 0
+	{
+		mod kingdom = "ks_rebel_spawn_chance_bonus"
+	}
+
+	stat rs_rebellion_risk_religion
+	{
+		mod religion_mod = 0 //!!! not implemented (might be implemented - check)
+	}
+	
+	stat rs_rebellion_risk_dynastic = 0 //!!! not implemented - check what this is, probably obsolete
+
+	/// REBELLION RISK STATS	
+
+	stat rs_commerce_settlements
+	{
+		text name = "{trade_icon}" //"commerce"
+	}
+	
+	stat rs_commerce_town
+	{
+		text name = "{trade_icon}" //"commerce"
+	}
+	
+	stat rs_food_in_farms
+	{
+		mod kingdom = "ks_food_in_farms" //(kingdom.food_in_farms)
+	}
+	
+	stat rs_food_in_towns
+	{
+		mod kingdom = "ks_food_in_towns" //(kingdom.food_in_towns)
+	}
+	
+	stat rs_gold_in_orthodox_provinces_perc
+	{
+		mod kingdom = "ks_gold_in_orthodox_provinces_perc" //(kingdom.gold_in_orthodox_provinces_perc * is_orthodox)
+		hide_multiplier = true
+	}
+	
+	stat rs_stability_to_own_neighbors = 0
+	{
+		text name = "stability in all neighbors"
+	}
+	
+	stat rs_stability = 0
+	{
+		text name = "province stability"
+		mod keeps_authority = (round(#KeepsLocalAuthority))				// comes from Fiefdoms idea, obsolete?
+		mod governor = (round(rs_stability_governors)) 					// category RebellionRiskCategoryGovernors
+		mod disorder = (round(is_disorder * (-20)))
+		mod happiness = (round(rs_happiness))
+		//mod happiness = (min(0, max(-20, rs_happiness))) 			// category RebellionRiskCategoryHappiness
+		mod religious_tension = (round(rs_stability_religious_tension)) 	// category RebellionRiskCategoryReligiousTension
+		mod culture_tension = (round(#RebellionRiskCultureTension)) 			// category RebellionRiskCategoryCultureTension
+		mod rebel_occupations = (round(#RebellionRiskRebelOccupations)) 		// category RebellionRiskCategoryRebelOccupiedProvinces
+		mod rebel_leaders = (round(#RebellionRiskRebelArmies)) 				// category RebellionRiskCategoryRebelLeaders
+		mod castle_sacked = (round(#RebellionRiskSacked))
+		mod buildings = (round(rs_stability_buildings))			// category RebellionRiskCategoryBuildings
+		mod kingdom_stability = (round(kingdom.stability))
+		mod disloyal_population = (round(#RebellionRiskDisloyalPop))
+		mod patriarch_bonus = (kingdom.ks_orthodox_provinces_stability * is_orthodox)
+		mod establish_order = (rs_stability_establish_order)
+		//mod recent_establish_order = f (t)
+	}
+
+	stat rs_stability_religious_tension = 0
+	{
+		mod negative_piety = (floor( realm.negative_piety * 0.5 )) // floor for negative numbers pushes towards -infinityn
+		mod religious_tension = #RebellionRiskReligionTension
+	}
+
+	stat rs_stability_governors = 0
+	{
+		mod from_own_neighbors = #LocalAuthorityFromOwnNeighbors
+		mod governor = (rs_governor_stability_realm)
+		mod governorCL = (rs_governor_local_authority_from_CL)
+		mod governor_per_keep = (keeps_count_realm_and_own_neighbors * rs_governor_local_authority_per_keep_in_realm_and_neighbors)
+		mod governor_for_realm = (rs_governor_local_authority_in_realm_and_neighbors)
+	}
+
+	stat rs_stability_buildings = 0
+	{
+		text name = "province stability"
+	}
+
+	stat rs_stability_establish_order = 0
+	{
+		text name = "province stability"
+	}
+
+	stat rs_coastal_town_food_loss_reduction_perc = 50
+	{
+		text name = "food loss reduction during sieges"
+	}
+	
+	stat rs_siege_defense = 100
+	{
+		text name = "siege defense"
+		mod kingdom = "ks_siege_defense" //(kingdom.siege_defense)
+	}
+
+	stat rs_siege_defense_own_attacker_with_pop_majority = -50 
+	{
+		perc
+		text name = "siege defense penalty when attacker is the owner of the province and the population majority is his"
+	}
+
+	stat rs_siege_defense_own_attacker = -25 
+	{
+		perc
+		text name = "siege defense penalty when attacker is the owner of the province"
+	}
+	
+	stat rs_siege_resilience = 100
+	{
+		text name = "siege resilience"
+		mod kingdom = "ks_siege_resilience" //(kingdom.siege_resilience)
+	}
+	
+	stat rs_attrition_damage = 0
+	{
+		text name = "fortifications attrition damage"
+		mod kingdom = "ks_attrition_bonus" //(kingdom.attrition_bonus)
+	}
+	
+	//	stat naval_siege_attrition = 0 //!!! not implemented, maybe will not be
+	//	stat break_siege_morale_nerf = 0 //!!! not implemented, probably will not be
+	
+	stat rs_growth_rate_perc = 100 //use 100 as base for clearer visualization
+	{
+		text name = "population growth"
+		mod kingdom = "ks_population_growth_perc"
+	}
+
+	stat rs_growth_chance_perc = 100
+	{
+		text name = "population growth chance"
+	}
+	
+	stat rs_garrison_slots = 5
+	{
+		min = 5
+		max = 5
+	}
+	stat rs_garrison_manpower_bonus = 0 // only for garrison, not temp defenders
+	stat rs_recruit_cost_bonus_perc = 0 // % discount
+	{
+		mod kingdom = "ks_recruit_cost_bonus_perc" //(kingdom.recruit_cost_bonus_perc)
+	}
+	
+	stat rs_light_discount_perc = 0 // % discount
+	{
+		text name = "cheaper hiring of light squads in this province"
+	}
+	stat rs_heavy_discount_perc = 0 // % discount
+	{
+		text name = "cheaper hiring of heavy squads in this province"
+	}
+	
+	stat rs_build_cost_discount_perc = 0 // % discount
+	{
+		text name = "cheaper building costs"
+		mod kingdom = "ks_build_cost_discount_perc" //(kingdom.build_cost_discount_perc)
+	}
+	
+	stat rs_ships_level = 0
+	{
+		text name = "ship level"
+		min = 0
+		max = 2
+	}
+	
+	//stat rs_gold_income_perc = 0
+	stat rs_gold_per_worker_mod = 0
+	stat rs_max_food = 400
+	{
+		text name = "{food_icon} storage"
+		mod governor = "rs_governor_max_food_town"
+		mod kingdom = "ks_max_food_in_towns"
+	}
+	
+	stat rs_initial_troop_experience = 0
+	stat rs_initial_troops_level = 0
+	{
+		text name = "initial squad rank"
+		mod kingdom = "ks_initial_troops_level"
+	}
+	stat rs_morale_in_province = 0
+	{
+		text name = "morale in the province"
+	}
+	stat rs_garrison_morale = 5
+	{
+		mod keeps = #CalcMoraleFriendlyRealmKeeps
+		mod king_warfare_ability = #CalcMoraleKingWarfareAbility
+		mod rebel_pop =  (-1 * num_rebellious_population)
+	}
+	
+	stat rs_escape_siege_chance = 0
+
+	stat rs_settlement_recovery = 0
+	{
+		text name = "faster recovery of burned settlements"
+		mod king = (kingdom.king.cs_settlement_recovery_perc)
+		show_plus_sign = false
+	}
+	stat rs_enemy_move_speed_reduction_perc = 0
+	{
+		text name = "reduced travel speed of enemy armies in province"
+	}
+	
+	stat rs_guard_level = 0
+	{
+		text mod_text = null
+	}
+
+	stat rs_militia_level = 0
+	stat rs_wall_level = 1	 // used for viusal level
+	{
+		text name = "wall strength"
+		min = 0
+		max = 4
+	}
+
+	stat rs_fame_town_bonus = 0 //!!! currently not used
+	{
+		text name = "fame" // bonus (when the province is governed)
+	}
+
+	stat rs_fame_buildings_bonus = 0
+	{
+		text name = "fame" // bonus from buildings (when the province is governed)
+	}
+
+	stat rs_levy_per_village = 0
+	{
+		text name = "{levy_icon} in all Villages"
+		mod kingdom = "ks_levy_per_village"
+	}
+
+	stat rs_governor_books = 0
+	{
+		text name = "{books_icon} in Town"
+	}
+
+	stat rs_governor_books_per_castle = 0
+	{
+		text name = "{books_icon} in Castles"
+	}
+
+	stat rs_governor_books_per_village = 0
+	{
+		text name = "{books_icon} in Villages"
+	}
+
+	stat rs_governor_books_per_religious_settlement = 0
+	{
+		text name = "{books_icon} in [{kingdom.religious_settlement_name}|Religious Settlements]"
+	}
+
+	stat rs_governor_piety_per_settlement = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Settlements"
+	}
+
+	stat rs_governor_books_per_settlement = 0
+	{
+		text name = "{books_icon} in Settlements"
+	}
+
+	stat rs_governor_piety = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Town"
+		mod patriarch = (rs_governor_piety_from_patriarch)
+		mod cleric = (rs_governor_piety_from_cleric)
+		mod scholar = (rs_governor_piety_from_scholar)
+		mod shaman = (rs_governor_piety_from_shaman)
+	}
+
+	stat rs_governor_piety_from_cleric = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Town"
+	}
+	stat rs_governor_piety_from_scholar = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Town"
+	}
+
+	stat rs_governor_piety_from_shaman = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Town"
+	}
+
+	stat rs_governor_piety_from_patriarch = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Town"
+	}
+
+	stat rs_governor_piety_per_religous_settlement = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Religious Settlements"
+	}
+
+	stat rs_governor_piety_per_monastery = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Monasteries"
+	}
+
+	stat rs_governor_piety_per_shrine = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Shrines"
+	}
+
+	stat rs_governor_happiness_from_CL = 0
+	{
+		text name = "happiness in Town"
+	}
+
+	stat rs_governor_levy_per_settlement
+	{
+		text name = "{levy_icon} in all Settlements"
+	}
+
+	stat rs_governor_levy_per_keep = 0
+	{
+		text name = "{levy_icon} in all Castles"
+	}
+
+	stat rs_governor_levy_per_village = 0
+	{
+		text name = "{levy_icon} in all Villages"
+	}
+
+	stat rs_governor_levy_in_town = 0
+	{
+		text name = "{levy_icon} in Town"
+	}
+
+	stat rs_governor_gold_per_settlement = 0
+	{
+		text name = "{gold_icon} in Settlements"
+		mod king = (rs_governor_king_gold_per_settlement)
+	}
+
+	stat rs_governor_king_gold_per_settlement = 0
+	{
+		text name = "{gold_icon} in Settlements"
+	}
+
+	stat rs_governor_commerce_flat = 0
+	{
+		text name = "{trade_icon} in Town"
+	}
+
+	stat rs_governor_commerce_per_village = 0
+	{
+		text name = "{trade_icon} in Villages"
+	}
+
+	stat rs_governor_commerce_per_settlement = 0
+	{
+		text name = "{trade_icon} in Settlements"
+		mod king = (rs_governor_king_commerce_per_settlement)
+	}
+
+	stat rs_governor_commerce_per_coastal_settlement = 0
+	{
+		text name = "{trade_icon} in coastal settlements"
+	}	
+
+	stat rs_governor_commerce_per_good
+	{
+		text name = "{trade_icon} per good produced"
+	}
+
+	stat rs_governor_king_commerce_per_settlement = 0
+	{
+		text name = "{trade_icon} in Settlements"
+	}
+
+	stat rs_governor_commerce_per_monastery = 0
+	{
+		text name = "{trade_icon} in [{kingdom.religious_settlement_name}|Religious Settlements]"
+	}
+
+	stat rs_governor_max_population = 0
+	{
+		text name = "{workers_icon} in Town"
+	}
+
+	stat rs_governor_workers_per_village = 0
+	{
+		text name = "{workers_icon} in all Villages"
+	}
+
+	stat rs_governor_food_per_settlement = 0
+	{
+		text name = "{food_icon} in Settlements"
+	}
+
+	stat rs_governor_enemy_attrition = 0 
+	{
+		text name = "fortifications attrition damage"
+	}
+
+	stat rs_governor_food_per_farm = 0
+	{
+		text name = "{food_icon} in Crop farms"
+	}
+
+	stat rs_governor_local_authority_in_realm_and_neighbors = 0 
+	{
+		text name = "stability in this and neighboring provinces"
+	}
+
+	stat rs_governor_town_guards = 0 
+	{
+		text name = "{guard_icon} in Town"
+	}
+
+	stat rs_governor_local_authority_per_keep_in_realm_and_neighbors = 0
+	{
+		text name = "stability in Castle in province and own neighbors"
+		multiplier = (realm.keeps_count_realm_and_own_neighbors)
+	}
+
+	stat rs_governor_local_authority_from_CL = 0
+	{
+		text name = "province stability"
+	}
+
+	stat rs_governor_gold_in_town_per_good
+	{
+		text name = "{gold_icon} per produced good in governed town"
+	}
+
+	stat rs_governor_stability_realm
+	{
+		text name = "province stability"
+	}
+
+	stat rs_governor_max_food_town
+	{
+		text name = "{food_icon} storage in governed town"
+	}
+
+	stat rs_governor_food_in_town_per_good
+	{
+		text name = "{food_icon} per produced good in governed town"
+	}
+
+	stat rs_governor_prod_food_flat
+	{
+		text name = "{food_icon} in Town"
+	}
+
+
+	stat rs_governor_prod_gold_flat
+	{
+		text name = "{gold_icon} in Town"
+	}
+
+	stat rs_governor_guards_in_keeps
+	{
+		text name = "{guard_icon} per castle in governed province"
+	}
+
+	stat rs_governor_gold_per_village
+	{
+		text name = "{gold_icon} in Villages"
+	}
+
+	stat rs_governor_gold_per_religious_settlement
+	{
+		text name = "{gold_icon} in Religious Settlements"
+	}
+
+	stat rs_governor_gold_per_good
+	{
+		text name = "{gold_icon} per good produced"
+	}
+
+	stat rs_governor_books_university_or_madrasah
+	{
+		text name = "{books_icon} in governed town with University/Madrasah"
+		hide_multiplier = true
+	}
+
+	stat rs_governor_books_church_or_masjid
+	{
+		text name = "{books_icon} in governed town with Church/Masjid"
+		hide_multiplier = true
+	}
+
+	stat rs_governor_books_cathedral_or_great_mosque
+	{
+		text name = "{books_icon} in governed town with Cathedral/Great Mosque"
+		hide_multiplier = true
+	}
+
+	stat rs_levy_per_keep
+	{
+		mod kingdom = "ks_levy_per_keep"
+	}
+
+}
+
+def KingdomStats : Stats = "ks_"
+{
+	stat ks_debug = 10
+	{
+		text name = "Kingdom Debug Stat"
+		mod base = 10
+		mod perc = 50 { perc }
+		//mod unscaled = 10 {unscaled}
+	}
+
+	stat ks_debug2
+	{
+		text name = "debug2"
+	}
+	
+	stat ks_max_piety = 1000
+	{
+		text name = "[{kingdom.piety_icon}|piety] capacity in kingdom"
+	}
+	stat ks_max_books = 1000
+	{
+		text name = "{books_icon} capacity in kingdom"
+	}
+	
+	stat ks_prison_capacity = 3 // modified by royal dungeon buildings
+	{
+		text name = "prison capacity"
+	}
+	
+	stat ks_happiness = 0
+	{
+		text name = "kingdom happiness"
+	}
+	
+	stat ks_happines_in_orthodox_provinces = 0
+	{
+		text name = "happiness in orthodox provinces"
+	}
+	
+	stat ks_rebellion_risk_total_bonus
+	{
+		text name = "rebellion risk bonus in all provinces"
+	}
+	
+	stat ks_rebel_spawn_chance_bonus = 0
+	{
+		text name = "additional chance for rebels to spawn in all provinces"
+	}
+
+	stat ks_resupply_price_gold_reduction_perc = 0
+	{
+		text name = "army resupply gold reduction"
+	}
+
+	stat ks_army_refill_cost_perc
+	{
+		text name = "cost for refilling squads"
+		penalty = true
+	}
+
+	/// VERY IMPORTANT: mods won't show up in the tooltip unless they have an equivalent RebellionRiskCategory def
+	stat ks_stability = 0
+	{
+		text name = "stability" //fallback
+		mod taxes = (tax_level * -10) 									// RebellionRiskCategoryTaxes
+		mod wars = (round(-1 * ks_war_exhaustion))						// RebellionRiskCategoryWarExhaustion
+		mod dead_king = (ks_king_death * -1) 							// RebellionRiskCategoryDeadKing
+		mod hunger = #StabilityFromHunger 								// RebellionRiskCategoryHunger
+		mod crown_authority = #StabilityFromCrownAuthority 				// RebellionRiskCategoryCrownAuthority
+		mod traditions = (ks_kingdom_stability_from_traditions) 		// RebellionRiskCategoryTraditions
+		mod cleric = #StabilityFromHelpTheWeak 							// RebellionRiskCategoryHelpTheWeak
+		mod opinions = (round(ks_stability_from_opinions)) 				// RebellionRiskCategoryOpinions
+		mod rebel_leaders = #StabilityFromRebelLevels					// RebellionRiskCategoryRebelLeaders
+		mod defeated_rebels = (ks_defeated_rebellion)					// RebellionRiskCategoryDefeatedRebels
+		mod religous_bonuses = (ks_stability_religion)					// RebellionRiskCategoryReligionBonuses
+		mod religious_differences = #StabilityFromReligiousDifferences	// RebellionRiskCategoryReligionDifferences
+		mod cultural_differences = (round(#StabilityFromCultureDifferences))		// RebellionRiskCategoryCultureDifferences
+		mod own_spies = #StabilityFromOwnSpies                          // RebellionRiskCategoryOwnSpies
+	}
+
+	stat ks_defeated_rebellion = 0
+	{
+		text name = "stability"
+	}
+	
+	stat ks_stability_from_opinions = 0 // from opinions
+	{
+		text name = "stability"
+	}
+	
+	stat ks_stability_religion = 0 // from opinions
+	{
+		text name = "stability"
+	}
+
+	stat ks_inflation_reduction_perc = 0
+	{
+		text mod_text = "Inflation is reduced by {value}"
+	}
+	
+	stat ks_gold_from_trade = 0
+	{
+		text name = "{gold_icon} from trade"
+	}
+	stat ks_gold_per_good = 0
+	{
+		text name = "{gold_icon} per good"
+		multiplier = (num_goods)
+	}
+	stat ks_gold_per_population = 0
+	{
+		text name = "{gold_icon} per population"
+	}
+	stat ks_gold_from_royal_trade = 0
+	{
+		text name = "{gold_icon} from royal trade"
+	}
+	
+	stat ks_gold_in_ungoverned_realms_perc = 0
+	
+	stat ks_tax_bonus = 0
+	{
+		
+	}
+
+	stat ks_tax_rate = 10
+	{
+		min = 5
+		max = 20
+		mod from_authority = (crown_authority)
+		mod from_traditions = (ks_tax_rate_traditions)
+		mod from_skills = (ks_tax_rate_skills)
+	}
+
+	stat ks_tax_rate_traditions = 0
+
+	stat ks_tax_rate_skills = 0
+
+	stat ks_vassal_tax_perc = 15
+	{
+		text name = "{gold_icon} from vassal's income"
+	}
+	stat ks_jizya_tax_perc = 10
+	{
+		text name = "{gold_icon} income"
+	}
+	stat ks_liege_rein_perc = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+
+	stat ks_base_gold_income = 20
+	{
+		text name = "{gold_icon} income"	
+	}
+
+	stat ks_gold_from_goods = 0
+	{
+		text name = "{gold_icon} income"
+	}
+
+	stat ks_base_levy_income = 10
+	{
+		text name = "{levy_icon} income"		
+	}
+	
+	stat ks_prod_gold_perc = 0
+	{
+		text name = "{gold_icon} income"
+	}
+
+	stat ks_hammers_in_provinces_perc = 0
+	{
+		text name = "{hammers_icon} production"
+	}
+	stat ks_gold_in_orthodox_provinces_perc = 0
+	{
+		text name = "{gold_icon} in Orthodox provinces"
+	}
+
+	stat ks_prod_books_flat = 0
+	{
+		text name = "{books_icon} income"
+	}
+	stat ks_prod_books_goods = 0
+	{
+		text name = "{books_icon} income"
+	}
+	stat ks_prod_books_traditions = 0
+	{
+		text name = "{books_icon} income"
+	}
+	stat ks_prod_books_religion = 0
+	{
+		text name = "{books_icon} income"
+	}
+
+	stat ks_books_per_cleric = 1
+	{
+		text name = "{books_icon} per [{kingdom.cleric_title}|cleric]"	
+	}
+
+	stat ks_prod_books_perc = 0
+	{
+		text name = "{books_icon} in kingdom"
+	}
+	stat ks_prod_books_religion_perc = 0
+	{
+		text name = "{books_icon} in kingdom"
+	}
+	stat ks_gold_per_monastery = 0
+	{
+		text name = "{gold_icon} in Monasteries"
+	}
+	stat ks_books_per_monastery = 0
+	{
+		text name = "{books_icon} in [{kingdom.religious_settlement_name}|Religious Settlements]"
+	}
+	stat ks_books_per_village = 0
+	{
+		text name = "{books_icon} in Villages"
+	}
+	stat ks_books_per_society = 0
+	{
+		text name = "{books_icon} per society"
+	}
+
+	stat ks_production_bonus = 0
+	{
+		text name = "{hammers_icon} in provinces"
+	}
+
+    stat ks_piety_converted_to_books_from_pope_perc
+	{
+		text name = "{books_icon} from {piety_icon}"
+	}
+	stat ks_piety_converted_to_books_perc = 0
+	{
+		text name = "of [{kingdom.piety_icon}|piety] converted to {books_icon}"
+		mod from_caliphate = (ks_caliphate_books_per_piety)
+		mod from_controlling_papacy = (ks_piety_converted_to_books_from_pope_perc)
+		max = 100
+	}
+
+	stat ks_caliphate_books_per_piety = 0
+	{
+		text name = "of [{kingdom.piety_icon}|piety] converted to {books_icon}"
+	}
+	
+	stat ks_prod_piety_flat = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+	stat ks_prod_piety_opinions = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+
+	stat ks_prod_piety_traditions = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+
+	stat ks_prod_piety_advantages = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+	
+	stat ks_prod_piety_perc = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+	stat ks_prod_piety_religion_perc = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] income"
+	}
+    
+    stat ks_piety_per_religous_settlement = 0
+    {
+		text name = "[{kingdom.piety_icon}|piety] in Religious Settlements"
+    }
+	stat ks_piety_per_monastery = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] in Monasteries"
+	}
+	stat ks_piety_per_society = 0
+	{
+		text name = "[{kingdom.piety_icon}|piety] per society"
+	}
+
+	stat ks_heresy_susceptibility_perc
+	{
+		text name = "chance for heresy to spread"
+		penalty = true
+	}
+	
+	stat ks_prod_trade_perc = 0 //!!! not implemented
+	{
+		text name = "{trade_icon} available" //"commerce"
+	}
+	
+	stat ks_max_population = 0
+	{
+		text name = "{workers_icon} in all towns"
+	}
+	stat ks_population_growth_perc = 0
+	{
+		text name = "population growth in all provinces"
+	}
+	stat ks_levi_growth_perc = 0
+	{
+		text name = "population growth"
+	}
+
+	stat ks_max_food_in_towns = 0
+	{
+		text name = "{food_icon} storage in all towns"
+	}
+	
+	stat ks_food_in_farms = 0
+	{
+		text name = "{food_icon} in Crop farms"
+	}
+	stat ks_food_in_towns = 0
+	{
+		text name = "{food_icon} in towns"
+	}
+	stat ks_food_in_coastal_villages = 0
+	{
+		text name = "{food_icon} in coastal villages"
+	}
+	stat ks_max_food_in_provinces_per_village = 0
+	{
+		text name = "max food in provinces per village"
+	}
+	stat ks_food_production_perc
+	{
+		text name = "{food_icon} in all provinces"
+	}
+	stat ks_gold_in_coastal_villages = 0
+	{
+		text name = "{gold_icon} in coastal villages"
+	}
+
+	stat ks_gold_in_coastal_settlements = 0
+	{
+		text name = "{gold_icon} in coastal settlements"
+	}
+
+	stat ks_gold_in_castles = 0
+	{
+		text name = "{gold_icon} in castles"
+	}
+	
+	stat ks_gold_per_coastal_realm = 0
+	{
+		text name = "{gold_icon} in coastal provinces"
+	}
+
+	stat ks_base_trading_income = 0
+	{
+		text name = "{gold_icon} base merchant trade income"
+	}
+	
+	stat ks_merchant_trade_income_perc = 100
+	{
+		text name = "{gold_icon} merchant trade income"
+	}
+
+	stat ks_base_commerce = 15
+	
+	stat ks_commerce = (incomes.trade.TOTAL)
+	{
+		text name = "{trade_icon}" //"commerce"
+		//mod base = (ks_base_commerce)
+		//mod from_realms = #SumRealmsMaxTradePower
+		//mod from_religion = (ks_commerce_religion)
+		//mod from_ideas = (ks_commerce_ideas)
+	}
+	stat ks_commerce_religion = 0
+	{
+		text name = "{trade_icon} in kingdom" //"commerce from religion"
+	}
+	stat ks_commerce_ideas = 0
+	{
+		text name = "{trade_icon} in kingdom" //"commerce from ideas"
+	}
+
+	stat ks_commerce_goods = 0
+	{
+		text name = "{trade_icon} in kingdom" //"commerce from ideas"
+	}
+	
+	stat ks_max_arms = 200
+	{
+		text name = "arms capacity"
+	}
+
+	stat ks_max_levy = 1000
+	{
+		text name = "{levy_icon} capacity in kingdom"
+	}
+
+	stat ks_levy_per_village = 0
+	{
+		text name = "{levy_icon} in every village in kingdom"
+	}
+
+	stat ks_troops_per_levy = 40
+	{
+		text name = "troops per levy garrison squad"
+	}
+	
+	stat ks_pillage_interrupt_chance_bonus = 0
+	
+	
+	stat ks_arms_production_mod = 0 // 100 + mod/100
+	
+	stat ks_trade_per_society = 0
+	{
+		text name = "{trade_icon} per society" //"commerce per society"	
+	}
+	stat ks_trade_per_food = 0
+	{
+		text name = "{trade_icon} per food" //"commerce per food"	
+	}
+	stat ks_trade_per_coastal_realm = 0
+	{
+		text name = "{trade_icon} in coastal provinces" //"commerce per coastal province"
+		multiplier = (kingdom.coastal_realms_count)
+	}
+	stat ks_trade_per_trading_merchant = 0
+	{
+		text name = "{trade_icon} per merchant" //"commerce per merchant"		
+	}
+
+	stat ks_trade_income_perc = 0
+	{
+		text name = "{gold_icon} merchant trade income"
+	}
+	stat ks_trade_income_with_constantinople_perc = 0
+	{
+		text name = "{gold_icon} merchant trade income with {ecumenical_patriarch_kingdom}"
+	}
+	stat ks_trade_income_with_subordinated_perc = 0
+	{
+		text name = "{gold_icon} merchant trade income with subordinated kingdoms"
+	}
+	
+	
+	stat ks_increase_TC_range = 0
+	{
+		text name = "trade center range increase"
+	}
+
+	stat ks_tc_sea_spread_penalty_reduced_perc = 0
+	{
+		text name = "reduction of trade spread penalty over seas"
+		min = 0
+		max = 80
+	}
+
+	stat ks_gold_for_own_influenced_by_TC_realms = 0
+	{
+		text name = "{gold_icon} for provinces influenced by trade denter"
+	}
+	
+	stat ks_recruit_cost_bonus_perc = 0
+	{
+		text name = "cheaper squads"
+	}
+	
+	stat ks_build_cost_discount_perc = 0
+	{
+		text name = "cheaper building costs in kingdom"
+		mod king = (king.cs_build_cost_discount_perc)
+		mod build_upgrade_discount = (ks_build_upgrade_cost_discount_perc)
+		max = 50
+	}
+
+	stat ks_upgrade_cost_discount_perc = 0
+	{
+		text name = "cheaper upgrade costs"
+		mod king = (king.cs_upgrade_cost_discount_perc)
+		mod build_upgrade_discount = (ks_build_upgrade_cost_discount_perc)
+		max = 50
+	}
+
+	stat ks_build_upgrade_cost_discount_perc = 0
+	{
+		text name = "cheaper buildings and upgrades costs"
+		mod king_effect = (king_economy_ability * 3)
+	}
+
+	stat ks_hire_knight_cost_discount_perc = 0
+	{
+		text name = "cheaper price for hiring knights"
+		mod king = (king.cs_hire_knight_cost_discount_perc)
+		show_plus_sign = false
+	}
+	stat ks_knight_wage_discount_perc = 0
+	{
+		text name = "lower knight wages"
+	}
+	stat ks_reduce_religious_tension_perc = 0
+	{
+		text name = "lower religuious tension"
+	}
+	stat ks_reduce_culture_tension_perc = 0
+	{
+		text name = "lower cultural tension"
+	}
+	stat ks_catch_spies_chance_perc = 0 //!!! not implemented
+	{
+		text name = "chance to catch spies"
+	}
+	
+	stat ks_war_exhaustion = 0
+	{
+		min = 0
+		max = 100
+		text name = "war exhaustion"
+	}
+	stat ks_king_death = 0
+	
+	stat ks_troop_cost_increase = 0
+	{
+		text name = "increase in squads hire cost"
+	}
+	
+	stat ks_initial_troops_level = 0
+	{
+		text name = "initial squad rank"
+	}
+
+	stat ks_enemy_rebels_morale
+	{
+		text name = "enemy rebels morale"
+		penalty = true
+	}
+	
+	stat ks_army_morale = 0
+	{
+		text name = "army morale"
+		max = 30
+		
+		mod great_power = (is_great_power * 3) { text mod_name = "Great power" }
+		mod important_relatives = (morale_from_relatives) { text mod_name = "Important relative marshals"}
+	}
+
+	stat ks_troops_resilience
+	{
+		text name = "squads resilience"
+	}
+
+	stat ks_troops_shock
+	{
+		text name = "squads chance to shock"
+	}
+
+
+	stat ks_rebel_morale = 0
+	{
+		text name = "morale of all rebels in the kingdom"
+		penalty = true
+	}
+
+	stat ks_army_morale_restoring_papacy = 5
+	{
+		text name = "army morale against {rome_kingdom}"
+	}
+	stat ks_army_morale_vs_other_religion = 5
+	{
+		text name = "army morale when fighting against other religions"
+	}
+	stat ks_army_morale_vs_occupators = 3
+	{
+		text name = "army morale when fighting to recapture own province from occupators"
+	}
+	stat ks_army_morale_at_home = 3
+	{
+		text name = "army morale in own kingdom"
+	}
+
+	stat ks_army_morale_at_allied = 0
+	{
+		text name = "army morale in allied kingdom"
+	}
+
+	stat ks_army_morale_at_neutral = -3
+	{
+		text name = "army morale in neutral kingdom"
+	}
+
+	stat ks_peasants_morale //!!! revise when the morale mechanic is finalized
+	{
+		text name = "morale of peasant and militia squads"
+	}
+
+	// stat ks_army_slot_bonus = 0
+	// {
+	// 	text name = "additional army squads"
+	// }
+
+	stat ks_army_item_bonus
+	{
+		text name = "maximum army inventory slots"
+	}
+	
+	stat ks_army_speed_world_perc = 0
+	{
+		text name = "army travel speed"
+		max = 30
+	}
+
+	stat ks_army_defense_perc = 0
+	{
+		text name = "squads defense"
+	}
+	stat ks_infantry_defense = 0
+	{
+		text name = "infantry and spearmen defense"
+	}
+
+	stat ks_army_attack_perc = 0 //!!! not implemented
+	{
+		text name = "army attack"
+	}
+	stat ks_ranged_CTH_perc = 0
+	{
+		text name = "ranged squads attack"
+	}
+	stat ks_cavalry_CTH_perc = 0
+	{
+		text name = "cavalry attack"
+	}
+	stat ks_heavy_cavalry_CTH_perc = 0
+	{
+		text name = "heavy cavalry attack"
+	}
+	stat ks_heavy_cavalry_trample_chance_perc = 0
+	{
+		text name = "heavy cavalry trample chance"
+	}
+	stat ks_cavalry_discount_perc = 0
+	{
+		text name = "cavalry discount"
+	}
+	stat ks_cavalry_resilience = 0
+	{
+		text name = "cavalry resilience"
+	}
+	stat ks_camels_CTH_perc = 0
+	{
+		text name = "camel cavalry attack"
+	}
+	stat ks_camels_discount_perc = 0
+	{
+		text name = "camel cavalry cost reduction"
+	}
+	stat ks_camels_resilience = 0
+	{
+		text name = "camel cavalry resilience"
+	}
+	stat ks_heavy_unit_defense_flat = 0
+	{
+		text name = "heavy squads defense"
+	}
+	stat ks_defense_flat = 0
+	{
+		text name = "squads defense"
+	}
+	stat ks_elite_unit_defense_flat = 0
+	{
+		text name = "elite squads defense"
+	}
+	stat ks_ships_level = 0
+	{
+		text name = "ship level"
+		//mod realms = #max_realm_ships_level !!! obsolete 
+		mod admiralty_completed = (ks_has_admiralty > 0)
+		min = 0
+		max = 2
+		show_value = false
+	}
+	stat ks_has_admiralty = 0
+	{
+		text name = "ship level"
+	}
+
+	stat ks_ships_speed_perc = 0
+	{
+		text name = "ship sailing speed for all armies"
+	}
+	stat ks_embark_speed_perc = 0
+	{
+		text name = "faster embarking"
+	}
+	
+	stat ks_settlement_razed_penalty = 0
+	{
+		text name = "razed restore penalty"
+	}
+	stat ks_pillage_gold_perc = 0
+	{
+		text name = "{gold_icon} from pillaging"
+	}
+	stat ks_siege_defense = 0
+	{
+		text name = "siege defense"
+	}
+	stat ks_siege_resilience = 0
+	{
+		text name = "siege resilience"
+	}
+	stat ks_levy_per_keep = 0
+	{
+		text name = "{levy_icon} in Castles in kingdom"
+	}
+	stat ks_town_guards = 1 
+	{
+		text name = "{guard_icon} in Town"
+	}
+	stat ks_siege_attack = 0
+	{
+		text name = "siege attack"
+	}
+	stat ks_base_siege_damage_perc
+	{
+		text name = "army's base siege damage"
+	}
+	stat ks_siege_equipment_siege_damage_perc
+	{
+		text name = "siege equipment siege damage"
+	}
+	stat ks_horse_cavalry_CTH_perc
+	{
+		text name = "horse cavalry attack"
+	}
+	stat ks_horse_cavalry_discount_perc
+	{
+		text name = "horse cavalry cost reduction"
+	}
+	stat ks_horse_cavalry_resilience
+	{
+		text name = "horse cavalry resilience"
+	}
+	stat ks_siege_equipment_cth_perc
+	{
+		text name = "siege equipment attack"
+	}
+	stat ks_siege_equipment_health_perc
+	{
+		text name = "siege equipment health"
+	}
+	stat ks_siege_equipment_discount_perc // only siege equipment, not additional troops/supply wagon
+	{
+		text name = "siege equipment cost reduction"
+	}
+	stat ks_melee_CTH_perc = 0
+	{
+		text name = "melee squads attack"
+	}
+	stat ks_infantry_CTH_perc = 0
+	{
+		text name = "infantry and defense attack"
+	}
+
+	stat ks_siege_attack_perc = 0
+	{
+		text name = "Siege attack"
+	}
+	stat ks_chance_to_convert_conquered_realm_perc = 0 //!!! not implemented
+	{
+		text name = "chance to convert conquered province religion"
+	}
+	stat ks_convert_religion_duration_reduction_perc = 0
+	{
+		text name = "reduce convert religion prepare duration"
+	}
+	stat ks_convert_chance_after_siege_perc
+	{
+		text name = "Chance to convert religion of towns upon conquering"
+	}
+	stat ks_piety_per_cleric = 1
+	{
+		text name = "bonus [{kingdom.piety_icon}|piety] per [{kingdom.cleric_title}|cleric]"
+	}
+	
+	stat ks_keeps_local_stability_bonus = 0
+	{
+		text name = "bonus stability per castle"
+	}
+	
+	stat ks_fame_bonus = 0
+	{
+		mod ecumenical_patriarch = (ks_fame_ecumenical_patriarch_bonus)
+		mod autocephaly = (ks_fame_autocephaly_bonus)
+		mod caliphate = (ks_fame_caliphate_bonus)
+		mod non_orthodox = (ks_fame_non_orthodox_bonus)
+		mod traditions = (ks_fame_traditions)
+		text name = "fame bonus"
+	}
+
+	stat ks_fame_ecumenical_patriarch_bonus = 0
+	{
+		text name = "fame from Ecumenical Patriarch"
+	}
+
+	stat ks_fame_traditions = 0
+	{
+		text name = "fame"
+	}
+
+	stat ks_fame_autocephaly_bonus = 0
+	{
+		text name = "fame from autocephaly"
+	}
+
+	stat ks_fame_non_orthodox_bonus = 0
+	{
+		text name = "non orthodox fame bonus"
+	}
+
+	stat ks_fame_caliphate_bonus = 0
+	{
+		text name = "fame from caliphate"
+	}
+	
+	stat ks_kingdom_stability_from_traditions
+	{
+		text name = "kingdom stability"
+	}
+	
+	stat ks_orthodox_provinces_stability = 0
+	{
+		text name = "stability in orthodox provinces"
+	}
+	stat ks_catholic_influence = 0
+	{
+		text name = "influence in all catholic kingdoms"
+	}
+
+	stat ks_orthodox_influence = 0
+	{
+		text name = "influence in all orthodox kingdoms"
+	}
+	stat ks_orthodox_subordinated_influence = 0
+	{
+		text name = "influence in subordinated kingdoms"
+		mod orthodox = (ks_orthodox_influence)
+	}
+	stat ks_orthodox_independent_influence = 0
+	{
+		text name = "influence in independent kingdoms"
+		mod orthodox = (ks_orthodox_influence)
+	}
+	stat ks_caliphate_influence = 0
+	{
+		text name = "caliphate influence in all muslim kingdoms"
+	}
+
+	// stat ks_papacy_relation_increase_perc
+	// {
+	// 	text name = "higher relations increases with the Papacy"
+	// }
+	// stat ks_papacy_relation_decrease_perc
+	// {
+	// 	text name = "less relations drops with the Papacy"
+	// 	//penalty = true
+	// }
+	
+	stat ks_cost_for_autocephaly //!!! not implemented
+	{
+		text name = "cost for autocephaly"
+		penalty = true
+	}
+
+	stat ks_chance_avoid_opinion_drops_perc = 0
+	{
+		text name = "chance to avoid opinion drops"
+	}
+
+
+
+// ----  CULTURE ----------
+
+
+
+	stat ks_culture_from_opinions_perc = 0 
+	{
+		text name = "cultural power"
+	}
+	stat ks_culture_from_pope = 0 
+	{
+		text name = "cultural power"
+	}
+
+	stat ks_culture_from_goods = 0 
+	{
+		text name = "cultural power"
+	}
+
+
+	//NOTE: when changing modifiers of this stat also update cultrure breakdown in IncomePanels.def
+	stat ks_base_culture = 0
+	{
+		min = 0
+		text name = "cultural power" 
+		mod from_books = (kingdom_books_income * 0.25)
+		mod from_faith = (kingdom_piety_income * 0.25)
+		mod from_goods = (ks_culture_from_goods)
+		mod universities = (num_universities * ks_culture_universities)
+		mod from_buildings = (ks_culture_from_buildings)
+		mod from_traditions = (ks_culture_from_traditions)
+		mod from_advantages = (ks_kingdom_advantages_culture)
+		mod from_governed_monasteries = #CultureFromGovernedMonasteries //works for all religions
+		mod from_controlling_papacy = (ks_culture_from_pope)
+	}
+
+	//NOTE: when changing modifiers of this stat also update cultrure breakdown in IncomePanels.def
+	stat ks_culture = 0
+	{
+		min = 0
+		max = 1000
+		text name = "cultural power"
+		mod base_culture = (ks_base_culture) { text mod_name = "Base cultural power" }
+		mod from_influence = (ks_base_influence * 0.25)
+		mod king_effect = (king_religion_ability * 3 + (king.is_cleric * king.class_level)) { perc }
+		mod from_ca = (MapCA(kingdom,-20,0,20)) { perc }		
+		mod great_power = (is_great_power * 20) { perc }
+		mod from_opinions = (ks_culture_from_opinions_perc) { perc }
+		mod from_cleric_bolster = (5 + culture_bolster_cleric.class_level) { perc }
+	}
+
+	stat ks_culture_universities
+	{
+		text name = "cultural power per University"
+	}
+
+	stat ks_culture_from_traditions = 0 //and skills
+	{
+		text name = "cultural power"
+	}
+
+	stat ks_culture_from_buildings = 0 //and upgrades
+	{
+		text name = "cultural power"
+	}
+
+	stat ks_kingdom_advantages_culture
+	{
+		text name = "cultural power"
+	}
+
+
+
+// ----  INFLUENCE ----------
+
+
+	stat ks_influence_from_opinions_perc = 0
+	{
+		text name = "influence"
+	}
+
+	stat ks_influence_from_goods = 0
+	{
+		text name = "influence"
+	}
+	
+	stat ks_influence_from_pope = 0
+	{
+		text name = "influence"
+	}
+	//NOTE: when changing modifiers of this stat also update influence breakdown in IncomePanels.def
+	stat ks_base_influence = 0 
+	{
+		min = 0
+		max = 1000
+		text name = "kingdom base influence"
+		mod from_kings_leadership = (ks_king_leadership_influence)
+		mod from_goods = (ks_influence_from_goods)
+		mod from_traditions = (ks_kingdom_traditions_influence)
+		mod from_advantages = (ks_kingdom_advantages_influence)
+		mod from_governed_keeps = #InfluenceFromGovernedKeeps	
+		mof from_caliphate = (kingdom.is_caliphate * 150)
+		mod from_holy_lands = (kingdom.holy_lands_count * 50)
+		mod from_papacy = (kingdom.is_papacy * 200)	
+		mod from_important_relatives = (influence_from_relatives)
+		mod from_controlling_papacy = (ks_influence_from_pope)
+	}
+
+	//NOTE: when changing modifiers of this stat also update influence breakdown in IncomePanels.def
+	stat ks_influence = 0
+	{
+		min = 0
+		max = 1000
+		text name = "kingdom influence"
+		mod base_influence = (ks_base_influence)
+		mod from_culture = (ks_base_culture * 0.2)
+		mod king_effect = (king_diplomacy_ability * 1 + (king.is_diplomat * king.class_level)) { perc }
+		mod from_ca = (MapCA(kingdom,-20,0,20)) { perc }
+		mod from_opinions = (ks_influence_from_opinions_perc) { perc }
+		mod great_power = (is_great_power * 20) { perc }
+	}
+
+	stat ks_king_leadership_influence = 0
+	{
+		text name = "kingdom influence"
+	}
+
+	stat ks_kingdom_traditions_influence = 0
+	{
+		text name = "kingdom influence"
+	}
+
+	stat ks_kingdom_advantages_influence = 0
+	{
+		text name = "kingdom influence"
+	}
+
+	// stat ks_influence_from_holy_lands = 0
+	// {
+	// 	text name = "influence in all [{is_muslim:if}muslim][{is_christian:if}christian] kingdoms from holy provinces"
+	// }
+	
+	stat ks_influence_in_constantinople_owner = 0
+	{
+		text name = "influence in {ecumenical_patriarch_kingdom}"
+	}
+	stat ks_influence_in_caliphate = 0
+	{
+		text name = "influence in caliphate"
+	}
+	stat ks_influence_in_neighbors = 0
+	{
+		text name = "influence in all neighbors"	
+
+	}	
+	stat ks_character_additional_skill_pick = 0
+	{
+		text name = "additional skill pick per character level"
+	}
+	stat ks_character_experience_perc = 0
+	{
+		text name = "higher experience gains for all knights"
+	}
+	stat ks_troop_experience_gain_rate_perc
+	{
+		text name = "faster squads' experience gain"
+		show_plus_sign = false //e.g. result = "20% faster troop experience gain rate"
+	}
+	stat ks_nationalism = 0
+	{
+		text name = "higher influence in provinces with our population"
+	}
+	stat ks_nationalism_rebel_risk = 0
+	{
+		text name = "chance for loyalists to spawn in foreign provinces under your influence"
+	}
+	stat ks_ransom_cost_perc
+	{
+		text name = "cost for ransoming your imprisoned knights"
+		penalty = true
+	}
+	
+	stat ks_accept_marriage_pc_bonus = 0
+	stat ks_vassal_annex_pc_bonus = 0
+	stat ks_intimidation_pc_bonus = 0
+	stat ks_spy_action_success_chance = 0 //added in chance 
+	{
+		text name = "chance for spy actions to succeed"
+	}
+	stat ks_enemy_spy_action_success_chance = 0 //added chance
+	{
+		text name = "chance for enemy spy actions to succeed"
+	}
+	stat ks_counter_espionage_tick_time = 0 //percent
+	{
+		text name = "time to reveal of enemy spies"
+	}
+	stat ks_salvo_capacity_bonus_perc = 0
+	{
+		text name = "ranged squads salvo capacity"
+	}
+	stat ks_attrition_bonus = 0
+	{
+		text name = "fortifications attrition damage"
+	}
+	
+	// stat all_knights_CL_bonus = 0
+	// stat marshal_CL_bonus = 0
+	// {
+	// 	min = 0
+	// 	max = 6
+	// 	mod all_bonus = = (all_knights_CL_bonus)
+	// }
+	// stat merchant_CL_bonus = 0
+	// {
+	// 	min = 0
+	// 	max = 6
+	// 	mod all_bonus = = (all_knights_CL_bonus)
+	// }
+	// stat diplomat_CL_bonus = 0
+	// {
+	// 	min = 0
+	// 	max = 6
+	// 	mod all_bonus = = (all_knights_CL_bonus)
+	// }
+	// stat spy_CL_bonus = 0
+	// {
+	// 	min = 0
+	// 	max = 6
+	// 	mod all_bonus = = (all_knights_CL_bonus)
+	// }
+	// stat cleric_CL_bonus = 0
+	// {
+	// 	min = 0
+	// 	max = 6
+	// 	mod all_bonus = = (all_knights_CL_bonus)
+	// }
+
+	stat ks_squad_size_perc = 0
+	{
+		text name = "armies manpower"	
+	}
+	
+	stat ks_infantry_squad_size_perc = 0
+	{
+		text name = "infantry and defense squads manpower"
+	}
+
+	stat ks_ranged_squad_size_perc = 0
+	{
+		text name = "ranged squads manpower"
+	}
+	
+	stat ks_mounted_squad_size_perc = 0
+	{
+		text name = "cavalry squads manpower"
+	}
+
+	stat ks_disorganized_state_disable
+	{
+		text mod_text = "Armies do not enter disorganized states"
+	}
+
+	stat ks_CA_cost_perc 
+	{
+		text name = "Crown Authority increase cost"
+		//show_plus_sign = false
+		penalty = true
+		mod ks_CA_cost_tradition_perc = (ks_CA_cost_tradition_perc)
+		min = -90
+	}
+
+	stat ks_CA_cost_tradition_perc 
+	{
+		text name = "Crown Authority increase cost"
+		//show_plus_sign = false
+		penalty = true
+		min = -90
+	}
+
+	stat ks_naval_CTH
+	{
+		text name = "attack in sea battles"
+	}
+
+	stat ks_corruption = 0
+	{
+		text name = "corruption"
+		penalty = true
+		min = 0
+		max = 100
+	}
+
+	stat ks_mercenary_price_reduction_perc
+	{
+		text name = "Hire cost and upkeep for mercenaries"
+		//show_plus_sign = false
+		penalty = true
+	}
+
+	stat ks_units_training_gold_perc
+	{
+		text name = "Gold cost for hiring squads"
+		penalty = true
+		//show_plus_sign = false
+	}
+
+	stat ks_import_goods_and_food_upkeep_reduction_perc = 0
+	{
+		text name = "lower upkeep for importing goods and food"
+		show_plus_sign = false
+		max = 50
+	}
+
+	stat ks_gold_from_own_TCs_perc
+	{
+		text name = "{gold_icon} generated in our trade centers"
+	}
+
+	stat ks_max_crown_authority
+	{
+		text name = "maximum crown authority"
+	}
+
+	stat ks_min_crown_authority
+	{
+		text name = "minimal crown authority"
+	}
+
+	stat ks_enemy_murder_plots_CTS_perc
+	{
+		text name = "chance for enemy spies' Murder Plots to succeed against us "
+		penalty = true
+	}
+
+	stat ks_own_murder_plots_CTS_perc
+	{
+		text name = "chance for our spies' Murder Plots to succeed"
+	}
+
+	stat ks_espionage_defense_TT
+	{
+		text name = "Espionage defense"
+		mod traditions = (ks_espionage_defense_skills_traditions)
+		mod opinions = (ks_espionage_defense_opinions)
+		mod crown_autority = (MapCA(kingdom, 0, 0, 15))
+		mod king =  (2 * king.is_spy * king.class_level)
+		mod relatives = (espionage_defense_from_relatives)
+		mod spy_governed_keeps = (espionage_defense_from_spy_governed_keeps)
+		//!!! add important relatives spy bonus like mod important_relatives = (5 * kingdom.important_relative_spies)
+	}
+
+	stat ks_espionage_defense_skills_traditions
+	{
+		text name = "espionage defense"
+	}
+
+	stat ks_espionage_defense_opinions
+	{
+		text name = "espionage defense"
+	}
+	
+	stat ks_intrigue_cost_perc
+	{
+		text name = "plots intrigue cost"
+		penalty = true
+	}
+
+	stat ks_plot_reveal_chance_reduction_perc
+	{
+		text name = "lower spy actions reveal chance"
+		show_plus_sign = false
+	}
+	stat ks_enemy_plot_army_revolt_strength = 0
+	{
+		text name = "strength of enemy 'army revolt' plots"
+		penalty = true
+	}
+
+	stat ks_own_knight_bribe_cost_perc
+	{
+		text name = "cost of bribing our knights"
+	}
+
+	stat ks_bribe_CTS_perc
+	{
+		text name = "chance for our spies to bribe other knights"
+	}
+
+	stat ks_adopt_tradition_discount_perc
+	{
+		text mod_text = "Traditions are {value} cheaper to adopt"
+		mod ks_learn_upgrade_skill_tradition_discount_perc = (ks_learn_upgrade_skill_tradition_discount_perc)
+	}
+
+	stat ks_upgrade_tradition_discount_perc
+	{
+		text mod_text = "Traditions are {value} cheaper to upgrade"
+		mod ks_learn_upgrade_skill_tradition_discount_perc = (ks_learn_upgrade_skill_tradition_discount_perc)
+	}
+
+	stat ks_learn_skill_discount_perc
+	{
+		text mod_text = "Skills are {value} cheaper to learn"
+		mod ks_learn_upgrade_skill_tradition_discount_perc = (ks_learn_upgrade_skill_tradition_discount_perc)
+	}
+
+	stat ks_upgrade_skill_discount_perc
+	{
+		text mod_text = "Skills are {value} cheaper to improve"
+		mod ks_learn_upgrade_skill_tradition_discount_perc = (ks_learn_upgrade_skill_tradition_discount_perc)
+	}
+
+	stat ks_learn_upgrade_skill_tradition_discount_perc
+	{
+		text mod_text = "{value} cheaper skills and traditions learning and improving"
+	}
+
+	stat ks_conversion_against_us_perc // this is about the change in pop_majority - i.e. a modifier over the population influcence. Not to be confused with the convert religion.
+	{
+		min = 0
+		max = 100
+		text name = "rate our people are converted by other kingdoms"
+		penalty = true
+	}
+
+	stat ks_discard_exile_abandon_penalties
+	{
+		text mod_text = "No penalties upon exiling or abandoning a knight"
+	}
+
+	stat ks_piety_cathedrals
+	{
+		text name = "[{kingdom.piety_icon}|piety] in all provinces with Cathedrals/Great Mosques"
+	}
+
+	stat ks_princes_skill_upgrade
+	{
+		text mod_text = "Princes learn their skills at level 3"
+	}
+
+	//          PLACEHOLDER TRADITION Stats
+
+	stat ks_marry_foreign_princesses_chance //can give pro-con (!!! not implemented)
+	{
+		text mod_text = "Higher chance for kingdoms to accept royal marriages"
+	}
+
+	stat ks_profit_from_colonies_perc
+	{
+		text name = "more profit from colonies";
+	}
+
+	stat ks_chance_for_expedition_perc
+	{
+		text name = "increased chance for successful expedition"
+	}
+
+	stat ks_chance_to_establish_colony = 20
+	{
+		text name = "chance to establish trade colony"
+	}
+
+	stat ks_allow_PuppetSupportPretenderToTheThroneAction = 0
+	{
+		text mod_text = "Plot: {clr:gold}Support pretender to the throne{/clr}" //!!! temporary formatting!
+		max = 1
+	}
+
+	stat ks_sow_dissent_chance
+	{
+		text name = "more effective sow dissent"
+	}
+
+	stat ks_witch_hunt_efficiency_perc 
+	{
+		text name = "Witch Hunt Efficiency"
+	}
+
+
+}

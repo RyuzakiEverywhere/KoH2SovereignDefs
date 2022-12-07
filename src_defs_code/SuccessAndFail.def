@@ -1,0 +1,45 @@
+def SuccessAndFail
+{
+	text prefix = "{indent:1em}"
+	text suffix = "{/indent}{indent:4em}{name}{/indent}"
+
+	text positive =      "{SuccessAndFail.prefix}{value:bonus}{SuccessAndFail.suffix}"
+	text positive_perc = "{SuccessAndFail.prefix}{value:bonus:%}{SuccessAndFail.suffix}"
+	text zero =          "{SuccessAndFail.prefix}{clr:gray}--{SuccessAndFail.suffix}{/clr}"
+	text zero_perc =     "{SuccessAndFail.prefix}{clr:gray}--{SuccessAndFail.suffix}{/clr}"
+	text negative      = "{SuccessAndFail.prefix}{value:bonus}{SuccessAndFail.suffix}"
+	text negative_perc = "{SuccessAndFail.prefix}{value:bonus:%}{SuccessAndFail.suffix}"
+
+	text positive_penalty =      "{SuccessAndFail.prefix}{value:penalty}{SuccessAndFail.suffix}"
+	text positive_penalty_perc = "{SuccessAndFail.prefix}{value:penalty:%}{SuccessAndFail.suffix}"
+	text zero_penalty =          "{SuccessAndFail.prefix}{clr:gray}--{SuccessAndFail.suffix}{/clr}"
+	text zero_penalty_perc =     "{SuccessAndFail.prefix}{clr:gray}--{SuccessAndFail.suffix}{/clr}"
+	text negative_penalty      = "{SuccessAndFail.prefix}{value:penalty}{SuccessAndFail.suffix}"
+	text negative_penalty_perc = "{SuccessAndFail.prefix}{value:penalty:%}{SuccessAndFail.suffix}"
+
+	sf_crown_authority // = min/max
+	{ 
+		text name = "Our Crown Authority"
+	}
+	sf_king_skills // = [ "Skill1", "Skill2", ...]
+	{
+		text name = "King Skills"
+		level_values = 1/2/3
+	}
+	sf_king_class // = value/"class_name", // no default text, specify it where used and mention the class
+
+	sf_king_class_level // = multiplier (float), default: 1
+	{
+		text name = "King class level"
+	}
+
+	sf_class_level
+	{
+		text name = "Class level"
+	}
+
+	sf_they_are_player
+	{
+		text name = "Target kingdom is controlled by a player"
+	}
+}

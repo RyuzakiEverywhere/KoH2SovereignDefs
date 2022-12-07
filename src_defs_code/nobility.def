@@ -1,0 +1,805 @@
+def Nobility
+{
+	// nobility levels (a.k.a. kingdom types)
+	text Duchy = "Duchy"
+	text Kingdom = "Kingdom"
+	text Empire = "Empire"
+
+	// title keys depending on kingdom type
+	title_keys
+	{
+		Duchy
+		{
+			King = "Duke"
+			Queen = "Duchess"
+		}
+		Kingdom
+		{
+			King = "King"
+			Queen = "Queen"
+		}
+		Empire
+		{
+			King = "Emperor"
+			Queen = "Empress"
+		}
+	}
+	
+	// "common noble" title
+	text Knight = "Earl"
+	
+	// "Governors"
+	//text Knight = "Earl"
+	
+	// prices and princesses
+	text Prince = "Prince"
+	text Princess = "Princess"
+	
+	// kings and queens
+	text Duke = "Duke"
+	text Duchess = "Duchess"
+	text King = "King"
+	text Queen = "Queen"
+	text Emperor = "Emperor"
+	text Empress = "Empress"
+	text Concubine = "Lady"
+	text Lady = "Lady"
+	text MercenaryLeader = "Mercenary Leader"
+	text None = ""
+}
+
+def NordicNobility : Nobility
+{
+	Duchy = "Jarldom"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Knight"
+	Duke = "Jarl"
+	Duchess = "Duchess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def TribalNobility : Nobility
+{
+	Duchy = "Tribe"
+	Kingdom = "High Chiefdom"
+	Empire = "Empire"
+	
+	Knight = "Alderman"
+	Duke = "Tribal Chief"
+	Duchess = "Tribal Chieftess"
+	King = "High Chieftain"
+	Queen = "High Chieftainess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def AllNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Count"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Countess"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def RussNobility : Nobility
+{
+	Duchy = "Principality"
+	Kingdom = "Grand Principality"
+	Empire = "Tsardom"
+	
+	Knight = "Boyar"
+	Duke = "Knyaz"
+	Duchess = "Knyaginya"
+	King = "Grand Prince"
+	Queen = "Grand Princess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Boyarina"
+	Emperor = "Tsar"
+	Empress = "Tsaritsa"
+}
+
+def SteppeNobility : Nobility
+{
+	Duchy = "Chiefdom"
+	Kingdom = "Khanate"
+	Empire = "Khaganate"
+	
+	Knight = "Bagatur"
+	Duke = "Noyan"
+	Duchess = "Khatun"
+	King = "Khan"
+	Queen = "Khatun"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Khatun"
+	Emperor = "Khagan"
+	Empress = "Khatun"
+}
+
+def TurkNobility : Nobility
+{
+	Duchy = "Beylik"
+	Kingdom = "Kingdom"
+	Empire = "Sultanate"
+	
+	Knight = "Aga"
+	Duke = "Bey"
+	Duchess = "Beygum"
+	King = "Sultan"
+	Queen = "Sultana"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Hatun"
+	Emperor = "Sultan"
+	Empress = "Sultana"
+}
+
+def GreekNobility : Nobility
+{
+	Duchy = "Despotate"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Kyrios"
+	Duke = "Despote"
+	Duchess = "Despina"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Kyria"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def ArabNobility : Nobility
+{
+	Duchy = "Emirate"
+	Kingdom = "Kingdom"
+	Empire = "Sultanate"
+	
+	Knight = "Sahib"
+	Duke = "Emir"
+	Duchess = "Emira"
+	King = "Malik"
+	Queen = "Malika"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Sahiba"
+	Emperor = "Sultan"
+	Empress = "Sultana"
+}
+
+def IranicNobility : Nobility
+{
+	Duchy = "Emirate"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Mirza"
+	Duke = "Emir"
+	Duchess = "Emira"
+	King = "Shah"
+	Queen = "Shahine"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lalla"
+	Emperor = "Shahanshah"
+	Empress = "Shahine"
+}
+
+def SlavNobility : Nobility
+{
+	Duchy = "Banat"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Knight"
+	Duke = "Ban"
+	Duchess = "Banovitsa"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Tsar"
+	Empress = "Tsaritza"
+}
+
+def ItalianNobility : Nobility
+{
+	Duchy = "Republic"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Conte"
+	Duke = "Doge"
+	Duchess = "Dogaressa"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Contessa"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def GenoeseNobility : Nobility
+{
+	Duchy = "Republic"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Conte"
+	Duke = "Consul"
+	Duchess = "Consulessa"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Contessa"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def AfricanNobility : Nobility
+{
+	Duchy = "Chiefdom"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Hakim"
+	Duke = "Chief"
+	Duchess = "Chieftainess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Mansa"
+	Empress = "Empress"
+}
+
+def BritNobility : Nobility
+{
+	Duchy = "Earldom"
+	Kingdom = "Kingdom"
+	Empire = "United Kingdom"
+	
+	Knight = "Baron"
+	Duke = "Earl"
+	Duchess = "Countess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Baroness"
+	Emperor = "King"
+	Empress = "Queen"
+}
+
+def OrderNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "State"
+	Empire = "Empire"
+	
+	Knight = "Landmeister"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Grand Master"
+	Queen = "Dame"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def BulgarianNobility : Nobility
+{
+	Duchy = "Despotate"
+	Kingdom = "Tzardom"
+	Empire = "Empire"
+	
+	Knight = "Bolyar"
+	Duke = "Despot"
+	Duchess = "Despotitza"
+	King = "Tzar"
+	Queen = "Tzaritza"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Tzar"
+	Empress = "Tzaritza"
+}
+
+def SharifNobility : Nobility
+{
+	Duchy = "Emirate"
+	Kingdom = "Sharifate"
+	Empire = "Caliphate"
+	
+	Knight = "Knight"
+	Duke = "Emir"
+	Duchess = "Emira"
+	King = "Sharif"
+	Queen = "Hatun"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Hatun"
+	Emperor = "Caliph"
+	Empress = "Hatun"
+}
+
+def BerberNobility : Nobility
+{
+	Duchy = "Taifa"
+	Kingdom = "Emirate"
+	Empire = "Sultanate"
+	
+	Knight = "Knight"
+	Duke = "Sheikh"
+	Duchess = "Sheikha"
+	King = "Emir"
+	Queen = "Emira"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lalla"
+	Emperor = "Sultan"
+	Empress = "Sultana"
+}
+
+def NormanNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Principality"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Prince"
+	Queen = "Princess"
+	Prince = "Lord"
+	Princess = "Lady"
+	Lady = "Baroness"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def CaucasianNobility : Nobility
+{
+	Duchy = "Principality"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Knight"
+	Duke = "Grand Prince"
+	Duchess = "Grand Princess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def HungarianNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Ban"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def WallachianNobility : Nobility
+{
+	Duchy = "Voevodeship"
+	Kingdom = "Principality"
+	Empire = "Tzardom"
+	
+	Knight = "Ban"
+	Duke = "Voevode"
+	Duchess = "Lady"
+	King = "Grand Prince"
+	Queen = "Grand Princess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Banovitsa"
+	Emperor = "Tzar"
+	Empress = "Tzaritza"
+}
+
+def BalticNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Grand Duchy"
+	Empire = "Commonwealth"
+	
+	Knight = "Knight"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Grand Duke"
+	Queen = "Grand Duchess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "King"
+	Empress = "Queen"
+}
+
+def OutlawNobility : Nobility
+{
+	Duchy : null
+	Kingdom : null
+	Empire : null
+
+	Knight = "Rebel"
+	Duke = "Rebel"
+	Duchess = "Rebel"
+	King = "Rebel"
+	Queen = "Rebel"
+	Prince = "Rebel"
+	Princess = "Rebel"
+	Lady = "Rebel"
+	Emperor = "Rebel"
+	Empress = "Rebel"
+}
+
+def ExileNobility : Nobility
+{
+	Duchy : null
+	Kingdom : null
+	Empire : null
+
+	Knight = "Exile"
+	Duke = "Exile"
+	Duchess = "Exile"
+	King = "Exile"
+	Queen = "Exile"
+	Prince = "Exile"
+	Princess = "Exile"
+	Lady = "Exile"
+	Emperor = "Exile"
+	Empress = "Exile"
+}
+
+def WelshNobility : Nobility
+{
+	Duchy = "Principality"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "High Prince"
+	Duchess = "High Princess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Baroness"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def ScotNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Thain"
+	Duchess = "Thainess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Baroness"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def CatalanNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Principality"
+	Empire = "Kingdom"
+	
+	Knight = "Baron"
+	Duke = "Count"
+	Duchess = "Countess"
+	King = "Grand Prince"
+	Queen = "Grand Princess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Baroness"
+	Emperor = "King"
+	Empress = "Queen"
+}
+
+def SwissNobility : Nobility
+{
+	Duchy = "County"
+	Kingdom = "Confederacy"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Count"
+	Duchess = "Countess"
+	King = "Landammann"
+	Queen = "Lady"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def RepublicNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Republic"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Rector"
+	Queen = "Lady"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def ZealotNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Zealot Republic"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Despot"
+	Queen = "Despina"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def CountyNobility : Nobility
+{
+	Duchy = "County"
+	Kingdom = "Marquisate"
+	Empire = "Kingdom"
+	
+	Knight = "Baron"
+	Duke = "Count"
+	Duchess = "Countess"
+	King = "Marquess"
+	Queen = "Marchioness"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "King"
+	Empress = "Queen"
+}
+
+def GermanNobility : Nobility
+{
+	Duchy = "Margraviate"
+	Kingdom = "Kingdom"
+	Empire = "Kingdom"
+	
+	Knight = "Baron"
+	Duke = "Margrave"
+	Duchess = "Margravine"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def FrisianNobility : Nobility
+{
+	Duchy = "Municipality"
+	Kingdom = "Freeland"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Mayor"
+	Duchess = "Lady"
+	King = "Potestaat"
+	Queen = "Dame"
+	Prince = "Lord"
+	Princess = "Dame"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def SardinianNobility : Nobility
+{
+	Duchy = "Curadoria"
+	Kingdom = "Judicate"
+	Empire = "Empire"
+	
+	Knight = "Podesta"
+	Duke = "Mayor"
+	Duchess = "Dame"
+	King = "Judike"
+	Queen = "Judikessa"
+	Prince = "Lord"
+	Princess = "Lady"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def RomanNobility : Nobility
+{
+	Duchy = "Despotate"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Despot"
+	Duchess = "Despina"
+	King = "Caesar"
+	Queen = "Caisarissa"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def NovgorodianNobility : Nobility
+{
+	Duchy = "Principality"
+	Kingdom = "Republic"
+	Empire = "Empire"
+	
+	Knight = "Boyar"
+	Duke = "Prince"
+	Duchess = "Princess"
+	King = "Grand Prince"
+	Queen = "Grand Princess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Boyarina"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def PolishNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "High Duchy"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "High Duke"
+	Queen = "High Duchess"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def KanemNobility : Nobility
+{
+	Duchy = "Chiefdom"
+	Kingdom = "Kingdom"
+	Empire = "Empire"
+	
+	Knight = "Hakim"
+	Duke = "Chief"
+	Duchess = "Chieftainess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Hakima"
+	Emperor = "Mai"
+	Empress = "Empress"
+}
+
+def CrusaderNobility : Nobility
+{
+	Duchy = "Principality"
+	Kingdom = "Crusader State"
+	Empire = "Empire"
+	
+	Knight = "Crusader"
+	Duke = "Prince"
+	Duchess = "Princess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Lord"
+	Princess = "Lady"
+	Lady = "Dame"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}
+
+def KalmarNobility : Nobility
+{
+	Duchy = "Jarldom"
+	Kingdom = "Kingdom"
+	Empire = "Union"
+	
+	Knight = "Lendermenn"
+	Duke = "Jarl"
+	Duchess = "Duchess"
+	King = "King"
+	Queen = "Queen"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "King"
+	Empress = "Queen"
+}
+
+def LatinNobility : Nobility
+{
+	Duchy = "Duchy"
+	Kingdom = "Empire"
+	Empire = "Empire"
+	
+	Knight = "Baron"
+	Duke = "Duke"
+	Duchess = "Duchess"
+	King = "Emperor"
+	Queen = "Empress"
+	Prince = "Prince"
+	Princess = "Princess"
+	Lady = "Lady"
+	Emperor = "Emperor"
+	Empress = "Empress"
+}

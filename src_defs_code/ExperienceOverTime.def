@@ -1,0 +1,8 @@
+﻿def ExperienceOverTime
+{
+	float refresh_rate = 60
+	uint exp_ammount_base = 0
+	uint exp_ammount_in_court = 0.63
+	float chance = 0.1 //obsolete
+	int max_exp_adds_per_tick = 3 //obsolete
+}

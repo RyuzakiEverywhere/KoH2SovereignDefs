@@ -1,0 +1,1386 @@
+﻿def FamousPersonSpawner
+{
+	float duration = 61
+	int max_famous_people = 0
+	int available_pool = 30
+}
+
+def FamousPerson = 60
+{
+	text name
+	skills = []
+	text description
+	require = []
+	string sex = "Male"
+	int gp_min_skills = 1
+	int gp_max_skills = 3
+	float migrate_time_min = 120
+	float migrate_time_max = 240
+	int year_born = 900
+	float chance_die_pillage = 15
+}
+
+def Aaron_of_Lincoln : FamousPerson
+{
+	text name = "Aaron_of_Lincoln"
+	skills = ["Finances"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+	year_born = 800
+}
+def Abdallatif_alBaghdadi : FamousPerson
+{
+	text name = "Abdallatif_alBaghdadi"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Abraham_bar_Hiyya : FamousPerson
+{
+	text name = "Abraham_bar_Hiyya"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Abu_alAbbas_alNabati : FamousPerson
+{
+	text name = "Abu_alAbbas_alNabati"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Abulcasis : FamousPerson
+{
+	text name = "Abulcasis"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Afanasy_Nikitin : FamousPerson
+{
+	text name = "Afanasy_Nikitin"
+	skills = ["Navigation"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Ahmad_Ghazali : FamousPerson
+{
+	text name = "Ahmad_Ghazali"
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Ahmad_ibn_Majid : FamousPerson
+{
+	text name = "Ahmad_ibn_Majid"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Akshamsaddin : FamousPerson
+{
+	text name = "Akshamsaddin"
+	skills = ["Piety"]
+	require = ["GreatMosque"]
+	sex = "Male"
+}
+def AlDakhwar : FamousPerson
+{
+	text name = "AlDakhwar"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Albert_of_Livonia : FamousPerson
+{
+	text name = "Albert_of_Livonia"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Albertus_Magnus : FamousPerson
+{
+	text name = "Albertus_Magnus"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Albuzale : FamousPerson
+{
+	text name = "Albuzale"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Alessandra_Giliani : FamousPerson
+{
+	text name = "Alessandra_Giliani"
+	skills = ["Medicine"]
+	require = ["University"]
+	sex = "Female"
+}
+def Alexander_Nevsky : FamousPerson
+{
+	text name = "Alexander_Nevsky"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Alhazen : FamousPerson
+{
+	text name = "Alhazen"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Ali_ibn_Ridwan : FamousPerson
+{
+	text name = "Ali_ibn_Ridwan"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Ali_Qushji : FamousPerson
+{
+	text name = "Ali_Qushji"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Amerigo_Vespucci : FamousPerson
+{
+	text name = "Amerigo_Vespucci"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Anna_Komnena : FamousPerson
+{
+	text name = "Anna_Komnena"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Female"
+}
+def Anselm_of_Canterbury : FamousPerson
+{
+	text name = "Anselm_of_Canterbury"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Arzachel : FamousPerson
+{
+	text name = "Arzachel"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Avenzoar : FamousPerson
+{
+	text name = "Avenzoar"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Averroes : FamousPerson
+{
+	text name = "Averroes"
+	skills = ["Insight"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Avicenna : FamousPerson
+{
+	text name = "Avicenna"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Bektash_Veli : FamousPerson
+{
+	text name = "Bektash_Veli"
+	skills = ["Rhetoric"]
+	require = ["GreatMosque"]
+	sex = "Male"
+}
+def Bernat_Calbo : FamousPerson
+{
+	text name = "Bernat_Calbo"
+	skills = ["Training"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Bertrand_du_Guesclin : FamousPerson
+{
+	text name = "Bertrand_du_Guesclin"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Birgitta_Birgersdotter : FamousPerson
+{
+	text name = "Birgitta_Birgersdotter"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Catherine_of_Siena : FamousPerson
+{
+	text name = "Catherine_of_Siena"
+	skills = ["Negotiation"]
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Christine_de_Pizan : FamousPerson
+{
+	text name = "Christine_de_Pizan"
+	require = ["University"]
+	sex = "Female"
+}
+def Christopher_Columbus : FamousPerson
+{
+	text name = "Christopher_Columbus"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Cosimo_di_Medici : FamousPerson
+{
+	text name = "Cosimo_di_Medici"
+	skills = ["Finances"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Cristoforo_Landino : FamousPerson
+{
+	text name = "Cristoforo_Landino"
+	skills = ["Rhetoric"]
+	require = ["University"]
+	sex = "Male"
+}
+def Dante_Alighieri : FamousPerson
+{
+	text name = "Dante_Alighieri"
+	skills = ["Literacy"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Demetrios_Chalkokondyles : FamousPerson
+{
+	text name = "Demetrios_Chalkokondyles"
+	skills = ["Rhetoric"]
+	require = ["University"]
+	sex = "Male"
+}
+def Demetrios_Kydones : FamousPerson
+{
+	text name = "Demetrios_Kydones"
+	skills = ["Stewardship"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Duns_Scotus : FamousPerson
+{
+	text name = "Duns_Scotus"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Eckhart_von_Hochheim : FamousPerson
+{
+	text name = "Eckhart_von_Hochheim"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Edward_of_Woodstock : FamousPerson
+{
+	text name = "Edward_of_Woodstock"
+	skills = ["Stewardship"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def El_Cid : FamousPerson
+{
+	text name = "El_Cid"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Elijah_of_Nisibis : FamousPerson
+{
+	text name = "Elijah_of_Nisibis"
+	skills = ["Literacy"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Elizabeth_of_Hungary : FamousPerson
+{
+	text name = "Elizabeth_of_Hungary"
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Erasmus_Roterodamus : FamousPerson
+{
+	text name = "Erasmus_Roterodamus"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Eric_the_Red : FamousPerson
+{
+	text name = "Eric_the_Red"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Federico_da_Montefeltro : FamousPerson
+{
+	text name = "Federico_da_Montefeltro"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Fernando_Magellan : FamousPerson
+{
+	text name = "Fernando_Magellan"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Fibonacci : FamousPerson
+{
+	text name = "Fibonacci"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Filippo_Brunelleshi : FamousPerson
+{
+	text name = "Filippo_Brunelleshi"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Fra_Mauro : FamousPerson
+{
+	text name = "Fra_Mauro"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Francesco_di_Giorgio_Martini : FamousPerson
+{
+	text name = "Francesco_di_Giorgio_Martini"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Francesco_Petrarca : FamousPerson
+{
+	text name = "Francesco_Petrarca"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Male"
+}
+def Francesco_of_Assisi : FamousPerson
+{
+	text name = "Francesco_of_Assisi"
+	skills = ["Rhetoric"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Gasparino_Barzizza : FamousPerson
+{
+	text name = "Gasparino_Barzizza"
+	skills = ["Rhetoric"]
+	require = ["University"]
+	sex = "Male"
+}
+def Georgos_Amiroutzes : FamousPerson
+{
+	text name = "Georgos_Amiroutzes"
+	skills = ["Conspiracy"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Giovanni_Boccaccio : FamousPerson
+{
+	text name = "Giovanni_Boccaccio"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Male"
+}
+def Godfrey_of_Bouillon : FamousPerson
+{
+	text name = "Godfrey_of_Bouillon"
+	skills = ["Siegecraft"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Gemistus_Pletho : FamousPerson
+{
+	text name = "Gemistus_Pletho"
+	skills = ["Insight"]
+	require = ["University"]
+	sex = "Male"
+}
+def Geoffrey_Chaucer : FamousPerson
+{
+	text name = "Geoffrey_Chaucer"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Male"
+}
+def Geoffrey_of_Monmouth : FamousPerson
+{
+	text name = "Geoffrey_of_Monmouth"
+	skills = ["Literacy"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Geoffroi_de_Charny : FamousPerson
+{
+	text name = "Geoffroi_de_Charny"
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Gervase_Alard : FamousPerson
+{
+	text name = "Gervase_Alard"
+	skills = ["Training"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Giovanni_da_Pian_del_Carpine : FamousPerson
+{
+	text name = "Giovanni_da_Pian_del_Carpine"
+	skills = ["Navigation"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Giovanni_Villani : FamousPerson
+{
+	text name = "Giovanni_Villani"
+	skills = ["Finances"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Gregorio_Dati : FamousPerson
+{
+	text name = "Gregorio_Dati"
+	skills = ["Bargain"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Guillaume_de_Machaut : FamousPerson
+{
+	text name = "Guillaume_de_Machaut"
+	skills = ["Learning"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Harry_Hotspur : FamousPerson
+{
+	text name = "Harry_Hotspur"
+	skills = ["Swordsmanship"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Hassani_Sabah : FamousPerson
+{
+	text name = "Hassani_Sabah"
+	skills = ["Conspiracy"]
+	require = ["GreatMosque"]
+	sex = "Male"
+}
+def Heloise : FamousPerson
+{
+	text name = "Heloise"
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Henry_the_Navigator : FamousPerson
+{
+	text name = "Henry_the_Navigator"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Herrad_of_Landsberg : FamousPerson
+{
+	text name = "Herrad_of_Landsberg"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Hildegard_von_Bingen : FamousPerson
+{
+	text name = "Hildegard_von_Bingen"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Ibn_alNafis : FamousPerson
+{
+	text name = "Ibn_alNafis"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Ibn_Battuta : FamousPerson
+{
+	text name = "Ibn_Battuta"
+	skills = ["Navigation"]
+	require = ["GreatMosque"]
+	sex = "Male"
+}
+def Ibn_Khaldun : FamousPerson
+{
+	text name = "Ibn_Khaldun"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Isidor_of_Kiev : FamousPerson
+{
+	text name = "Isidor_of_Kiev"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Jacquetta_of_Luxembourg : FamousPerson
+{
+	text name = "Jacquetta_of_Luxembourg"
+	skills = ["Conspiracy"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def James_Black_Douglas : FamousPerson
+{
+	text name = "James_Black_Douglas"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Jan_Hus : FamousPerson
+{
+	text name = "Jan_Hus"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Jaques_de_Molay : FamousPerson
+{
+	text name = "Jaques_de_Molay"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Jean_Buridan : FamousPerson
+{
+	text name = "Jean_Buridan"
+	skills = ["Insight"]
+	require = ["University"]
+	sex = "Male"
+}
+def Joan_of_Arc : FamousPerson
+{
+	text name = "Joan_of_Arc"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Female"
+}
+def Johann_Gutenberg : FamousPerson
+{
+	text name = "Johann_Gutenberg"
+	skills = ["Literacy"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Johann_Heynlin : FamousPerson
+{
+	text name = "Johann_Heynlin"
+	skills = ["Literacy"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Johannes_Cuspinian : FamousPerson
+{
+	text name = "Johannes_Cuspinian"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Johannes_Shoener : FamousPerson
+{
+	text name = "Johannes_Shoener"
+	skills = ["Learning"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def John_of_Arderne : FamousPerson
+{
+	text name = "John_of_Arderne"
+	skills = ["Medicine"]
+	require = ["University"]
+	sex = "Male"
+}
+def John_Chandos : FamousPerson
+{
+	text name = "John_Chandos"
+	skills = ["Tactics"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def John_Gower : FamousPerson
+{
+	text name = "John_Gower"
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def John_Hawkwood : FamousPerson
+{
+	text name = "John_Hawkwood"
+	skills = ["Swordsmanship"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def John_Peckham : FamousPerson
+{
+	text name = "John_Peckham"
+	skills = ["Rhetoric"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def John_Wycliffe : FamousPerson
+{
+	text name = "John_Wycliffe"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Juan_Sebestian_Elcano : FamousPerson
+{
+	text name = "Juan_Sebestian_Elcano"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Khutulun : FamousPerson
+{
+	text name = "Khutulun"
+	skills = ["Training"]
+	require = ["FeudalKeeps"]
+	sex = "Female"
+}
+def Lady_Godiva : FamousPerson
+{
+	text name = "Lady_Godiva"
+	skills = ["Riding"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def Leif_Ericson : FamousPerson
+{
+	text name = "Leif_Ericson"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Leon_Battista_Alberti : FamousPerson
+{
+	text name = "Leon_Battista_Alberti"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Leonardo_Da_Vinci : FamousPerson
+{
+	text name = "Leonardo_Da_Vinci"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Lorenzo_de_Medici : FamousPerson
+{
+	text name = "Lorenzo_de_Medici"
+	skills = ["Stewardship"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Loukas_Notaras : FamousPerson
+{
+	text name = "Loukas_Notaras"
+	skills = ["Stewardship"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Lucrezia_Tornabuoni : FamousPerson
+{
+	text name = "Lucrezia_Tornabuoni"
+	skills = ["Negotiation"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def Ludovico_di_Varthema : FamousPerson
+{
+	text name = "Ludovico_di_Varthema"
+	skills = ["Navigation"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Maimonides : FamousPerson
+{
+	text name = "Maimonides"
+	skills = ["Insight"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Marco_Polo : FamousPerson
+{
+	text name = "Marco_Polo"
+	skills = ["Navigation"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Margaret_Beaufort : FamousPerson
+{
+	text name = "Margaret_Beaufort"
+	skills = ["Conspiracy"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def Margaret_Paston : FamousPerson
+{
+	text name = "Margaret_Paston"
+	skills = ["Stewardship"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def Margaret_Pole : FamousPerson
+{
+	text name = "Margaret_Pole"
+	skills = ["Conspiracy"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+def Margery_Kempe : FamousPerson
+{
+	text name = "Margery_Kempe"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Female"
+}
+def Marko_Marulich : FamousPerson
+{
+	text name = "Marko_Marulich"
+	skills = ["Literacy"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Marsilo_Ficino : FamousPerson
+{
+	text name = "Marsilo_Ficino"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Martin_Luther : FamousPerson
+{
+	text name = "Martin_Luther"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Megareites_of_Brindisi : FamousPerson
+{
+	text name = "Megareites_of_Brindisi"
+	skills = ["Leadership"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Michelangelo : FamousPerson
+{
+	text name = "Michelangelo"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Mimar_Sinan : FamousPerson
+{
+	text name = "Mimar_Sinan"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Miskawayh : FamousPerson
+{
+	text name = "Miskawayh"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Mondino_de_Luzzi : FamousPerson
+{
+	text name = "Mondino_de_Luzzi"
+	skills = ["Medicine"]
+	require = ["University"]
+	sex = "Male"
+}
+def Nasir_alDin_Tusi : FamousPerson
+{
+	text name = "Nasir_alDin_Tusi"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Nasir_Khusraw : FamousPerson
+{
+	text name = "Nasir_Khusraw"
+	skills = ["Literacy"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Niccolo_de_Conti : FamousPerson
+{
+	text name = "Niccolo_de_Conti"
+	skills = ["Navigation"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Niccolo_Machiavelli : FamousPerson
+{
+	text name = "Niccolo_Machiavelli"
+	skills = ["Negotiation"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Nicolas_Flamel : FamousPerson
+{
+	text name = "Nicolas_Flamel"
+	skills = ["Learning"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Nicolaus_Copernicus : FamousPerson
+{
+	text name = "Nicolaus_Copernicus"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Nicolaus_Cusanus : FamousPerson
+{
+	text name = "Nicolaus_Cusanus"
+	skills = ["Insight"]
+	require = ["University"]
+	sex = "Male"
+}
+def Nicole_Oresme : FamousPerson
+{
+	text name = "Nicole_Oresme"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Niklot : FamousPerson
+{
+	text name = "Niklot"
+	skills = ["Defense"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Nizam_alMulk : FamousPerson
+{
+	text name = "Nizam_alMulk"
+	skills = ["Negotiation"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Omar_Khayyam : FamousPerson
+{
+	text name = "Omar_Khayyam"
+	skills = ["Learning"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Perking_Warbeck : FamousPerson
+{
+	text name = "Perking_Warbeck"
+	skills = ["Conspiracy"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Peter_Abelard : FamousPerson
+{
+	text name = "Peter_Abelard"
+	require = ["University"]
+	sex = "Male"
+}
+def Peter_Parler : FamousPerson
+{
+	text name = "Peter_Parler"
+	skills = ["Logistics"]
+	require = ["MasonsGuild"]
+	sex = "Male"
+}
+def Peter_the_Hermit : FamousPerson
+{
+	text name = "Peter_the_Hermit"
+	skills = ["Rhetoric"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Piri_Reis : FamousPerson
+{
+	text name = "Piri_Reis"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Poliziano : FamousPerson
+{
+	text name = "Poliziano"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Male"
+}
+def Ranulf_Flambard : FamousPerson
+{
+	text name = "Ranulf_Flambard"
+	skills = ["Finances"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Rashid_alDin_Hamadani : FamousPerson
+{
+	text name = "Rashid_alDin_Hamadani"
+	skills = ["Learning"]
+	require = ["Muhtasib"]
+	sex = "Male"
+}
+def Regiomontanus : FamousPerson
+{
+	text name = "Regiomontanus"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Richard_Lyons : FamousPerson
+{
+	text name = "Richard_Lyons"
+	skills = ["Bargain"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Richard_of_Cornwall : FamousPerson
+{
+	text name = "Richard_of_Cornwall"
+	skills = ["Negotiation"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Richard_Whittington : FamousPerson
+{
+	text name = "Richard_Whittington"
+	skills = ["Finances"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def Robert_Burnell : FamousPerson
+{
+	text name = "Robert_Burnell"
+	skills = ["Negotiation"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Robert_Guiscard : FamousPerson
+{
+	text name = "Robert_Guiscard"
+	skills = ["Tactics"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Robert_Grosseteste : FamousPerson
+{
+	text name = "Robert_Grosseteste"
+	skills = ["Insight"]
+	require = ["University"]
+	sex = "Male"
+}
+def Rodolphus_Agricola : FamousPerson
+{
+	text name = "Rodolphus_Agricola"
+	skills = ["Learning"]
+	require = ["University"]
+	sex = "Male"
+}
+def Roger_Bacon : FamousPerson
+{
+	text name = "Roger_Bacon"
+	skills = ["Insight"]
+	require = ["University"]
+	sex = "Male"
+}
+def Rumi : FamousPerson
+{
+	text name = "Rumi"
+	skills = ["Literacy"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+def Saint_Dominic : FamousPerson
+{
+	text name = "Saint_Dominic"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Saint_Louis : FamousPerson
+{
+	text name = "Saint_Louis"
+	skills = ["Stewardship"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Saint_Sava : FamousPerson
+{
+	text name = "Saint_Sava"
+	skills = ["Negotiation"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Simon_de_Montfort : FamousPerson
+{
+	text name = "Simon_de_Montfort"
+	skills = ["Conspiracy"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Syrgiannes_Palaiologos : FamousPerson
+{
+	text name = "Syrgiannes_Palaiologos"
+	skills = ["Conspiracy"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def Taddeo_Alderotti : FamousPerson
+{
+	text name = "Taddeo_Alderotti"
+	skills = ["Rhetoric"]
+	require = ["University"]
+	sex = "Male"
+}
+def Tancred_de_Hauteville : FamousPerson
+{
+	text name = "Tancred_de_Hauteville"
+	skills = ["Leadership"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+def Theodoric_Borgognoni : FamousPerson
+{
+	text name = "Theodoric_Borgognoni"
+	skills = ["Medicine"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Thomas_Aquinas : FamousPerson
+{
+	text name = "Thomas_Aquinas"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Thomas_Becket : FamousPerson
+{
+	text name = "Thomas_Becket"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Vlad_the_Impaler : FamousPerson
+{
+	text name = "Vlad_the_Impaler"
+	skills = ["Conspiracy"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def William_Caxton : FamousPerson
+{
+	text name = "William_Caxton"
+	skills = ["Bargain"]
+	require = ["MerchantsGuild"]
+	sex = "Male"
+}
+def William_Marshal : FamousPerson
+{
+	text name = "William_Marshal"
+	skills = ["Swordsmanship"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def William_of_Ockham : FamousPerson
+{
+	text name = "William_of_Ockham"
+	skills = ["Insight"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def William_of_Poltiers : FamousPerson
+{
+	text name = "William_of_Poltiers"
+	skills = ["Piety"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Willem_van_Rubroek : FamousPerson
+{
+	text name = "Willem_van_Rubroek"
+	skills = ["Navigation"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def William_Wallace : FamousPerson
+{
+	text name = "William_Wallace"
+	skills = ["Conspiracy"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+def William_Waynflete : FamousPerson
+{
+	text name = "William_Waynflete"
+	skills = ["Literacy"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+def Vasco_da_Gama : FamousPerson
+{
+	text name = "Vasco_da_Gama"
+	skills = ["Navigation"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+def Vittorino_Rambaldoni : FamousPerson
+{
+	text name = "Vittorino_Rambaldoni"
+	skills = ["Literacy"]
+	require = ["University"]
+	sex = "Male"
+}
+def Zakariya_alQazwini : FamousPerson
+{
+	text name = "Zakariya_alQazwini"
+	skills = ["Medicine"]
+	require = ["Madrasah"]
+	sex = "Male"
+}
+
+def Einar_Thambareskelfir : FamousPerson
+{
+	text name = "Einar_Thambareskelfir"
+	skills = ["Archery"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Jebe : FamousPerson
+{
+	text name = "Jebe"
+	skills = ["Archery"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Hugh_of_Cluny : FamousPerson
+{
+	text name = "Hugh_of_Cluny"
+	skills = ["Leadership"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+
+def Gui_Geoffroi : FamousPerson
+{
+	text name = "Gui_Geoffroi"
+	skills = ["Siegecraft"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Roger_Bosso : FamousPerson
+{
+	text name = "Roger_Bosso"
+	skills = ["Siegecraft"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Nikephoros_Milessenos : FamousPerson
+{
+	text name = "Nikephoros_Milessenos"
+	skills = ["Defense"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Roger_Borsa : FamousPerson
+{
+	text name = "Roger_Borsa"
+	skills = ["Siegecraft"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Sikelgaita : FamousPerson
+{
+	text name = "Sikelgaita"
+	skills = ["Leadership"]
+	require = ["TownsCharter"]
+	sex = "Female"
+}
+
+def Basil_Boioannes : FamousPerson
+{
+	text name = "Basil_Boioannes"
+	skills = ["Tactics"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Bruno_of_Cologne : FamousPerson
+{
+	text name = "Bruno_of_Cologne"
+	skills = ["Rhetoric"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+
+def Raymond_Pilet : FamousPerson
+{
+	text name = "Raymond_Pilet"
+	skills = ["Siegecraft"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Alexios_Komnenos : FamousPerson
+{
+	text name = "Alexios_Komnenos"
+	skills = ["Defense"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+
+def Imad_adDin_Zengi : FamousPerson
+{
+	text name = "Imad_adDin_Zengi"
+	skills = ["Tactics"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Usama_ibn_Munqidh : FamousPerson
+{
+	text name = "Usama_ibn_Munqidh"
+	skills = ["Learning"]
+	require = ["Muhtasib"]
+	sex = "Male"
+}
+
+def Fernando_Perez_de_Traba : FamousPerson
+{
+	text name = "Fernando_Perez_de_Traba"
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+
+def William_of_Tyre : FamousPerson
+{
+	text name = "William_of_Tyre"
+	skills = ["Learning"]
+	require = ["Cathedral"]
+	sex = "Male"
+}
+
+def Henry_the_Lion : FamousPerson
+{
+	text name = "Henry_the_Lion"
+	skills = ["Tactics"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+
+def Raynald_of_Chatillon : FamousPerson
+{
+	text name = "Raynald_of_Chatillon"
+	skills = ["Defense"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+
+def Enrico_Dandolo : FamousPerson
+{
+	text name = "Enrico_Dandolo"
+	skills = ["Siegecraft"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+
+def Gillis_Berthout : FamousPerson
+{
+	text name = "Gillis_Berthout"
+	skills = ["Defense"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+
+def Guillaume_de_Chartres : FamousPerson
+{
+	text name = "Guillaume_de_Chartres"
+	skills = ["Defense"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Ramon_de_Bonifaz : FamousPerson
+{
+	text name = "Ramon_de_Bonifaz"
+	skills = ["Tactics"]
+	require = ["Admiralty"]
+	sex = "Male"
+}
+
+def Otto_de_Grandson : FamousPerson
+{
+	text name = "Otto_de_Grandson"
+	skills = ["Archery"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Hermann_von_Salza : FamousPerson
+{
+	text name = "Hermann_von_Salza"
+	skills = ["Leadership"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Alonso_Perez_de_Guzman : FamousPerson
+{
+	text name = "Alonso_Perez_de_Guzman"
+	skills = ["Defense"]
+	require = ["FeudalKeeps"]
+	sex = "Male"
+}
+
+def Don_Juan_Manuel : FamousPerson
+{
+	text name = "Don_Juan_Manuel"
+	skills = ["Finances"]
+	require = ["TownsCharter"]
+	sex = "Male"
+}
+

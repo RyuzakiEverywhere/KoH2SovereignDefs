@@ -1,0 +1,211 @@
+﻿def WarScoreModifier
+{
+	text historyText = ""
+	float value = 0
+	string opositionStat = ""
+}
+
+
+def WarStats : Stats
+{
+	stat warScore = 1000
+	{
+		min = 0
+		max = 900000
+	}
+	
+	def Score : WarScoreModifier //used for modifications by value, not by name
+	{
+		value = 1
+	}
+
+	def WarStart : WarScoreModifier
+	{
+		historyText = "{kingdom} started war against {kingdom2}"
+	}
+	
+	def VictoryScore : WarScoreModifier
+	{
+		historyText = "The war between {kingdom} and {kingdom2} ended"
+		value = 10000000
+	}
+	
+	def WarEnd : WarScoreModifier
+	{
+		historyText = "The war between {kingdom} and {kingdom2} came to an end"
+	}
+	
+	def BattleWon : WarScoreModifier
+	{
+		historyText = "{kingdom} won a battle against {kingdom2} in {realm}"
+		value = 2
+	}
+	
+	def UnitsKilled : WarScoreModifier
+	{
+		historyText = "{kingdom} killed troops from {kingdom2} in battle"
+		value = 1 // multiplied in code
+	}
+	
+	def CapturedRealm : WarScoreModifier
+	{
+		
+		historyText = "{kingdom} captured {realm} from {kingdom2}"
+		value = 1 // multiplied in code
+	}
+	
+	def CapturedKeep : WarScoreModifier
+	{
+		
+		historyText = "{kingdom} captured a castle from {kingdom2} in {realm}"
+		value = 3
+	}
+	
+	def PillagedSettlement : WarScoreModifier
+	{
+		historyText = "{kingdom} pillaged one of {kingdom2}'s settlements in {realm}"
+		value = 2
+	}
+	
+	def KnightNeutralized : WarScoreModifier
+	{
+		historyText = "{kingdom} neutralized a knight from {kingdom2}"
+		value = 1 // multiplied in code
+	}
+}
+
+def War
+{
+	text type = "War"
+	{
+		cap = "War"
+	}
+	text name = "War between {attacker} and {defender}"
+	text description = "An offensive initiative against {defender}, instigated by {attacker}."
+	sprite icon = "Assets/UI/Elements/Royal Court/Top/UI_Top_Category_Wars.png:UI_Top_Category_Wars#1" //GUID:06e5cad9d5d423342a5e62e01e339fd8
+	sprite icon_third_party = "Assets/UI/Elements/Royal Court/Top/UI_Top_Category_Wars.png:UI_Top_Category_Wars#1" //GUID:06e5cad9d5d423342a5e62e01e339fd8
+	// these might be better as % of lower value
+	float score_ratio_norm = 5
+	float strength_ratio_norm = 100
+	float strength_confidence_factor = 0.5
+	float confidence_fade_time = 600 // seconds to fade in
+	float confidence_fade_power = 1.5 
+
+
+	int province_taken_base_score = 10
+	int province_taken_building_score = 2
+	float core_province_mult = 1.5
+	
+	int squad_destroyed_base_score = 0
+	int squad_destroyed_level_score = 1
+	
+	int neutralized_knight_base_score = 3
+	int neutralized_knight_level_score = 1
+	
+	int royalty_mod_prince = 3
+	int royalty_mod_king = 5
+
+	float chance_imprison_merchants_perc = 50;
+	float chance_imprison_diplomats_perc = 20;
+	float chance_imprison_clerics_perc = 20;
+	
+	int warscore_exsoution_tresholds = [-20,0,300,500,700]
+	color warscore_exsoution_tresholds_color = 
+	[
+	"255,255,255", //FFFFFFFF
+	"23,233,25", //17E91AFF
+	"255,221,0", //FFDD00FF
+	"204,103,31", //CC6720FF
+	"255,0,0" //FF0000FF
+	]
+	// white - green - yellow - orange - red
+	text warscore_exsoution_tresholds_texts = ["none", "low", "medium","high","severe"]
+	int warscore_rel_threshold_threat = -200
+	int warscore_rel_threshold_friends = 200
+    int warscore_tf_max_distance = 3
+    int warscore_tf_display = 5
+    int warscore_display_pcs = 4
+
+    text score_tooltip = "War Score: {plr_side_score} : {plr_enemies_score}"
+    text strength_tooltip = "Strength: {plr_side_strength} : {plr_enemies_strength}"
+
+	text bonus_text = "{blt} {name}: {value:bonus}{p}"
+}
+
+def IndependenceWar : War
+{
+	text name = "Independence war between {attacker} and {defender}"
+	text description = "A conflict in which {attacker} fights against the tyranny of its former sovereign - {defender}."
+}
+
+def TeritorialClaimsWar : War
+{
+	text name = "War for territory between {attacker} and {defender}"
+	text description = "A dispute over a handful of {defender:ian} lands inherited by {attacker}."
+}
+
+def Jihad : War
+{
+	text type = "Jihad"
+	text name = "War between {jihad_owner} and {jihad_target}"
+	text description = "A jihad led by {jihad_owner}, uniting Muslim rulers against {jihad_target}."
+	sprite icon = "Assets/UI/Elements/Common/Icons/Icon_JihadWar.png:Icon_JihadWar#2" //GUID:12140b2e7b3f51649bcd4d896803ee7b
+	sprite icon_third_party = "Assets/UI/Elements/Common/Icons/Icon_OngoingJihads.png:Icon_OngoingJihads#1" //GUID:9ad63863c6479c44eac2bbbb6dd3cd63
+	
+	upkeep = (ceil(15 + 0.03 * caliphate.S1, 5)) // upkeep for a jihade
+
+	jihad_bonuses
+	{
+		normal_bonuses
+		{
+			float army_morale = 5 // in own realm and realm of jihad enemies
+			{
+				text name = "Army morale"
+				condition = (is_muslim && is_war_leader)
+			}
+		}
+
+		random_bonuses = 2
+		{
+			float defense = 15/30
+			{
+				text name = "Unit's defense (%)"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+				perc = true
+			}
+			float CTH = 10/20
+			{
+				text name = "Unit's attack (%)"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+				perc = true
+			}
+			float siege_strength = 20/50
+			{
+				text name = "Siege attack"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+			}
+			float defense_during_siege_perc = 25/50
+			{
+				text name = "Siege defense"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+				perc = true
+			}
+			float pillage_gold_perc = 20/50
+			{
+				text name = "Gold from pillaging"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+			}
+			float conversion_chance = 20
+			{
+				text name = "Chance to convert conquered povinces' religion"
+				text mod_name = "From jihad"
+				condition = (is_muslim && is_war_leader)
+			}
+		}
+	}
+}

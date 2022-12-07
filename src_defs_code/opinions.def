@@ -1,0 +1,184 @@
+﻿def Opinions
+{
+	float passive_increase_min_time = 120
+	float passive_increase_max_time = 240
+	//Chance = (opinion increase base chance + opinion increase chance if negative + Diplomat CL * opinion increase  per diplomat CL * (1 + is_king * opinion increase king mod + is_prince * opinion increase prince mod)) * ((10 - opinion) / 10) if opinion > 0
+	float passive_increase_chance = ((0 + (opinion_value < 0) * 20 + ( 20 + diplomat.class_level * 2 * (1 + diplomat.is_king + diplomat.is_prince * 0.5) || 0)) * (((opinion_value > 0) && ((max_value - opinion_value) / max_value)) || 1))
+	float passive_increase_amount = 1
+}
+
+def Opinion
+{
+	text name
+	text tooltip
+	sprite icon
+	
+	int history_size = 5
+	sprite illustration
+	
+	float value_range = -10/10
+	float initial_value = (RndI(-1, 1)) //(RndI(min_value / 2, max_value / 2)) // move this to kingdoms.csv?	
+	
+	backgrounds
+	{
+		sprite positive = "Assets/UI/Elements/KingdomAuthority/Element_CrownAuthority_Opinion_Positive.psd:Element_CrownAuthority_Opinion_Positive#2" //GUID:05811ae649b0217488fd584e54dab73f
+		sprite neutral = "Assets/UI/Elements/KingdomAuthority/Element_CrownAuthority_Opinion_Neutral.psd:Element_CrownAuthority_Opinion_Neutral#2" //GUID:cb51461b682c1e146950e7b917eeaad6
+		sprite negative = "Assets/UI/Elements/KingdomAuthority/Element_CrownAuthority_Opinion_Negative.psd:Element_CrownAuthority_Opinion_Negative#2" //GUID:4e8b0b500f03a4e4286d49525928d3e2
+	}
+}
+
+// UI to list oppinions based on defs
+// kingdom.XXXOpinion variable
+//   - can be used in global stat mods
+// XXXOpinion outcomes
+
+def NobilityOpinion : Opinion
+{
+	name = "Nobility"
+	tooltip = "To preserve the symphaty and support of the elite, a ruler should ensure the integrity of the kingdom, financial stability and thoughtful diplomatic relations."
+	icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Noblemen.psd:Icon_SocialGroup_Noblemen#1" //GUID:0f6ebdad53d6bce4895f4de5c84cbd7e
+	
+	stat_mods
+	{
+		mod ks_CA_cost_perc = 100/0/-50
+		mod ks_own_knight_bribe_cost_perc = -50/0/100
+		mod ks_espionage_defense_opinions = -15/0/15
+		mod ks_influence_from_opinions_perc = -20/0/20
+		mod ks_stability_from_opinions = -10/0/0 //(map3_clamp(value, min_value, 0, max_value, 20, 0, 0))
+		
+		//better loan terms
+	}
+	illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Nobility.png:Illustration_SocialGroup_Nobility#2" //GUID:56ece4c781527924eab34bbd2f199da0
+}
+
+def ArmyOpinion : Opinion
+{
+	name = "Army"
+	tooltip = "The loyalty of regular soldiers and army leaders is earned by increasing the kingdom's strength and emerging victorious in military endeavours."
+	icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Army.psd:Icon_SocialGroup_Army#2" //GUID:7ae9578d5151e4c449a761843f495481
+	illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Army.png:Illustration_SocialGroup_Army#2" //GUID:280901d8b22750a408ce07dd00286b00
+	
+	stat_mods
+	{
+		mod ks_army_morale = -5/0/5 { text mod_name = "Army opinion" }
+		mod ks_enemy_plot_army_revolt_strength = 20/0/-20
+		mod ks_units_training_gold_perc = 50/0/-25
+		mod ks_mercenary_price_reduction_perc = 50/0/-20
+		mod ks_stability_from_opinions = -10/0/0
+	}
+}
+
+def MerchantsOpinion : Opinion
+{
+	name = "Merchants"
+	tooltip = "The support of the wealthiest merchants can be earned by ensuring good infrastructure, external relation and stability, that are all needed for prosperous trade."
+	icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Merchants.psd:Icon_SocialGroup_Merchants#2" //GUID:aa1d0e3fa641ea34b997f66f2906f163
+	illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Merchants.png:Illustration_SocialGroup_Merchants#2" //GUID:b26d1e81d49f51d4da0b11f50d6ca7a9
+	
+	stat_mods
+	{
+		mod ks_trade_income_perc = -50/0/20
+		mod ks_profit_from_colonies_perc = -50/0/20
+		mod ks_corruption = 20/0/0 // !!! change to 5/0/-20 when we have sources of corruption
+		mod ks_espionage_defense_opinions = -5/0/5
+		mod ks_influence_from_opinions_perc = -20/0/10
+		
+		//better loan terms
+		//army's food supply cost reduction
+	}
+}
+
+def ClergyOpinion : Opinion
+{
+	case Catholic = (kingdom.is_catholic)
+	{
+		name = "Clergy"
+		tooltip = "Following the path of Christianity, fighting against the enemies of Christ and respecting the church's authority is what wins the support of the clergy."
+		icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Clergy_Catholic.psd:Icon_SocialGroup_Clergy_Catholic#2" //GUID:5b23db0d672fa9c469966d42bceb048d
+		illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Clergy_Catholic.png:Illustration_SocialGroup_Clergy_Catholic#2" //GUID:98546c872cb0f0b4d97d1bb1cc87a387
+	}
+	case Orthodox = (kingdom.is_orthodox)
+	{
+		name = "Clergy"
+		tooltip = "Following the path of Christianity, fighting against the enemies of Christ and respecting the church's authority is what wins the support of the clergy."
+		icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Clergy_Orthodox.psd:Icon_SocialGroup_Clergy_Orthodox#2" //GUID:2d478b9e966b21d4a8c671720c3ccffc
+		illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Clergy_Catholic.png:Illustration_SocialGroup_Clergy_Catholic#2" //GUID:98546c872cb0f0b4d97d1bb1cc87a387
+	}
+	case Muslim = (kingdom.is_muslim)
+	{
+		name = "Scholars"
+		tooltip = "Protecting the muslim holy lands, good relation with muslim kingdoms and righteous wars against the infidels is what wins the support of the scholars."
+		icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Scholars.psd:Icon_SocialGroup_Scholars#2" //GUID:71774c70da39cbe4997485e82947fffb
+		illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Clergy_Muslim.png:Illustration_SocialGroup_Clergy_Muslim#2" //GUID:adb82754a272a1c4c8a22b38f26a47fe
+	}
+	case Pagan = (kingdom.is_pagan)
+	{
+		name = "Shamans"
+		tooltip = "Shamans believe in a ruler chosen by the gods, who has the strength to crush the enemies of the kingdom. Those who fail are deemed unworthy to rule or even live."
+		icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Shamans.psd:Icon_SocialGroup_Shamans#2" //GUID:9565683f5b674bc47a0e17a4c51dcf1a
+		illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Clergy_Pagan.tga:Illustration_SocialGroup_Clergy_Pagan#2" //GUID:87c5f0d5a65177944ae553780751ccd2
+	}
+	case default // just in case
+	{
+		name = "Clergy"
+		tooltip = "The opinion of the religious leaders in the kingdom reflects how godly or ungodly acts the ruler undertakes."
+		icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Clergy_Catholic.psd:Icon_SocialGroup_Clergy_Catholic#2" //GUID:5b23db0d672fa9c469966d42bceb048d
+		illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Clergy_Catholic.png:Illustration_SocialGroup_Clergy_Catholic#2" //GUID:98546c872cb0f0b4d97d1bb1cc87a387
+	}
+	
+	stat_mods
+	{
+		mod ks_prod_piety_opinions = 0/0/10
+		mod ks_books_per_cleric = 0/0/5
+		{
+			condition = (is_christian or is_muslim)
+			recalc_on { religion_changed }
+		}
+		
+		mod ks_culture_from_opinions_perc = -25/0/25
+		
+		mod ks_army_morale = -3/0/3
+		{
+			text mod_name = "Clergy opinion"
+			condition = (is_pagan)
+			recalc_on { religion_changed }
+		}
+		mod ks_heresy_susceptibility_perc = 100/0/-50
+		{
+			condition = (!is_pagan)
+			recalc_on { religion_changed }
+		}
+		mod ks_cost_for_autocephaly = 100/0/-50
+		{
+			condition = (is_orthodox)
+			recalc_on { religion_changed }
+		}
+		mod ks_stability_from_opinions = -15/0/0
+	}
+	
+}
+
+def PeasantryOpinion : Opinion
+{
+	name = "Peasantry"
+	tooltip = "Kingdom's security is what worries the commoners most of all - armies and rebels, roaming free and pillaging the lands."
+	icon = "Assets/UI/Elements/Common/Icons/SocialGroups/Icon_SocialGroup_Peasantry.psd:Icon_SocialGroup_Peasantry#2" //GUID:4f879e2983484384d900b6a284a56b14
+	illustration = "Assets/UI/Elements/Common/Icons/SocialGroups/Illustration_SocialGroup_Peasantry.tga:Illustration_SocialGroup_Peasantry#2" //GUID:0cf3f2413f833d14aa3ed2a845e2f8aa
+	
+	stat_mods
+	{
+		mod ks_stability_from_opinions = -10/0/5
+		{
+			bool round = true
+		}
+		mod ks_food_production_perc = -25/0/25
+		mod ks_peasants_morale = -5/0/5
+		mod ks_population_growth_perc = -20/0/20
+	}
+}
+
+// def MinoritiesOpinion : Opinion
+// {
+// 	caption = "Minorities opinion"
+// 	text = "People of different religions and cultures within the kingdom rely on tolerant policy and respect of their ways of living."
+// }

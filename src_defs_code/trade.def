@@ -1,0 +1,14 @@
+﻿def KingdomTradeRanking
+{
+// ----------------------------------------------------------------------------------------------
+// Used only in Trade Power PV
+// Trade Value
+// Formula:(arctan((x - I)/S) - arctan((0 - I)/S))/(abs(arctan((0 - I)/S)) + abs(arctan((100 - I)/S)))*(MaxTradeValue-MinTradeValue) + MinTradeValue
+// (I = inflex; S = smoothness)
+// ----------------------------------------------------------------------------------------------
+	float min = 10
+	float max = 50
+	float inflex = 80 //determines the inflex point of the function (lower values results in a steeper increase towards the end)
+	float smoothness = 20 //contros the smoothness of the function's progression
+
+}

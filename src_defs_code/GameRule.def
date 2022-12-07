@@ -1,0 +1,85 @@
+def GameRule
+{
+	int log = 0 // <=0: no logging, 1: log start/stop, 2: also log stop triggers, 3+: also log start triggers
+
+	float timeout = 30; //1800 // thime after deactivation to "forget" the rule
+	float cooldown = 0 // do not start X seconds after last stop, 0 - no cooldown
+
+	// // what types of objects this rule applies to and how they will be "named"
+	// // "target" variable is defined as the current target (useful when multiple targets are used)
+	// // current target is also accessible via its name
+	// target
+	//  { 
+	//  	kingdom k
+	//  	character c
+	//  	//...
+ 	// 	 }
+
+	// triggers // = 10 // default chance
+	// {
+	// 	target message_id // start triggers will be checked for target types only, stop for target object only
+	// 	realm ChangedKingdom = [ "kingdom_changed" ] // if value(s) are present, the key is just the name of the trigger
+	// 	{
+	// 		// named vars, captured at the moment of triggering
+	// 		var r = (trigger.sender)
+	// 		var new_kingdom = (r.kingdom)
+	// 		var old_kingdom = (trigger.param)
+
+	// 		condition = (new_kingdom = c.kingdom) && (old_kingdom = c.prison_kingdom)
+	// 		chance = (c.class_level) // chance override
+	// 		chance_mul = 1.5 // chance multiplier
+	// 	}
+	// 	//...
+	// }
+
+	// start_triggers {} // defaults to "triggers"
+	// stop_triggers {} // defaults to "triggers"
+
+	// condition active = (...) // use this when rule should be active while this expression is true
+	// {
+	// 	//...
+	// }
+
+	// condition execute = (...) // use this for "one-shot" rules (apply outcomes and stop immediatelly)
+
+	// use these for separate start / stop condition (both must be defined)
+	// condition start = (...) 
+	// condition stop = (...)
+
+	// mod stat_name = value
+
+	// status StatusDefId
+
+	// outcomes
+	// {
+	// }
+
+	// stop_outcomes
+	// {
+	// }
+
+	// rule SomeRule // will be force stopped on parent stop
+	// {
+	// 	//...
+	// }
+
+	// timer NamedTimer = 1800/3600  // min/max tick time
+	// {
+	// 	secondary_tick = 30/60 // alternative tick for 2nd+ ticks
+	// 	//repeating = false
+	//	//max_ticks = 3 // stop the timer after 3 ticks
+	//	//trigger_parent = true // check rule's condition (and potentially stop it) on every tick
+	//	//stop_parent = true // stop rule when timer stops
+	//
+	// 	rule SomeRule
+	// 	{
+	// 		//...
+	// 	}
+	// 	// outcomes
+	// }
+}
+
+template RumorRule : GameRule
+{
+	timeout = 300
+}

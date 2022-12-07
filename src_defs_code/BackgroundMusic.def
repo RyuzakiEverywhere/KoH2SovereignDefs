@@ -1,0 +1,452 @@
+def MusicGroup
+{
+	// pick one of the subgroups
+	// play a number of random tracks from them, and then pause for x seconds
+	// when unpaused, move to a different subgroup
+
+	float snippet_percentage = 0.2; // between 0-1, triggers apply only if the time since the start of the pause has passed this percentage of the total pause length
+	playlist ambience
+	{
+		int tracks_to_play = 2
+		float min_pause_time = 80
+		float max_pause_time = 100
+		bool can_be_interrupted = true;
+		string tracks = []
+	}
+	playlist campaign
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		bool can_be_interrupted = true;
+		string tracks = []
+	}
+	playlist battleview
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 0
+		float max_pause_time = 0
+		bool can_be_interrupted = true;
+		string tracks = ["event:/music/battleview/battle_tension_playlists"]
+	}
+}
+
+def TriggerPriorities
+{
+	float None = 0
+	float Low = 3
+	float Medium = 6;
+	float High = 9;
+	float Obligatory = 100000; // max
+}
+
+def ChristianMusic : MusicGroup
+{
+	religions
+	{
+		Catholic
+		Orthodox
+	}
+	float snippet_percentage = 0.2;
+	playlist ambience
+	{
+		int tracks_to_play = 2
+		float min_pause_time = 100
+		float max_pause_time = 120
+		string tracks = [
+			"event:/music/worldview/ambient_snippet_europe_01",
+			"event:/music/worldview/ambient_snippet_europe_02",
+			"event:/music/worldview/ambient_snippet_europe_03",
+			"event:/music/worldview/ambient_snippet_europe_04",
+			"event:/music/worldview/ambient_snippet_europe_05",
+			"event:/music/worldview/ambient_snippet_europe_06",
+			"event:/music/worldview/ambient_snippet_europe_07",
+			"event:/music/worldview/ambient_snippet_europe_08",
+			"event:/music/worldview/ambient_snippet_europe_09",]
+	}
+	playlist campaign
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/campaign_track_europe_01",
+			"event:/music/worldview/campaign_track_europe_02",
+			"event:/music/worldview/campaign_track_europe_03",
+			"event:/music/worldview/campaign_track_europe_04",
+			"event:/music/worldview/campaign_track_europe_05",]
+	}
+}
+
+def IslamicMusic : MusicGroup
+{
+	religions
+	{
+		Sunni
+		Shia
+	}
+	float snippet_percentage = 0.2;
+	playlist ambience
+	{
+		int tracks_to_play = 2
+		float min_pause_time = 100
+		float max_pause_time = 120
+		string tracks = [
+			"event:/music/worldview/ambient_snippet_arabia_01",
+			"event:/music/worldview/ambient_snippet_arabia_02",
+			"event:/music/worldview/ambient_snippet_arabia_03",
+			"event:/music/worldview/ambient_snippet_arabia_04",
+			"event:/music/worldview/ambient_snippet_arabia_05",
+			"event:/music/worldview/ambient_snippet_arabia_06",]
+	}
+	playlist campaign
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/campaign_track_arabia_01",
+			"event:/music/worldview/campaign_track_arabia_02",
+			"event:/music/worldview/campaign_track_arabia_03",
+			"event:/music/worldview/campaign_track_arabia_04",]
+	}
+}
+
+def PaganMusic : MusicGroup
+{
+	religions
+	{
+		Pagan
+	}
+	float snippet_percentage = 0.2;
+	playlist ambience
+	{
+		int tracks_to_play = 2
+		float min_pause_time = 100
+		float max_pause_time = 120
+		string tracks = [
+			"event:/music/worldview/ambient_snippet_pagan_01",
+			"event:/music/worldview/ambient_snippet_pagan_03",
+			"event:/music/worldview/ambient_snippet_pagan_04",
+			"event:/music/worldview/ambient_snippet_pagan_05",
+			"event:/music/worldview/ambient_snippet_pagan_06",
+			"event:/music/worldview/ambient_snippet_pagan_07",]
+	}
+	playlist campaign
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/campaign_track_pagan_01",
+			"event:/music/worldview/campaign_track_pagan_02",]
+	}
+}
+
+def MusicTrigger
+{
+	string priority = "Low" { enum { Low; Medium; High; Obligatory } }
+	bool interrupt = false
+	float cooldown = 0
+}
+
+/// LOW PRIORITY
+
+def WeddingTrigger : MusicTrigger
+{
+}
+
+def ArmyEnterProvinceTrigger : MusicTrigger
+{
+}
+
+def BuildStartedTrigger : MusicTrigger
+{
+	
+}
+
+def BuildFinishedTrigger : MusicTrigger
+{
+	
+}
+
+def ActionMissionKingdomTrigger : MusicTrigger
+{
+	
+}
+
+/// MEDIUM PRIORITY
+
+def DiplomacyAcceptTrigger : MusicTrigger
+{
+	priority = "Medium"
+}
+
+
+def SelOwnRealmTrigger : MusicTrigger
+{
+	priority = "Medium"
+}
+
+def PopMajorityChangedTrigger : MusicTrigger
+{
+	priority = "Medium"
+}
+
+def SelPlayerBattleTrigger : MusicTrigger
+{
+	priority = "Medium"
+}
+
+/// HIGH PRIORITY
+
+def SelOtherRealmTrigger : MusicTrigger
+{
+	priority = "High"
+}
+
+def DiplomacyOfferOpenTrigger : MusicTrigger
+{
+	priority = "High"
+}
+
+def SelArmyTrigger : MusicTrigger
+{
+	priority = "High"
+}
+
+def SelKingdomTrigger : MusicTrigger
+{
+	priority = "High"
+}
+
+/// CUSTOM
+
+def KingDiedTrigger : MusicTrigger
+{	
+	interrupt = true;
+	priority = "Low";
+	cooldown = 30 // seconds
+}
+
+def KingDiedChristianTrigger : KingDiedTrigger
+{
+	playlist playlist
+	{
+		can_be_interrupted = false
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_king_death"]
+	}
+}
+
+def KingDiedMuslimTrigger : KingDiedTrigger
+{
+	playlist playlist
+	{
+		can_be_interrupted = false
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_king_death"]
+	}
+}
+
+def KingDiedPaganTrigger : KingDiedTrigger
+{
+	playlist playlist
+	{
+		can_be_interrupted = false
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_king_death"]
+	}
+}
+
+
+def WeddingDifChristianTrigger : WeddingTrigger
+{
+}
+def WeddingDifMuslimTrigger : WeddingTrigger
+{
+}
+def WeddingDifPaganTrigger : WeddingTrigger
+{
+}
+def CrusadeTrigger : MusicTrigger
+{
+	interrupt = true;
+	playlist playlist
+	{
+		can_be_interrupted = false
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_new_crusade"]
+	}
+}
+
+//def BattlePreparationTrigger : MusicTrigger
+//{
+//	interrupt = true
+//	playlist playlist
+//	{
+//		bool works_bv = false
+//		bool can_be_interrupted = true
+//		int tracks_to_play = 1
+//		float min_pause_time = 80
+//		float max_pause_time = 100
+//		string tracks = [""]
+//	}
+//}
+
+//def BattleEnterTrigger : MusicTrigger 
+//{
+//	interrupt = false	
+//	playlist playlist
+//	{
+//		bool works_bv = true
+//		bool can_be_interrupted = true
+//		int tracks_to_play = 1
+//		float min_pause_time = 80
+//		float max_pause_time = 100
+//		string tracks = [""]
+//	}
+//}
+
+// def BattleIntroTrigger : MusicTrigger
+// {
+// 	interrupt = true
+// 	playlist playlist
+// 	{
+// 		bool works_bv = true
+// 		int tracks_to_play = 1
+// 		float min_pause_time = 80
+// 		float max_pause_time = 100
+// 		string tracks = [
+// 			""]
+// 	}
+// }
+
+// def BattleIntroAfterNarratorTrigger : MusicTrigger
+// {
+// 	interrupt = true
+// 	playlist playlist
+// 	{
+// 		bool works_bv = true
+// 		int tracks_to_play = 1
+// 		//float min_pause_time = 80
+// 		//float max_pause_time = 100
+// 		string tracks = [
+// 			""]
+// 	}
+// }
+
+def TensionTrigger : MusicTrigger
+{
+	interrupt = true
+	bool can_be_interrupted = false
+	cooldown = 1800 / 2700 // 30-45 minutes
+	playlist christian
+	{
+		religions
+		{
+			Catholic
+			Orthodox
+		}
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_crossing_border_europe"]
+	}
+	playlist muslim
+	{
+		religions
+		{
+			Sunni
+			Shia
+		}
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_crossing_border_arabia"]
+	}
+	playlist pagan
+	{
+		religions
+		{
+			Pagan
+		}
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_crossing_border_pagan"]
+	}
+}
+
+
+def WarDeclaredTrigger : MusicTrigger
+{
+	interrupt = true
+	cooldown = 60 //1800 / 2700 // 30-45 minutes
+	playlist playlist
+	{
+		can_be_interrupted = false
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_war_declared"]
+	}
+}
+
+def JihadTrigger : MusicTrigger
+{
+	interrupt = true
+	cooldown = 1800 / 2700 // 30-45 minutes
+	playlist playlist
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_new_jihad"]
+	}
+}
+
+def PopeDiedTrigger : MusicTrigger
+{
+	interrupt = true
+	//cooldown = 1800 / 2700 // 30-45 minutes
+	playlist playlist
+	{
+		int tracks_to_play = 1
+		float min_pause_time = 80
+		float max_pause_time = 100
+		string tracks = [
+			"event:/music/worldview/event_pope_death"]
+	}
+}
+
+// def SiegePreparationTrigger : MusicTrigger
+// {
+// 	interrupt = true
+// 	//cooldown = 1800 / 2700 // 30-45 minutes
+// 	playlist playlist
+// 	{
+// 		int tracks_to_play = 1
+// 		float min_pause_time = 80
+// 		float max_pause_time = 100
+// 		string tracks = [
+// 			"event:/music/worldview/event_siege_preparation"]
+// 	}
+// }

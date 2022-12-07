@@ -1,0 +1,132 @@
+def AI
+{
+	// used to calculate "production score" for a building / upgrade
+	province_specialization_resource_weights
+	{
+		resources General
+		{
+			Gold = 0
+			Food = 0
+			Books = 0
+			Piety = 0
+			Levy = 0
+			TownGuards = 0
+			WorkerSlots = 0
+			Trade = 0
+			Goods = 0
+			UniqueGoods = 0
+		}
+
+		resources Military : General
+		{
+			Levy = 0
+		}
+
+		resources Gold : General
+		{
+			Gold = 0
+			Food = 0
+			Trade = 0
+			Books = 0
+			Piety = 0
+			Levy = 0
+			TownGuards = 0
+			WorkerSlots = 0
+		}
+
+		resources Food : General
+		{
+			Food = 0			
+			Gold = 0
+			Books = 0
+			Piety = 0
+			Levy = 0
+			TownGuards = 0
+			WorkerSlots = 0
+			Trade = 0
+		}
+
+		resources Religion : General
+		{
+			Books = 0
+			Piety = 0
+			Gold = 0
+			Food = 0
+			Levy = 0
+			TownGuards = 0
+			WorkerSlots = 0
+			Trade = 0
+		}
+
+		//resources Trade
+		//resources Crafts
+	}
+
+	// reduce evaluation of building resource production in non-governed provinces
+	non_governed_production_eval_mul = 0.5 
+
+	// how much food to keep for reserves
+	food_reserve = 10
+	{
+		critical_weight = 10000  // alter food weight if bellow 0
+		low_weight = 1000        // alter food weight if bellow reserve
+	}
+
+	// boost evaluation of unique goods in PF district, per number of buildings built
+	// unique_PF_goods_eval_multiplier
+	// {
+	// 	0 = 1
+	// 	1 = 2
+	// 	2 = 5
+	// 	3 = 10
+	// 	4 = 100
+	// }
+
+	// per number of buildings built, value is immediate / near future / far future
+	// immediate: "production score" we will get immediatelly
+	// near_future: plus everything that can be built/upgraded at the moment
+	// far_future: when fully built and upgraded
+	production_evaluation_future_weights 
+	{
+		0 = 1 / 0.75 / 0.01
+		2 = 1 / 1 / 0.01
+		4 = 1 / 1 / 0.25
+		6 = 1 / 1 / 0.5
+	}
+
+	// maximum percentage of gold earned to spend on specific category
+	budget
+	{
+		None = (map_clamp(game.time_hours, 0.5, 1.5, 0, 20)) // reserves
+		Military = (40 - Espionage / 2 + king_warfare_ability + min(num_wars, 2) * 10)
+		Economy = (40 - Espionage / 2 + king_economy_ability)
+		Diplomacy = (5 + king_diplomacy_ability)
+		Espionage = (1 + spies_count * (5 + king_espionage_ability))
+		Religion = (5 + king_religion_ability)
+
+		//Total: 90 - 135
+	}
+
+	// maximum percentage of income allowed for upkeeps
+	// subcategories are taken from IncomePanels.def
+	// for subcategories both the subcategory and the parent category must be OK
+	// total is also always checked, as if it was the parent of everything
+	upkeeps_budget
+	{
+		None = (Military + map_clamp(game.time_hours, 1, 3, 10, 20)) // total
+		Military = (20 + king_warfare_ability + min(num_wars, 2) * 5)
+		{
+			ArmyUpkeep = (num_marshals >= Marshal.ai_max_court_count and all_armies_full and 10)
+		}
+		Economy = (5 + king_economy_ability)
+		Diplomacy = (10 + king_diplomacy_ability)
+		Espionage = (5 + spies_count * (5 + king_espionage_ability))
+		{
+			Bribes = 10
+		}
+		Religion = (5 + king_religion_ability + is_pagan * 10)
+		{
+			subtotal = "Religion_Culture"
+		}
+	}
+}

@@ -1,0 +1,453 @@
+def Sounds
+{
+	never_play_together
+	{
+		case 1:	
+		{	
+			path = "event:/sound_effects/interface/paper/click"
+			targets = ["event:/sound_effects/interface/default/click", ""]
+		}
+		case 2:	
+		{	
+			path = "narrator_voice:rebellion_defeated"
+			targets = ["narrator_voice:rebels_defeated", ""]
+		}
+		case 3:
+		{	
+			path = "narrator_voice:we_destroyed_papacy"
+			targets = ["narrator_voice:war_won", "narrator_voice:war_won_battle_over"]
+		}
+
+	}
+	
+	float visible_skirmish_cooldown = 10 //battleview music transition cooldown 
+	/// SNAPSHOTS - used to control audio channel settings, such as volume, EQ corrections,etc.,  
+	string pause_game_snapshot = "snapshot:/GamePaused"	
+	string battleview_outcome_screen = "snapshot:/BattleOutcomeScreen"	
+	string battle_introductions_snapshot = "snapshot:/BattleIntroductions"	
+	string political_view_snapshot = "snapshot:/PoliticalViewEnter"
+	string loading_screen_snapshot = "snapshot:/TitleScreenWorldview"
+	string victory_defeat_screen_snapshot = "snapshot:/VictoryDefeatScreen"
+	string battleview_loading_screen_snapshot = "snapshot:/LoadingScreens"
+	
+	/// Sound effects/INTERFACE
+	string open_window_default = "event:/sound_effects/interface/default/open"
+	string close_window_default = "event:/sound_effects/interface/default/close"
+	string open_window_paper = "event:/sound_effects/interface/paper/open"		
+	string close_window_paper = "event:/sound_effects/interface/paper/close"	
+	//custom 
+	string open_royal_dungeon_window = "event:/sound_effects/interaction/dungeon/open" //Royal Dungeon 
+	string close_royal_dungeon_window = "event:/sound_effects/interaction/dungeon/close" //Royal Dungeon 
+	string open_income_window = "event:/sound_effects/interface/paper/open" //Income Window 
+	string close_income_window = "event:/sound_effects/interface/paper/close" //Income Window	
+	string open_religion_books_window = "event:/sound_effects/interface/default/open" //Religion & Books
+	string close_religion_books_window = "event:/sound_effects/interface/default/close" //Religion & Books
+	string open_royal_family_window = "event:/sound_effects/interface/default/open" //Royal Family
+	string close_royal_family_window = "event:/sound_effects/interface/default/close" //Royal Family
+	string open_war_preparation_window = "event:/sound_effects/interface/default/open" //Friends, Threads, War
+	string close_war_preparation_window = "event:/sound_effects/interface/default/close" //Friends, Threads, War 
+	string open_province_overview_window = "event:/sound_effects/interface/default/open" //Province Overview
+	string close_province_overview_window = "event:/sound_effects/interface/default/close" //Province Overview
+	string open_buildings_window = "event:/sound_effects/interface/default/open"
+	string close_buildings_window = "event:/sound_effects/interface/default/close"
+
+	// menu windows
+	string open_load_game_window = "event:/sound_effects/interface/default/open"
+	string close_load_game_window = "event:/sound_effects/interface/default/close"
+	string open_save_game_window = "event:/sound_effects/interface/default/open"
+	string close_save_game_window = "event:/sound_effects/interface/default/close"
+	string open_multiplayer_menu_window = "event:/sound_effects/interface/default/open"
+	string close_multiplayer_menu_window = "event:/sound_effects/interface/default/close"
+	string open_preferences_window = "event:/sound_effects/interface/default/open"
+	string close_preferences_window = "event:/sound_effects/interface/default/close"
+	string open_credits_window = "event:/sound_effects/interface/default/open"
+	string close_credits_window = "event:/sound_effects/interface/default/close"
+	string open_title_login_window = "event:/sound_effects/interface/default/open"
+	string close_title_login_window = "event:/sound_effects/interface/default/close"
+	string open_offline_warning_window = "event:/sound_effects/interface/default/open"
+	string close_offline_warning_window = "event:/sound_effects/interface/default/close"
+	string open_title_register_window = "event:/sound_effects/interface/default/open"
+	string close_title_register_window = "event:/sound_effects/interface/default/close"
+	string open_forgot_password_window = "event:/sound_effects/interface/default/open"
+	string close_forgot_password_window = "event:/sound_effects/interface/default/close"
+	string open_sp_login_window = "event:/sound_effects/interface/default/open"
+	string close_sp_login_window = "event:/sound_effects/interface/default/close"
+
+	//campaign-political view interface sounds 
+	string exit_political_view = "event:/sound_effects/interface/worldmap/close"
+	string enter_political_view = "event:/sound_effects/interface/worldmap/open"
+	string select_kingdom_pv = "event:/sound_effects/interface/paper/click"	
+	string switch_political_view = ""
+	//chat 
+	string lobby_chat_sound = "event:/sound_effects/interface/chat/notification"
+	string ingame_chat_sound = "event:/sound_effects/interface/chat/notification"
+	string system_chat_sound = "event:/sound_effects/interface/chat/notification" 
+
+	/// Sound effects/INTERACTION 
+	string action_unavailable = "event:/sound_effects/interaction/unavailable"
+	string action_inactive = "event:/sound_effects/interaction/unavailable"
+	string action_cost_not_met = "event:/sound_effects/interaction/unavailable"
+	string action_missing_targets = "event:/sound_effects/interaction/unavailable"	
+	//select 	
+	string select_town = "event:/sound_effects/interaction/select/town"	
+	string select_town_tab = "event:/sound_effects/interaction/select/town_tab"
+	string select_settlement_razed = "event:/sound_effects/interaction/select/razed_settlement"	
+	string select_army = "event:/sound_effects/interaction/select/army"	
+	//misc 
+	//string army_disband = "event:/sound_effects/interaction/army/disband" //sound effect not ready 
+	string army_resupply = "event:/sound_effects/interaction/army/resupply"
+	//build 
+	string building_started = "event:/sound_effects/interaction/building/started"	
+	string building_upgrades_started = "event:/sound_effects/interaction/building/upgrade_started"
+	string building_demolished = "event:/sound_effects/interaction/building/demolished"	
+	string fortifications_upgrade_started = "event:/sound_effects/interaction/fortification/upgrade_started"	
+	string fortifications_repair_started = "event:/sound_effects/interaction/fortification/upgrade_started"
+	string province_expanded = "event:/sound_effects/interaction/expand_province"		
+		
+	/// Sound effects/NOTIFICATION	
+
+	// only for specific stuff that doesn't go through messages
+	string war_declared_sound_effect = "event:/sound_effects/notification/war_declared"
+	string war_declared_narrator_voice_line = "narrator_voice:war_declared"
+
+	string notification_message = "event:/sound_effects/notification/message/default" //the one that appears on the left side 
+	//string radio_message = "event:/sound_effects/notification/radio" //sound effect not ready 
+
+	//string crown_authority_increase_button = "event:/sound_effects/notification/crown_authority/increased"
+	string crown_authority_increase = "event:/sound_effects/notification/crown_authority/increased"
+	string crown_authority_decrease = "event:/sound_effects/notification/crown_authority/dropped"	
+
+	string imprisoned_sfx = "event:/sound_effects/notification/character/imprisoned"	
+	
+	string building_completed = "event:/sound_effects/notification/building/completed"
+	string building_upgraded = "event:/sound_effects/notification/building/upgrades_completed"
+
+	/// VOICE 
+	float narrator_building_delay = 600 // will play narrator_building_window 20 seconds after having the window stay open
+	string narrator_building_window = "narrator_voice:wait_build" // Select which building to build
+	string building_upgraded_voice_line = "narrator_voice:upgrade_finished" 
+	string narrator_building_completed = "narrator_voice:building_finished" 
+	string narrator_fortifications_finished = "narrator_voice:fortifications_finished"
+	//interface voice lines 
+	string narrator_advantages_window = "narrator_voice:open_window" //Kingdom Advantages 
+	string narrator_royal_family_window = "narrator_voice:open_window" // Royal Family
+	string narrator_great_powers_window = "narrator_voice:open_window" // Great Powers and Ranking 
+	string narrator_religion_books_window = "narrator_voice:open_window" //Religion 
+	string narrator_war_preparation_window = "narrator_voice:open_window" //Friends, Threads, War
+	string narrator_province_overview_window = "narrator_voice:open_window" //Provinces 	
+	string narrator_income_window = "narrator_voice:open_window" //Income Window 	
+	string narrator_royal_dungeon_window = "narrator_voice:open_window" //Royal Dungeon 
+	string narrator_political_view = "narrator_voice:open_window" //Political View 
+	string narrator_preferences_window = "narrator_voice:preferences" //preferences
+	/// WAR	
+	string war_won_battles = "narrator_voice:war_won_battle_over" 
+	string war_lost_battles = "narrator_voice:war_lost_battle_over" 
+	string war_drawn_battles = "narrator_voice:war_ended_white_peace_battle_over" 
+	string war_won_no_battles = "narrator_voice:war_won" 
+	string war_lost_no_battles = "narrator_voice:war_lost" 
+	string war_drawn_no_battles = "narrator_voice:war_ended"
+	string war_drawn_no_battles_supporter = "narrator_voice:war_ended_peace_leaders"
+
+	string our_jihad_gained_muslim_ally = "narrator_voice:our_jihad_gained_muslim_ally"
+	string our_jihad_gained_non_muslim_ally = "narrator_voice:our_jihad_gained_non_muslim_ally"
+
+	/// Enemy Knight Imprisoned 
+	string enemy_king_imprisoned = "narrator_voice:enemy_knight_captured" 
+	string enemy_prince_imprisoned = "narrator_voice:enemy_knight_captured" 
+	string enemy_knight_imprisoned = "narrator_voice:enemy_knight_captured"	
+	string exquisite_ransom = "narrator_voice:exquisite_ransom"	//ExquisiteRansomMessage //A surprising event issued by a foreign merchant. 
+	/// Own Knight in Imprisoned 
+	string own_king_imprisoned = "narrator_voice:royal_court_member_imprisoned" 
+	string own_prince_imprisoned = "narrator_voice:royal_court_member_imprisoned" 
+	string own_knight_imprisoned = "narrator_voice:royal_court_member_imprisoned" 
+	//Another kingdom decided to release our knight from their royal dungeon.
+	string own_king_released = "narrator_voice:imprisoned_court_member_released" 
+	string own_prince_released = "narrator_voice:imprisoned_court_member_released" 
+	string own_knight_released = "narrator_voice:imprisoned_court_member_released" 		
+	string successfull_ransom_prisoner = "narrator_voice:imprisoned_court_member_rescued" //Rescued, either by sending a ransom or via diplomacy.	
+	
+	/// MISC
+	string player_reinforcements_arrived = "narrator_voice:we_received_reinforcements" 
+	string narrator_assault_can_start = "narrator_voice:ready_to_assault" 
+	string disorder_started = "narrator_voice:province_in_disorder" 	
+	string disorder_ended = "narrator_voice:disorder_ended" 
+	string narrator_our_province_religion_converted = "narrator_voice:our_province_converted_to_foreign_religion" 	
+	//string pop_majority_kingdom_changed = "" 
+	
+	string narrator_crown_authority_increased = "narrator_voice:crown_authority_increased"
+	string narrator_crown_authority_dereased = "narrator_voice:crown_authority_decreased" 
+	string narrator_advantage_gained = "narrator_voice:advantage_gained" 
+	string narrator_advantage_lost = "narrator_voice:advantage_lost" 
+
+	string losing_initiative = "narrator_voice:we_are_losing_initiative"
+	string lost_initiative_our_assault = "narrator_voice:initiative_ended_our_assault"
+	string lost_initiative_their_assault = "narrator_voice:initiative_ended_their_assault"
+	string lost_initiative_enemy_break_siege_inside = "narrator_voice:initiative_ended_enemy_break_siege_inside"
+	string lost_initiative_enemy_break_siege_outside = "narrator_voice:initiative_ended_enemy_break_siege_outside"
+	string lost_initiative_our_break_siege_inside = "narrator_voice:initiative_ended_our_break_siege_inside"
+	string lost_initiative_our_break_siege_outside = "narrator_voice:initiative_ended_our_break_siege_outside"
+
+	string battle_prediction_balanced = "narrator_voice:battle_is_balanced"
+	string battle_prediction_winning = "narrator_voice:battle_is_onesided_us"
+	string battle_prediction_losing = "narrator_voice:battle_is_onesided_them"
+	string battle_prediction_winning_decisively = "narrator_voice:battle_is_very_onesided_us"
+	string battle_prediction_losing_badly = "narrator_voice:battle_is_very_onesided_them"
+
+	string independence_claimed_by_us = "narrator_voice:independence_claimed_by_us"
+	string independence_granted_to_them = "narrator_voice:independence_granted"
+
+	string our_puppet_became_king = "narrator_voice:our_puppet_became_king"
+
+	///TO DO (implement) "narrator_voice:can_claim_advantages_victory" //NOTE:happens before the actual claim!!	
+
+	/// ENDGAME Victory&Defeat 
+	string EndGame_victory = "narrator_voice:multiplayer_victory"
+	string EndGame_defeat = "narrator_voice:multiplayer_defeat"		
+ 	string EndGame_victory_EmperorOfTheWorld = "narrator_voice:eow_victory" 
+	string EndGame_defeat_EmperorOfTheWorld = "narrator_voice:eow_defeat" 
+
+	string EndGame_victory_KingdomAdvantages = "narrator_voice:advantages_victory"
+	string EndGame_defeat_KingdomAdvantages = "narrator_voice:advantages_defeat"
+	
+	string EndGame_defeat_PlayerEliminated = "narrator_voice:our_kingdom_destroyed"
+	// "narrator_voice:single_player_defeat_kingdom_destroyed" 	
+
+	string EndGame_victory_Conquest = "narrator_voice:conquest_victory"
+		
+	//string EndGame_victory_KingdomDefeated = "" // no victory in KingdomDefeated, so this isn't needed
+	string EndGame_defeat_KingdomDefeated = "narrator_voice:our_kingdom_destroyed"
+	
+	string EndGame_victory_LastTeamStanding = "narrator_voice:multiplayer_victory" // default (generic fallback) victory voice
+
+	string EndGame_victory_HaveXGold = "narrator_voice:greedy_kings_victory"
+	string EndGame_defeat_HaveXGold = "narrator_voice:greedy_kings_defeat"
+
+	string EndGame_victory_HaveXRealms = "narrator_voice:peasant_rush_victory"
+	string EndGame_defeat_HaveXRealms = "narrator_voice:peasant_rush_defeat"
+
+	string EndGame_victory_FirstBlood = "narrator_voice:first_blood_victory"
+	string EndGame_defeat_FirstBlood = "narrator_voice:first_blood_defeat"
+
+	string EndGame_victory_WarForGoods = "narrator_voice:advantages_victory"
+	string EndGame_defeat_WarForGoods = "narrator_voice:advantages_defeat"
+
+	string EndGame_victory_DestroyKingdom = "narrator_voice:destroy_kingdom_victory"
+	string EndGame_defeat_DestroyKingdom = "narrator_voice:destroy_kingdom_defeat"
+
+
+	string EndGame_defeat_EndGameLimit = "narrator_voice:multiplayer_defeat" // default (generic fallback) defeat voice
+	/// ENDGAME - END
+
+
+	//string narrator_emperor_of_the_world_their_claim_failed = "" //unused 
+	//messages.def: 
+	//claim_refused_others voice line = "narrator_voice:emperor_of_the_world_claim_refused_yours"//messages.def - EmperorOfTheWorldPretenderNotChosenMessage
+	//no_result voice line = "narrator_voice:emperor_of_the_world_no_result" //messages.def - NoEmperorOfTheWorldChosenMessage 	
+
+	/// UNUSED //archived //do not remove!!!
+	// string narrator_commerce_window = "narrator_voice:open_window" //Trade Window 
+	/// UNUSED Sound effects //archive if someting is needed again 
+	// string open_kingdom_advantages_window = "" //Kingdom Advantages 
+	
+	// string open_great_powers_window = ""  //Great Powers and Ranking
+	// string close_great_powers_window = "" //Great Powers and Ranking
+	
+	// string open_commerce_window = "" //Commerce	
+	// string open_opinions_window = "" 
+	// string open_rebellion_overview_window = "" // Stability	
+	// string open_rebellions_window = "" // Stability	
+	// string open_kingdom_goods_window = "" // Quests	
+	// string open_kingdom_missions_window = "" // Quests	
+
+	// string close_kingdom_advantages_window = "" //Kingdom Advantages 
+	// string close_commerce_window = "" //Trade Window 
+	// string close_opinions_window = ""	
+	   
+	// string select_battle = ""		
+	// string select_rebels = ""
+	// string select_mercenary = ""		
+	// string select_army_camp = ""
+	// string select_rebel_camp = ""
+	// string select_mercenary_camp = ""	 
+	// string fortifications_upgrade_finished = ""  
+	// string fortifications_repair_finished = "" 		 
+	// string tax_rate_increased = ""
+	// string tax_rate_decreased = ""
+	// string take_loan = ""
+	// string collect_war_tax = ""	
+
+}
+
+
+def AudioRenderSettings
+{
+	
+	template AmbientChannel
+	{
+		string event
+	}
+	
+	ambient_channels
+	{
+		Ocean : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_ocean"
+		}
+		River : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_river"
+		}		
+		Desert : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_climate_desert"
+		}
+		Nordic : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_climate_temperate"
+		}
+		Temperate : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_climate_temperate"
+		}
+		// Mediterranean
+		// {
+		// 	event = ""
+		// }
+		Forest_Desert : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_forest_desert"
+		}
+		Forest_Tropical : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_forest_desert"
+		}
+		Forest_Nordic : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_forest_temperate"
+		}
+		// Forest_Mediterranean : AudioRenderSettings.AmbientChannel
+		// {
+		// 	event = ""
+		// }
+		Forest_Temperate : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/worldview_forest_temperate"
+		}		
+	}
+}
+
+def BattleViewAudioRenderSettings : AudioRenderSettings
+{
+	ambient_channels : null
+	{
+		Town : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_town"
+		}
+		Ocean : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_ocean"
+		}		
+		Desert : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_climate_desert"
+		}
+		Nordic : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_climate_nordic"
+		}
+		Temperate : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_climate_temperate"
+		}
+		Mediterranean : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_climate_temperate"
+		}
+		Forest_Desert : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_forest_desert"
+		}
+		Forest_Nordic : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_forest_nordic"
+		}
+		Forest_Temperate : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_forest_temperate"
+		}
+		Forest_Mediterranean : AudioRenderSettings.AmbientChannel
+		{
+			event = "event:/ambience/battleview_forest_temperate"
+		}
+	}
+}
+
+
+def Title_Banks //Bank Loader //loaded all the time 
+{
+	// currentlry testing performance if all of the banks are always loaded 
+	// if true, preload sample data
+
+	bool interface = true
+	bool interactions = true
+	bool sound_effects_worldview	
+	bool notifications	
+
+	// other currently existing banks - loading is needed before defs are loaded
+
+	// bool music //loading on initialization using FMODStudioSettings 
+	// bool ambience //loading on initialization using FMODStudioSettings
+	// bool voices //loading seperately via script 
+}
+
+def WV_Banks //unloads only banks's sample date 
+{
+	
+}
+
+def BV_Banks //banks are loaded during battleview only
+{
+	bool sound_effects_battleview
+}
+
+def WV_BV_Banks //unloads only banks's sample date (if unloading at all) 
+{
+	
+}
+
+def ObsoleteVoices
+{
+	///Narrator voice lines
+	string obsolete_voice_messages = "narrator_voice:multiple_messages_received" //unused
+	string obsolete_voice_sp_victory = "narrator_voice:single_player_victory" //unused
+	string obsolete_voice_sp_kingdom_destroyed = "narrator_voice:single_player_defeat_kingdom_destroyed" //unused
+	string obsolete_voice_ncp_taken_enemy = "narrator_voice:neutral_capture_point_taken_by_enemy" //unused
+	string obsolete_voice_ncp_taken_us = "narrator_voice:neutral_capture_point_taken_by_us" //unused
+	string obsolete_voice_frc_assault_walls = "narrator_voice:friendly_castle_assault_walls" //unused	
+	string obsolete_voice_game_loaded = "narrator_voice:game_loaded" //on hold, probably obsolete
+	string obsolete_voice_game_paused = "narrator_voice:game_paused" //on hold, probably obsolete
+	string obsolete_voice_game_resumed = "narrator_voice:game_resumed" //on hold, probably obsolete
+	string obsolete_voice_game_saved = "narrator_voice:game_saved"  //on hold, probably obsolete
+	string obsolete_voice_game_starts = "narrator_voice:game_starts"  //on hold, probably obsolete
+	string obsolete_voice_game_voice_check = "narrator_voice:voice_volume_check" //on hold (design)
+	string obsolete_voice_inheritance = "narrator_voice:inheritance" //replaced vith virtual 
+	string obsolete_voice_independence = "narrator_voice:independence" //replaced vith virtual 
+	string obsolete_voice_army_revolt = "narrator_voice:army_revolt" //replaced vith virtual 
+	string obsolete_voice_siege_interrupted = "narrator_voice:siege_interrupted" //replaced vith virtual 
+	string obsolete_voice_province_religion_converted = "narrator_voice:province_religion_converted" //replaced vith virtual 
+	string obsolete_voice_diplomat_opinion = "narrator_voice:diplomat_improved_opinion" //replaced with virtual
+	string obsolete_voice_crusade = "narrator_voice:new_crusade_message" //replaced with virtual
+	string obsolete_voice_ally_joined_our_jihad = "narrator_voice:our_jihad_gained_ally" //replaced with virtual
+	///Character voice lines
+	string obsolete_voice_confirm_unexcommunicate = "character_voice:action_confirmation_unexcommunicate" //obsolete	
+	string obsolete_voice_build_ship = "character_voice:build_ship" //obsolete
+	string obsolete_voice_imprisoned = "character_voice:imprisoned" //replaced with virtual	
+	string obsolete_voice_reinforce_ours = "character_voice:reinforce_army" //narrator only
+	string obsolete_voice_reinforce_theirs = "character_voice:enemy_reinforcements" //narrator only
+	string obsolete_voice_army_shaking = "character_voice:enemy_army_shaking" //narrator only
+}
+
+	
+	
+	

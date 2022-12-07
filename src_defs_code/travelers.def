@@ -1,0 +1,67 @@
+﻿def Traveler
+{
+	prefab model
+	prefab model_addon
+	float movement_speed = 1.6
+	float anim_movement_speed = 2
+	int total_travellers_per_road = 2
+	int travellers_per_road = 1
+	float min_spawn_interval = 10
+	float max_spawn_interval = 30
+	float look_ahead = 0.75
+	float finish_path_offset = 0
+}
+
+def TravelerCart : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Travaler_Cart.prefab" //GUID:1f9499004e3596b4c957ccb9e7fb3e8a
+	model_addon = "Assets/Units/Travelers/Europe/Prefabs/Travaler_Cart_Addon.prefab" //GUID:1aa85f42c9ae88e408734d574fc348e7
+	float pivot_offset_x = 0
+	float pivot_offset_y = 0.73787952
+	float pivot_offset_z = -1.14814452
+	float min_dist = 0.87985836
+	float addon_offset = 2.223
+	float render_scale = 0.78
+	look_ahead = 1.5
+	finish_path_offset = 3
+}
+
+def TravelerSack : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Travaler_Worker.prefab" //GUID:783acff0ac977d845b323a9be7829109
+}
+
+def TravelerAxe : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Axe.prefab" //GUID:07d2025d98299a24192052bf3956fd64
+}
+
+def TravelerHammer : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Hammer.prefab" //GUID:6ef6dde84fe02c64fae909cb6efff7fc
+}
+
+def TravelerPickaxe : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Pickaxe.prefab" //GUID:a3838f18624bb17488456f021624d662
+}
+
+def TravelerScythe : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Scythe.prefab" //GUID:b060bd8536159e94fb034be775da7234
+}
+
+def TravelerShovel : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Shovel.prefab" //GUID:576d6bf2723408f4da926b6050f16508
+}
+
+def TravelerFemaleMenci : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Female_Menci.prefab" //GUID:a45137731cc5e0241a9acaefc4175c97
+}
+
+def TravelerFemaleBasket : Traveler
+{
+	model = "Assets/Units/Travelers/Europe/Prefabs/Traveller_Female_Basket.prefab" //GUID:ede169853710b4646831b48f3e689754
+}

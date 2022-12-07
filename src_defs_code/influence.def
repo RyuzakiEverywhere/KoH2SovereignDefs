@@ -1,0 +1,20 @@
+﻿def Influence
+{
+	
+// NEW stuff -----------------------
+	
+	// base ks_influence is from 0 .. 1000
+	// we calculate in this range and at the end 
+	// divide by 10 to be compatible with the old stuff
+	min = 0
+	max = 100
+
+	princess_influence = 75
+	queen_influence = 200
+	diplomat_addition = 0.20 // max percent of our influence added where diplomat is based in his level
+	vassal_multiplier = 1.5
+
+	distance_multipliers = [1, 0.6, 0.4, 0.2] 		// influence fades with distance
+	religion_multipliers = [1, 0.75, 0.5] 			// for religious defferences
+	
+}

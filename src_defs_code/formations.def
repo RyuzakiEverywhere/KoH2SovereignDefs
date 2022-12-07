@@ -1,0 +1,34 @@
+def Formation
+{
+	int cols = 12 // default number of columns in formation
+	int rows = 4 // default number of rows in formation
+	int pivot = 0.5 // pivot row [0 .. 1]
+	
+	int min_cols = 4 // minimum number of colums with default number of troops
+	int min_rows = 2 // minimum number of rows with default number of troops
+
+	float min_rows_to_cols = 0.3 // eg if you have 20 rows * cols, you'd get ceil(20 * 0.3) = 7 cols, ceil(20 / 7) = 3 rows, 3 / 7 = 0.42 ratio, if it went to any lower number of rows we'd be < min_rows_to_cols ratio
+
+	float col_spacing_mul = 0.5 // space between two columns, in troop diameters
+	float row_spacing_mul = 0.5 // space between two rows, in troop diameters
+	float deform_x = 1 // maximum troop horizontal offset from perfect spot, multiplied by available space
+	float deform_y1 = 1 // maximum troop vertical offset from perfect spot while stopped, multiplied by available space
+	float deform_y2 = 1 // maximum troop vertical offset from perfect spot while moving, multiplied by row spacing	
+
+	float defensive_stance_control_zone = 8		//additional range (added to formation size) for searching for enemy when in hold ground mode
+	float aggressive_mode_ground_control_zone = 30		//additional range (added to formation size) for searching for enemy when not in hold ground mode
+	float attacking_control_zone = 30		//additional range when squad is attacking (added to stance control zone value)
+}
+
+def RectFormation : Formation
+{
+}
+
+def TriangleFormation : Formation
+{
+	rows = 9
+}
+
+def CheckerboardFormation : RectFormation
+{
+}

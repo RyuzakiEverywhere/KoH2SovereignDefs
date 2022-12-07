@@ -1,0 +1,400 @@
+﻿def ObjectIcon
+{
+	prefab prefab
+}
+
+
+def ActionIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Character/UIP_CharacterActionIcon.prefab" //GUID:299b318f677cb364aa9c15c5dab16779
+	{
+		prefab change_religion = "Assets/UI/Religion/UIP_ActionIcon_ChangeReligion.prefab" //GUID:070fe4de5ba1fc64a90f5f9a3f080c5d
+	}
+	template State
+	{
+		sprite icon // icon override,
+		color icon_color = "255,255,135,191" // Non-modified color
+		color icon_color_over = "255,255,135,191" // Non-modified color
+		color border_color = "102,102,50,31" // GRAY   
+		color border_color_over = "102,102,50,31" // GRAY   
+	}
+	Undefined : ActionIcon.State
+	{
+		icon_color = "214,214,173,17" // GRAY
+		icon_color_over = "214,214,173,27" // GRAY
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,51" // GRAY
+	}
+	Valid : ActionIcon.State
+	{
+		icon_color = "255,255,135,191" // NORMAL 
+		icon_color_over = "255,255,135,191" // NORMAL 
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+		// gray 
+	}
+	Invalid : ActionIcon.State
+	{
+		icon_color = "214,214,173,17" // GRAY
+		icon_color_over = "214,214,173,17" // GRAY
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+	}
+	InvalidActioInprogress : ActionIcon.State
+	{
+		icon_color = "214,214,173,17" // GRAY
+		icon_color_over = "214,214,173,17" // GRAY
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+	}
+	PickingTarget : ActionIcon.State
+	{
+		icon_color = "255,255,135,191" // NORMAL 
+		icon_color_over = "255,255,135,191" // NORMAL 
+		border_color = "255,255,135,191" // GOLD
+		border_color_over = "255,255,135,191" // GOLD
+	}
+	PickingArgs : ActionIcon.State
+	{
+		icon_color = "255,255,135,191" // NORMAL 
+		icon_color_over = "255,255,135,191" // NORMAL 
+		border_color = "255,255,135,191" // GOLD
+		border_color_over = "255,255,135,191" // GOLD
+	}
+	Preparing : ActionIcon.State
+	{
+		icon_color = "97,123,143,92" // GREEN
+		icon_color_over = "97,123,143,92" // GREEN
+		border_color = "102,102,50,31" // GRAY 
+		border_color_over = "102,102,50,31" // GRAY 
+	}
+	Running : ActionIcon.State
+	{
+		icon_color = "97,123,143,92" // GREEN
+		icon_color_over = "97,123,143,92" // GREEN
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+	}
+	Finishing : ActionIcon.State
+	{
+		icon_color = "97,123,143,92" // GREEN
+		icon_color_over = "97,123,143,92" // GREEN
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+	}
+	OnCooldown : ActionIcon.State
+	{
+		icon_color = "255,255,135,191" // NORMAL 
+		icon_color_over = "255,255,135,191" // NORMAL 
+		border_color = "102,102,50,31" // GRAY
+		border_color_over = "102,102,50,31" // GRAY
+	}
+}
+
+
+def OpportunityIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Character/UIP_CharacterOpportunityIcon.prefab" //GUID:8d10bab422ab43e45b7b207b1f6a0e40
+}
+
+def KingdomIcon : ObjectIcon
+{
+	
+	prefab = "Assets/UI/ObjectIcons/UIP_KingdomIcon.prefab" //GUID:64b42bb89568e674b88e94a0f6791bec
+	{
+		prefab extended = "Assets/UI/ObjectIcons/UIP_KingdomIcon_Extended.prefab" //GUID:d2db375e8a64f9c498c512b336806503
+		prefab compact = "Assets/UI/ObjectIcons/UIP_KingdomIcon_Compact.prefab" //GUID:3f2bcc45d5767a34b815bbd40b3573da
+		prefab top = "Assets/UI/ObjectIcons/UIP_KingdomIcon_Compact.prefab" //GUID:3f2bcc45d5767a34b815bbd40b3573da
+	}
+}
+
+def RealmIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_RealmIcon.prefab" //GUID:01af09ea8ba2e2845aebb5cbc74910dc
+	sprite icon = [
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_01.psd:Icon_Castle_Level_01#1", //GUID:181ca0c7cc5f93a4797a8da350e6cdec
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_02.psd:Icon_Castle_Level_02#2", //GUID:f6fccb946b8cc274499d9ce92184336a
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_03.psd:Icon_Castle_Level_03#2", //GUID:75defb7556b82ff42b9f44f07e771a98
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_04.psd:Icon_Castle_Level_04#2" //GUID:30bd86fbd0bc11f44b9184d7cf5e55cd
+	]
+	
+	template State
+	{
+		color icon_color = "255,255,135,191" // Non-modified color
+		sprite border = "Assets/UI/Elements/Settlements/Element_Settlement_Border.png:Element_Settlement_Border#2" //GUID:3dfe8b61de3f04342a71c4db4b8d033f
+		color border_color = "255,255,135,191" // Non-modified color
+		bool show_status = false
+		sprite status_icon
+		sprite status_color = "255,255,135,191" // Non-modified color
+	}
+	Normal : State
+	{
+		
+	}
+	Siege : State
+	{
+		show_status = true
+		icon_color = "194,63,34" //C33F22FF
+		status_icon = "Assets/UI/Elements/Settlements/Icons/Icon_CastleStatus_Siege.psd:Icon_CastleStatus_Siege#2" //GUID:59622192616227041833eec36634c49e
+	}
+	Disorder : State
+	{
+		icon_color = "194,63,34" //C33F22FF
+	}
+	Occupation : State
+	{
+		
+		icon_color = "194,63,34" //C33F22FF
+	}
+}
+
+def ArmyIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_ArmyIcon.prefab" //GUID:897f482727689184d83352d04da03daf
+}
+
+def WarIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_WarIcon.prefab" //GUID:e0e766fbc4ac93145b633f1615cc0faa
+	{
+		prefab thirdPartyJihad = "Assets/UI/ObjectIcons/UIP_ThirdPartyJihadIcon.prefab" //GUID:4d4f821160c31a14f95cd9cfad385d72
+		prefab compact = "Assets/UI/ObjectIcons/UIP_WarIconCompact.prefab" //GUID:a93eec22c9b3d934a9b704999bf45888
+	}
+}
+
+def PactIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_PactIcon.prefab" //GUID:dcf521db32a5f10408c05cce977c408c
+}
+
+def CastleIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_CastleIcon.prefab" //GUID:70b3f3d6b0a1d5f41aa1ccffddb38275
+	
+	sprite icon = [
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_01.psd:Icon_Castle_Level_01#1", //GUID:181ca0c7cc5f93a4797a8da350e6cdec
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_02.psd:Icon_Castle_Level_02#2", //GUID:f6fccb946b8cc274499d9ce92184336a
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_03.psd:Icon_Castle_Level_03#2", //GUID:75defb7556b82ff42b9f44f07e771a98
+	"Assets/UI/Elements/Settlements/Icons/Icon_Castle_Level_04.psd:Icon_Castle_Level_04#2" //GUID:30bd86fbd0bc11f44b9184d7cf5e55cd
+	]
+	
+	template State
+	{
+		color icon_color = "255,255,135,191" // Non-modified color
+		sprite border = "Assets/UI/Elements/Settlements/Element_Settlement_Border.png:Element_Settlement_Border#2" //GUID:3dfe8b61de3f04342a71c4db4b8d033f
+		color border_color = "255,255,135,191" // Non-modified color
+		bool show_status = false
+		sprite status_icon
+		sprite status_color = "255,255,135,191" // Non-modified color
+	}
+	Normal : State
+	{
+		
+	}
+	Siege : State
+	{
+		show_status = true
+		icon_color = "194,63,34" //C33F22FF
+		status_icon = "Assets/UI/Elements/Settlements/Icons/Icon_CastleStatus_Siege.psd:Icon_CastleStatus_Siege#2" //GUID:59622192616227041833eec36634c49e
+	}
+	Disorder : State
+	{
+		icon_color = "194,63,34" //C33F22FF
+	}
+	Occupation : State
+	{
+		
+		icon_color = "194,63,34" //C33F22FF
+	}
+}
+
+def SettlementIcon : ObjectIcon
+{
+	
+	prefab = "Assets/UI/ObjectIcons/UIP_SettelmentIcon.prefab" //GUID:fa4d638bd5f2de1439bb6720c4c46101
+	{
+		prefab extended = "Assets/UI/ObjectIcons/UIP_SettlementIcon_Extended.prefab" //GUID:513354c113faa0b46ac2a07300e118dd
+		prefab compact = "Assets/UI/ObjectIcons/UIP_SettlementIcon_Compact.prefab" //GUID:d947d7e0d9fbcf44b9fd86ae16bd4191
+		
+	}
+}
+
+def VillageIcon : ObjectIcon
+{
+	
+	prefab = "Assets/UI/ObjectIcons/UIP_SettelmentIcon.prefab" //GUID:fa4d638bd5f2de1439bb6720c4c46101
+	{
+		prefab extended = "Assets/UI/ObjectIcons/UIP_SettlementIcon_Extended.prefab" //GUID:513354c113faa0b46ac2a07300e118dd
+		prefab compact = "Assets/UI/ObjectIcons/UIP_SettlementIcon_Compact.prefab" //GUID:d947d7e0d9fbcf44b9fd86ae16bd4191
+		
+	}
+}
+
+def CharacterIcon : ObjectIcon
+{
+	
+	prefab = "Assets/UI/Character/UIP_CharacterIcon_CardCompact.prefab" //GUID:1b6827f69a27c9b42ad42ea1da2c99d2
+	{
+		prefab extended = "Assets/UI/Character/UIP_CharacterIcon_RoyalCourt.prefab" //GUID:68b7f30fab0bbed4d82814343d0c6614
+		prefab compact = "Assets/UI/Character/UIP_CharacterIcon_Compact.prefab" //GUID:853fa4f6de201dd438fe40dd85f3f176
+		prefab compact_simple = "Assets/UI/Character/UIP_CharacterIcon_CartCompactSimple.prefab" //GUID:c389c4dd211db7b42bff86fbd1befd3f
+		prefab court = "Assets/UI/Character/UIP_CharacterIcon_RoyalCourt.prefab" //GUID:68b7f30fab0bbed4d82814343d0c6614
+		prefab important_message = "Assets/UI/Character/UIP_CharacterIcon_ImportantMessage.prefab" //GUID:334d7082b51a0504e9afed436a1e2be9
+		prefab royal_family = "Assets/UI/Character/UIP_CharacterIcon_RoyalFamily.prefab" //GUID:816aec6b2cb1b834d974a74f971451e3
+		prefab micro = "Assets/UI/Character/UIP_CharacterIcon_Micro.prefab" //GUID:71a469cea91c5c044abcba301e8d394a
+		prefab cardinal = "Assets/UI/Character/UIP_CharacterIcon_Cardinal.prefab" //GUID:d34554e897c10af4b947e1e6776808db
+		prefab squad_leader = "Assets/UI/Character/UIP_CharacterIcon_SquadLeader.prefab" //GUID:755334df3b143834d8a41966bf97fbbc
+		prefab bribed = "Assets/UI/Character/UIP_CharacterIcon_Bribed.prefab" //GUID:730490a5d94f70c44b7e53ab70efe267
+		prefab secondary_target = "Assets/UI/Character/UIP_CharacterIcon_Bribed.prefab" //GUID:730490a5d94f70c44b7e53ab70efe267
+		prefab enemy_court = "Assets/UI/Character/UIP_CharacterIcon_InKingdom.prefab" //GUID:5b9673f3682d5f4468d095041db0c668
+	}
+	
+	
+	color Color_Invalid = "216, 152, 152, 255"
+	color Color_Normal = "255, 255, 255, 255"
+	color Color_Focused = "255, 255, 255, 125"
+	color Color_Dead = "241, 241, 252, 31"
+	color Color_Focused_Dead = "255, 255, 255, 31"
+	color Color_Reinforcement = "98, 104, 232, 31"
+	color Color_Reinforcement_Focused = "194, 194, 184, 31"
+	color Color_SemiTransparent = "255, 255, 255, 167"
+}
+
+def GoodsIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_GoodsIcon.prefab" //GUID:6f7ed97635bf7de4d9c05904089a0bf4
+}
+
+def ProvinceFeatureIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_ProvinceFeatureIcon.prefab" //GUID:1f13b75b7431cee45bf2e65f81665572
+	sprite border_normal = "Assets/UI/Elements/KingdomAdvantages/Element_GoodsIcon_Border_Produced.psd:Element_GoodsIcon_Border_Produced#1" //GUID:34e526bf9f441ce42b549e6dc2979a8e
+	sprite border_not_available = "Assets/UI/Elements/KingdomAdvantages/Element_GoodsIcon_Border_CantProduce.psd:Element_GoodsIcon_Border_CantProduce#2" //GUID:7293f84c3f02b53468dbe6e54d54a130
+}
+
+def StatusIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_CharacterStatusIcon.prefab" //GUID:ed360807f09c07a4686b7dab99e38e29
+	{
+		prefab ongoing_action = "Assets/UI/ObjectIcons/UIP_CharacterStatusIcon_OngoingAction.prefab" //GUID:71b809e75a8c92a4fb8f7a0594da0e27
+	}
+	template State
+	{
+		color icon_color = "188,188,165,127" // Non-modified color
+	}
+	Undefined : ActionIcon.State
+	{
+		icon_color = "214,214,173,17" // GRAY
+	}
+	Valid : ActionIcon.State
+	{
+		icon_color = "188,188,165,127" // NORMAL 
+	}
+	Invalid : ActionIcon.State
+	{
+		icon_color = "214,214,173,17" // GRAY
+	}
+	Running : ActionIcon.State
+	{
+		icon_color = "188,188,165,127" // NORMAL 
+	}
+	
+	border_color
+	{
+		color non_interactable = "214,214,173,17" //"111,111,230,31"
+		color interactable = "255,255,255,255"
+	}
+}
+
+def QuestIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_QuestIcon.prefab" //GUID:711efce178fbb7a42b2f77fbfc0ab4f6
+}
+
+def SkillIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Character/UIP_CharacterSkill_RoyalCourt.prefab" //GUID:c9e541ba2ac91c04bbc765c00730a5c6
+	
+	type
+	{
+		sprite primary = "Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Primary.psd:Element_CharacterSkill_Primary#1" //GUID:3a06257c4b38a54429c08611ec4f4d49
+		sprite secondary = "Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Secondary.psd:Element_CharacterSkill_Secondary#2" //GUID:42112ab8e1bbb0f4b8eecd6312e22d7f
+	}
+	sprite tier_border = [
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_1_Foreground.psd:Element_CharacterSkill_Level_1_Foreground#2", //GUID:7f633fb9dd42c1e40b71a73f8e586e5b
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_2_Foreground.psd:Element_CharacterSkill_Level_2_Foreground#2", //GUID:37a6e506bf3179942a165db6620296f9
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_3_Foreground.psd:Element_CharacterSkill_Level_3_Foreground#1" //GUID:3c2b8f5c7c33616418416086b7939c2a
+	]
+	sprite tier_selection = [
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_1_Foreground_Selection.psd:Element_CharacterSkill_Level_1_Foreground_Selection#2", //GUID:9ff22aea7c99ff84cb9f9df28cddf3fd
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_2_Foreground_Selection.psd:Element_CharacterSkill_Level_2_Foreground_Selection#1", //GUID:9f48f4a906891e146bb651b35264d358
+	"Assets/UI/Elements/Character/Skills/Element_CharacterSkill_Level_3_Foreground_Selection.psd:Element_CharacterSkill_Level_3_Foreground_Selection#2" //GUID:172cedecae78af940a653e47dff2a4ed
+	]
+	
+}
+
+def TraditionIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Kingdom/UIP_DynastyTradition.prefab" //GUID:375b7a9a69368ee4fa3551139a541d49
+	{
+		prefab extended = "Assets/UI/Kingdom/UIP_DynastyTradition_Big.prefab" //GUID:dc35dbdb0e5603b4a803a3e9fa5bc9f3
+	}
+	
+	icon_tint
+	{
+		color adoptable = "255,255,255,85"
+		color adopted = "255,255,255,255"
+		color reqierment_not_met = "143,138,152,20"
+		color invalid_slot = "255, 170, 238, 180"
+	}
+}
+
+def RebelIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Character/UIP_RebelIcon.prefab" //GUID:4760e2c67e1793f44a4ef0180a453fb7
+	{
+		prefab compact = "Assets/UI/Character/UIP_RebelIcon_Compact.prefab" //GUID:501346f634e1ce94bbbe1756a233880b
+		prefab general_compact = "Assets/UI/Character/UIP_RebelIcon_General_Compact.prefab" //GUID:2cf8980687cb88b449b9c3a3ad5078cc
+	}
+}
+
+def RebellionIcon : ObjectIcon
+{
+	prefab = "Assets/UI/Character/UIP_RebellionIcon.prefab" //GUID:3d1a30119076d36439f2dee23c89a062
+	leader_class_level_borders
+	{
+		sprite normal = "Assets/UI/Elements/Rebels/Elements/Element_RebelionLeaderClasssLevel_Background_Normal.png:Element_RebelionLeaderClasssLevel_Background_Normal#2" //GUID:b13a1d729bed14440898ffc0738980d1
+		sprite famous = "Assets/UI/Elements/Rebels/Elements/Element_RebelionLeaderClasssLevel_Background_Famous.png:Element_RebelionLeaderClasssLevel_Background_Famous#1" //GUID:ff8a8b6096ff59a4da330778683864d5
+	}
+}
+
+def CrusadeIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_CrusadeIcon.prefab" //GUID:55f22cc98a7171c4fa06752d19f83dbd
+}
+
+def MercenaryIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_MercenaryIcon.prefab" //GUID:6ee7cd081ace6f04ba6dfc81203234de
+}
+
+def ReligionIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_ReligionIcon.prefab" //GUID:b0806970664b8ba48923fbc02dfd823a
+}
+
+def TradeCenterIcon : ObjectIcon
+{
+	prefab = "Assets/UI/ObjectIcons/UIP_TradeCenterIcon.prefab" //GUID:71c7c09e552426f4e8797129f8ae6daf
+}
+
+def ModCompatibilityIcon : ObjectIcon
+{
+	prefab prefab = "Assets/UI/Mods/UIP_ModCompatibilityIcon.prefab" //GUID:261c42664703d994b8acb771f2616709
+	icons
+	{
+		sprite compatible = "Assets/UI/Mods/Icon_ModCompatibility_Compatible.psd:Icon_ModCompatibility_Compatible#1" //GUID:b52d83f628a632042aac46a24f51496e
+		sprite not_active = "Assets/UI/Mods/icon_ModCompatibility_NotActive.psd:icon_ModCompatibility_NotActive#2" //GUID:1164933e234683648bb9ffbc7801c7b4
+		sprite missing = "Assets/UI/Mods/Icon_ModCompatibility_MissingMod.psd:Icon_ModCompatibility_MissingMod#2" //GUID:7f8da186193e27e4cbacdf390db3a7bd
+	}
+}

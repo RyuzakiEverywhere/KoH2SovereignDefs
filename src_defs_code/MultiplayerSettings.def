@@ -1,0 +1,40 @@
+def MultiplayerSettings
+{
+	bool log_thqno_requests = false
+	
+	int wait_for_players_join_timeout = 30 // seconds
+	int wait_for_players_disconnect_timeout = 30 // seconds
+
+	int connection_issues_timeout = 1500 // milliseconds
+
+	int heartbeat_timeout = 5000 // milliseconds
+	int connect_to_player_timeout = 60000 // milliseconds
+
+	disconnected_player_ai_times
+	{
+		// predefined times after the player disconnected (in minutes)
+		times
+		{
+			1 = 5   // defend only
+			2 = 10  // hire army and garrison units, attack enemies
+			3 = 15  // everything except declaring wars
+			4 = 20  // full AI
+		}
+
+		// at which predefined time to turn each AI component on
+		components
+		{
+			Kingdom =      3 // kingdom actions, prisoners, crown authority, etc.
+	        HireCourt =    3 // hire and dismiss court members
+	        Buildings =    3 // build buildings
+	        Armies =       1 // command armies
+	        Units =        2 // hire units for armies
+	        Garrison =     2 // hire garrison units
+	        Characters =   3 // character actions, skills, etc.
+	        Diplomacy =    3 // all non-war-declaring diplomacy
+	        Wars =         4 // war-declaring diplomacy (requires Diplomacy to be enabled)
+	        Offense =      2 // send armies to attack
+	        Mercenaries =  3 // hire and command mercenary armies
+	    }
+	}
+}

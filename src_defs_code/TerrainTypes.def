@@ -1,0 +1,329 @@
+﻿def TerrainTypes
+{
+	/// IMPORTANT!!!
+	/// after touching this file, or any other file related to the map, rebuild the scenes
+
+	float tile_size = 8 // in meters
+	
+	thresholds
+	{
+		//float Plains = 0
+		float Hills = 0.7
+		//float Forest = 0
+		float River = 0.25
+		float Town = 0.5
+		float Lake = 0.75
+		float Ocean = 0.90
+		float Mountains = 0.5
+		
+	}
+	
+	thresholds_min
+	{
+		float Forest = 4
+	}
+	
+	colors
+	{
+		color Plains = 0, 128, 0
+		color Hills = 128, 128, 0
+		color Forest = 128, 85, 25
+		color River = 0, 255, 255
+		color Town = 255, 0, 255
+		color Lake = 0, 128, 128
+		color Ocean = 0, 0, 255
+		color Mountains = 255, 255, 255
+	}
+	
+	sprites
+	{
+		Plains
+		{
+			point grow = 0.4, 0.45
+			int rows_min = 1
+			int rows_max = 1
+			int cols_min = 1
+			int cols_max = 1
+			
+			sprite 1 = "Assets/UI/WV Battle Sim/plains.bmp:plains_0#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+			sprite 2 = "Assets/UI/WV Battle Sim/plains.bmp:plains_1#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+			sprite 3 = "Assets/UI/WV Battle Sim/plains.bmp:plains_2#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+			sprite 4 = "Assets/UI/WV Battle Sim/plains.bmp:plains_3#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+			sprite 5 = "Assets/UI/WV Battle Sim/plains.bmp:plains_4#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+			sprite 6 = "Assets/UI/WV Battle Sim/plains.bmp:plains_5#1" //GUID:d3828e73f2c92dc4594bb11603d0e524
+		}
+		
+		Hills
+		{
+			point grow = 0.3, 0.4
+			int rows_min = 1
+			int rows_max = 2
+			int cols_min = 1
+			int cols_max = 2
+			
+			sprite 1 = "Assets/UI/WV Battle Sim/hills.bmp:hills_0#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+			sprite 2 = "Assets/UI/WV Battle Sim/hills.bmp:hills_1#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+			sprite 3 = "Assets/UI/WV Battle Sim/hills.bmp:hills_2#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+			sprite 4 = "Assets/UI/WV Battle Sim/hills.bmp:hills_3#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+			sprite 5 = "Assets/UI/WV Battle Sim/hills.bmp:hills_4#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+			sprite 6 = "Assets/UI/WV Battle Sim/hills.bmp:hills_5#1" //GUID:db33a0ca0a3bbb64696d6c5d9db5ee91
+		}
+		
+		Forest
+		{
+			point grow = 0.6, 0.2
+			int rows_min = 1
+			int rows_max = 2
+			int cols_min = 1
+			int cols_max = 2
+			
+			sprite 1 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_0#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+			sprite 2 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_1#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+			sprite 3 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_2#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+			sprite 4 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_3#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+			sprite 5 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_4#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+			sprite 6 = "Assets/UI/WV Battle Sim/pinetrees.bmp:pinetrees_5#1" //GUID:266aaaeaa304b9d428e49fde0b4d34f3
+		}
+		
+		Mountains
+		{
+			point grow = 0.5, 0.6
+			int rows_min = 1
+			int rows_max = 3
+			int cols_min = 1
+			int cols_max = 2
+			
+			sprite 1 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_0#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+			sprite 2 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_1#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+			sprite 3 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_2#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+			sprite 4 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_3#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+			sprite 5 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_4#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+			sprite 6 = "Assets/UI/WV Battle Sim/mountains.bmp:mountains_5#1" //GUID:08398fe7e0af6b54284c7fab1b54ca5a
+		}
+		
+		
+		//sprite River
+		
+		sprite Town = "Assets/UI/Elements/Common/Icons/Icon_Castle.png:Icon_Castle#1" //GUID:5256f7996b816b844a37c8f3993745c6
+		
+		//sprite Lake = "Assets/UI/WV Battle Sim/shores.BMP:shores_15#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+		
+		sprite Ocean //= "Assets/UI/WV Battle Sim/shores.BMP:shores_14#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+		{
+			sprite FullTopLeft = "Assets/UI/WV Battle Sim/shores.BMP:shores_14#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullTopRight = "Assets/UI/WV Battle Sim/shores.BMP:shores_15#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullBotLeft = "Assets/UI/WV Battle Sim/shores.BMP:shores_20#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullBotRight = "Assets/UI/WV Battle Sim/shores.BMP:shores_21#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			sprite TopLeftOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_0#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite TopRightOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_5#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotLeftOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_30#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotRightOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_35#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			sprite TopLeftIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_28#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite TopRightIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_25#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotLeftIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_10#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotRightIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_7#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			TopLeft
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_2#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_4#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_26#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			TopRight
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_1#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_3#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_27#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			LeftTop
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_12#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_16#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_24#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			LeftBot
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_6#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_18#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_22#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			RightTop
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_13#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_17#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_29#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			RightBot
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_11#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_19#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_23#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			BotLeft
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_8#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_32#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_34#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			BotRight
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_9#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_31#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_33#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+		}
+		
+		sprite River //= "Assets/UI/WV Battle Sim/shores.BMP:shores_14#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+		{
+			sprite FullTopLeft = "Assets/UI/WV Battle Sim/shores.BMP:shores_14#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullTopRight = "Assets/UI/WV Battle Sim/shores.BMP:shores_15#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullBotLeft = "Assets/UI/WV Battle Sim/shores.BMP:shores_20#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite FullBotRight = "Assets/UI/WV Battle Sim/shores.BMP:shores_21#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			sprite TopLeftOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_0#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite TopRightOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_5#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotLeftOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_30#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotRightOut = "Assets/UI/WV Battle Sim/shores.BMP:shores_35#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			sprite TopLeftIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_28#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite TopRightIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_25#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotLeftIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_10#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			sprite BotRightIn = "Assets/UI/WV Battle Sim/shores.BMP:shores_7#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			
+			TopLeft
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_2#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_4#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_26#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			TopRight
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_1#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_3#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_27#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			LeftTop
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_12#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_16#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_24#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			LeftBot
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_6#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_18#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_22#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			RightTop
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_13#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_17#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_29#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			RightBot
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_11#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_19#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_23#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			BotLeft
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_8#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_32#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_34#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+			
+			BotRight
+			{
+				sprite 1 = "Assets/UI/WV Battle Sim/shores.BMP:shores_9#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 2 = "Assets/UI/WV Battle Sim/shores.BMP:shores_31#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+				sprite 3 = "Assets/UI/WV Battle Sim/shores.BMP:shores_33#1" //GUID:b6f668330c58d834a9963d2d995b41d7
+			}
+		}
+	}
+}
+
+
+def ClimateZones
+{
+	float tile_size = 8 // in meters // currently has to be the same as terrain types tile size
+	
+	colors
+	{
+		color Tropical = 38, 69, 16 // 264510
+		color Desert = 253, 198, 137 // fdc689
+		color Temperate = 149, 207, 107 // 95cf6b
+		color Mediterranean = 169, 173, 111 // 198, 156, 109// c69c6d
+		color Nordic = 198, 156, 109 // 00ffff
+	}
+	terrain FlatPlains = "Assets/BattleView/_Terrain Templates/Templates/Flat Plains Temperate.asset" //GUID:40873e2112b26b6478a3cf53c5c3f17c
+	terrain Architectures = "Assets/BattleView/Arch Edit/Green.asset" //GUID:e2c775ce1065ca9478eb0d6ef58b8460
+	prefab RoadBacgroundDecal = "Assets/BattleView/Roads/DefaultRoadBackground.prefab" //GUID:ff358fb744051764fa887b601f07bb09
+	prefab RoadForegroundDecal = "Assets/BattleView/Roads/DefaultRoadForeground.prefab" //GUID:a08e2735a8897d745987024045a8c4aa
+	terrain Trees = "Assets/BattleView/_Terrain Templates/Templates/Forest Temperate.asset" //GUID:491a12526358028418612a69c2340586
+	terrain Beach = "Assets/BattleView/_Terrain Templates/Templates/Beach.asset" //GUID:8e2bf5768a9cdbb449546842843243aa
+	terrain RockyCliffs = "Assets/BattleView/_Terrain Templates/Templates/Rocky Cliffs Temperate.asset" //GUID:93fe7753569593243acac8fc3872d9a6
+	terrain Underwater = "Assets/BattleView/_Terrain Templates/Templates/Underwater.asset" //GUID:79780263d792c354daa8856767d29fdb
+	
+	tree_density
+	{
+		min
+		{
+			float in_gamma = -0.92
+			float in_max = 0.9
+		}
+		max
+		{
+			float in_gamma = -0.7
+			float in_max = 0.6
+		}
+	}
+}
+
+def TropicalClimateZone : ClimateZones
+{
+}
+
+def DesertClimateZone : ClimateZones
+{
+	
+	Architectures = "Assets/BattleView/Arch Edit/Desert.asset" //GUID:749481fbc90832a49aeb4a7245117823
+	FlatPlains = "Assets/BattleView/_Terrain Templates/Templates/Flat Plains Desert.asset" //GUID:a3c0cf46781b89c42a857d62b85f0707
+	RockyCliffs = "Assets/BattleView/_Terrain Templates/Templates/Rocky Cliffs Desert.asset" //GUID:c049e151ad3c29e44b9e94f20cd8c7b4
+	Trees = "Assets/BattleView/_Terrain Templates/Templates/Forest Desert.asset" //GUID:4add2062708ea4542a90d8923a00a156
+	RoadBacgroundDecal = "Assets/BattleView/Roads/DesertRoadBackground.prefab" //GUID:e679215e3a7682d4ab0f283c488873d9
+	RoadForegroundDecal = "Assets/BattleView/Roads/DesertRoadForeground.prefab" //GUID:04d899a5d78feac42aa831ea31474be2
+}
+
+def TemperateClimateZone : ClimateZones
+{
+	
+}
+
+def MediterraneanClimateZone : ClimateZones
+{
+	Trees = "Assets/BattleView/_Terrain Templates/Templates/Forest Mediterranean.asset" //GUID:55d0a00d72c095144b208379fbcb0195
+	Architectures = "Assets/BattleView/Arch Edit/Desert.asset" //GUID:749481fbc90832a49aeb4a7245117823
+	RoadBacgroundDecal = "Assets/BattleView/Roads/DesertRoadBackground.prefab" //GUID:e679215e3a7682d4ab0f283c488873d9
+	RoadForegroundDecal = "Assets/BattleView/Roads/DesertRoadForeground.prefab" //GUID:04d899a5d78feac42aa831ea31474be2
+}
+
+def NordicClimateZone : ClimateZones
+{
+	Trees = "Assets/BattleView/_Terrain Templates/Templates/Forest Nordic.asset" //GUID:89f3c590f4c99a64d8359587e5e0a312
+}

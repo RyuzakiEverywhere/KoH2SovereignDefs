@@ -1,0 +1,80 @@
+def Realm
+{
+	string kingdom
+	color map_color = black
+	Religion religion
+	unit_set 
+
+	//neighbors though sea and regions require baking - Analyze realm data and export.
+	int max_neighbors_through_sea = 5;
+	float max_neighbors_through_sea_distance = 300;
+
+	bool region_are_tresholds_in_percents = false;
+	float region_mountain_tresholds = [5, 500];
+	float region_mountain_multipliers = [1, 2];
+	float region_land_tresholds = [5, 500];
+	float region_land_multipliers = [1, 1];
+	float region_sea_tresholds = [5, 500];
+	float region_sea_multipliers = [1, 0.5];
+	float region_river_tresholds = [5, 500];
+	float region_river_multipliers = [1.5, 2.5];
+	
+
+	float time_until_core = 3600
+	float core_timeout = 3600
+
+	gold_from_trade_center
+	{
+		distance_tresholds = [1,2,3] //anything over 3 is considered as 3
+		gold_amounts = [3,2,1]
+	}
+
+	int appeal_trade_center = 10
+    int appeal_kingdom_commerse_perc = 0 // set to 0 by design request
+    int appeal_neighboring_commerse_perc = 20
+    int appeal_neighboring_2_commerse_perc = 10 //distance 2 neighbors
+
+    float chance_imprison_on_occupation = 10;
+    float occupied_upkeep = [5, 15, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000]; //for 1,2,3... occupied provinces
+    float disorder_upkeep = [5, 10, 20, 30, 50, 75, 100, 150, 200, 300, 400, 500]; //for 1,2,3... occupied provinces
+    float help_the_weak_upkeep = 2
+    float recent_occupator_timeout = 3600//seconds
+
+    float on_siege_convert_timeout = 1800 //seconds
+
+    int prev_owners_count = 5
+    
+    bool has_rivers
+    bool has_river_city
+    bool has_coastal_city
+    bool has_mountains
+    int seas_count
+}
+
+def RealmCost
+{
+	float base = 1000
+	float per_settlement = 1000
+	float per_province_feature = 2000
+	float per_province_feature_we_have_elsewhere = 1000
+	float trade_center = 5000
+	float per_trade_center_zone_realm = 100
+	float is_religious_center_from_our_religion = 20000
+	float is_religious_center_from_other_religion = 5000
+	float per_siege_defense = 10
+	float population_is_loyal_to_us = 3000
+	float population_has_our_religion = 2000
+	float building_cost_mult = 0.25
+	float kingdom_to_size_value = 20000 // value = 20000 / kingdom size
+
+	float multiplier = 1
+}
+
+tag DistantPort
+{
+	float distance = 150
+	text name = "Distant Port"
+}
+
+
+Realms

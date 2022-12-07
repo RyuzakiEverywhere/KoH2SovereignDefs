@@ -1,0 +1,221 @@
+template AVC : Analytics
+{
+	enabled = false
+	
+	log = 0
+
+	int visual_clue
+}
+
+def BattleWonAVC : AVC
+{
+	visual_clue = 1
+
+	triggers
+	{
+		player_kingdom battle_won
+		{
+			condition = (trigger.sender == trigger.sender.kingdom)
+		}
+	}
+}
+
+def BattleLostAVC : AVC
+{
+	visual_clue = 2
+	
+	triggers
+	{
+		player_kingdom battle_lost
+		{
+			condition = (trigger.sender == trigger.sender.kingdom)
+		}
+	}
+}
+
+def DeclareWarAVC : AVC
+{
+	visual_clue = 3
+	
+	triggers
+	{
+		player_kingdom declared_war
+	}
+}
+
+def DeclaredWarAVC : AVC
+{
+	visual_clue = 4
+	
+	triggers
+	{
+		kingdom declared_war
+		{
+			condition = (trigger.param.is_local_player)
+		}
+	}
+}
+
+def QuitGameAVC : AVC
+{
+	visual_clue = 5
+
+	triggers
+	{
+		game analytics_game_quit
+		{
+			condition = (trigger.param.menuLocation == "in_game")
+		}
+	}
+}
+
+def SaveGameAVC : AVC
+{
+	visual_clue = 6
+
+	triggers 
+	{ 
+		player_kingdom analytics_save_game
+	}
+}
+
+def LoadGameAVC : AVC
+{
+	visual_clue = 7
+
+	triggers 
+	{ 
+		game loading_saved_game
+		{
+			condition = (trigger.param == "in_game")	
+		}
+	}
+}
+
+def BesiegedAVC : AVC
+{
+	visual_clue = 8
+
+	triggers 
+	{ 
+		player_kingdom new_settlement_battle_defender
+		{
+			condition = (trigger.param.is_siege)	
+		}
+	}
+}
+
+def PlunderedAVC : AVC
+{
+	visual_clue = 9
+
+	triggers 
+	{ 
+		player_kingdom new_settlement_battle_defender
+		{
+			condition = (trigger.param.is_plunder || trigger.param.is_plunder_interrupt)	
+		}
+	}
+}
+
+def AutoBattleStartedAVC : AVC
+{
+	visual_clue = 10
+
+	triggers 
+	{ 
+		player_battle stage_changed
+		{
+			condition = (trigger.sender.stage == "Ongoing" && trigger.param == "Preparing" && !trigger.sender.is_battle_view)	
+		}
+	}
+}
+
+def ManualBattleStartedAVC : AVC
+{
+	visual_clue = 11
+
+	triggers 
+	{ 
+		player_battle stage_changed
+		{
+			condition = (trigger.sender.stage == "EnteringBattle")
+		}
+	}
+}
+
+def BuildStartedAVC : AVC
+{
+	visual_clue = 12
+
+	triggers 
+	{ 
+		player_kingdom build_started
+	}
+}
+
+def UpgradeStartedAVC : AVC
+{
+	visual_clue = 13
+
+	triggers 
+	{ 
+		player_kingdom upgrade_started
+		{
+			condition = (trigger.sender == trigger.sender.kingdom)
+		}
+	}
+}
+
+def ConqueredProvinceAVC : AVC
+{
+	visual_clue = 14
+
+	triggers 
+	{ 
+		player_kingdom realm_added
+	}
+}
+
+def LostProvinceAVC : AVC
+{
+	visual_clue = 15
+
+	triggers 
+	{ 
+		player_kingdom realm_deleted
+	}
+}
+
+def RulerDiedAVC : AVC
+{
+	visual_clue = 16
+
+	triggers 
+	{ 
+		player_kingdom analytics_royal_family_change
+		{
+			condition = (familyEvent == "died")
+		}
+	}
+}
+
+def HireCourtAVC : AVC
+{
+	visual_clue = 17
+
+	triggers
+	{
+		player_kingdom analytics_court_add
+	}
+}
+
+def AssignGovernorAVC : AVC
+{
+	visual_clue = 18
+
+	triggers
+	{
+		player_kingdom analytics_governor_changed
+	}
+}

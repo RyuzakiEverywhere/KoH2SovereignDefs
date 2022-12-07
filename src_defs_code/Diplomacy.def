@@ -1,0 +1,1111 @@
+﻿def Pact
+{
+	text type_text
+	sprite icon
+	
+	text name = "{type_text:cap}[ against {target}]"
+	{
+		an = "{type_text:an}[ against {target}]"
+	}
+	
+	text tooltip = "Owned by {owner}"
+	
+	text owner_label = "[Owned by {owner}[ from {owner.kingdom}]]"
+	text leave_label = "Leave"
+	text dissolve_label = "Dissolve"
+	
+	text cannot_join_label = "{clr:red}{i}Cannot join now{/i}{/clr}"
+	
+	cannot_join_reasons
+	{
+		text ally_of_target = "{kingdom} and {target} are allies"
+		text enemy_of_target = "{kingdom} and {target} are already at war"
+		// offensive pact only
+		text ally_of_defender = "{kingdom} is an ally of {kingdom2}, who will join on {target:s} side"
+		text enemy_of_defender = "{kingdom} is already at war with {kingdom2}, who will join on {target:s} side"
+		text has_defensive_pact = "{kingdom} has Defensive Pact against {leader} and will join on {target:s} side"
+	}
+	
+	int max_members = 4 // including the leader kingdom
+	
+	float upkeep = (SSum(owner.kingdom, 0.01, 10)) //(20 - owner.class_level)
+}
+
+def DefensivePact : Pact
+{
+	int max_pacts_against_target = 3
+	text type_text = "Defensive Pact"
+	{
+		an = "a Defensive Pact"
+		cap = "Defensive Pact"
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Icon_DefensivePact_Positive.psd:Icon_DefensivePact_Positive#2" //GUID:5062b3cc46bbdb1429f6b27c8e949dd3
+	sprite icon_negative = "Assets/UI/Elements/Common/Icons/Icon_DefensivePact_Negative.psd:Icon_DefensivePact_Negative#2" //GUID:cf34073b4083c1040abd8d8f6fcc517b
+	sprite icon_positive = "Assets/UI/Elements/Common/Icons/Icon_DefensivePact_Positive.psd:Icon_DefensivePact_Positive#2" //GUID:5062b3cc46bbdb1429f6b27c8e949dd3
+}
+
+def OffensivePact : Pact
+{
+	int max_pacts_against_target = 2
+	text type_text = "Invasion Plan"
+	{
+		an = "an Invasion Plan"
+		cap = "Invasion Plan"
+	}
+	icon = "Assets/UI/Elements/Common/Icons/Icon_OffensivePact.png:Icon_OffensivePact#1" //GUID:f496d8ac305732b48bb37395ef7090aa
+	sprite icon_negative = "Assets/UI/Elements/Common/Icons/Icon_OffensivePact_Negative.psd:Icon_OffensivePact_Negative#2" //GUID:b8c080b8dba76694c9af4b25da51756f
+	sprite icon_positive = "Assets/UI/Elements/Common/Icons/Icon_OffensivePact_Positive.psd:Icon_OffensivePact_Positive#2" //GUID:bf3ada256b3b14944bfd7c4fffba4a2b
+}
+
+def Offer
+{
+	bool disabled = false
+	bool allow_random_generation = true //if disabled, this is only sent on events
+	text name = "{label}" // short name of the offer, with multiple forms, used in captions, mentions, etc.(texts with {offer})
+	text label = "" // button text in audience window
+	string diplomacy_event_id // id of the diplomacy event, use in texts/.../diplomacy.def
+	float diplomacy_rel_texts_weight = 20
+	float diplomacy_pc_texts_weight = 70
+	float diplomacy_base_texts_weight = 10
+	float ai_propose_cooldown = 0
+	text propose_caption // caption of the propose message
+	text consider_caption = "{target_kingdom} considers our offer"
+	text tooltip = "{label}" // button tooltip in audience window
+	
+	string from // type of the sender object, e.g. "Kingdom"
+	string to // type of the receiver object, e.g. "Kingdom"
+	string args = [] // argument types, the number of values indicates the maximum number of arguments
+	
+	float timeout = 300 // 5 min
+	sprite illustration = "Assets/UI/Elements/Common/WindowElements/UI_Generic_Illustration.png:UI_Generic_Illustration#2" //GUID:b41446c8d567cbd4682e9e09883979e3
+	
+	string diplomacy_counter_offer = "event:/sound_effects/notification/diplomatic/offer_counter"
+	string diplomacy_accept = "event:/sound_effects/notification/diplomatic/offer_accepted"
+	string diplomacy_decline = "event:/sound_effects/notification/diplomatic/offer_declined"
+	string player_accept_offer = "event:/sound_effects/notification/diplomatic/offer_accepted"
+	string player_decline_offer = ""
+	int sfx_priority = 0
+	
+	string rel_change_type = "neutral" // used for offer random generations. Manually set. Types: "positive" - generation considers that this offer uses a rel_change that is 0 or positive, "negative" - 0 or negative, "neutral" - 0, positive or negative
+	
+	outcome_defaults : OfferOutcomeDefaults
+	
+	//Offers that use accept_decline always need answer, those that use accept_only dont and sometimes need to be forced
+	bool force_needs_answer = false
+	
+	//limit some offers to only be sent if they are a suboffer or a CounterOffer/SweetenOffer/Tribute/etc
+	bool can_be_sent_without_parent_offer = true
+	
+	// use "outcomes : accept_only" to override the default outcomes
+	accept_only
+	{
+		main accept
+		{
+			also_silent rel_change
+		}
+	}
+	
+	// default outcomes, accept / decline (by default), override rel_change = "rel_xxx" if needed
+	accept_decline
+	{
+		option accept
+		{
+			also_silent rel_change
+		}
+		main decline
+		{
+			also rel_change = "rel_decline"
+			{
+				src_kingdom = (to.kingdom)
+				tgt_kingdom = (from.kingdom)
+			}
+		}
+	}
+	
+	outcomes : accept_decline
+}
+
+def DiplomacyOffer : Offer
+{
+	from = "Kingdom"
+	to = "Kingdom"
+}
+
+def EmptyOffer : DiplomacyOffer
+{
+	allow_random_generation = false
+	label = "Empty"
+	outcomes : accept_only
+	can_be_sent_without_parent_offer = false
+}
+
+def CounterOffer : DiplomacyOffer
+{
+	allow_random_generation = false
+	name = "Counter-offer: {arg1}"
+	args // original offer, additional demand offers(minimum 1)
+	{
+		Offer arg0 = CanBeCountered
+		Offer arg1 = AdditionalConditionOffers
+		Offer? arg2 = AdditionalConditionOffers
+		Offer? arg3 = AdditionalConditionOffers
+	}
+	label = "Counter-offer"
+	propose_caption = "{src_kingdom} has a counter-offer"
+	
+	float pro_con_difference_cover_perc = [100, 200] //Calculated pro-cons ratio = 1.0, accept treshold = 1.2, diffetence 0.2, cover between 100% and 200% of 0.2 as additional offers
+	
+	outcomes
+	{
+		option custom_counter_offer_answer
+		{
+			condition = (arg.def.outcomes.custom_counter_offer_answer.condition)
+			text label = "{arg.def.outcomes.custom_counter_offer_answer.label}"
+		}
+	}
+	
+	string CanBeCountered = ["DemandGold",
+							 "DemandLand",
+							 "MarriageOffer",
+							 "WhitePeaceOffer",
+							 "PeaceOfferTribute",
+							 "PeaceDemandTribute",
+							 "SignNonAggression",
+							 "SignAlliance",
+							 "SignTrade",
+							 "SignExclusiveTrade",
+							 "DemandChangeReligion",
+							 "DemandAttackKingdom",
+							 "AskForProtection",
+							 "AskForLoan",
+							 "DemandReleasePrisoners",
+							 "DemandHelpWithRebels",
+							 "DemandSupportInWar",
+							 "DemandJoinInDefensivePact",
+							 "DemandJoinInOffensivePact",
+							 "ClaimIndependence",
+							 "AskForCrusadeOffer",
+							 "AskForExcommunicationOffer"]
+	
+	string AdditionalConditionOffers = ["DemandGold",
+										"DemandLand",
+										"MarriageOffer",
+										"DemandVassalage",
+										"DemandAbandonCaliphate",
+										"SignNonAggression",
+										"SignAlliance",
+										"SignTrade",
+										"SignExclusiveTrade",
+										"DemandBook",
+										"DemandChangeReligion",
+										"DemandAttackKingdom",
+										"AskForProtection",
+										"AskForLoan",
+										"DemandReleasePrisoners",
+										//"DemandReleaseVassalage",
+										"DemandHelpWithRebels",
+										"DemandSupportInWar",
+										"DemandJoinInDefensivePact",
+										"DemandJoinInOffensivePact",
+										"ClaimIndependence"]
+}
+
+def SweetenOffer : DiplomacyOffer
+{
+	allow_random_generation = false
+	name = "Better offer: {arg1}"
+	diplomacy_event_id = "SweetenOffer"
+	args // original offer, additional sweeten offer
+	{
+		Offer arg0 = CanBeSweetened
+		Offer arg1 = CanBeSweetenedWith
+	}
+	label = "Sweeten offer"
+	propose_caption = "{src_kingdom} proposes a better offer"
+	
+	float pro_con_difference_cover_perc = [20, 90] //Calculated pro-cons ratio = 1.5, propose treshold = 1.2, diffetence 0.3, cover between 20% and 90% of 0.3 as additional offers
+	string CanBeSweetened = ["MarriageOffer",
+							 "WhitePeaceOffer",
+							 "PeaceOfferTribute",
+							 "PeaceDemandTribute",
+							 "SignNonAggression",
+							 //"SignAlliance", //obsolete
+							 "SignTrade",
+							 //"SignExclusiveTrade", //obsolete
+							 "ClaimIndependence",
+							 "DemandSupportInWar",
+							 "DemandGold",
+							 "DemandLand",
+							 "AskForProtection",
+							 "DemandAttackKingdom",
+							 "AskForPrisonerRansom",
+							 "OfferRansomPrisoner",
+							 "DemandReleasePrisoners",
+							 "OfferSupportInWar",
+							 "OfferJoinInDefensivePact",
+							 "DemandJoinInDefensivePact",
+							 "OfferJoinInOffensivePact",
+							 "DemandJoinInOffensivePact",
+							 "AskForProtection"
+							 ]
+	string CanBeSweetenedWith = ["OfferGold",
+								 "OfferLand",
+								 "MarriageOffer",
+								 "OfferVassalage",
+								 "SignNonAggression",
+								 "SignAlliance",
+								 "SignTrade",
+								 "SignExclusiveTrade",
+								 "OfferBook",
+								 "OfferChangeReligion",
+								 "OfferAttackKingdom",
+								 "PayLoan",
+								 "OfferReleasePrisoners",
+								 //"OfferReleaseVassalage",
+								 "OfferHelpWithRebels",
+								 "OfferSupportInWar",
+								 "OfferJoinInDefensivePact",
+								 "OfferJoinInOffensivePact",
+								 "GrantIndependence"]
+}
+
+def AdditionalConditionOffer : DiplomacyOffer
+{
+	name = "Conditional offer: {arg1}"
+	diplomacy_event_id = "AdditionalConditionOffer"
+	args // offer, 3 additional conditions(mininum 1)
+	{
+		Offer arg0 = CanBeOffered
+		Offer arg1 = AdditionalConditionOffers
+		Offer? arg2 = AdditionalConditionOffers
+		Offer? arg3 = AdditionalConditionOffers
+	}
+	label = "Conditional offer"
+	propose_caption = "{src_kingdom} proposes a conditional offer"
+	
+	float pro_con_difference_cover_perc = [100, 300] //Calculated pro-cons ratio = 1.5, propose treshold = 1.2, diffetence 0.3, cover between min% and max% of 0.3 as additional offers
+	string CanBeOffered = ["OfferGold", 
+							"OfferLand", 
+							"MarriageOffer",
+							"SignNonAggression", 
+							"SignTrade",
+							"OfferHelpWithRebels",
+							"OfferSupportInWar", 
+							"OfferJoinInDefensivePact", 
+							"OfferJoinInOffensivePact"]
+	string AdditionalConditionOffers = ["DemandGold",
+										"DemandLand",
+										"MarriageOffer",
+										"SignNonAggression",
+										"SignAlliance",
+										"SignTrade",
+										"SignExclusiveTrade",
+										"DemandAttackKingdom",
+										"AskForProtection",
+										"AskForLoan",
+										"DemandReleasePrisoners",
+										"DemandHelpWithRebels",
+										"DemandSupportInWar",
+										"DemandJoinInDefensivePact",
+										"DemandJoinInOffensivePact"]
+}
+
+def OfferGold : DiplomacyOffer
+{
+	name = "{gold_amount}{gold_icon}"
+	label = "{gold_amount}{gold_icon}"
+	tooltip = "Offer a donation of {gold_amount}{gold_icon}"
+	diplomacy_event_id = "OfferGold"
+	propose_caption = "{src_kingdom} offers Gold"
+	args = "int"
+	rel_change_type = "positive"
+	outcomes : accept_only
+	{
+		accept { rel_change = "rel_offer_gold" }
+	}
+}
+
+def DemandGold : DiplomacyOffer
+{
+	name = "{gold_amount}{gold_icon}"
+	label = "{gold_amount}{gold_icon}"
+	tooltip = "Demand a donation of {gold_amount}{gold_icon}"
+	diplomacy_event_id = "DemandGold"
+	propose_caption = "{src_kingdom} demands Gold"
+	args = "int"
+	rel_change_type = "negative"
+	outcomes
+	{
+		accept { rel_change = "rel_demand_gold" }
+	}
+}
+
+def OfferLand : DiplomacyOffer
+{
+	name = "Province of {arg}"
+	label = "Land: {arg}"
+	tooltip = "Offer to transfer ownership over the entire province of {arg}"
+	diplomacy_event_id = "OfferLand"
+	propose_caption = "{src_kingdom} offers Land"
+	args = "Realm"
+	rel_change_type = "positive"
+	outcomes : accept_only
+	{
+		accept { rel_change = "rel_offer_land" }
+	}
+}
+
+def DemandLand : DiplomacyOffer
+{
+	name = "Province of {arg}"
+	label = "Land: {arg}"
+	tooltip = "Demand to transfer ownership over the entire province of {arg}"
+	diplomacy_event_id = "DemandLand"
+	propose_caption = "{src_kingdom} demands Land"
+	args = "Realm"
+	rel_change_type = "negative"
+	outcomes
+	{
+		accept { rel_change = "rel_demand_land" }
+	}
+}
+
+def MarriageOffer : DiplomacyOffer
+{
+	name = "Marriage between {arg} and {arg1}"
+	label = "Marriage"
+	tooltip = "Royal marriage between {arg} and {arg1}"
+	diplomacy_event_id = "Marriage"
+	propose_caption = "{src_kingdom} offers Marriage"
+	args = [ "Character", "Character"]
+	rel_change_type = "positive"
+	outcomes
+	{
+		accept { rel_change = "rel_marriage" }
+	}
+}
+
+def WhitePeaceOffer : DiplomacyOffer
+{
+	name = "White peace"
+	label = "White peace"
+	tooltip = "Sign unconditional peace with {tgt_kingdom}"
+	diplomacy_event_id = "Peace"
+	propose_caption = "{src_kingdom} offers Peace"
+	rel_change_type = "positive"
+}
+
+def PeaceOfferTribute : DiplomacyOffer
+{
+	name = "Peace tribute offer{indent:1em}[{p}- {arg0}][{p}- {arg1}][{p}- {arg2}]{/indent}"
+	label = "Offer tribute"
+	diplomacy_event_id = "PeaceOfferred"
+	propose_caption = "{src_kingdom} pleads for Peace"
+	float sub_offers_weight_mod = 1
+	args
+	{
+		Offer? arg0 = CanIncludeOffers
+		Offer? arg1 = CanIncludeOffers
+		Offer? arg2 = CanIncludeOffers
+	}
+	rel_change_type = "positive"
+	outcomes
+	{
+		decline
+		{
+			trigger moral_change_offer_outcome
+			{
+				param = -3
+				condition = (tgt_kingdom.ArmyOpinion < 0)
+				target = (tgt_kingdom)
+			}
+		}
+	}
+	string CanIncludeOffers = ["EmptyOffer",
+								"MarriageOffer",
+								"OfferLand",
+								"OfferGold",
+								"OfferVassalage",
+								"SignNonAggression",
+								"SignExclusiveTrade",
+								"OfferBook",
+								"OfferChangeReligion",
+								"OfferAttackKingdom",
+								"OfferReleasePrisoners"]
+								//"OfferReleaseVassalage"]
+}
+
+def PeaceDemandTribute : PeaceOfferTribute
+{
+	name = "Peace tribute demand{indent:1em}[{p}- {arg0}][{p}- {arg1}][{p}- {arg2}]{/indent}"
+	label = "Demand tribute"
+	diplomacy_event_id = "PeaceDemanded"
+	propose_caption = "{src_kingdom} demands your Surrender"
+	float sub_offers_weight_mod = 1
+	args
+	{
+		Offer? arg0 = CanIncludeOffers
+		Offer? arg1 = CanIncludeOffers
+		Offer? arg2 = CanIncludeOffers
+	}
+	rel_change_type = "positive"
+	string CanIncludeOffers = ["EmptyOffer",
+								"DemandGold",
+								"DemandLand",
+								"MarriageOffer",
+								"DemandVassalage",
+								"DemandAbandonCaliphate",
+								"SignNonAggression",
+								"SignTrade",
+								"SignExclusiveTrade",
+								"DemandBook",
+								"DemandChangeReligion",
+								"DemandAttackKingdom",
+								"DemandReleasePrisoners"
+								//"DemandReleaseVassalage"
+								]
+}
+
+def OfferVassalage : DiplomacyOffer
+{
+	name = "Become our sovereign"
+	label = "Become vassal"
+	tooltip = "Offer to become a vassal of {tgt_kingdom}"
+	diplomacy_event_id = "OfferVassalage"
+	propose_caption = "{src_kingdom} offers Vassalage"
+	can_be_sent_without_parent_offer = false
+}
+
+def DemandVassalage : DiplomacyOffer
+{
+	name = "Become our vassal"
+	label = "Vassalization"
+	tooltip = "Demand the vassalisation of {tgt_kingdom}"
+	diplomacy_event_id = "DemandVassalage"
+	propose_caption = "{src_kingdom} demands Vassalage"
+	can_be_sent_without_parent_offer = false
+}
+
+def OfferAbandonCaliphate : DiplomacyOffer
+{
+	name = "Offer abandoning caliph title"
+	label = "Offer abandoning caliph title"
+	tooltip = "Offer to abandon the caliph title of {tgt_kingdom.king}"
+	diplomacy_event_id = "OfferAbandonCaliphate"
+	propose_caption = "{src_kingdom.king} offers to abandon their caliph title"
+	can_be_sent_without_parent_offer = false
+}
+
+def DemandAbandonCaliphate : DiplomacyOffer
+{
+	name = "Abandon caliphate title"
+	label = "Abandon caliphate title"
+	tooltip = "Demand {tgt_kingdom.king} to abandon his caliph title"
+	diplomacy_event_id = "DemandAbandonCaliphate"
+	propose_caption = "{src_kingdom} demands {tgt_kingdom.king} to abandon his caliph title"
+	can_be_sent_without_parent_offer = false
+}
+
+
+
+def JoinVassalOffer : DiplomacyOffer //Check if this is supposed to be Annex vassal or a vassal asking his overlord for help
+{
+	disabled = true
+	name = "Annexation"
+	label = "Annexation"
+	diplomacy_event_id = ""
+	propose_caption = "Sovereign proposes annexation"
+}
+
+def ClaimIndependence : DiplomacyOffer
+{
+	label = "Claim Independence"
+	tooltip = "Stop being a vassal of {tgt_kingdom}"
+	diplomacy_event_id = "ClaimIndependence"
+	//propose_message = "IndependanceDeclared"
+	propose_caption = "{src_kingdom} demands Independance"
+	//diplomacy_decline = "" //unused
+	outcomes
+	{
+		accept { rel_change = "rel_claimed_independence_granted" }
+		option custom_counter_offer_answer
+		{
+			condition = (name == "CounterOffer" && CanDeclareWar(from, to)) //used only when in context of counteroffer
+			text label = "&Declare War"
+		}
+	}
+	voice_line = "narrator_voice:independence" 
+}
+
+def IndependenceWarOffer : DiplomacyOffer //we can rename this to RemainVassalOffer
+{
+	allow_random_generation = false
+	label = "Remain vassal"
+	tooltip = "Start a war for independence against {tgt_kingdom}"
+	diplomacy_event_id = "IndependenceWarOffer"
+	propose_caption = "{src_kingdom} demands us to remain their vassal"
+	diplomacy_decline = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+	
+	outcome_defaults : IndependenceWarOfferOutcomeDefaults
+	outcomes
+	{
+		main decline
+		{
+			text label = "Declare Independence War"
+		}
+	}
+}
+
+
+def IndependenceWarOfferOutcomeDefaults : OfferOutcomeDefaults
+{
+	accept : OutcomeMessageParams
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Positive.png:Icon_Message_IncomingOffer_Positive#2" //GUID:a9f3b9652ebca5349a12a7fb31f62b0b
+		caption = "{to} remained our vassal"
+		bullet = "{name}"
+	}
+	
+	decline : OutcomeMessageParams
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Negative.png:Icon_Message_IncomingOffer_Negative#2" //GUID:f16b118485fa3de4ca358309faf0b723
+		caption = "{to} decalred independence war"
+	}
+}
+
+
+def GrantIndependence : DiplomacyOffer
+{
+	label = "Grant Independence"
+	tooltip = "Release {tgt_kingdom} as a vassal"
+	diplomacy_event_id = "GrantIndependence"
+	propose_caption = "{src_kingdom} granted us Independance"
+	rel_change_type = "positive"
+	outcomes : accept_only
+	{
+		accept { rel_change = "rel_independence_granted" }
+	}
+	
+}
+
+def SignNonAggression : DiplomacyOffer
+{
+	name = "Non-Aggression"
+	label = "Sign Non-Aggression"
+	tooltip = "Formally forbid any warfare between {tgt_kingdom} and {src_kingdom}"
+	diplomacy_event_id = "NonAggression"
+	propose_caption = "{src_kingdom} offers a Non-Aggression Pact"
+	rel_change_type = "positive"
+}
+
+def SignNonAggressionRenewOurKing : DiplomacyOffer
+{
+	name = "Non-Aggression"
+	label = "Renew Non-Aggression"
+	diplomacy_event_id = "NonAggressionOurKing"
+	propose_caption = "{src_kingdom} offers new Non-Aggression Pact"
+	rel_change_type = "positive"
+}
+
+def SignNonAggressionRenewTheirKing : DiplomacyOffer
+{
+	name = "Non-Aggression"
+	label = "Renew Non-Aggression"
+	diplomacy_event_id = "NonAggressionTheirKing"
+	propose_caption = "{src_kingdom} offers new Non-Aggression Pact"
+	rel_change_type = "positive"
+}
+
+
+
+// def SignAlliance : DiplomacyOffer
+// {
+// 	name = "Alliance"
+// 	label = "Sign Alliance"
+// 	diplomacy_event_id = "Alliance"
+// 	propose_caption = "{src_kingdom} offers an Alliance"
+// 	rel_change_type = "positive"
+// 	can_be_sent_without_parent_offer = false
+// 	// allowed_parent_offers
+// 	// {
+// 	// 	Peace OfferTribute
+// 	// 	Peace Demand Tribute
+// 	// 	Sweeten Offer
+// 	// 	Counter Offer
+// 	// }
+// }
+
+def SignTrade : DiplomacyOffer
+{
+	name = "Trade Agreement"
+	label = "Sign Trade"
+	tooltip = "Establish a trade agreement, allowing merchants from both kingdoms to trade with eachother"
+	diplomacy_event_id = "Trade"
+	propose_caption = "{src_kingdom} offers a Trade Agreement"
+	illustration = "Assets/UI/Elements/Common/Icons/UI_Illustration_Messsage_TradeOffer.png:UI_Illustration_Messsage_TradeOffer#2" //GUID:39dfe94654245c340a2b4db03058f03f	
+	rel_change_type = "positive"
+	diplomacy_accept = "event:/sound_effects/notification/diplomatic/offer_accepted"
+	sfx_priority = 1
+}
+
+def SignExclusiveTrade : DiplomacyOffer
+{
+	disabled = true
+	name = "Exclusive Trade Agreement"
+	label = "Exclusive Trade Deal"
+	diplomacy_event_id = "ExclusiveTrade"
+	propose_caption = "{src_kingdom} offers an Exclusive Trade Deal"
+	rel_change_type = "positive"
+}
+
+def BreakTrade : DiplomacyOffer
+{
+	disabled = true
+	name = "Break trade between {from} and {to}"
+	label = "Break trade: {from} & {to}"
+	diplomacy_event_id = "BreakTrade"
+	propose_caption = "{src_kingdom} broke our trade agreement"
+	rel_change_type = "negative"
+	outcomes : accept_only
+}
+
+def DeclareWar : DiplomacyOffer
+{
+	label = "War"
+	diplomacy_event_id = "War"
+	propose_message = "WarDeclared"
+	rel_change_type = "negative"
+	outcomes : accept_only
+	diplomacy_accept = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+}
+
+def OfferBook : DiplomacyOffer
+{
+	disabled = true
+	name = "Book {arg}"
+	label = "Offer book"
+	diplomacy_event_id = "OfferBook"
+	args = "string"
+	propose_caption = "{src_kingdom} offers a Book"
+	can_be_sent_without_parent_offer = false
+}
+
+def DemandBook : DiplomacyOffer
+{
+	disabled = true
+	name = "Book {arg}"
+	label = "Demand book"
+	diplomacy_event_id = "DemandBook"
+	args = "string"
+	propose_caption = "{src_kingdom} demands a Book"
+	can_be_sent_without_parent_offer = false
+}
+
+def OfferChangeReligion : DiplomacyOffer
+{
+	name = "Change religion to {religion}"
+	label = "Offer to change religion"
+	diplomacy_event_id = "OfferChangeReligion"
+	propose_caption = "{src_kingdom} offers to change their Religion"
+	can_be_sent_without_parent_offer = false
+	
+}
+
+def DemandChangeReligion : DiplomacyOffer
+{
+	name = "Change religion to {religion}"
+	label = "Demand to change religion"
+	diplomacy_event_id = "DemandChangeReligion"
+	propose_caption = "{src_kingdom} demands us to change our Religion"
+	can_be_sent_without_parent_offer = false
+}
+
+def OfferAttackKingdom : DiplomacyOffer
+{
+	name = "Attack {arg}"
+	label = "Attack kingdom : {arg}"
+	tooltip = "Offer to wage war against {arg}"
+	diplomacy_event_id = "OfferAttackKingdom"
+	propose_caption = "{src_kingdom} offers to Attack {arg}"
+	args = "Kingdom"
+	can_be_sent_without_parent_offer = false
+	diplomacy_accept = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+}
+
+def DemandAttackKingdom : DiplomacyOffer
+{
+	name = "Attack {arg}"
+	label = "Attack kingdom : {arg}"
+	tooltip = "Demand to wage war against {arg}"
+	diplomacy_event_id = "DemandAttackKingdom"
+	propose_caption = "{src_kingdom} demands us to Attack {arg}"
+	args = "Kingdom"
+	rel_change_type = "negative"
+	max_relation_between_sender_and_other = -200 // wont ask if higher
+	max_relation_between_target_and_other = 200 // wont ask if target and other as "friends"
+	diplomacy_accept = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+}
+
+// def InvokeAlliance : DiplomacyOffer
+// {
+// 	name = "Ivoke Alliance against {arg}"
+// 	label = "Offer to attack kingdom"
+// 	diplomacy_event_id = "InvokeAlliance"
+// 	propose_caption = "{src_kingdom} invokes our Alliance"
+// 	rel_change_type = "negative"
+// 	args = "Kingdom"
+// 	can_be_sent_without_parent_offer = false
+// }
+
+def SummonVassal : DiplomacyOffer
+{
+	disabled = true
+	name = "Summon Vassal against {arg}"
+	label = "Offer to attack kingdom"
+	tooltip = "Demand to wage war against {arg}"
+	diplomacy_event_id = "SummonVassal"
+	propose_caption = "{src_kingdom} summons us to help"
+	rel_change_type = "negative"
+	args = "Kingdom"
+}
+
+def AskForProtection : DiplomacyOffer
+{
+	name = "Protection against {arg}"
+	label = "Protection in war"
+	tooltip = "Ask for protection against {arg}"
+	diplomacy_event_id = "AskForProtection"
+	propose_caption = "{src_kingdom} asks for protection"
+	args = "War"
+	rel_change_type = "negative"
+	outcomes
+	{
+		decline {
+			also rel_change = "rel_liege_declined_protection"
+			also rel_change_other_vassals = "rel_liege_declined_protection_other_vassals"
+		}
+	}
+}
+
+def AskForLoan : DiplomacyOffer
+{
+	disabled = true
+	name = "Loan of {arg}{gold_icon}"
+	label = "Ask for a loan"
+	diplomacy_event_id = "AskForLoan"
+	propose_caption = "{src_kingdom} asks for a Loan"
+	args = "int"
+	rel_change_type = "negative"
+}
+
+def PayLoan : DiplomacyOffer
+{
+	disabled = true
+	name = "Pay {arg}{gold_icon} of the loan"
+	label = "Pay loan"
+	diplomacy_event_id = "PayLoan"
+	propose_caption = "{src_kingdom} paid their Loan"
+	args = "int"
+	outcomes : accept_only
+	rel_change_type = "positive"
+}
+
+def OfferReleasePrisoners : DiplomacyOffer
+{
+	name = "Offer to release prisoners"
+	label = "Release prisoners"
+	tooltip = "Offer to release all {tgt_kingdom:ian} knights currently held as prisoners"
+	diplomacy_event_id = "OfferReleasePrisoners"
+	propose_caption = "{src_kingdom} offers us to release our prisoners"
+	can_be_sent_without_parent_offer = false
+}
+
+def DemandReleasePrisoners : DiplomacyOffer
+{
+	name = "Demand to release prisoners"
+	label = "Release prisoners"
+	tooltip = "Demand the release of all {src_kingdom:ian} prisoners"
+	diplomacy_event_id = "DemandReleasePrisoners"
+	propose_caption = "{src_kingdom} demands us to release their prisoners"
+	rel_change_type = "negative"
+}
+
+def OfferReleaseVassalage : DiplomacyOffer
+{
+	disabled = true
+	name = "Release vassalage over {arg}"
+	label = "Release vassalage"
+	tooltip = "Offer to release {arg} from vassalage"
+	diplomacy_event_id = "OfferReleaseVassalage"
+	propose_caption = "{src_kingdom} offers us to release a vassal"
+	args = "Kingdom"
+	can_be_sent_without_parent_offer = false
+}
+
+def DemandReleaseVassalage : DiplomacyOffer
+{
+	disabled = true
+	name = "Release vasslage over {arg}"
+	label = "Release vassalage"
+	tooltip = "Demand the release of {arg} as a vassal"
+	diplomacy_event_id = "DemandReleaseVassalage"
+	propose_caption = "{src_kingdom} demands us to release a vassal"
+	args = "Kingdom"
+	can_be_sent_without_parent_offer = false
+}
+
+def OfferHelpWithRebels : DiplomacyOffer
+{
+	name = "Help with rebels"
+	label = "Help with rebels"
+	tooltip = "Offer to send {src_kingdom:ian} armies against the rebels plaguing {tgt_kingdom}"
+	diplomacy_event_id = "HelpWithRebels"
+	propose_caption = "{src_kingdom} offers help with our rebels"
+	//outcomes : accept_only
+}
+
+def DemandHelpWithRebels : DiplomacyOffer
+{
+	name = "Help with rebels"
+	label = "Help with rebels"
+	tooltip = "Demand {tgt_kingdom} to send their armies against the rebels plaguing {src_kingdom}"
+	diplomacy_event_id = "HelpWithRebels"
+	propose_caption = "{src_kingdom} asks us to help them with Rebels"
+}
+
+
+def BreakRoyalTies : DiplomacyOffer
+{
+	label = "Break royal ties"
+	diplomacy_event_id = "BreakMarriage"
+	outcomes : accept_only
+	propose_caption = "{src_kingdom} broke our Royal Ties"
+	rel_change_type = "negative"
+}
+
+def AskForCrusadeOffer : DiplomacyOffer
+{
+	label = "Ask for crusade"
+	diplomacy_event_id = "AskForCrusade"
+	propose_caption = "Crusade against {arg}, demanded by {src_kingdom}"
+	args = "Kingdom"
+	float relationship_treshold_cardinal = 500
+	float relationship_treshold_without_cardinal = 700
+}
+
+def AskForExcommunicationOffer : DiplomacyOffer
+{
+	label = "Ask for excommunication"
+	diplomacy_event_id = "AskForExcommunication"
+	propose_caption = "Excommunicate {arg}"
+	args = "Kingdom"
+	float relationship_treshold_cardinal = 500
+	float relationship_treshold_without_cardinal = 700
+}
+
+def AskForPrisonerRansom : DiplomacyOffer
+{
+	name = "Demand a ransom for {arg0}"
+	diplomacy_event_id = "AskForPrisonerRansom"
+	
+	args = [ "Character", "int"]
+	label = "Demand Ransom"
+	tooltip = "Demand a ransom for the release of {arg0} from prison"
+	propose_caption = "Ransom wanted for {arg0}"
+	
+	outcomes
+	{
+		accept
+		{
+			sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Positive.png:Icon_Message_IncomingOffer_Positive#2" //GUID:a9f3b9652ebca5349a12a7fb31f62b0b
+			switch_value = (game.plr_kingdom)
+			case from
+			{
+				message
+				{
+					def = DiplomacyOutcomeMessage
+					text caption = "{tgt_kingdom} agreed to pay ransom"
+					text bullet = "{arg0} was freed in exchange for {arg1} {gold_icon}"
+				}
+			}
+			also rel_change = "rel_ransomed_prisoner"
+		}
+		decline
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Negative.png:Icon_Message_IncomingOffer_Negative#2" //GUID:f16b118485fa3de4ca358309faf0b723
+				text caption = "{tgt_kingdom} declined ransom"
+				//text bullet = "Ransoming {arg0} failed."
+			}
+			also rel_change = "rel_decline_ransome_prisoner"
+			also opinion_change
+			{
+				kingdom = (to)
+				opinion = "NobilityOpinion"
+				amount = -1
+				reason = "refuse_to_pay_ransom"
+			}
+		}
+	}
+}
+
+def OfferRansomPrisoner : DiplomacyOffer
+{
+	name = "Offer a ransom for {arg0}"
+	diplomacy_event_id = "OfferRansomPrisoner"
+	args = [ "Character", "int"]
+	label = "Offer Ransom"
+	tooltip = "Offer a ransom for the release of {arg0} from prison"
+	propose_caption = "Ransom offered for {arg0}"
+	outcomes
+	{
+		accept
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Positive.png:Icon_Message_IncomingOffer_Positive#2" //GUID:a9f3b9652ebca5349a12a7fb31f62b0b
+				text caption = "{tgt_kingdom} accepted our ransom"
+				text bullet = "{arg0} was freed in exchange for {arg1} {gold_icon}."
+			}
+			also rel_change = "rel_ransomed_prisoner"
+		}
+		decline
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Negative.png:Icon_Message_IncomingOffer_Negative#2" //GUID:f16b118485fa3de4ca358309faf0b723
+				text caption = "{tgt_kingdom} refused our offer"
+				//text bullet = "{tgt_kingdom} refused to ransom {arg0}."
+			}
+			also rel_change = "rel_decline_ransome_prisoner"
+		}
+	}
+}
+
+def OfferSupportInWar : DiplomacyOffer
+{
+	name = "Offer support in the {arg}"
+	label = "Offer support in war"
+	diplomacy_event_id = "OfferSupportInWar"
+	diplomacy_accept = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+	switch_value = (tgt_kingdom == arg.jihad_owner)
+	case 1
+	{
+		propose_caption = "{src_kingdom} offers to join our Jihad"
+	}
+	case 0
+	{
+		propose_caption = "{src_kingdom} offers to join our war"
+	}
+	args = ["War"]
+}
+
+def DemandSupportInWar : DiplomacyOffer
+{
+	name = "Demand support in the {arg}"
+	label = "Demand support in war"
+	diplomacy_event_id = "DemandSupportInWar"
+	diplomacy_accept = "event:/sound_effects/notification/war_declared"
+	sfx_priority = 10
+	switch_value = (src_kingdom == arg.jihad_owner)
+	case 1
+	{
+		propose_caption = "{src_kingdom} asks us to join their Jihad"
+	}
+	case 0
+	{
+		propose_caption = "{src_kingdom} asks us to join their war"
+	}
+	args = ["War"]
+}
+
+def OfferJoinInDefensivePact : DiplomacyOffer
+{
+	name = "Offer to join the {arg}"
+	label = "Join Defensive Pact"
+	diplomacy_event_id = "OfferJoinInDefensivePact"
+	propose_caption = "{src_kingdom} offers to join our Defensive Pact"
+	args = ["Pact"]
+}
+
+def DemandJoinInDefensivePact : DiplomacyOffer
+{
+	name = "Invite to {arg}"
+	label = "Invite in Defensive Pact"
+	diplomacy_event_id = "DemandJoinInDefensivePact"
+	propose_caption = "{src_kingdom} invites us to their Defensive Pact"
+	args = ["Pact"]
+}
+
+
+def OfferJoinInOffensivePact : DiplomacyOffer
+{
+	name = "Offer to join the {arg}"
+	label = "Join Offensive Plan"
+	diplomacy_event_id = "OfferJoinInOffensivePact"
+	propose_caption = "{src_kingdom} offers to join our Invasion Plan"
+	args = ["Pact"]
+}
+
+def DemandJoinInOffensivePact : DiplomacyOffer
+{
+	name = "Invite to {arg}"
+	label = "Invite in Invasion Plan"
+	diplomacy_event_id = "DemandJoinInOffensivePact"
+	propose_caption = "{src_kingdom} invites us to their Invasion Plan"
+	args = ["Pact"]
+}
+
+def PrincessClaimInheritanceOffer : DiplomacyOffer
+{
+	allow_random_generation = false
+	name = "Claim inheritance"
+	label = "Claim inheritance"
+	diplomacy_event_id = "PrincessClaimInheritance"
+	propose_caption = "{src_kingdom:ians} claim inheriance of lands"
+	args = ["Character", "List"]
+	outcomes
+	{
+		accept { rel_change = "rel_accept_give_inheritence" }
+		decline { rel_change = "rel_decline_claim_inheritence" }
+	}
+}
+
+def DemandFundCrusade : DiplomacyOffer
+{
+	allow_random_generation = false
+	name = "Fund a crusade"
+	label = "Fund a crusade"
+	diplomacy_event_id = "DemandFundCrusade"
+	propose_caption = "Funding for crusade demanded"
+	args = ["int"]
+	is_catholic_church_offer = true
+	
+	outcomes
+	{
+		accept { rel_change = "rel_accept_fund_crusade" }
+		decline { rel_change = "rel_decline_fund_crusade" }
+	}
+}
+
+def OfferCourtCleric : DiplomacyOffer
+{
+	allow_random_generation = false
+	name = "Cleric"
+	label = "Cleric"
+	diplomacy_event_id = "OfferCourtCleric"
+	propose_caption = "Papacy sends us a cleric"
+	is_catholic_church_offer = true
+	
+	outcomes
+	{
+		accept { rel_change = "rel_accept_papacy_cleric" }
+		decline { rel_change = "rel_decline_papacy_cleric" }
+	}
+}

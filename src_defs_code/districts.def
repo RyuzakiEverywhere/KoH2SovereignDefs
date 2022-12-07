@@ -1,0 +1,225 @@
+﻿def District
+{
+	icon_size = 115,102 // 115 with upgrades //84,79
+	icon_spacing = 12,20 //28 if upgrades are part of icon_size //17,31
+	
+	float panels_spacing = 6 // spacing between districts
+	float panel_min_width = 200 // minimum width of district panel
+	float panel_padding = 12 // space between border/background and buildings panel (only used if there is border or background)
+	float panel_background = 1 // alpha (transparency) of the background, 0 .. 1, <=0 to disable background
+	bool panel_background_colorize = false // tint panel borders with district color
+	color panel_border =  196,174,136,128 // panel border color, set alpha to 0 to disable
+	color panel_shadow = 0,0,0,0 // panel shadow color, alpa 0 to disable (or hide border and frame)
+
+	text name
+	arrow_prefabs
+	{
+		object line = "Assets/Test/Michael/BuildingsPanel/UIP_LineArrow.prefab" //GUID:e2aef7da4a879ad4eb032737cfbc8e7d
+		object arrow = "Assets/Test/Michael/BuildingsPanel/UIP_Arrow.prefab" //GUID:49b26dcd661ce164dbeab812ce1e68b0
+		object arrow_on_top = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowOnTop.prefab" //GUID:f298a125c9af67947b2240b992156c8e
+		object arrow_bellow = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowBellow.prefab" //GUID:baf8a664a713d6d49b25a34b8a589cd2
+		object arrow_bellow_left = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowBellowLeft.prefab" //GUID:fe47bab68d366804092916396a5c65ce
+		object arrow_bellow_right = "Assets/Test/Michael/BuildingsPanel/UIP_ArrowBellowRight.prefab" //GUID:550dc9531cb92fe40a53d95b94645f11
+	}
+	
+	//--------------------------------
+	int caption_count = 0
+	color color
+	sprite backgroud
+	sprite border
+	
+	string requires // = [ X, Y ]
+	string requires_all // = [ X, Y ]
+	
+	// buildings
+	// {
+	// 	Granary = 1.5,1 // position in logical grid coordinates
+	// 	{
+	// 		prerequisites { Market; Warehouse }
+	// 	}
+	// 	//...
+	// }
+	
+	// arrows
+}
+
+def CommonDistrict : District
+{
+	icon_size = 115,102 //!!! temporary
+	icon_spacing = 8,16  //!!! temporary
+
+	name = "Common"
+	color = "#7B766CCC"
+	
+	buildings //a.k.a. Industries
+	{
+		HillFort
+		PirateHaven { prerequisites { Harbor } } //first, below the coastal
+		FlaxGrowing
+		HerbGardening
+		Viticulture //Winegrowing
+		SheepFarming
+		CattleFarming
+		HorseBreeding
+		Woodworking
+		Stoneworking //almost last to connect with limestone
+		Metalworking //almost last to connect with silver, gold, lodestone
+		RiverTrade { prerequisites { MarketSquare } } //almost last to connect with irrigation
+
+	}
+
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_Common.png:Element_BuildingSlot_District_Common#2" //GUID:0d639065606363e409258b4f16d102c8
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_Common.png:Element_BuildingSlot_DistrictCirlce_Common#2" //GUID:c2567f8929e06414694986cbed1cbec0
+}
+
+def PFDistrict : District
+{
+	icon_size = 115,102 //!!! temporary
+	icon_spacing = 4,10  //!!! temporary
+
+	name = "Province Features"
+	color = "#CCC283B3"
+	
+	buildings //a.k.a. trade goods
+	{
+		Irrigation  { prerequisites { CropFarming } }
+
+		LimeTrade { prerequisites { Stoneworking; MarketSquare } }
+
+		// if empty will be automatically generated from code
+		LodestoneTrade { prerequisites { Metalworking; MarketSquare } }
+		SilverSmelting { prerequisites { Metalworking; MarketSquare } }
+		GoldSmelting { prerequisites { Metalworking; MarketSquare } }
+
+		AmberTrade { prerequisites { MarketSquare } } //next to jewels
+		MineralsTrade { prerequisites { MarketSquare } }
+		
+		CamelsTrade { prerequisites { MarketSquare } }
+		FurTrade { prerequisites { MarketSquare } }
+
+		SaltTrade { prerequisites { MarketSquare } }
+		SaltpeterTrade { prerequisites { MarketSquare } }		
+		SulfurTrade { prerequisites { MarketSquare } }				
+	}
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_PF.png:Element_BuildingSlot_District_PF#2" //GUID:7f9cf7cd847ec5c4da2a39557d7c2783
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_PF.png:Element_BuildingSlot_DistrictCirlce_PF#2" //GUID:008b72462ada2374f936088a2a8733bb
+}
+
+def CastlesDistrict : District
+{
+	name = "Military"
+	color = "#902B2BCC"
+	//color = "#772828CC"
+	
+	//requires { Keep }
+	caption_count = (keeps_count)
+
+	buildings
+	{
+		Barracks = 1.5
+
+		RoyalArmory = 1,2 { prerequisites { Barracks } }
+		LordsCastles = 2,2 { prerequisites { Barracks } }
+
+		RoyalPalace = 2,3 { prerequisites { LordsCastles } }
+	}
+}
+
+def VillagesDistrict : District
+{
+	name = "Population"
+	color = "#99653DCC"
+	
+	//requires { Village }
+	caption_count = (villages_count)
+	
+	buildings
+	{
+		MarketSquare = 1, 1
+		Housings = 2, 1
+
+		Artisans = 1, 2 { prerequisites { MarketSquare } }
+		VillageMilitia = 2,1.85
+
+		MerchantsGuild = 1,3 { prerequisites { Artisans } }
+	}
+	
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_SeaShore.png:Element_BuildingSlot_District_SeaShore#2" //GUID:aaaa3cdb5696fbe4f8714a25d6792b07
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_SeaShore.png:Element_BuildingSlot_DistrictCirlce_SeaShore#2" //GUID:6d754f25da00eb440a6c0c8542bfea7e
+}
+
+def MonasteriesDistrict : District
+{
+	name = "Religion"
+	color = "#54295ECC"
+	
+	//requires_or { Monastery; Mosque; Shrine }
+	caption_count = (religious_settlements_count)
+
+	buildings
+	{
+		Church = 1,1
+		Masjid = 1,1
+		Temple = 1,1
+
+		Cathedral = 1,2 { prerequisites { Church } }
+		GreatMosque = 1,2 { prerequisites { Masjid } }
+
+		University = 1,3 { prerequisites { Cathedral } }
+		Madrasah = 1,3 { prerequisites { GreatMosque } }
+	}
+
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_Monasteries.png:Element_BuildingSlot_District_Monasteries#2" //GUID:92ec0424ec4f93d4789c0f378941f95d
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_Monasteries.png:Element_BuildingSlot_DistrictCirlce_Monasteries#2" //GUID:19a8b6be4ee90ad48851d589419d1a7b
+}
+
+def CropFarmsDistrict : District
+{
+	name = "Farming"
+	color = "202,177,93,76"
+	
+	//requires { Farm }
+	caption_count = (farms_count)
+
+	buildings
+	{
+		CropFarming
+
+		Windmill = 1,2 { prerequisites { CropFarming } }
+
+		FoodMarket = 1,3 { prerequisites { Windmill; MarketSquare } }
+	}
+
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_CropFarm.png:Element_BuildingSlot_District_CropFarm#2" //GUID:8df3bb194ef5b6548ae7b4f37e7e1d16
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_CropFarm.png:Element_BuildingSlot_DistrictCirlce_CropFarm#2" //GUID:22ba7ebf6db8a2742a2234454379ad8b
+}
+
+def SeaShoreDistrict : District
+{
+	name = "Sea Shore"
+	color = "#3F5B6ACC"
+	
+	requires { Coastal }
+
+	caption_count = (coastal_settlements_count)
+	buildings
+	{
+		Harbor = 1.5
+		
+		Admiralty = 1,2 { prerequisites { Harbor } }
+		Shipyard { prerequisites { Harbor } }
+				
+		TradePort = 1.5,3 { prerequisites { Admiralty; Shipyard } }
+	}
+	
+	// arrows
+	// {
+	// 	Docks { prefab = arrow_prefabs.arrow_bellow; width = 1.8 }
+	// 	FilthyTavern
+	// 	Shipyard { prefab = arrow_prefabs.arrow_bellow; width = 1.1 }
+	// 	Cartographer { prefab = arrow_prefabs.arrow_bellow_right; width = 1 }
+	// 	Admiralty { prefab = arrow_prefabs.arrow_bellow_left; width = 1 }
+	// }
+	backgroud = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_District_SeaShore.png:Element_BuildingSlot_District_SeaShore#2" //GUID:aaaa3cdb5696fbe4f8714a25d6792b07
+	border = "Assets/UI/Elements/BuildingSlots/Element_BuildingSlot_DistrictCirlce_SeaShore.png:Element_BuildingSlot_DistrictCirlce_SeaShore#2" //GUID:6d754f25da00eb440a6c0c8542bfea7e
+}

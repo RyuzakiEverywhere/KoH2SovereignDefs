@@ -1,0 +1,584 @@
+// NOTE The basic Slavic and Nordic set are identical with the European set
+def AvailableUnits
+{
+	town_guards
+	{
+		TownGuard
+		EliteGuard
+		RoyalGuard
+	}
+	marshals 
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+//Default Sets
+
+def DefaultUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def EuropeanUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def WesternUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Man_At_Arms_Special
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Feudal_Knight_Special
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def SpanishUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Jinetes_Special
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def NormanUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Norman_Special
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def CrusaderUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Templar_Knight_Special
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Templar_Special
+	Horse_Archer_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def TeutonicUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Teutonic_Knight_Special
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Teutonic_Knight_Mounted_Special
+	Horse_Archer_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def NordicUnitSet : AvailableUnits
+{
+	Militia_Nord
+	AdvancedMilitia_Nord
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	town_guards
+	{
+		TownGuard_Nord
+		EliteGuard_Nord
+		RoyalGuard_Nord
+	}
+	marshals
+	{
+		marshal = Marshal_Nord
+		marshal_guard = Marshal_Guard_Nord
+		rebel_marshal = Marshal_Rebel_Nord
+		rebel_marshal_guard = Marshal_Guard_Rebel_Nord
+	}
+}
+
+def ByzantineUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Roman_Infantry_Special
+	Heavy_Spearman_CE
+	Pronoia_Special
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_CE
+	}
+}
+
+def HungarianUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	Horse_Archer_CE
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_Nord
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_Nord
+	}
+}
+
+def BalticUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	town_guards
+	{
+		TownGuard_Nord
+		EliteGuard_Nord
+		RoyalGuard_Nord
+	}
+	marshals
+	{
+		marshal = Marshal_Nord
+		marshal_guard = Marshal_Guard_Nord
+		rebel_marshal = Marshal_Rebel_Nord
+		rebel_marshal_guard = Marshal_Guard_Rebel_Nord
+	}
+}
+
+def WestSlavicUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_Slav
+	Light_Spearman_CE
+	Light_Archer_Slav
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_Slav
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_Nord
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_Nord
+	}
+}
+
+def EastSlavicUnitSet : AvailableUnits
+{
+	Militia_CE
+	AdvancedMilitia_CE
+	Light_Infantry_Slav
+	Axeman_Special
+	Light_Spearman_CE
+	Light_Archer_Slav
+	Light_Cavalry_CE
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Boyar_Special
+	town_guards
+	{
+		TownGuard_CE
+		EliteGuard_CE
+		RoyalGuard_CE
+	}
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_Nord
+		rebel_marshal = Marshal_Rebel_CE
+		rebel_marshal_guard = Marshal_Guard_Rebel_Nord
+	}
+}
+
+def SteppeUnitSet : AvailableUnits
+{
+	Militia_Steppe
+	AdvancedMilitia_Steppe
+	Light_Infantry_Steppe
+	Light_Archer_Steppe
+	Light_Cavalry_Steppe
+	Light_Horse_Archer_Steppe
+	Heavy_Horse_Archer_Steppe
+	town_guards
+	{
+		TownGuard_Steppe
+		EliteGuard_Steppe
+		RoyalGuard_Steppe
+	}
+	marshals
+	{
+		marshal = Marshal_Steppe
+		marshal_guard = Marshal_Guard_Steppe //!!! new model needed
+		rebel_marshal = Marshal_Rebel_Steppe
+		rebel_marshal_guard = Marshal_Guard_Rebel_Steppe
+	}
+}
+
+def MongolUnitSet : AvailableUnits
+{
+	Militia_Steppe
+	AdvancedMilitia_Steppe
+	Light_Infantry_Steppe
+	Light_Archer_Steppe
+	Light_Cavalry_Steppe
+	Heavy_Spearman_Arab
+	Mongol_Heavy_Lancers_Special
+	Light_Horse_Archer_Steppe
+	Mongol_Cavalry_Special
+	town_guards
+	{
+		TownGuard_Steppe
+		EliteGuard_Steppe
+		RoyalGuard_Steppe
+	}
+	marshals
+	{
+		marshal = Marshal_Steppe
+		marshal_guard = Marshal_Guard_Steppe //!!! new model needed
+		rebel_marshal = Marshal_Rebel_Steppe
+		rebel_marshal_guard = Marshal_Guard_Rebel_Steppe
+	}
+}
+
+def ArabicUnitSet : AvailableUnits
+{
+	Militia_Arab
+	AdvancedMilitia_Arab
+	Light_Infantry_Arab
+	Light_Spearman_Arab
+	Light_Archer_Arab
+	Light_Cavalry_Arab
+	Heavy_Swordman_Arab
+	Heavy_Spearman_Arab
+	Heavy_Archer_Arab
+	Heavy_Cavalry_Arab
+	Camel_Rider_Special
+	town_guards
+	{
+		TownGuard_Arab
+		EliteGuard_Arab
+		RoyalGuard_Arab
+	}
+	marshals
+	{
+		marshal = Marshal_Arab
+		marshal_guard = Marshal_Guard_Arab
+		rebel_marshal = Marshal_Rebel_Arab
+		rebel_marshal_guard = Marshal_Guard_Rebel_Arab
+	}
+}
+
+def BerberUnitSet : AvailableUnits
+{
+	Militia_Arab
+	AdvancedMilitia_Arab
+	Light_Infantry_Arab
+	Light_Spearman_Arab
+	Light_Archer_Arab
+	Light_Cavalry_Arab
+	Heavy_Swordman_Arab
+	Heavy_Spearman_Arab
+	Heavy_Cavalry_Arab
+	Camel_Rider_Special
+	town_guards
+	{
+		TownGuard_Arab
+		EliteGuard_Arab
+		RoyalGuard_Arab
+	}
+	marshals
+	{
+		marshal = Marshal_Arab
+		marshal_guard = Marshal_Guard_Arab
+		rebel_marshal = Marshal_Rebel_Arab
+		rebel_marshal_guard = Marshal_Guard_Rebel_Arab
+	}
+}
+
+def TurkmenUnitSet : AvailableUnits
+{
+	Militia_Steppe
+	AdvancedMilitia_Steppe
+	Light_Infantry_Steppe
+	Light_Spearman_CE
+	Light_Archer_Steppe
+	Light_Cavalry_Steppe
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Horse_Archer_Steppe
+	Sipahi_Special
+	Light_Horse_Archer_Steppe
+	town_guards
+	{
+		TownGuard_Arab
+		EliteGuard_Arab
+		RoyalGuard_Arab
+	}
+	marshals
+	{
+		marshal = Marshal_Arab
+		marshal_guard = Marshal_Guard_Arab
+		rebel_marshal = Marshal_Rebel_Arab
+		rebel_marshal_guard = Marshal_Guard_Rebel_Arab
+	}
+}
+
+def SaracenUnitSet : AvailableUnits
+{
+	Militia_Arab
+	AdvancedMilitia_Arab
+	Saracen_Special
+	Light_Spearman_Arab
+	Light_Archer_Arab
+	Light_Cavalry_Arab
+	Heavy_Swordman_Arab
+	Heavy_Spearman_Arab
+	Heavy_Archer_Arab
+	Heavy_Cavalry_Arab
+	Camel_Archer_Special
+	{
+		TownGuard_Arab
+		EliteGuard_Arab
+		RoyalGuard_Arab
+	}
+	marshals
+	{
+		marshal = Marshal_Arab
+		marshal_guard = Marshal_Guard_Arab
+		rebel_marshal = Marshal_Rebel_Arab
+		rebel_marshal_guard = Marshal_Guard_Rebel_Arab
+	}
+}
+
+def AfricanUnitSet : AvailableUnits
+{
+	Militia_Arab
+	AdvancedMilitia_Arab
+	Light_Infantry_African 
+	Light_Spearman_Arab
+	Light_Archer_Arab
+	Light_Cavalry_African
+	Heavy_Spearman_Arab
+	Heavy_Archer_Arab
+	Camel_Rider_Special
+	Camel_Archer_Special
+	{
+		TownGuard_African
+		EliteGuard_African
+		RoyalGuard_African
+	}
+	marshals
+	{
+		marshal = Marshal_African //!!! new model needed to become African
+		marshal_guard = Marshal_Guard_African //!!! new model needed to become African
+		rebel_marshal = Marshal_Rebel_African //!!! new model needed to become African
+		rebel_marshal_guard = Marshal_Guard_Rebel_African //!!! new model needed to become African
+	}
+}
+
+def CrusadeUnitSet : AvailableUnits
+{
+	Light_Infantry_CE
+	Light_Spearman_CE
+	Light_Archer_CE
+	Man_At_Arms_Special
+	Teutonic_Knight_Special
+	Templar_Knight_Special
+	Crossbowman_Special
+	Halberdier_Special
+	Heavy_Swordman_CE
+	Heavy_Spearman_CE
+	Heavy_Archer_CE
+	Heavy_Cavalry_CE
+	Horse_Archer_CE
+	Norman_Special
+	Feudal_Knight_Special
+	Templar_Special
+	Teutonic_Knight_Mounted_Special
+	marshals
+	{
+		marshal = Marshal_CE
+		marshal_guard = Marshal_Guard_CE
+	}
+}

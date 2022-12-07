@@ -1,0 +1,1570 @@
+﻿def TutorialMessage : Message
+{
+	string tutorial_topic
+	
+	text ht_body
+	
+	illustration = "Assets/UI/Elements/Common/Icons/UI_Icon_Quest.png:UI_Icon_Quest#2" //GUID:d19d67fa507cb9c43807fccc017e6acb
+	ht_illustration = illustration
+	
+	ui_prefab = "Assets/UI/Messages/UIP_TutorialMessage.prefab" //GUID:7c1722153dc920f46a589b7f7b83af3c
+	parent_path = "id_TutorialMessageContainer"
+	
+	exclusive_window_set = "TutorialMessage"
+	persist = "TutorialMessageWnd"
+	
+	buttons
+	{
+		text skip = "Skip"
+		disable
+		{
+			text text = "Disable tips"
+			text tooltip = $["This will disable all tutorials related to [{in_battleview:if}tactical battles|world view]."
+							"You can turn tutorials on once again, or reset them all, from the game's preferences."]
+		}
+		text prev = "Previous"
+		text next = "Next"
+		text done = "Done" // shown instead of "Next" for the last message
+	}
+}
+
+def TutorialHyperText : MessageHyperText
+{
+	row header
+	{
+		spacing = 10
+		sprite icon = (message_def_field.ht_illustration) //"Assets/UI/Elements/Common/Icons/UI_Icon_Quest.png:UI_Icon_Quest#1" //GUID:d19d67fa507cb9c43807fccc017e6acb
+		{
+			width = 100
+			height = 100
+		}
+		text text = "{message_def_field.ht_body}"
+	}
+}
+
+def TutorialRule
+{
+	string show_topic
+	string hide_topic
+	int log = 0 // <= 0: no logs, 1 - log sent events, 2+ - log trigger activations
+}
+
+template ShowTopicWhileWindowIsVisible : TutorialRule
+{
+	string path_mask
+	show_topic = (trigger.def.show_topic)
+	hide_topic = (trigger.def.hide_topic)
+	
+	triggers
+	{
+		ui_element ui_window_shown
+		{
+			condition = (Match(param, path_mask))
+			show_topic = (tutorial_topic)
+		}
+		ui_element ui_window_hidden
+		{
+			condition = (Match(param, path_mask))
+			hide_topic = (tutorial_topic)
+		}
+	}
+}
+
+template ShowTopicWhileHotspotIsVisible : TutorialRule
+{
+	string path_mask
+	show_topic = (trigger.def.show_topic)
+	hide_topic = (trigger.def.hide_topic)
+	
+	triggers
+	{
+		ui_element ui_hotspot_shown
+		{
+			condition = (Match(param, path_mask))
+			show_topic = (tutorial_topic)
+		}
+		ui_element ui_hotspot_hidden
+		{
+			condition = (Match(param, path_mask))
+			hide_topic = (tutorial_topic)
+		}
+	}
+}
+
+//---------------------------- Welcome
+template WelcomeTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "welcome"
+	caption = "Welcome"
+}
+
+template BigTutorialMessage : WelcomeTutorialMessage
+{
+	ui_prefab = "Assets/UI/Messages/UIP_TutorialWelcomeMessage.prefab" //GUID:a53f32c1176da1044abce1a8af5c72ac
+	illustration = "Assets/UI/Tutorial/Illustration_WelcomeScreen_1.psd:Illustration_WelcomeScreen_1#2" //GUID:4524c869971c26a439c7c0e0176cdd25
+	exclusive_window_set = "BigTutorialMessage"
+	persist = "BigTutorialMessageWnd"
+	buttons : null
+	{
+		text _prev = "Previous" // "_prev" is same as "prev", but hides instead of being disabled
+		text next = "Next"
+		text _empty = "" // compensates for the "_prev" button so when it is hidden "next" does not move
+	}
+}
+
+def WelcomeIntroTutorialMessage : BigTutorialMessage
+{
+	illustration = "Assets/UI/Tutorial/Illustration_WelcomeScreen_1.psd:Illustration_WelcomeScreen_1#2" //GUID:4524c869971c26a439c7c0e0176cdd25
+	caption = "Welcome, Sire!"
+	body = $[
+		"Greetings, and welcome to the medieval world of Knights of Honor! As your humble squire, it is my duty to inform you about the many aspects of ruling over a kingdom."
+		"{p}{p}Before you is the ambitious task of taking reign over the {kingdom.KingdomType} of {kingdom}, along with all of its bountiful provinces and loyal subjects."
+		"The following letters will hopefully draw light on how to best manage your territories, operate your royal court, partake in diplomacy and {noparse}expand{/noparse} your kingdom to greatness!"
+	]
+}
+
+def VictoryConditonsTutorialMessage : BigTutorialMessage
+{
+	illustration = "Assets/UI/Tutorial/Illustration_WelcomeScreen_2.psd:Illustration_WelcomeScreen_2#2" //GUID:0df0aa0b471ab3b45bb2adc77bca8ea3
+	caption = "Securing Victory"
+	body = $[
+		"There are several ways to state your supremacy over all other kingdoms and attain victory."
+		" Claiming the title of Emperor of the World is one way to do it, and for that you’d need to gain the favor of all great powers."
+		" Developing all kingdom advantages is another valid approach, which relies on sustaining rich provinces that produce an abundance of goods."
+		" Of course, you may also wish to walk down a more aggressive path and conquer all kingdoms on the map."
+		"{p}{p}In the end, how you rule your kingdom is up to you."
+	]
+	buttons : null
+	{
+		text next = "Next"
+	}
+}
+
+def HelpAndHotspotsTutorialMessage : BigTutorialMessage
+{
+	illustration = "Assets/UI/Tutorial/Illustration_WelcomeScreen_3.psd:Illustration_WelcomeScreen_3#2" //GUID:71408c551cd33914e901099e560c5a9b
+	caption = "Learning To Play"
+	body = $["There is much more depth and features in KoH2:S than you can see on the surface - as you play and explore the game, many unique opportunities and events will emerge, that will present new stories and require new strategies and decisions to be made."
+		"{p}{p}For more details, you can always visit the Royal Library - there you can see tips on solving some kingdom problems in the 'How to' sections and details about key game features and elements in the 'Learn about' section."
+		"{p}{p}Important areas of the screen and keywords in texts will also be highlighted, if you hold {clr:gold}(ALT){/clr} for a short time. Keywords can then be clicked to open pages within the Royal Library."
+		"{p}{p}You can always reset and/or turn back on tutorial messages from the Settings menu."
+
+	]
+	buttons : null
+	{
+		text next = "Begin"
+	}
+}
+
+def RoyalCourtTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "Royal Court"
+	body = $[
+		"This is the Royal Court - a place that is central to any kingdom, housing the king and his most trusted knights."
+		"{p}{p}Knights of varying classes can be hired by clicking on any empty slot."
+	]
+}
+
+def KingTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "King"
+	body = $[
+		"The King has his own designated spot in the royal court."
+		" As the ruler of your kingdom, he is often times more adept in many areas, compared to the rest of your knights."
+	]
+}
+
+def KingdomResourcesTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "{KingdomResourcesHotspot.tooltip.caption}"
+	body = "{KingdomResourcesHotspot.tooltip.text}"
+}
+
+def KingdomOpinionsTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "{OpinionsHotspot.tooltip.caption}"
+	body = "{OpinionsHotspot.tooltip.text}"
+}
+
+def CrownAuthorityTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "{CrownAuthorityButtonHotspot.tooltip.caption}"
+	body = "{CrownAuthorityButtonHotspot.tooltip.text}"
+}
+
+def RoyalFamilyButtonTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "Royal Family"
+	body = $["Your kingdom's royal family houses the king, his queen, their children and all of their important relatives."
+	" Visiting the royal family from time to time is an important step of ruling one's kingdom, as this is where you can appoint successors to the throne and adopt various beneficial traditions."]
+}
+
+def WarsAndPactsButtonTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "Wars and Pacts"
+	body = $["Your kingdom may participate in many wars and pacts, all of which can be inspected in detail here."
+	" Keep in mind that waging many wars can exhaust your population and lead to stability issues within your kingdom and provinces."]
+}
+
+def ProvinceOverviewButtonTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "Province Overview"
+	body = $["As keeping track of all your provinces can be a daunting task, all of them are listed here."
+	" This ledger information about what your lands produce, who governs them, what is being built and what state they're currently in."]
+}
+
+def GreatPowersTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "Great powers and rankings"
+	body = $["As your kingdom grows, so does your fame. The top 8 kingdoms which hold the largest amount of fame are considered great powers, owning the right to claim their might and become Emperor of the World."
+		"{p}{p}Current great powers and rankings may be viewed by clicking on this element."]
+}
+
+def AdvantagesTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "{AdvantagesHotspot.tooltip.caption}"
+	body = "Another way to claim victory is for your kingdom to produce or import all achievable goods. These are split into advantages with unique effects, which can be seen by clicking on this element."
+}
+
+def TimeAndSettingsTutorialMessage : WelcomeTutorialMessage
+{
+	caption = "{TimeAndSettingsHotspot.tooltip.caption}"
+	body = "{TimeAndSettingsHotspot.tooltip.text}"
+}
+
+// def GamepediaAndHotspotsTutorialMessage : WelcomeTutorialMessage
+// {
+// 	caption = "Royal Library and additional help"
+// 	body = $["If you wish to view more detailed information about the subtleties of ruling a kingdom, you can visit the Royal Library."
+// 	" You can also hold {b}(ALT){/b} at any time to discover more key interactions, across all areas of the game."]
+// }
+
+// def MainTutorialEndMessage : WelcomeTutorialMessage
+// {
+// 	caption = "Farewell"
+// 	body = "Now, it's time to take a solid hold of your lands, gather fearsome armies and rule your people to greatness. {p}{p}Go forth and conquer!"
+// }
+
+// def ResourcesTutorialMessage : WelcomeTutorialMessage
+// {
+// 	illustration = null
+// 	body = null
+// 	ht_body = $[
+// 		"This is hypertext"
+// 		"{p}There are resources"
+// 		"{p}There are also links, like this: {plr_kingdom.king}, {Barracks}, {Barrels}, {Vines}, {wiki.SimpleArticle}"
+// 	]
+// 	hypertext : TutorialHyperText
+// }
+
+// ---------- KNIGHT SKILLS -----------
+template KnightSkillsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "skills"
+	caption = "Skills"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_SubSelectionContainer/UIP_CourtMemberSkills(Clone)"
+	}
+}
+
+def SkillChoicesTutorialMessage : KnightSkillsTutorialMessage
+{
+	caption = "{SkillChoicesHotspot.tooltip.caption}"
+	body = "{SkillChoicesHotspot.tooltip.text}"
+}
+
+def PrimarySkillsTutorialMessage : KnightSkillsTutorialMessage
+{
+	caption = "{PrimarySkillsHotspot.tooltip.caption}"
+	body = "{PrimarySkillsHotspot.tooltip.text}"
+}
+
+def SecondarySkillsTutorialMessage : KnightSkillsTutorialMessage
+{
+	caption = "{SecondarySkillsHotspot.tooltip.caption}"
+	body = "{SecondarySkillsHotspot.tooltip.text}"
+}
+
+// ---------- KNIGHT ACTIONS AND STATUSES -----------
+template KnightsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "knight_bar"
+	caption = "Knights"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)"
+	}
+}
+
+def KnightsIntroTutorialMessage : KnightsTutorialMessage
+{
+	body = $["Knights are noble characters who can perform various actions for their kingdom, depending on their class."
+	"{p}{p}A knight can be a marshal, merchant, diplomat, cleric or spy."]
+}
+
+def KnightLevelTutorialMessage : KnightsTutorialMessage
+{
+	caption = "{KnightLevelHotspot.tooltip.caption}"
+	body = "{KnightLevelHotspot.tooltip.text}"
+}
+
+def KnightStatusesTutorialMessage : KnightsTutorialMessage
+{
+	caption = "{KnightStatusesHotspot.tooltip.caption}"
+	body = "{KnightStatusesHotspot.tooltip.text}"
+}
+
+def KnightActionsTutorialMessage : KnightsTutorialMessage
+{
+	caption = "{KnightActionsHotspot.tooltip.caption}"
+	body = "{KnightActionsHotspot.tooltip.text}"
+}
+
+// def KnightOpportunitiesTutorialMessage : KnightsTutorialMessage
+// {
+// 	caption = "{KnightOpportunitiesHotspot.tooltip.caption}"
+// 	body = "{KnightOpportunitiesHotspot.tooltip.text}"
+// }
+
+// ---------- OPPORTUNITIES -----------
+def OpportunitiesTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "opportunities"
+	caption = "Court Opportunities"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/UIP_CourtMemberActions(Clone)/id_ActionsAndOpportunities/id_CourtMemberOpportunityActions/*"
+	}
+	body = "From time to time, certain classes of knights may receive opportunities. These are temporary actions that can appear if certain conditions are met, or disappear as time passes."
+}
+
+// ---------- PROVINCE SELECTION -----------
+template ProvinceTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "province"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow(Clone)"
+	}
+}
+
+def ProvinceTutorialIntroMessage : ProvinceTutorialMessage
+{
+	caption = "Province"
+	body = "This is one of several lands which can be controlled by your kingdom. Each province allows you to build various structures, hire troops and station armed forces, in defense of the town against hostile sieges."
+}
+
+def ProvinceGovernorTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{GovernorTownSlotHotspot.tooltip.caption}"
+	body = "{GovernorTownSlotHotspot.tooltip.text}"
+	//body = "Any knight in your royal court can be assigned as a governor (unless they are imprisoned). This is an important step in the development of your kingdom, as governors grant full access to the produce of their realm."
+}
+
+def ProvincePopulationTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{ProvincePopulationHotspot.tooltip.caption}"
+	body = "{ProvincePopulationHotspot.tooltip.text}"
+}
+
+def ProvinceIncomeTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{ProvinceIncomeHotspot.tooltip.caption}"
+	body = "{ProvinceIncomeHotspot.tooltip.text}"
+}
+
+def ProvinceFeaturesAndGoodsTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{ProvinceFeaturesAndGoodsHotspot.tooltip.caption}"
+	body = "{ProvinceFeaturesAndGoodsHotspot.tooltip.text}"
+}
+
+def ProvinceBuildingsTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{BuildingSlotsAllHotspot.tooltip.caption}"
+	body = "{BuildingSlotsAllHotspot.tooltip.text}"
+}
+
+def ProvinceStatesTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{TownStatusesHotspot.tooltip.caption}"
+	body = "{TownStatusesHotspot.tooltip.text}"
+}
+
+def ProvinceFortificationsTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{FortificationsUpgradeHotspot.tooltip.caption}"
+	body = "{FortificationsUpgradeHotspot.tooltip.text}"
+}
+
+def ProvinceGarrisonTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{GarrisonHotspot.tooltip.caption}"
+	body = "{GarrisonHotspot.tooltip.text}"
+}
+
+def ProvinceGarrisonManpowerTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{GarrisonManpowerHotspot.tooltip.caption}"
+	body = "{GarrisonManpowerHotspot.tooltip.text}"
+}
+
+def ProvinceVisitingArmyTutorialMessage : ProvinceTutorialMessage
+{
+	caption = "{VisitingArmyHotspot.tooltip.caption}"
+	body = "{VisitingArmyHotspot.tooltip.text}"
+}
+
+// def ProvinceStatesTutorialMessage : ProvinceTutorialMessage
+// {
+// 	tutorial_topic = "town_states"
+// 	def rules : ShowTopicWhileHotspotIsVisible
+// 	{
+// 		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindow*/GroupStattuses/*"
+// 	}
+
+// 	caption = "{TownStatusesHotspot.tooltip.caption}"
+// 	body = "{TownStatusesHotspot.tooltip.text}"
+// }
+
+// ---------- BUILDINGS DETAILED -----------
+template BuildingsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "buildings"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_CastleBuildWindow(Clone)"
+	}
+}
+
+def BuildingsDistrictsTutorialMessage : BuildingsTutorialMessage
+{
+	caption = "{DistrictBuildingsHotspot.tooltip.caption}"
+	body = "{DistrictBuildingsHotspot.tooltip.text}"
+}
+
+def BuildingsSettlementsTutorialMessage : BuildingsTutorialMessage
+{
+	caption = "{DistrictHeaderHotspot.tooltip.caption}"
+	body = "{DistrictHeaderHotspot.tooltip.text}"
+}
+
+def BuildingsCrafts1TutorialMessage : BuildingsTutorialMessage
+{
+	caption = "{CommonBuildingsHotspot.tooltip.caption}"
+	body = "{CommonBuildingsHotspot.tooltip.text}"
+}
+
+def BuildingsCrafts2TutorialMessage : BuildingsTutorialMessage
+{
+	caption = "{SpecialBuildingsHotspot.tooltip.caption}"
+	body = "{SpecialBuildingsHotspot.tooltip.text}"
+}
+
+template BuildingDetailedViewTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "building_detailed"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_BuildingWindow(Clone)"
+	}
+}
+
+def Upgrades1TutorialMessage : BuildingDetailedViewTutorialMessage
+{
+	caption = "{BuildingUpgradesHotspot.tooltip.caption}"
+	body = "{BuildingUpgradesHotspot.tooltip.text}"
+}
+
+// def Upgrades2TutorialMessage : BuildingDetailedViewTutorialMessage
+// {
+// 	caption = "{BuildingUpgradesHotspot.tooltip.caption}"
+// 	body = "A building is considered 'completed' if all of its upgrades are finished, which grants additional effects."
+// }
+
+// ---------- DIPLOMACY OFFERS -----------
+def DiplomacyOffersTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "diplomacy_offer"
+	caption = "{DiplomacyOfferAreaHotspot.tooltip.caption}"
+	body = "{DiplomacyOfferAreaHotspot.tooltip.text}"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/id_ImportantMessages/id_Dynamic/id_IOIcons"
+	}
+}
+
+// ---------- AUDIENCE WINDOW -----------
+template AudienceTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "audience"
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/Audience(Clone)"
+	}
+}
+
+def AudienceIntroTutorialMessage : AudienceTutorialMessage
+{
+	caption = "Audience"
+	body = "Diplomatic negotiations can be initiated with any foreign kingdom. While in audience, you may form new stances, declare war or attempt to sign peace."
+}
+
+def AudienceButtonsTutorialIntroMessage : AudienceTutorialMessage
+{
+	caption = "{AudienceButtonsTutorialHotspot.tooltip.caption}"
+	body = "{AudienceButtonsTutorialHotspot.tooltip.text}"
+}
+
+def AudienceStancesMessage : AudienceTutorialMessage
+{
+	caption = "{AudienceStancesTutorialHotspot.tooltip.caption}"
+	body = "{AudienceStancesTutorialHotspot.tooltip.text}"
+}
+
+def AudienceRelationshipMessage : AudienceTutorialMessage
+{
+	caption = "{AudienceRelationshipTutorialHotspot.tooltip.caption}"
+	body = "{AudienceRelationshipTutorialHotspot.tooltip.text}"
+}
+
+// ---------- FOREIGN PROVINCE SELECTION -----------
+template OtherProvinceSelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "other_province"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_CastleWindowOther(Clone)"
+	}
+}
+
+def OtherProvinceCenterAreaTutorialMessage : OtherProvinceSelectionTutorialMessage
+{
+	caption = "{OtherProvinceCentralAreaTutorialHotspot.tooltip.caption}"
+	body = "{OtherProvinceCentralAreaTutorialHotspot.tooltip.text}"
+}
+
+def OtherProvinceOwnerFlagTutorialMessage : OtherProvinceSelectionTutorialMessage
+{
+	caption = "{OtherProvinceOwnerFlagTutorialHotspot.tooltip.caption}"
+	body = "{OtherProvinceOwnerFlagTutorialHotspot.tooltip.text}"
+}
+
+def OtherProvinceOccupierFlagTutorialMessage : OtherProvinceSelectionTutorialMessage
+{
+	caption = "{OtherProvinceOccupierFlagTutorialHotspot.tooltip.caption}"
+	body = "{OtherProvinceOccupierFlagTutorialHotspot.tooltip.text}"
+}
+
+def OtherProvinceSendSpyTutorialMessage : OtherProvinceSelectionTutorialMessage
+{
+	caption = "{OtherProvinceSendSpyTutorialHotspot.tooltip.caption}"
+	body = "{OtherProvinceSendSpyTutorialHotspot.tooltip.text}"
+}
+
+// ---------- KINGDOM SELECTION -----------
+template OtherKingdomSelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "other_kingdom"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_KingdomWindow_Other(Clone)"
+	}
+}
+
+def OtherKingdomCenterAreaTutorialMessage : OtherKingdomSelectionTutorialMessage
+{
+	caption = "{OtherKingdomCentralAreaTutorialHotspot.tooltip.caption}"
+	body = "{OtherKingdomCentralAreaTutorialHotspot.tooltip.text}"
+}
+
+def OtherKingdomRoyalFamilyTutorialMessage : OtherKingdomSelectionTutorialMessage
+{
+	caption = "{OtherKingdomRoyalFamilyTutorialHotspot.tooltip.caption}"
+	body = "{OtherKingdomRoyalFamilyTutorialHotspot.tooltip.text}"
+}
+
+def OtherKingdomPoliticsTutorialMessage : OtherKingdomSelectionTutorialMessage
+{
+	caption = "{OtherKingdomPoliticsTutorialHotspot.tooltip.caption}"
+	body = "{OtherKingdomPoliticsTutorialHotspot.tooltip.text}"
+}
+
+// ---------- ROYAL FAMILY -----------
+template RoyalFamilyTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "royal_family"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_RoyalFamiliy(Clone)"
+	}
+}
+
+def RoyalFamilyIntroTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "Royal Family"
+	body = "The royal family of a kingdom represents its king, queen, children and important relatives. Maintaining a healthy royal family is an important step of the development of your kingdom."
+}
+
+def RoyalFamilyKingTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilyKingTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilyKingTutorialHotspot.tooltip.text}"
+}
+
+def RoyalFamilyKingAbilitiesTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilyKingAbilitiesTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilyKingAbilitiesTutorialHotspot.tooltip.text}"
+}
+
+def RoyalFamilyQueenTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilyQueenTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilyQueenTutorialHotspot.tooltip.text}"
+}
+
+def RoyalChildrenTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilyChildrenTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilyChildrenTutorialHotspot.tooltip.text}"
+}
+
+def SpousesTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilySpousesTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilySpousesTutorialHotspot.tooltip.text}"
+}
+
+def AssignHeirTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{AssignHeirTutorialHotspot.tooltip.caption}"
+	body = "{AssignHeirTutorialHotspot.tooltip.text}"
+}
+
+def ImportantRelativesTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{ImportantRelativesTutorialHotspot.tooltip.caption}"
+	body = "{ImportantRelativesTutorialHotspot.tooltip.text}"
+}
+
+def TraditionsTutorialMessage : RoyalFamilyTutorialMessage
+{
+	caption = "{RoyalFamilyTraditionsTutorialHotspot.tooltip.caption}"
+	body = "{RoyalFamilyTraditionsTutorialHotspot.tooltip.text}"
+}
+
+// ---------- GREAT POWERS & RANKINGS -----------
+template GreatPowersAndRankingsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "great_powers"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_GreatPowersRankingsWindow(Clone)"
+	}
+}
+
+def GreatPowersFlagsTutorialMessage : GreatPowersAndRankingsTutorialMessage
+{
+	caption = "{GreatPowersTutorialHotspot.tooltip.caption}"
+	body = "{GreatPowersTutorialHotspot.tooltip.text}"
+}
+
+def RankingsTutorialMessage : GreatPowersAndRankingsTutorialMessage
+{
+	caption = "{RankingsTutorialHotspot.tooltip.caption}"
+	body = "{RankingsTutorialHotspot.tooltip.text}"
+}
+
+def AdditionalFameSourcesTutorialMessage : GreatPowersAndRankingsTutorialMessage
+{
+	caption = "{AdditionalFameSourcesTutorialHotspot.tooltip.caption}"
+	body = "{AdditionalFameSourcesTutorialHotspot.tooltip.text}"
+}
+
+def EmperorOfTheWorldButtonTutorialMessage : GreatPowersAndRankingsTutorialMessage
+{
+	caption = "{EmperorOfTheWorldButtonTutorialHotspot.tooltip.caption}"
+	body = "{EmperorOfTheWorldButtonTutorialHotspot.tooltip.text}"
+}
+
+// ---------- ADVANTAGES -----------
+template AdvantagesWindowTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "advantages"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_KingdomAdvantagesWindow(Clone)"
+	}
+}
+
+def AdvantageCategoriesTutorialMessage : AdvantagesWindowTutorialMessage
+{
+	caption = "{AdvantageCategoriesHotspot.tooltip.caption}"
+	body = "{AdvantageCategoriesHotspot.tooltip.text}"
+}
+
+def GoodsTutorialMessage : AdvantagesWindowTutorialMessage
+{
+	caption = "{GoodsHotspot.tooltip.caption}"
+	body = "{GoodsHotspot.tooltip.text}"
+}
+
+def AdvantagesVictoryTutorialMessage : AdvantagesWindowTutorialMessage
+{
+	caption = "{AdvantagesVictoryHotspot.tooltip.caption}"
+	body = "{AdvantagesVictoryHotspot.tooltip.text}"
+}
+
+// ---------- ADVANTAGES -----------
+template WarsAndPactsWindowTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "wars_and_pacts"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/id_MessageContainer/UIP_WarsOverviewWindow(Clone)"
+	}
+}
+
+def WarsTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarsHotspot.tooltip.caption}"
+	body = "{WarsHotspot.tooltip.text}"
+}
+
+def WarExhaustionTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarExhaustionHotspot.tooltip.caption}"
+	body = "{WarExhaustionHotspot.tooltip.text}"
+}
+
+def WarWindowFriendsTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarWindowFriendsHotspot.tooltip.caption}"
+	body = "{WarWindowFriendsHotspot.tooltip.text}"
+}
+
+def WarWindowEnemiesTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarWindowEnemiesHotspot.tooltip.caption}"
+	body = "{WarWindowEnemiesHotspot.tooltip.text}"
+}
+
+def WarWindowOurPactsTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarWindowOurPactsHotspot.tooltip.caption}"
+	body = "{WarWindowOurPactsHotspot.tooltip.text}"
+}
+
+def WarWindowEnemyPactsTutorialMessage : WarsAndPactsWindowTutorialMessage
+{
+	caption = "{WarWindowEnemyPactsHotspot.tooltip.caption}"
+	body = "{WarWindowEnemyPactsHotspot.tooltip.text}"
+}
+
+// ---------- ARMY SELECTION -----------
+template ArmySelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "army_selection"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_ArmyWindow*"
+	}
+}
+
+def ArmyLeaderTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmyLeaderTutorialHotspot.tooltip.caption}"
+	body = "{ArmyLeaderTutorialHotspot.tooltip.text}"
+}
+
+def ArmyUnitsTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmyUnitsTutorialHotspot.tooltip.caption}"
+	body = "{ArmyUnitsTutorialHotspot.tooltip.text}"
+}
+
+def ArmyMoraleTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmyMoraleTutorialHotspot.tooltip.caption}"
+	body = "{ArmyMoraleTutorialHotspot.tooltip.text}"
+}
+
+def ArmyManpowerTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmyManpowerTutorialHotspot.tooltip.caption}"
+	body = "{ArmyManpowerTutorialHotspot.tooltip.text}"
+}
+
+def ArmySuppliesTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmySuppliesTutorialHotspot.tooltip.caption}"
+	body = "{ArmySuppliesTutorialHotspot.tooltip.text}"
+}
+
+def ArmyEquipmentTutorialMessage : ArmySelectionTutorialMessage
+{
+	caption = "{ArmyEquipmentTutorialHotspot.tooltip.caption}"
+	body = "{ArmyEquipmentTutorialHotspot.tooltip.text}"
+}
+
+// ---------- SIEGE BATTLE -----------
+template SiegeBattleTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "siege_battle"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_Center/Background_SiegeBattleName/id_Name"
+	}
+}
+
+def SiegeIntroTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeBattleHeaderTutorialHotspot.tooltip.caption}"
+	body = "{SiegeBattleHeaderTutorialHotspot.tooltip.text}"
+}
+
+def SiegeArmyLeadersTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeBattleArmyLeadersTutorialHotspot.tooltip.caption}"
+	body = "{SiegeBattleArmyLeadersTutorialHotspot.tooltip.text}"
+}
+
+def SiegeDefenderResilienceTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeDefenderResilienceTutorialHotspot.tooltip.caption}"
+	body = "{SiegeDefenderResilienceTutorialHotspot.tooltip.text}"
+}
+
+def SiegeDefenderSiegeDefenseTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeDefenderSiegeDefenseTutorialHotspot.tooltip.caption}"
+	body = "{SiegeDefenderSiegeDefenseTutorialHotspot.tooltip.text}"
+}
+
+def SiegeAttackerSuppliesTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeAttackerSuppliesTutorialHotspot.tooltip.caption}"
+	body = "{SiegeAttackerSuppliesTutorialHotspot.tooltip.text}"
+}
+
+def SiegeDefenderFoodTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeDefenderFoodTutorialHotspot.tooltip.caption}"
+	body = "{SiegeDefenderFoodTutorialHotspot.tooltip.text}"
+}
+
+def SiegeBattleArmyMoraleTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeBattleArmyMoraleTutorialHotspot.tooltip.caption}"
+	body = "{SiegeBattleArmyMoraleTutorialHotspot.tooltip.text}"
+}
+
+def SiegeBattleArmyManpowerTutorialMessage : SiegeBattleTutorialMessage
+{
+	caption = "{SiegeBattleArmyManpowerTutorialHotspot.tooltip.caption}"
+	body = "{SiegeBattleArmyManpowerTutorialHotspot.tooltip.text}"
+}
+
+// ---------- BATTLE PREPARATION -----------
+def BattlePreparationTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "battle_preparation"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Preparation/Group_PreparationProgress"
+	}
+	caption = "{BattlePreparationTutorialHotspot.tooltip.caption}"
+	body = "{BattlePreparationTutorialHotspot.tooltip.text}"
+}
+
+// ---------- BATTLE ACTIONS -----------
+
+def FieldBattlePlayerActionsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "field_battle_actions"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_PlayerActions/id_Retreat"
+	}
+	caption = "{FieldBattlePlayerActionsTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattlePlayerActionsTutorialHotspot.tooltip.text}"
+}
+
+def SiegeBattlePlayerActionsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "siege_battle_actions"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Siege/Group_PlayerActions/*"
+	}
+	caption = "{SiegeBattlePlayerActionsTutorialHotspot.tooltip.caption}"
+	body = "{SiegeBattlePlayerActionsTutorialHotspot.tooltip.text}"
+}
+
+// ---------- FIELD BATTLE -----------
+template FieldBattleTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "field_battle"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Center/Background_BattleName/id_Name"
+	}
+}
+
+def FieldBattleIntroTutorialMessage : FieldBattleTutorialMessage
+{
+	caption = "{FieldBattleHeaderTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleHeaderTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleArmyLeadersTutorialMessage : FieldBattleTutorialMessage
+{
+	caption = "{FieldBattleArmyLeadersTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleArmyLeadersTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleEstimationTutorialMessage : TutorialMessage //!!! extended to be a unique message, since pillages don't have estimation...
+{
+	tutorial_topic = "field_battle_estimation"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/*/Group_Center/id_estimation/tut_BattleEstimation"
+	}
+	
+	caption = "{FieldBattleEstimationTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleEstimationTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleArmyMoraleTutorialMessage : FieldBattleTutorialMessage
+{
+	caption = "{FieldBattleArmyMoraleTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleArmyMoraleTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleArmyManpowerTutorialMessage : FieldBattleTutorialMessage
+{
+	caption = "{FieldBattleArmyManpowerTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleArmyManpowerTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleArmySuppliesTutorialMessage : FieldBattleTutorialMessage
+{
+	caption = "{FieldBattleArmySuppliesTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleArmySuppliesTutorialHotspot.tooltip.text}"
+}
+
+def FieldBattleTerrainBonusesTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "terrain_bonuses"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Ongoing/Background/Footer"
+	}
+	
+	caption = "{FieldBattleTerrainBonusesTutorialHotspot.tooltip.caption}"
+	body = "{FieldBattleTerrainBonusesTutorialHotspot.tooltip.text}"
+}
+
+def PillageTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "pillage_selection"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_BattleWindow(Clone)/id_Ongoing/Group_Center/id_PlunderProgressContainer"
+	}
+	
+	caption = "{PillageIndicationTutorialHotspot.tooltip.caption}"
+	body = "{PillageIndicationTutorialHotspot.tooltip.text}"
+}
+
+// ---------- MERCENARY SELECTION -----------
+template MercenaryMainSelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "merc_selection"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_*/id_HireKingdom"
+	}
+}
+
+def MercenaryVisitingArmyTutorialMessage : MercenaryMainSelectionTutorialMessage
+{
+	caption = "{MercenaryVisitingArmyTutorialHotspot.tooltip.caption}"
+	body = "{MercenaryVisitingArmyTutorialHotspot.tooltip.text}"
+}
+
+def MercenaryUnitsTutorialMessage : MercenaryMainSelectionTutorialMessage
+{
+	caption = "{MercenaryUnitsTutorialHotspot.tooltip.caption}"
+	body = "{MercenaryUnitsTutorialHotspot.tooltip.text}"
+}
+
+def HireMercenaryTutorialMessage : MercenaryMainSelectionTutorialMessage
+{
+	caption = "{HireMercenaryTutorialHotspot.tooltip.caption}"
+	body = "{HireMercenaryTutorialHotspot.tooltip.text}"
+}
+
+def ForceOutMercenaryTutorialMessage : MercenaryMainSelectionTutorialMessage
+{
+	caption = "{ForceOutMercenaryTutorialHotspot.tooltip.caption}"
+	body = "{ForceOutMercenaryTutorialHotspot.tooltip.text}"
+}
+
+def HiredMercenaryTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "hired_merc_selection"
+	
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_Mercenary(Clone)/Group_Hired/CommandButtons"
+	}
+	
+	caption = "{MercenaryCommandsTutorialHotspot.tooltip.caption}"
+	body = "{MercenaryCommandsTutorialHotspot.tooltip.text}"
+}
+
+// ---------- REBEL SELECTION -----------
+template RebelSelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "rebel_selection"
+	
+	def rules : ShowTopicWhileWindowIsVisible
+	{
+		path_mask = "UI/Canvas/Bottom/id_SelectionUI/UIP_RebelWindow_Minor*"
+	}
+}
+
+def RebelIntroTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "Rebel armies"
+	body = "Rebels can appear within any kingdom which suffers from low stability. These unruly armies are most often formed by rebellious population within provinces, but may also be headed by disobedient knights within a kingdom's royal court."
+}
+
+def RebelRebellionsTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "Rebellions"
+	body = "Each rebel army is part of a bigger rebellion. Rebellions are always headed by a rebellion leader, with the possibility of more rebel armies joining his ranks - those can either be regular rebel mobs or generals. If the rebellion leader perishes, he can be replaced by one of his generals."
+}
+
+def RebelTypesTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "{RebelTypeTutorialHotspot.tooltip.caption}"
+	body = "When inspecting a rebel, information about his type and the rebellion he is a part of can be seen here."
+}
+
+def RebelUnitsTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "{RebelUnitsTutorialHotspot.tooltip.caption}"
+	body = "{RebelUnitsTutorialHotspot.tooltip.text}"
+}
+
+def RebelManpowerTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "{RebelManpowerTutorialHotspot.tooltip.caption}"
+	body = "{RebelManpowerTutorialHotspot.tooltip.text}"
+}
+
+def RebelMoraleTutorialMessage : RebelSelectionTutorialMessage
+{
+	caption = "{RebelMoraleTutorialHotspot.tooltip.caption}"
+	body = "{RebelMoraleTutorialHotspot.tooltip.text}"
+}
+
+// ---------- OTHER -----------
+template OwnPrisonerTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "own_prisoner"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/RoyalCourt/id_CourtContainer/id_CourSlot/id_CharacterGroup/UIP_CharacterIcon_RoyalCourt(Clone)/Group_Populated/tut_prisoner_area"
+	}
+}
+
+def OwnPrisoner1TutorialMessage : OwnPrisonerTutorialMessage
+{
+	caption = "{OwnPrisonerTutorialHotspot.tooltip.caption}"
+	body = "{OwnPrisonerTutorialHotspot.tooltip.text}"
+}
+
+def OwnPrisoner2TutorialMessage : OwnPrisonerTutorialMessage
+{
+	caption = "{OwnPrisonerTutorialHotspot.tooltip.caption}"
+	body = "With the right skills or the help of a spy, he might have a chance to escape captivity."
+}
+
+def ForeignPrisonerTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "foreign_prisoner"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PrisonersContainer/tut_area"
+	}
+	caption = "{RoyalDungeonHotspotTutorialHotspot.tooltip.caption}"
+	body = $["You've caught a foreign knight! He lies in your royal dungeon, awaiting to meet his fate."
+	"{p}{p}Click on a prisoner to view the actions associated with him."]
+}
+
+def WarTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "war"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_WarsContainer/tut_area"
+	}
+	caption = "{WarsHotspot.tooltip.caption}"
+	body = $["Your kingdom is at war! These clashes are always waged between two leaders and each side can have multiple supporters."
+	"{p}{p}Click on a war to view detailed information about it."]
+}
+
+def RebellionsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "rebellions"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_RebelsContainer/tut_area"
+	}
+	caption = "{RebellionsHotspotTutorialHotspot.tooltip.caption}"
+	body = $["A rebellion just appeared in one of your provinces! Defeat its leader quickly, before further armies appear and the rebellion grows in strength."
+	"{p}{p}Click on a rebellion to view detailed information about it."]
+}
+
+def CrusadeTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "crusade"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_CrusadeContainer/tut_area"
+	}
+	caption = "{CrusadeTutorialHotspot.tooltip.caption}"
+	body = "The Pope has called for a crusade! Click on it to select its leader and view his location."
+}
+
+def JihadTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "jihad"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_ThirdPartyJihadsContainer/tut_area"
+	}
+	caption = "{JihadTutorialHotspot.tooltip.caption}"
+	body = "An Islamic kingdom has just proclaimed that their war is now a Jihad! You may support any side, or observe the feud from a safe distance."
+}
+
+def HeadlessArmyTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "headless_army"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_LoyalMercenaries/*/id_Leaderless/id_Icon"
+	}
+	caption = "{HeadlessArmiesTutorialHotspot.tooltip.caption}"
+	body = "{HeadlessArmiesTutorialHotspot.tooltip.text}"
+}
+
+def PactAgainstUsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "pact_against_us"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_PactsAgainstContainer/tut_area"
+	}
+	caption = "Pact against us"
+	body = $["A foreign kingdom has formed a pact against us! By using diplomats, kingdoms may either form defensive pacts or invasion plans."
+	"{p}{p}Click on a pact icon to open the Wars and Pacts window, where you can see its type and supporters."]
+}
+
+def MissingGoodsTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "missing_goods"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UI/Canvas/Top Area/Id_ImportantEvents/id_MissingGoodsContainer/UIP_MissingGoodsIcon(Clone)"
+	}
+	caption = "{MissingGoodsTutorialHotspot.tooltip.caption}"
+	body = "{MissingGoodsTutorialHotspot.tooltip.text}"
+}
+
+// ---------------------------------
+// ---------- BATTLEVIEW -----------
+// ---------------------------------
+
+// BATTLEVIEW MAIN SEQUENCE
+template BattleViewTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "battleview_tutorial"
+	caption = "Battle"
+}
+
+def BattleViewIntro1TutorialMessage : BattleViewTutorialMessage
+{
+	caption = "Tactical Battles"
+	body = "Welcome to the battlefield, Sire! Here is where your skills as a renowned leader may shine, as you command your troops to victory and decimate your opponents in real time."
+}
+
+def BattleViewMainArmyTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "Main Army"
+	body = "{BattleViewMainArmyTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSupportingArmyTutorialMessage : BattleViewTutorialMessage
+{
+	//tutorial_topic = "battleview_tutorial_supporters"
+	// def rules : ShowTopicWhileHotspotIsVisible
+	// {
+	// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/id_SupportingArmyWindow/tut_area"
+	// }
+	caption = "Supporting Army"
+	body = "{BattleViewSupportingArmyTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewLocalDefendersTutorialMessage : BattleViewTutorialMessage
+{
+	// def rules : ShowTopicWhileHotspotIsVisible
+	// {
+	// 	path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/id_GarrisonArmyWindow/tut_area"
+	// }
+	caption = "Local Troops"
+	body = "{BattleViewLocalDefendersTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewControls1TutorialMessage : BattleViewTutorialMessage //!!! Too minor to show? Doesn't flow nicely... Consider.
+{
+	caption = "Selecting squads"
+	body = "You can select individual squads by clicking on them, either on the battlefield or via their icons in the bottom portion of the screen ({clr:gold}LMB{/clr}). You can also add additional squads to your current selection {clr:gold}(SHIFT){/clr} + {clr:gold}(LMB){/clr}, or drag a box on the battlefield to select multiple ones."
+}
+
+def BattleViewControls2TutorialMessage : BattleViewTutorialMessage //!!! Too minor to show? Doesn't flow nicely... Consider.
+{
+	caption = "Grouping and ordering squads"
+	body = "Once selected, a squad can be ordered to move to a location or to attack an enemy entity by clicking {clr:gold}RMB{/clr}. Multiple selected squads can be assigned to groups ({clr:gold}CTRL + 1-9{/clr}), which can be ordered to perform various commands collectively."
+}
+
+def BattleViewHelpTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "{BattleViewHelpTutorialHotspot.tooltip.caption}"
+	body = "These unit orders, along with many more, are described here, along with hotkeys for each."
+}
+
+def BattleViewWinConditionDefeatOpponentsTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "Securing Victory - Eliminate Opponents"
+	body = "Defeating your enemy can be done in many different ways. The most obvious choice would be to simply kill as many enemy troops as possible. This area shows how many soldiers you have left and what their power is, compared to your foes."
+}
+
+def BattleViewWinConditionMorale2TutorialMessage : BattleViewTutorialMessage
+{
+	caption = "Securing Victory - Morale"
+	body = "As your enemies fall, so does their morale. This can force individual squads to retreat temporarily, or to entirely flee from the battlefield. The battle may even end if the overall morale of the enemy side falls too much."
+}
+
+def BattleViewWinConditionKillLeaderTutorialMessage : BattleViewTutorialMessage //SHOW ARMY LEADERS IN TOP UI
+{
+	caption = "Securing Victory - Kill Enemy Leaders"
+	body = "Another way to secure victory is by eliminating the leaders of the opposing armies. This means that you must also be careful when navigating your own leaders, as their demise can be detrimental."
+}
+
+def BattleViewWinConditionCapturePoints1TutorialMessage : BattleViewTutorialMessage //SHOW CAPTURE POINTS IN TOP UI
+{
+	caption = "Securing Victory - Capture Points"
+	body = "You can also outmaneuver your opponents and take all capture points on the battlefield. Taking all capture points is a guaranteed way to secure victory."
+}
+
+def BattleViewWinConditionCapturePoints2TutorialMessage : BattleViewTutorialMessage
+{
+	caption = "Securing Victory - Capture Points"
+	body = "A capture point can be taken by positioning your troops next to it. They will then slowly convert the object to your control, as long as no hostile forces are close-by."
+}
+
+// def BattleViewTopArmyLeadersTutorialMessage : BattleViewTutorialMessage //!!! showing BattleViewWinConditionKillLeaderTutorialMessage instead
+// {
+// 	def rules : ShowTopicWhileHotspotIsVisible
+// 	{
+// 		path_mask = ""
+// 	}
+// 	caption = "{BattleViewTopArmyLeadersTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewTopArmyLeadersTutorialHotspot.tooltip.text}"
+// }
+
+// def BattleViewTopEstimationTutorialMessage : BattleViewTutorialMessage
+// {
+// 	caption = "{BattleViewTopEstimationTutorialHotspot.tooltip.caption}"
+// 	body = "While all of this is happening, you can keep track of the current balance of power between both armies. This does not take into account capture points and morale."
+// }
+
+// def BattleViewTopMoraleTutorialMessage : BattleViewTutorialMessage //!!! showing BattleViewWinConditionMorale2TutorialMessage instead
+// {
+// 	def rules : ShowTopicWhileHotspotIsVisible
+// 	{
+// 		path_mask = ""
+// 	}
+// 	caption = "{BattleViewTopMoraleTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewTopMoraleTutorialHotspot.tooltip.text}"
+// }
+
+def BattleViewTopInitiativeTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_initiative"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_BattleOverview/id_character*/id_barsContainer/initiative/id_InitiativeContainer/IdleContainer/id_InitiativeRadialContainer/id_Initiative"
+	}
+	caption = "{BattleViewTopInitiativeTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewTopInitiativeTutorialHotspot.tooltip.text}"
+}
+
+// def BattleViewTopCapturePointsTutorialMessage : BattleViewTutorialMessage //!!! showing BattleViewWinConditionCapturePoints1TutorialMessage instead
+// {
+// 	def rules : ShowTopicWhileHotspotIsVisible
+// 	{
+// 		path_mask = ""
+// 	}
+// 	caption = "{BattleViewTopCapturePointsTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewTopCapturePointsTutorialHotspot.tooltip.text}"
+// }
+
+// def BattleViewTopBattleTypeTutorialMessage : BattleViewTutorialMessage //!!! Probably unnecessary.
+// {
+// 	def rules : ShowTopicWhileHotspotIsVisible
+// 	{
+// 		path_mask = ""
+// 	}
+// 	caption = "{BattleViewTopBattleTypeTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewTopBattleTypeTutorialHotspot.tooltip.text}"
+// }
+
+// ---------- BATTLEVIEW BOTTOM RIGHT AREA -----------
+def BattleViewMinimapTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "{BattleViewMinimapTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewMinimapTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewTimeControlsTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "{BattleViewTimeControlsTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewTimeControlsTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewFiltersTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "{BattleViewFiltersTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewFiltersTutorialHotspot.tooltip.text}"
+}
+
+// ---------- BATTLEVIEW TOP LEFT AREA -----------
+def BattleViewRetreatButtonTutorialMessage : BattleViewTutorialMessage
+{
+	caption = "{BattleViewRetreatButtonTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewRetreatButtonTutorialHotspot.tooltip.text}"
+}
+
+// ---------- BATTLEVIEW SQUAD SELECTION -----------
+
+template BattleViewSquadSelectionTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_squad_selection"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_ArmyActions"
+	}
+}
+
+// def BattleViewSquadTypeIntroTutorialMessage : BattleViewSquadSelectionTutorialMessage
+// {
+// 	caption = "Squad selection"
+// 	body = "This is a selected squad. You can select own or enemy squads. Selecting multiple squads is also possible."
+// }
+
+def BattleViewSquadTypeTutorialMessage : BattleViewSquadSelectionTutorialMessage
+{
+	caption = "{BattleViewSelectionSquadTypeTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionSquadTypeTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSelectionCommandsTutorialMessage : BattleViewSquadSelectionTutorialMessage
+{
+	caption = "{BattleViewSelectionCommandsTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionCommandsTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadAttributesTutorialMessage : BattleViewSquadSelectionTutorialMessage
+{
+	caption = "{BattleViewSelectionSquadAttributesTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionSquadAttributesTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewMarkTargetTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_mark_target"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_MarkTarget/id_MarkTargetButton"
+	}
+	caption = "{BattleViewSelectionMarkTargetTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionMarkTargetTutorialHotspot.tooltip.text}"
+}
+
+// def BattleViewSquadBarsTutorialMessage : BattleViewSquadSelectionTutorialMessage
+// {
+// 	caption = "{BattleViewSelectionSquadBarsTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewSelectionSquadBarsTutorialHotspot.tooltip.text}"
+// }
+
+// def BattleViewSquadStatusesTutorialMessage : BattleViewSquadSelectionTutorialMessage
+// {
+// 	caption = "{BattleViewSelectionSquadStatusesTutorialHotspot.tooltip.caption}"
+// 	body = "{BattleViewSelectionSquadStatusesTutorialHotspot.tooltip.text}"
+// }
+
+// ---------- BATTLEVIEW OTHER (EMERGENT) -----------
+def BattleViewSquadMoraleTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_selection_morale"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_Morale/id_MoraleContainer"
+	}
+	caption = "{BattleViewSelectionBarsMoraleTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionBarsMoraleTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadHealthTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_selection_health"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_HealthContainer"
+	}
+	caption = "{BattleViewSelectionBarsHealthTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionBarsHealthTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadStaminaTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_selection_stamina"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SquadStatsContainer/id_StaminaContainer"
+	}
+	caption = "{BattleViewSelectionBarsStaminaTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionBarsStaminaTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSiegeHealthTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_selection_siege_health"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SiegeMachineStatsContainer/id_MachineHealthContainer"
+	}
+	caption = "{BattleViewSelectionSiegeHealthTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionSiegeHealthTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewTrebuchetDeploymentTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_selection_trebuchet_deployment"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_SelectionUI/UIP_SquadWindow(Clone)/id_Populated/id_SquadFrame/id_SquadStatusBar/id_SiegeMachineStatsContainer/id_DeploymentContainer"
+	}
+	caption = "{BattleViewSelectionTrebuchetDeploymentTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSelectionTrebuchetDeploymentTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewArmyInventoryTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_army_inventory"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/*/id_SiegeEquipmentContainer"
+	}
+	caption = "{BattleViewArmyInventoryTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewArmyInventoryTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewIncomingReinforcementsTutorialMessage : TutorialMessage
+{
+	// def rules : ShowTopicWhileHotspotIsVisible
+	// {
+	// 	path_mask = ""
+	// }
+	caption = "{BattleViewIncomingReinforcementsTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewIncomingReinforcementsTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewArmyStateTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_armystates"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_Buff/id_StatusBackground"
+		//"UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_SquadStatuses/UIP_SquadStatus(Clone)"
+	}
+	caption = "{BattleViewArmyStateTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewArmyStateTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadClimbingTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_squad_climbing"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_SquadTypeIcon/id_Ladder"
+	}
+	caption = "{BattleViewSquadClimbingTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSquadClimbingTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadInForestTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_squad_in_forest"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_StatusBars/UIP_BattleView_Squad_Compact(Clone)/id_SquadTypeIcon/id_Forest"
+	}
+	caption = "{BattleViewSquadAmongTreesTutorialHotspot.tooltip.caption}"
+	body = "{BattleViewSquadAmongTreesTutorialHotspot.tooltip.text}"
+}
+
+def BattleViewSquadRetreatingTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_retreat"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_RetreatIcon"
+	}
+	caption = "Retreating Squad"
+	body = "One of your squads is retreating! Units can't be controlled while retreating, but will return to the fray of battle after some time passes."
+}
+
+def BattleViewSquadFleeingTutorialMessage : TutorialMessage
+{
+	tutorial_topic = "bv_flee"
+	def rules : ShowTopicWhileHotspotIsVisible
+	{
+		path_mask = "UIBattle/Canvas/id_BattleHud/id_ArmyWindowContainer/id_Container/*/id_Squads/UIP_BattleView_SquadFrame_Small(Clone)/id_FleeingIcon"
+	}
+	caption = "Fleeing Squad"
+	body = "One of your squads has fled from the battlefield! Alas, these troops will no longer fight for you."
+}

@@ -1,0 +1,50 @@
+def Morale
+{
+    float max_morale = 30
+    float temp_morale_per_minute = 0.5
+    float max_temp_morale_difference = 15
+    float diminishing_returns = 10 // multiplier of current temporary morale
+
+    /// REBEL MORALE
+    float rebel_leader_level_morale_mod = 1
+    float rebel_supporter_leader_level_morale_mod = 0.3
+    float rebel_leader_morale_per_supporter = 1
+    float rebel_leader_morale_per_lieutenant = 3
+    float rebel_supporter_morale_per_army = 1
+    float rebel_morale_per_occupied_province = 3
+    float rebel_famous_morale_leader = 3
+    float rebel_famous_morale_lieutenant = 3
+    float rebel_famous_morale = 3
+    /// CRUSADER MORALE
+    //float crusader_morale_in_enemy_province = -5
+
+    /// REBEL/CRUSADER MORALE
+    float morale_if_camping = 5
+    
+    /// PERMANENT 
+	float army_morale_loss_marshal_death = 5
+    float starvation_kingdom_morale_penalty = 3 // if kingdom is starving
+    //float starvation_army_morale_penalty = 5 // if army is starving
+	float morale_enemy_realm = [-5, -7, -10] // how much morale you lose in enemy territory at some distance
+
+    float morale_in_enemy_realm_near = -5 // neigboring to us
+    float morale_in_enemy_realm_mid = -7  // distance 2 to us (neighbor of neighbor)
+    float morale_in_enemy_realm_far = -10  // dist more than 2 
+    float morale_same_pop_majority = 5
+
+    float morale_per_enemy_keep = -2
+    float morale_per_friendly_keep = 2
+    /// TEMPORARY
+    float morale_on_battle_won_enemy = 2
+    float morale_on_battle_lost_enemy = -5
+    float morale_on_battle_won_neutral = 3
+    float morale_on_battle_lost_neutral = -3
+    float morale_on_battle_won_own_or_ally = 5
+    float morale_on_battle_lost_own_or_ally = -2
+    float morale_on_plunder_won = 3
+    float morale_on_plunder_lost = -3
+    float morale_on_battle_nearby_won = 3
+    float morale_on_battle_nearby_lost = -3
+    float morale_on_war_lost = -5
+    float morale_king_died = -3
+}

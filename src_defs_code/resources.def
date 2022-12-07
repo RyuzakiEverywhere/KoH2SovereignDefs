@@ -1,0 +1,1161 @@
+def Resource
+{
+	text name
+	text tooltip
+	sprite icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Placeholder.png:Icon_Resource_Placeholder#2" //GUID:3d5e963fb3b44544ba59e318c41a7af5
+	text category = "Base"
+	
+	float import_gold = 90000
+	float import_commerce = 190000 // overriden per resource
+	float import_commerce_mul = 5
+	float building_commerce_upkeep_mul = 0.5 // building upkeep if resource is missing = import_commerce * this
+	
+	import_upkeep
+	{
+		gold = (ceil( import_gold * (1.3 ^ (-relationship / 1000))))
+		commerce = (ceil(import_commerce * import_commerce_mul) + (distance-1) * 3) // * distance_weight
+	}
+	
+	availability_texts
+	{
+		text Available_1 = "We are currently producing {availability_color}{resource.name}{/availability_color} in {availability_castle_1}."
+		text Available_2 = "We are currently producing {availability_color}{resource.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text Available_3 = "We are currently producing {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text Available_many = "We are currently producing {availability_color}{resource.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text Available_all = "We are currently producing {availability_color}{resource.name}{/availability_color} in all of our our provinces."
+		
+		text DirectlyObtainable_1 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}."
+		text DirectlyObtainable_2 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text DirectlyObtainable_3 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text DirectlyObtainable_many = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text DirectlyObtainable_all = "We can produce {availability_color}{resource.name}{/availability_color} in all of our our provinces."
+		
+		text IndirectlyObtainable_1 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, but we need to develop other provinces first."
+		text IndirectlyObtainable_2 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to develop other provinces first."
+		text IndirectlyObtainable_3 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to develop other provinces first."
+		text IndirectlyObtainable_many = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to develop other provinces first."
+		text IndirectlyObtainable_all = "We can produce {availability_color}{resource.name}{/availability_color} in all of our our provinces, but we need to develop some provinces first."
+		
+		text Impossible_0 = "We cannot produce {availability_color}{resource.name}{/availability_color} in any of our provinces."
+		text Impossible_1 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, but we need to gain access to goods outside our kingdom first."
+		text Impossible_2 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}, but we need to gain access to goods outside our kingdom first."
+		text Impossible_3 = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}, but we need to gain access to goods outside our kingdom first."
+		text Impossible_many = "We can produce {availability_color}{resource.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others), but we need to gain access to goods outside our kingdom first."
+		text Impossible_all = "We can produce {availability_color}{resource.name}{/availability_color} in all of our our provinces, but we need to gain access to goods outside our kingdom first."
+	}
+}
+
+// -----------------   NEW NEW RESOURCES   -----------------
+def Ale : Resource
+{
+	name = "Ale"
+	tooltip = "A hearthy drink fit for noblemen and peasants alike."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Ale.png:Icon_Resource_Ale#2" //GUID:64a6fc20c81a2a746a5dcc2fb185cbe7
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+	
+	mod ks_happiness = 2
+	mod ks_commerce_goods = 5
+}
+
+def Amber : Resource
+{
+	name = "Amber"
+	tooltip = "Beautiful natural resin, turned into stone by time and weather. Valued as a gemstone."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Amber.png:Icon_Resource_Amber#2" //GUID:b2b24e83ba976cd459a17b56e522887e
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_base_trading_income = 1
+}
+
+def Barrels : Resource
+{
+	name = "Barrels"
+	tooltip = "Used for storing a variety of products - from local storage to grains and ale to distant trade of salt and other precious goods."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Barrels.png:Icon_Resource_Barrels#2" //GUID:7c8a2ce61c791d947b020023ed84b52f
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+	ai_eval = (kingdom.Barracks and 5)
+
+	mod ks_max_food_in_towns = 50
+	mod ks_resupply_price_gold_reduction_perc  = 10
+}
+
+def Candles : Resource
+{
+	name = "Candles"
+	tooltip = "An important source of light for all households, additionally needed by the clergy and scholars."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Candles.png:Icon_Resource_Candles#2" //GUID:488cc7a17ff14be4c9e067195ddd1048
+	category = "Base"
+	import_commerce = 90000
+	import_gold = 90000
+
+	mod ks_prod_books_goods = 3
+	mod ks_culture_from_goods = 10
+}
+
+def Cannons : Resource
+{
+	name = "Cannons"
+	tooltip = "Heavy large artillery guns, capable if firing heavy projectile over a long distance, powerful in sieges and naval warfare."
+	category = "Base"
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Cannons.png:Icon_Resource_Cannons#2" //GUID:a7fd2fedd03a4934e861533b507c4d0f
+	import_commerce = 90000
+	import_gold = 90000
+
+	mod ks_naval_CTH = 10
+	mod ks_attrition_bonus = 20
+	mod ks_base_siege_damage_perc = 30
+}
+
+def Canvas : Resource
+{
+	name = "Canvas"
+	tooltip = "Strong fabrics made from thickly woven hemp, often used as bases for displaying maps and paintings."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Canvas.png:Icon_Resource_Canvas#2" //GUID:32aa6945ab9f82943a69916b210d7d69
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_commerce_goods = 2
+	mod ks_culture_from_goods = 15
+}
+
+def Carpets : Resource
+{
+	name = "Carpets"
+	tooltip = "The mastership going into creating these floor coverings is as undeniable, as their beauty."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Carpets.png:Icon_Resource_Carpets#2" //GUID:01b1c6a4263850546aae0a306b032a5f
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_base_trading_income = 1
+	mod ks_culture_from_goods = 10
+}
+
+def Charcoal : Resource
+{
+	name = "Charcoal"
+	tooltip = "A basic product used mainly used as fuel for burning when high temperatures are required."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Charcoal.png:Icon_Resource_Charcoal#2" //GUID:b2f235f7fbe1d6041acb07a2dda18d90
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+	ai_eval = (kingdom.Barracks and kingdom.IronOre and 10) // needed for Iron
+
+	mod ks_gold_from_goods = 5
+	mod ks_hammers_in_provinces_perc = 10
+}
+
+def Compasses : Resource
+{
+	name = "Compasses"
+	tooltip = "A magnetic device, invaluable for navigation and orientation, especially on sea."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Compasses.png:Icon_Resource_Compasses#2" //GUID:37cf37c7f8561634fbf37c993adcc4c1
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_trade_income_perc = 2
+	mod ks_chance_for_expedition_perc = 5
+	mod ks_ships_speed_perc = 10
+}
+
+def DraftOxen : Resource
+{
+	name = "Draft oxen"
+	tooltip = "Carefully selected and bred bovines, trained as draft animals."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_DraftOxen.png:Icon_Resource_DraftOxen#2" //GUID:b4e0b7245be627e46946c0e99b79f926
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+
+	mod ks_hammers_in_provinces_perc = 10
+	mod ks_food_in_farms = 1
+}
+
+def Dyes : Resource
+{
+	name = "Dyes"
+	tooltip = "A substance used to bring color to canvas and textiles alike."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Dyes.png:Icon_Resource_Dyes#2" //GUID:3f2f07b7a86153c4c90a27a9f26057f5
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_happiness = 2
+	mod ks_gold_from_goods = 5
+}
+
+def FineArt : Resource
+{
+	name = "Fine Art"
+	tooltip = "Paintings, poems, music, architecture - art is the food for the souls and minds of the population."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Art.png:Icon_Resource_Art#2" //GUID:27f7c195d80c475408b4f0b6fa1d1604
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_culture_from_goods = 10
+	mod ks_influence_from_goods = 20
+}
+
+def FineBoots : Resource
+{
+	name = "Fine boots"
+	tooltip = "Exquisite footwear made of only the finest materials."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_FineBoots.png:Icon_Resource_FineBoots#2" //GUID:9814258550f72084d8460d8997f46440
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+
+	mod ks_gold_from_goods = 5
+	mod ks_army_speed_world_perc = 5
+}
+
+def FineCheese : Resource
+{
+	name = "Fine Cheese"
+	tooltip = "Exquisite dairy products made from cow's milk. Due to their more durable nature, they are also a treasured trade good."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_FineCheese.png:Icon_Resource_FineCheese#2" //GUID:64735603841200b4a9922dfc0a6bf17b
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_happiness = 2
+	mod ks_commerce_goods = 3
+}
+
+def FineClothing : Resource
+{
+	name = "Fine Clothing"
+	tooltip = "Made by the most highly skilled Tailors, from the highest quality materials."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_FineClothing.png:Icon_Resource_FineClothing#2" //GUID:6e5fdca2920801f4cb525c0942bfd137
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_base_trading_income = 1
+	mod ks_gold_from_goods = 5
+}
+
+def Furniture : Resource
+{
+	name = "Furniture"
+	tooltip = "All kinds of wooden articles for basic household needs and facilities like hospitals and libraries."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Furniture.png:Icon_Resource_Furniture#2" //GUID:ca4f870d29753504b89dfe18708120c9
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+
+	mod ks_happiness = 2
+	mod ks_commerce_goods = 3
+}
+
+def Furs : Resource
+{
+	name = "Furs"
+	tooltip = "Prized possessions of any hunter who deals with finding and killing rare game. Aside from warmth, some furs can provide surprising amounts of wealth and stature to their owners."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Furs.png:Icon_Resource_Furs#2" //GUID:26414e1670376e34ea2a5d9911a02a52
+	category = "Base"
+	import_commerce = 15
+	import_gold = 10
+
+	mod ks_base_trading_income = 1
+}
+
+def Glass : Resource
+{
+	name = "Glass"
+	tooltip = "Made primarily of wood ash and sand, forest glass is used mainly for everyday vessels, but also for stained glass windows and decorative glassworks."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Glass.png:Icon_Resource_Glass#2" //GUID:b640ccbad4caf944b805bb1b53e376d2
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+
+	mod ks_commerce_goods = 5
+	mod ks_gold_from_goods = 5
+}
+
+def Gold : Resource
+{
+	name = "Gold ingots"
+	tooltip = "A precious metal, refined and ready to be used in jewellery, finery and every facet of the economy."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Gold.png:Icon_Resource_Gold#2" //GUID:6426f4993554eff4d802c5ce5caa6547
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_base_trading_income = 1
+	mod ks_gold_from_goods = 8
+}
+
+def Gunpowder : Resource
+{
+	name = "Gunpowder"
+	tooltip = "An explosive mixture of saltpeter, sulfur and carbon, initially used for cannons and other heavy artillery guns."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Gunpowder.png:Icon_Resource_Gunpowder#2" //GUID:453fd23940ba6fb41aee0c472f0479af
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_base_siege_damage_perc = 20
+}
+
+def Herbs : Resource
+{
+	name = "Herbs"
+	tooltip = "The dried leaves and pettles of many wild and domestic plants can be used for healing and well being."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Herbs.png:Icon_Resource_Herbs#2" //GUID:befab961bb1cbee4192175bd946b7f2d
+	category = "Base"
+	import_commerce = 5
+	import_gold = 20
+
+	mod ks_commerce_goods = 2
+	mod ks_population_growth_perc = 5
+}
+
+def IllustratedBooks : Resource
+{
+	name = "Illustrated books"
+	tooltip = "It takes years to turn a simple batch of parchments into selection of illuminated texts, inhoused in beautiful leather covers."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_IllustratedBooks.png:Icon_Resource_IllustratedBooks#2" //GUID:bb97198f930762c478e530a83d11cae3
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_prod_books_goods = 3
+	mod ks_culture_from_goods = 10
+}
+
+def Ink : Resource
+{
+	name = "Ink"
+	tooltip = "A scribe's finest weapon. This colored liquid has varying uses, from writing mundane paperwork to signing treaties and sealing the fates of entire nations."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Ink.png:Icon_Resource_Ink#2" //GUID:0e664fc5a4cb2f84f8ca7c8ec61fbb84
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_prod_books_goods = 3
+	mod ks_trade_income_perc = 2
+}
+
+def Iron : Resource
+{
+	name = "Iron"
+	tooltip = "Refined from pig iron and ready for smithing, this is the most common and suitable metal to be used in the creation of various tools, weapons, building materials, mechanical parts and others."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Iron.png:Icon_Resource_Iron#2" //GUID:0a0460d303f41f84da8cdf079a19d7ef
+	category = "Base"
+	import_commerce = 8000
+	import_gold = 90000
+	ai_eval = (kingdom.Barracks and 10)
+
+	mod ks_heavy_unit_defense_flat = 20
+	mod ks_siege_equipment_cth_perc = 30
+	mod ks_siege_equipment_health_perc = 30
+	mod ks_siege_equipment_siege_damage_perc = 30
+
+}
+
+def Jewellery : Resource
+{
+	name = "Jewellery"
+	tooltip = "Masterfully crafted from precious materials and gemstones. Symbol of status, power and beauty."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Jewellery.png:Icon_Resource_Jewellery#2" //GUID:37d5850f0b9cad043949ef94f797ca49
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_happiness = 2
+	mod ks_base_trading_income = 1
+}
+
+def Leather : Resource
+{
+	name = "Leather"
+	tooltip = "The animal skin can be turned into a sturdy material, used for shoemaking and armor crafting."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Leather.png:Icon_Resource_Leather#2" //GUID:8f8fa7f456a0a5940aeeda2e8de3fc34
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+	ai_eval = (kingdom.Barracks and 5)
+
+	mod ks_defense_flat = 10
+}
+
+def Lime : Resource
+{
+	name = "Lime"
+	tooltip = "Limestone is a sedimentary rock, which is widely used in architecture, road building and sculpturing as well, since it is easy to work and good for fine detail. Limewater is also used in leatherworking."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Lime.png:Icon_Resource_Lime#2" //GUID:b78144b9cf98f1a459cc26f1faa959c4+
+	category = "Base"
+	import_commerce = 25
+	import_gold = 90000
+	ai_eval = (kingdom.Barracks and (kingdom.SheepFarm or kingdom.CattleFarm) and 5) // needed for Leather
+
+	mod ks_elite_unit_defense_flat = 10
+}
+
+def Linen : Resource
+{
+	name = "Linen"
+	tooltip = "Linen is strong and absorbent textile made from flax and due to its good properties, it is very suitable for the making of comfortable clothing."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Linen.png:Icon_Resource_Linen#2" //GUID:1949efd636e7e714cafd1c98c7a28a45
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+
+	mod ks_commerce_goods = 3
+	mod ks_gold_from_goods = 3
+}
+
+def Lodestone : Resource
+{
+	name = "Lodestone"
+	tooltip = "Naturally magnetized piece of mineral, used for creation of magnetic compasses."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Lodestone.png:Icon_Resource_Lodestone#2" //GUID:d24746dc94650ac45849f7f0304dfe33
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_commerce_goods = 5
+}
+
+def NavigationMaps : Resource
+{
+	name = "Maps"
+	tooltip = "The  visual representation of the known world. Used for navigating the lands and seas by travellers rich and poor."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_NavigationMaps.png:Icon_Resource_NavigationMaps#2" //GUID:4f9d561c0940c80418b8685c73dfb5fa
+	category = "Base"
+	import_commerce = 5
+	import_gold = 90000
+
+	mod ks_trade_income_perc = 2
+	mod ks_chance_for_expedition_perc = 5
+	mod ks_ships_speed_perc = 10
+}
+
+def Marble : Resource
+{
+	name = "Marble"
+	tooltip = "Stonemasons can turn this ordinarily looking rock into architectural marvel. It is also popular to use among artist for sculptures and frescoes."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Marble.png:Icon_Resource_Marble#2" //GUID:2acdbf1baf0cbbe478ed971233221841
+	category = "Base"
+	import_commerce = 25
+	import_gold = 90000
+
+	mod ks_culture_from_goods = 10
+	mod ks_build_upgrade_cost_discount_perc = 2
+}
+
+def Meat : Resource
+{
+	name = "Meat"
+	tooltip = "Important part of the people's diet, rich on protein and amino acids."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Meat.png:Icon_Resource_Meat#2" //GUID:0a3b0832b2a4af44ab5b916ef6c6b913
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+
+	mod ks_gold_from_goods = 2
+	mod ks_population_growth_perc = 5
+}
+
+def Medicine : Resource
+{
+	name = "Medicine"
+	tooltip = "Substance that can heal sickness and pain. It can even make wound recovery faster."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Medicine.png:Icon_Resource_Medicine#2" //GUID:f8521b56d841c614089082688b4bbd5e
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_population_growth_perc = 10
+	mod ks_army_refill_cost_perc = -20
+}
+
+def Minerals : Resource
+{
+	name = "Minerals"
+	tooltip = "Gathered from rocks, minerals are usually added as a coloring component in the creation of materials, such as dyes and glass."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Minerals.png:Icon_Resource_Minerals#2" //GUID:93d4e754f96352341a66ecbb47352646
+	category = "Base"
+	import_commerce = 15
+	import_gold = 90000
+
+	mod ks_commerce_goods = 3
+	mod ks_gold_from_goods = 3
+}
+
+def Oils : Resource
+{
+	name = "Oils"
+	tooltip = "Extracted by flaxseed and commonly used as food, oils are necessary for the work of many craftsmen and even artists. Oil is also important for mechanisms and improves the effect of blade sharpening."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Oils.png:Icon_Resource_Oils#2" //GUID:a1e7efb0ce62d6a409750ef2f6677604
+	category = "Base"
+	import_commerce = 15
+	import_gold = 25
+
+	mod ks_melee_CTH_perc = 5
+	mod ks_siege_equipment_cth_perc = 30
+	mod ks_siege_equipment_siege_damage_perc = 30
+}
+
+def Parchment : Resource
+{
+	name = "Parchment"
+	tooltip = "Blank canvases, made from untanned animal skins, that are used as surface to write and draw on."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Parchment.png:Icon_Resource_Parchment#2" //GUID:ca0320c9bfceb4747941ede29ac5012f
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_prod_books_goods = 3
+	mod ks_influence_from_goods = 25
+}
+
+def Pastries : Resource
+{
+	name = "Pastries"
+	tooltip = "Various delicious baked goods made from delicate dough."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Pastries.png:Icon_Resource_Pastries#2" //GUID:886d69992bbae9c4fbd09442574bb058
+	category = "Base"
+	import_commerce = 10
+	import_gold = 90000
+
+	mod ks_happiness = 2
+	mod ks_gold_from_goods = 5
+}
+
+def Raisins : Resource
+{
+	name = "Raisins"
+	tooltip = "Delicious and sweet dried grape, used in cooking, baking and brewing."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Raisins.png:Icon_Resource_Raisins#2" //GUID:1c0957756b117184f829ecbb02b9222a
+	category = "Base"
+	import_commerce = 10
+	import_gold = 20
+
+	mod ks_commerce_goods = 3
+	mod ks_gold_from_goods = 3
+}
+
+def Ropes : Resource
+{
+	name = "Ropes"
+	tooltip = "Strong linen fibers, twisted together in ropewalks. Ropes are a necessity in constructions, sailing, mechanisms and in everyday's work of the people. Finer ropes and bowstrings are important for archers and siege machinery."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Ropes.png:Icon_Resource_Ropes#2" //GUID:e655128897349dd41adee955169e23af
+	category = "Base"
+	import_commerce = 20
+	import_gold = 90000
+
+	mod ks_ranged_CTH_perc = 15
+	mod ks_siege_equipment_cth_perc = 30
+	mod ks_siege_equipment_siege_damage_perc = 30
+}
+
+def Sails : Resource
+{
+	name = "Sails"
+	tooltip = "A fleet with sturdy sails can truly harness the power of wind and dominate the seas"
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sails.png:Icon_Resource_Sails#2" //GUID:ccd32c51a2f29c94cba82a695bf00888
+	category = "Base"
+	import_commerce = 15
+	import_gold = 40
+
+	mod ks_ships_speed_perc = 15
+	mod ks_naval_CTH = 10
+}
+
+def Salt : Resource
+{
+	name = "Salt"
+	tooltip = "Harvested from both sea and land, this substance is used for food flavoring, enrichment and preservation."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Salt.png:Icon_Resource_Salt#2" //GUID:f8fa2cdb054b4b94c8808231aac5ebb6
+	category = "Base"
+	import_commerce = 15
+	import_gold = 35
+
+	mod ks_base_trading_income = 1
+	mod ks_max_food_in_towns = 30
+}
+
+def SaltedFish : Resource
+{
+	name = "Salted fish"
+	tooltip = "Healthy and delicious sea food, well salted for longer preservation."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_SaltedFish.png:Icon_Resource_SaltedFish#2" //GUID:c400c891cdf979a47836a31f28cc00f7
+	category = "Base"
+	import_commerce = 15
+	import_gold = 20
+
+	mod ks_commerce_goods = 3
+	mod ks_resupply_price_gold_reduction_perc = 5
+}
+
+def Saltpeter : Resource
+{
+	name = "Saltpeter"
+	tooltip = "Purified potassium nitrate, useful as an ingredient for salted meat, food preservation and production of gunpowder."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Saltpeter.png:Icon_Resource_Saltpeter#2" //GUID:a0e9dc8a68a738d4794463a479f06675
+	category = "Base"
+	import_commerce = 15
+	import_gold = 15
+
+	mod ks_max_food_in_towns = 20
+	mod ks_base_siege_damage_perc = 5
+}
+
+def Sausages : Resource
+{
+	name = "Sausages"
+	tooltip = "A delicacy made from mixed meat, salt and spices, encased in an intestine."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sausages.png:Icon_Resource_Sausages#2" //GUID:82b2c765aa4b67741a946ad8a7e663e5
+	category = "Base"
+	import_commerce = 10
+	import_gold = 40
+
+	mod ks_happiness = 2
+	mod ks_resupply_price_gold_reduction_perc  = 5
+}
+
+def Sculptures : Resource
+{
+	name = "Sculptures"
+	tooltip = "The hands of a master craftsman can turn any stone into beautiful figures, that are pleasant for the eye and preserve the history and culture of the time for all ages to come."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+	category = "Base"
+	import_commerce = 20
+	import_gold = 60
+
+	mod ks_happiness = 2
+	mod ks_culture_from_goods = 20
+}
+
+def Silver : Resource
+{
+	name = "Silver Ingots"
+	tooltip = "A soft, white, lustrous metal, mined from the earth and refined to be used by jewellers and various artisans."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Silver.png:Icon_Resource_Silver#2" //GUID:0cbde2f62d5b01d429601a103c5ba7f2
+	category = "Base"
+	import_commerce = 10
+	import_gold = 50
+
+	mod ks_base_trading_income = 1
+	mod ks_gold_from_goods = 5
+}
+
+def Spices : Resource
+{
+	name = "Spices"
+	tooltip = "Various seeds, fruits, roots, barks and even whole plants, used for flavoring food."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Spices.png:Icon_Resource_Spices#2" //GUID:ac7c4e567358c524a815f00b274fa6cd
+	category = "Base"
+	import_commerce = 10
+	import_gold = 30
+
+	mod ks_base_trading_income = 1
+	mod ks_gold_from_goods = 3
+}
+
+def Spirits : Resource
+{
+	name = "Spirits"
+	tooltip = "Made from fermented and then distilled fruits, this substance have medicinal application and lifts the spirits as well."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Spirits.png:Icon_Resource_Spirits#2" //GUID:cb4fa163273cd92469dd12383d4594d4
+	category = "Base"
+	import_commerce = 10
+	import_gold = 35
+
+	mod ks_gold_from_goods = 3
+	mod ks_population_growth_perc = 5
+}
+
+def Sulfur : Resource
+{
+	name = "Sulfur"
+	tooltip = "This yellow rock is known for fumigation, medicine and most importantly for creation of black powder."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sulfur.png:Icon_Resource_Sulfur#2" //GUID:ada3bdad760ea5d4ab8b581c8b3e31a1
+	category = "Base"
+	import_commerce = 15
+	import_gold = 30
+
+	mod ks_population_growth_perc = 15
+	mod ks_base_siege_damage_perc = 15
+}
+
+def Tar : Resource
+{
+	name = "Tar"
+	tooltip = "This dark-colored viscous liquid is an important resource for making ropes, shipbuilding and ship maintenance."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Tar.png:Icon_Resource_Tar#2" //GUID:4f4c83bcdf68d9d40bbb52b871852662
+	category = "Base"
+	import_commerce = 20
+	import_gold = 20
+
+	mod ks_chance_for_expedition_perc = 5
+	mod ks_siege_equipment_cth_perc = 10
+	mod ks_siege_equipment_health_perc = 20
+	mod ks_siege_equipment_siege_damage_perc = 10
+}
+
+def Timber : Resource
+{
+	name = "Timber"
+	tooltip = "Processed wooden chunks, essencial for buildings and carpentry."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Timber.png:Icon_Resource_Timber#2" //GUID:779217316bdfd2b4b895caa1e64c090d
+	category = "Base"
+	import_commerce = 20
+	import_gold = 10
+
+	mod ks_hammers_in_provinces_perc = 10
+	mod ks_siege_equipment_discount_perc = 20
+}
+
+def TrainedCamels : Resource
+{
+	name = "Trained Camels"
+	tooltip = "Resistent to heat and long marches, these mounts have one additional trait - their smell scares horses."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_TrainedCamels.png:Icon_Resource_TrainedCamels#2" //GUID:aefb4a8765e83114aa0d52693221b2f9
+	category = "Base"
+	import_commerce = 20
+	import_gold = 30
+	ai_eval = (kingdom.Barracks and 10)
+
+	mod ks_camels_discount_perc = 25
+	mod ks_camels_resilience = 10
+	mod ks_camels_CTH_perc = 15
+	
+}
+
+def TrainedHorses : Resource
+{
+	name = "Trained Horses"
+	tooltip = "Powerful horses, bred and trained for military purposes, needed for creating cavalry units."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_TrainedHorses.png:Icon_Resource_TrainedHorses#2" //GUID:becbcda0c756e8542aab6ccbb359701e
+	category = "Base"
+	import_commerce = 20
+	import_gold = 40
+	ai_eval = (kingdom.Barracks and 10)
+
+	mod ks_horse_cavalry_discount_perc = 25
+	mod ks_horse_cavalry_resilience = 10
+	mod ks_horse_cavalry_CTH_perc = 15
+}
+
+def WarHorses : Resource
+{
+	name = "War Horses"
+	tooltip = "The strongest, fastest and most disciplined of horses. They are bred and trained specifically for use in warfare, in order to attack enemies and not to get scared in the heart of the battle."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_WarHorses.png:Icon_Resource_WarHorses#2" //GUID:c8a95bd4d67f09c46a6d498ab0936851
+	category = "Base"
+	import_commerce = 25
+	import_gold = 80
+
+	mod ks_heavy_cavalry_CTH_perc = 15
+	mod ks_heavy_cavalry_trample_chance_perc = 20
+}
+
+def Wax : Resource
+{
+	name = "Wax"
+	tooltip = "Produced by the hardworking bees, this substance has application in households, candlemaking and for waxing blades to prevent rusting."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Wax.png:Icon_Resource_Wax#1" //GUID:f62d90e7ada07fd4eb709e65a292a7f4
+	category = "Base"
+	import_commerce = 15
+	import_gold = 30
+
+	mod ks_commerce_goods = 3
+	mod ks_melee_CTH_perc = 10
+}
+
+def Wine : Resource
+{
+	name = "Wine"
+	tooltip = "This sophisticated drink is made by fermented grapes and is favored by both the nobility and the common folk."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Wine.png:Icon_Resource_Wine#2" //GUID:3a80b68d4927bc44182450fa7a3c2618
+	category = "Base"
+	import_commerce = 15
+	import_gold = 20
+
+	mod ks_commerce_goods = 3
+	mod ks_gold_from_goods = 3
+}
+
+def Wool : Resource
+{
+	name = "Wool"
+	tooltip = "Obtained from the wooly coats of sheep, this material is spinned into textiles and yarn."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Wool.png:Icon_Resource_Wool#2" //GUID:035ec987dd1b7354da33ce9dbf4c8c9a
+	category = "Base"
+	import_commerce = 15
+	import_gold = 15
+
+	mod ks_happiness = 2
+	mod ks_base_trading_income = 1
+}
+// def Hemp : Resource
+// {
+// 	name = "Hemp"
+// 	tooltip = "A fast growing plant which fibers can be spun into assortsment of materials.{p}It's used in textiles, clothing and even for shipbuilding needs."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Hemp.png:Icon_Resource_Hemp#2" //GUID:1fc7a1effb0d57a4495be212f5166d64
+// 	category = "Base"
+// }
+
+
+
+//-----------------   EXOTIC RESOURCES   -----------------
+
+
+// def Ebony : Resource
+// {
+// 	name = "Ebony"
+// 	tooltip = "The common name for the dense black wood, harvested from a few different kinds of trees. It's highly valued by nobility and artisans for it's beautiful coloration and texture, perfect for creating fine furnuture and ornaments."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Ebony.png:Icon_Resource_Ebony#2" //GUID:4e3d5fe081c6d8f419d39c528f7cd36e
+// 	category = "Exotic"
+// }
+
+// def Gems : Resource
+// {
+// 	name = "Gems"
+// 	tooltip = "Precious stones used in jewelry making."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Gems.png:Icon_Resource_Gems#2" //GUID:0730a571a23d119498c1ee4b33bc5b35
+// 	category = "Exotic"
+// }
+
+// def Ivory : Resource
+// {
+// 	name = "Ivory"
+// 	tooltip = "Beautiful crafstmanship material, made from the tusks of elephants."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Ivory.png:Icon_Resource_Ivory#2" //GUID:97c5062b01d35d64aa1d32c503f4c711
+// 	category = "Exotic"
+// }
+
+// def Silk : Resource
+// {
+// 	name = "Silk"
+// 	tooltip = "This beautiful and high valued fabric is created from the fiber, produced by certain insect larvae. This origin story is almost as fascinating as the impact this fabric had on trade."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Silk.png:Icon_Resource_Silk#2" //GUID:8481cd6a5a0735547824bad39645b96d
+// 	category = "Exotic"
+// }
+
+//-----------------   HUMAN RESOURCES   -----------------
+
+def Artists : Resource
+{
+	name = "Artists"
+	tooltip = "The creators of paintings, literature, music and everything concidered art."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Artists.png:Icon_Resource_Artists#2" //GUID:850b385754fc8ad4481b7c62c1f7c470
+	category = "Society"
+
+	mod ks_culture_from_goods = 20
+	mod ks_gold_from_goods = 5
+}
+
+// def Bourgeoisie : Resource
+// {
+// 	name = "Bourgeoisie"
+// 	tooltip = "The people belonging to the middle and upper middle class of society."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Bourgeoisie.png:Icon_Resource_Bourgeoisie#2" //GUID:e52d02f103165934f90b4b9932fbdeb2
+// 	category = "Society"
+// }
+
+def Clergy : Resource
+{
+	name = "Clergy"
+	tooltip = "The religious leaders of the communities and societies around the world."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Clergy.png:Icon_Resource_Clergy#2" //GUID:f2136f7a25768df49a7ae33b1f94cf30
+	category = "Society"
+
+	mod ks_culture_from_goods = 20
+	mod ks_influence_from_goods = 20
+}
+
+// def Craftsmen : Resource
+// {
+// 	name = "Craftsmen"
+// 	tooltip = "Masterful artisans that craft functional or decorative items, used by rich and poor alike."
+// 	category = "Society"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Craftsmen.png:Icon_Resource_Craftsmen#2" //GUID:dea868d77c57ae7469a78824446b9d2b
+// }
+
+def Explorers : Resource
+{
+	name = "Explorers"
+	tooltip = "Brave captains and seamen, ready to risk their lives and travel to distant shores for the prosperity of their kingdoms."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Explorers.png:Icon_Resource_Explorers#2" //GUID:fd8fcc2b27099144da094744d1aa8c52
+	category = "Society"
+
+	mod ks_chance_for_expedition_perc = 10
+	mod ks_ships_speed_perc = 15
+}
+
+// def Hunters : Resource
+// {
+// 	name = "Hunters"
+// 	tooltip = "Often times part of the higher echelons of society, hunters partake in hunting wild animals - more often for sport rather than food.{p}{p}Emerging in: {clr:building_color}{b}Royal Forest{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Society{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Hunters.png:Icon_Resource_Hunters#2" //GUID:b8a671d301d32604996e3d1ef77213c0
+// 	category = "Society"
+// }
+
+def Masons : Resource
+{
+	name = "Masons"
+	tooltip = "The builders of cities and villages. They are working hard on creating everything from houses and bridges, to keeps and walls."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Masons.png:Icon_Resource_Masons#2" //GUID:8582fb3a01cfb564098c8694f8e161f7
+	category = "Society"
+
+	mod ks_hammers_in_provinces_perc = 20
+	mod ks_build_upgrade_cost_discount_perc = 5
+}
+
+def Merchants : Resource
+{
+	name = "Traders"
+	tooltip = "Those businessmen have been using their skills in bargain and finance for as long as commerce and trade have existed."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Merchants.png:Icon_Resource_Merchants#2" //GUID:da237cf62b65a6c4e98c817ec13c1ad5
+	category = "Society"
+
+	mod ks_trade_per_coastal_realm = 3
+	mod ks_trade_income_perc = 90000
+}
+
+def Noblemen : Resource
+{
+	name = "Noblemen"
+	tooltip = "The members of the highest class in society. The truly rich and powerful."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Noblemen.png:Icon_Resource_Noblemen#2" //GUID:5c4e6084557c374419567247eda2df38
+	category = "Society"
+
+	mod ks_influence_from_goods = 35
+	mod ks_CA_cost_perc = -10
+}
+
+// def Pirates : Resource
+// {
+// 	name = "Pirates"
+// 	tooltip = "The bane of the seas, they rob and sometimes even steal or destroy sea-faring vessels. Have high affinity to rum."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Pirates.png:Icon_Resource_Pirates#2" //GUID:6daa6d25661381a438f02c822eeba665
+// 	category = "Society"
+// }
+
+// def Sailors : Resource
+// {
+// 	name = "Sailors"
+// 	tooltip = "Professionals in sea-faring. As part of a ship crew, they are expected to be skilled in a lot of things - from rubbing the deck, to active combat.{p}{p}Emerging in: {clr:building_color}{b}Royal Fleet{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Conquest{/clr}{/b}, {b}{clr:idea_color}Politics{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sailors.png:Icon_Resource_Sailors#2" //GUID:ac09ff116b960e3488d7011974f7681e
+// 	category = "Society"
+// }
+
+def Scholars : Resource
+{
+	name = "Scholars"
+	tooltip = "They are not only the most learned people in a society, but also the ones who preserve, discover and teach learnings of various types."
+	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Scholars.png:Icon_Resource_Scholars#2" //GUID:5f58b37cb4491b74b903719bb0c02a66
+	category = "Society"
+
+	mod ks_prod_books_goods = 5
+	mod ks_learn_upgrade_skill_tradition_discount_perc = 10
+}
+
+// def Scum : Resource
+// {
+// 	name = "Scum"
+// 	tooltip = "The lowest of the low. The poorest of the poor. And most of the time - the most violent and dangerous people, walking the streets.{p}{p}Emerging in: {clr:building_color}{b}Dungeon{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Culture{/clr}{/b}, {b}{clr:idea_color}Conquest{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Scum.png:Icon_Resource_Scum#1" //GUID:f1fb36979cfd3734e888e5d9f77e1747
+// 	category = "Society"
+// }
+
+// def Slaves : Resource
+// {
+// 	name = "Slaves"
+// 	tooltip = "People without property or rights, often used for agricultural and artisanal labor, but military service as well."
+// 	category = "Society"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Slaves.png:Icon_Resource_Slaves#2" //GUID:d0a370e0e9655f14990dc2b5fc34225b
+// }
+
+// def Sufi : Resource //!!! temporary removed until we can support religious checks again
+// {
+// 	name = "Sufi"
+// 	tooltip = "The masters of islamic mysticism and those who teach the doctrines, values and practices to the muslim communities.{p}{p}Emerging in: {clr:building_color}{b}Sufi Lodge{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Culture{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+// 	category = "Society"
+// }
+
+
+
+//----------------- UNUSED RESOURCES (OLD!) -----------------
+
+// def Exotics : Resource
+// {
+// 	name = "Exotics"
+// 	tooltip = "Rare goods with significant trade potential, brought from distand lands over the seas."
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Exotics.png:Icon_Resource_Exotics#2" //GUID:bff289078895ac647a0f0ce382ad4f6f
+// 	category = "Base"
+// }
+
+// def BasRelief : Resource
+// {
+// 	name = "Bas-relief"
+// 	tooltip = "Bas-relief description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_BasRelief.png:Icon_Resource_BasRelief#2" //GUID:3dc54fbd0820c7243a4e6d753fbeaff2
+// }
+
+// def Cloth : Resource
+// {
+// 	name = "Cloth"
+// 	tooltip = "Woven fabrics made from hemp providing fine clothing.{p}{p}Produced in: {clr:building_color}{b}Weaver{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Politics{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Cloth.png:Icon_Resource_Cloth#2" //GUID:fa45d5589b2120c4bb635ea81353cbd2
+// 	category = "Base"
+// }
+
+// def Clothes : Resource
+// {
+// 	name = "Clothes"
+// 	tooltip = "Clothes description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Cloth.png:Icon_Resource_Cloth#2" //GUID:fa45d5589b2120c4bb635ea81353cbd2
+// }
+
+// def Columns : Resource
+// {
+// 	name = "Columns"
+// 	tooltip = "Columns description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Columns.png:Icon_Resource_Columns#2" //GUID:52af0eb23e8c98d45bec93a35dfc602e
+// }
+
+// def Cordage : Resource
+// {
+// 	name = "Cordage"
+// 	tooltip = "Rigging for ships. Allows for faster and more efficient seafaring.{p}{p}Produced in: {clr:building_color}{b}Rigging Workshop{/clr}{/b}{p}Required for advancements in: {b}{clr:idea_color}Conquest{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Cordage.png:Icon_Resource_Cordage#2" //GUID:3e8568dc2a7e3a745b497b569d18e29c
+// 	category = "Base"
+// }
+
+// def CrudePelts : Resource
+// {
+// 	name = "Crude Pelts"
+// 	tooltip = "Valuable pelts procured by skinning rare game.{p}{p}Produced in: {clr:building_color}{b}Hunters Lodge{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_CrudePelts.png:Icon_Resource_CrudePelts#2" //GUID:ad8d8a7334576f6428be1f81146f9777
+// 	category = "Base"
+// }
+
+// def GameMeat : Resource
+// {
+// 	name = "Game meat"
+// 	tooltip = "Game meat description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+// }
+
+// def Manuscripts : Resource
+// {
+// 	name = "Manuscripts"
+// 	tooltip = "Manuscripts description"	
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Manuscripts.png:Icon_Resource_Manuscripts#2" //GUID:fdeb555d653bcb6428496c6575fdebe6
+// }
+
+// def NavigationTools : Resource
+// {
+// 	name = "Navigation Tools"
+// 	tooltip = "Navigation Tools description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_NavigationTools.png:Icon_Resource_NavigationTools#2" //GUID:52201fdbcf9e5944587c1b56ea314f9b
+// }
+
+// def OliveOil : Resource
+// {
+// 	name = "Olive oil"
+// 	tooltip = "Olive oil description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_OliveOil.png:Icon_Resource_OliveOil#2" //GUID:38db0f65086e2fe44be9b085d677b032
+// }
+
+// def Paintings : Resource
+// {
+// 	name = "Paintings"
+// 	tooltip = "Paintings description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Paintings.png:Icon_Resource_Paintings#2" //GUID:c48254b6d20462b419f5ca91d04a8431
+// }
+
+// def Paper : Resource
+// {
+// 	name = "Paper"
+// 	tooltip = "Paper description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+// }
+
+// def Pickles : Resource
+// {
+// 	name = "Pickles"
+// 	tooltip = "Nice juicy pickles, providing vitamines during the winter.{p}{p}Produced in: {clr:building_color}{b}Pickler{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Pickles.png:Icon_Resource_Pickles#2" //GUID:67bd99074347cb04282db50a159333c9
+// 	category = "Base"
+// }
+
+// def ScentedOils : Resource
+// {
+// 	name = "Scented oils"
+// 	tooltip = "Scented oil description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_ScentedOils.png:Icon_Resource_ScentedOils#2" //GUID:41fb966315b70bd4fb48da8bf1fc766c
+// }
+
+// def Silverware : Resource
+// {
+// 	name = "Silverware"
+// 	tooltip = "Silverware description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+// }
+
+// def Steel : Resource
+// {
+// 	name = "Steel"
+// 	tooltip = "War Horses description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Steel.png:Icon_Resource_Steel#2" //GUID:496fd5c78ec7cf247a76f37414c7d65a
+// }
+
+// def Tackling : Resource
+// {
+// 	name = "Tackling"
+// 	tooltip = "Tackling description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Takling.png:Icon_Resource_Takling#2" //GUID:9cb36d28bc31d4740a25254b880bfc94
+// }
+
+// def Textile : Resource
+// {
+// 	name = "Textile"
+// 	tooltip = "Since ancient times clothing and textiles have been on of the most important resources.{p}{p}Produced in: {clr:building_color}{b}Weaver{/clr}{/b}{p}Required for buildings: {b}{clr:building_color}Tailors Guild{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Linen.png:Icon_Resource_Linen#2" //GUID:a061b896e75e34847aef75a0f6b37374
+// 	category = "Base"
+// }
+
+// def Tools : Resource
+// {
+// 	name = "Tools"
+// 	tooltip = "Every craftsman needs tools to do his work. Especially those that dabble in machinery.{p}{p}Produced in: {clr:building_color}{b}Blacksmith{/clr}{/b}"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Tools.png:Icon_Resource_Tools#2" //GUID:57974619a2413284797fa4054b067ca6
+// 	category = "Base"
+// }
+
+// def Truffles : Resource
+// {
+// 	name = "Truffles"
+// 	tooltip = "Truffles description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Trufflels.png:Icon_Resource_Trufflels#2" //GUID:3027d064966e5ab4d925dd353ef3dc96
+// }
+
+// def WhaleMeat : Resource
+// {
+// 	name = "Whale meat"
+// 	tooltip = "Game meat description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Sculptures.png:Icon_Resource_Sculptures#2" //GUID:e1ba7ed15054d564288c8cf649a88615
+// }
+
+// def WhaleOil : Resource
+// {
+// 	name = "Whale oil"
+// 	tooltip = "Whale oil description"
+// 	icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_WhaleOil.png:Icon_Resource_WhaleOil#2" //GUID:f0c7e424e31570549bb6169d34b6424a
+// }

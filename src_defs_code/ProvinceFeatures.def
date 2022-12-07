@@ -1,0 +1,365 @@
+﻿// --------------- NEW FEATURES (TAGS) FROM HERE ----------------
+
+def ProvinceFeature
+{
+	text name
+	text flavor
+	text tooltip
+	sprite icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Placeholder.png:Icon_ProvinceFeature_Placeholder#2" //GUID:201793f3155365045ae78f05f8f89453
+	sprite icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Placeholder.png:Icon_ProvinceFeature_Placeholder#2" //GUID:201793f3155365045ae78f05f8f89453
+	
+	//distributuion - currentl unused
+	float area = [0, 0, 1, 1] // (east limit,y) bottom left, (x,y) top right for where it can spawn //size  3000, 2100
+	int min_distance_between = -1 //minimal distance to another province feature of the same type, in realms, "-1" is infinite distance (Not implemented too heavy)
+	
+	int spawn_chance = 10
+	// int max_per_settlement = 3 //!!! Redundant functionality related to Settlement's max_allowed_features_per_settlement_type'
+	
+	int place = [20, 40] // !!! how many to place on the map // alex note - only max to be obeyed; might be renamed to int max_in_world = 50
+	bool show_in_political_view = true //!!! probably obsolete, used in old trade centers
+	bool requre_costal = false
+	int max_PF_per_province = 8
+	
+	int max_special_PF_per_province = 3 // rework using fields below
+	
+	int sort_id = 1
+	bool special = false
+	bool show_in_castle = true;
+
+	availability_texts
+	{
+		text Available_1 = "We have {availability_color}{province_feature.name}{/availability_color} in {availability_castle_1}."
+		text Available_2 = "We have {availability_color}{province_feature.name}{/availability_color} in {availability_castle_1} and {availability_castle_2}."
+		text Available_3 = "We have {availability_color}{province_feature.name}{/availability_color} in {availability_castle_1}, {availability_castle_2} and {availability_castle_3}."
+		text Available_many = "We have {availability_color}{province_feature.name}{/availability_color} in {availability_castles_count} of our provinces ({availability_castle_1}, {availability_castle_2}, {availability_castle_3} and others)."
+		text Available_all = "We have {availability_color}{province_feature.name}{/availability_color} in all of our our provinces."
+				
+		text Impossible_0 = "We don't have {availability_color}{province_feature.name}{/availability_color} in any of our provinces."
+	}	
+}
+
+
+
+/////////////////////////////////////////////        DO NOT REORDER, THIS IS THE ORDER IN GAME      //////////////////////////////////////////////////
+
+def Cattle : ProvinceFeature
+{
+	name = "Cattle"
+	flavor = "Cattle description."
+	tooltip = "The most common type of livestock, raised for their meat, milk and hides. They are also used for draft animals."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Cattle.tga:Icon_ProvinceFeature_Cattle#2" //GUID:3f37973c1467f3a42b8b88c3c7423ae6
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Cattle_60x60.tga:Icon_ProvinceFeature_Cattle_60x60#2" //GUID:7ae0b270724cd3c4b9da70ca0590f130
+	spawn_chance = 100 //default
+	special = true
+}
+
+def Sheep : ProvinceFeature
+{
+	name = "Sheep"
+	flavor = "Sheep description."
+	tooltip = "Sheep stockfirming provides useful recources for cultural and trade growth."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Sheep.tga:Icon_ProvinceFeature_Sheep#2" //GUID:49a021c73acb34c49bb73431bc02315a
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Sheep_60x60.tga:Icon_ProvinceFeature_Sheep_60x60#2" //GUID:2010029f33f0c184684a4fa121686a25
+	
+	spawn_chance = 100
+	special = true
+}
+
+def Horses : ProvinceFeature
+{
+	name = "Horses"
+	flavor = "Horses description."
+	tooltip = "Horse stockfarming boosts trade, economic and production power. Trained horses are needed for creating elite cavalry."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Horses.tga:Icon_ProvinceFeature_Horses#2" //GUID:279e3f6f84ddf094b9dc2683947f2b7b
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Horses_60x60.tga:Icon_ProvinceFeature_Horses_60x60#2" //GUID:23a021969bdd81343a071f9389ff2d16
+	
+	spawn_chance = 100
+	special = true
+}
+
+
+def Camels : ProvinceFeature
+{
+	name = "Camels"
+	flavor = "Camels description."
+	tooltip = "Camels are unmatched mounts in the hot desert sands with priamary usage is transportation and creating camel cavalry."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Camels.tga:Icon_ProvinceFeature_Camels#2" //GUID:82bc47dc5071c60488feb195e4f0dcce
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Camels_60x60.tga:Icon_ProvinceFeature_Camels_60x60#2" //GUID:c0b153ba87f119343856d45bd992ec43
+	
+	area = [0, 0, 1, 0.2286] //just the southern part of the map //depends on settlement
+	
+	spawn_chance = 50
+	special = true
+}
+
+def RareGame : ProvinceFeature
+{
+	name = "Rare Game"
+	flavor = "Rare Game description."
+	tooltip = "Rare game is hunted for entertainment and its precious furs."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_RareGame.tga:Icon_ProvinceFeature_RareGame#2" //GUID:2e430243c2ad4e44ab5a9248a28bae1b
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_RareGame_60x60.tga:Icon_ProvinceFeature_RareGame_60x60#2" //GUID:c204180aaca13d844b2788583277b46b
+	spawn_chance = 25
+}
+
+def DeepForests : ProvinceFeature
+{
+	name = "Deep Forests"
+	flavor = "Deep Forests description."
+	tooltip = "Deep forests are the source of many precious raw meterials like timber, tar, charcoal, glass and others."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_DeepForests.tga:Icon_ProvinceFeature_DeepForests#2" //GUID:563dba35a8290f649ac1e2fab12c8592
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_DeepForests_60x60.tga:Icon_ProvinceFeature_DeepForests_60x60#2" //GUID:e8700faca19c4a1468417b3365dfa803
+	spawn_chance = 100
+	area = [0, 0.152380952, 1, 1] //Basically excludes the southern deserts
+}
+
+
+def FlaxFields : ProvinceFeature
+{
+	name = "Flax Fields"
+	flavor = "Flax fields description."
+	tooltip = "Flax is valuable plant both for its linseed oil and fibers, used for making textiles."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Flax.tga:Icon_ProvinceFeature_Flax#2" //GUID:17fb6f893c5629941bf3371ddebcff81
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Flax_60x60.tga:Icon_ProvinceFeature_Flax_60x60#2" //GUID:648d841ea27944247ab5e2a6bb3a03ea
+	
+	spawn_chance = 100
+	special = true
+}
+
+def Herbage : ProvinceFeature
+{
+	name = "Herbs and Spices"
+	flavor = "Herbage description."
+	tooltip = "Herbs and spices are gathered here, as well as beeswax, used in the making of candles and ropes."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Herbage.tga:Icon_ProvinceFeature_Herbage#2" //GUID:2ac25f137ae82454480c18121aef4b1d
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Herbage_60x60.tga:Icon_ProvinceFeature_Herbage_60x60#2" //GUID:3480840533226b14ba4c47febddaa4ff
+	
+	spawn_chance = 100 //used in many places
+	special = true
+}
+
+def Vines : ProvinceFeature
+{
+	name = "Vines"
+	flavor = "Vines description."
+	tooltip = "The production of wine and spirits brings additional trade and economic viability to a province."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Vines.tga:Icon_ProvinceFeature_Vines#2" //GUID:6d9f7562cf9e9a9439af65c5104b4aa7
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Vines_60x60.tga:Icon_ProvinceFeature_Vines_60x60#2" //GUID:dced27c745338174885db42a8fcdbec0
+	
+	spawn_chance = 100
+	area = [0, 0.175, 1, 0.75]
+	special = true
+}
+
+def SulfurDeposits : ProvinceFeature
+{
+	name = "Sulfur deposits"
+	tooltip = "Often found in pure form, sulfur is mined, refined and used for production of black powder."
+	//icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Brine.png:Icon_ProvinceFeature_Brine#2" //GUID:f9b970985fc116c4485539345bbed32c
+	//icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Brine_60x60.png:Icon_ProvinceFeature_Brine_60x60#2" //GUID:1d7b3a183d6777b468f49c5e3dc38f8a
+	
+	spawn_chance = 20 //it is common, but not so needed and also late game thing, so we reduce it; was 40
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Sulfur.tga:Icon_ProvinceFeature_Sulfur#2" //GUID:2308106aec45c8b48a208f130c1cea12
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Sulfur_60x60.tga:Icon_ProvinceFeature_Sulfur_60x60#2" //GUID:926e6bc2a61fb244890ec1170cdb1e2b
+}
+
+def SaltpeterDeposits : ProvinceFeature
+{
+	name = "Saltpeter deposits"
+	tooltip = "Cave sediments, mined for extraction of their saltpeter, used for the production of black powder."
+	//icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Brine.png:Icon_ProvinceFeature_Brine#2" //GUID:f9b970985fc116c4485539345bbed32c
+	//icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Brine_60x60.png:Icon_ProvinceFeature_Brine_60x60#2" //GUID:1d7b3a183d6777b468f49c5e3dc38f8a
+	
+	spawn_chance = 15 //it is common, but not so needed and also late game thing, so we reduce it; was 30
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Saltpeter.tga:Icon_ProvinceFeature_Saltpeter#2" //GUID:52b22d41d309c1042ade755fed003707
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Saltpeter_60x60.tga:Icon_ProvinceFeature_Saltpeter_60x60#2" //GUID:8030ff2a6d7e1cd4b95490892370b4f3
+}
+
+def MineralsDeposit : ProvinceFeature
+{
+	name = "Mineral Deposits"
+	flavor = "Minerals description."
+	tooltip = "Minerals are needed as coloring component for glass and dyes."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Minerals.tga:Icon_ProvinceFeature_Minerals#2" //GUID:d40ab16bfe085264d835834b25e35997
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Minerals_60x60.tga:Icon_ProvinceFeature_Minerals_60x60#2" //GUID:118edae14af0c0a49917717e7839f9dc
+	
+	spawn_chance = 30 //we need this more than rare game as more buildings need dyes
+}
+
+
+
+/////////////////////////////////////////////              MINES AND QUARRIES           //////////////////////////////////////////////////
+
+def MarbleDeposit : ProvinceFeature //DEFAULT
+{
+	name = "Marble deposit"
+	flavor = "Marble deposit description."
+	tooltip = "Marble is primarily culturaly important resource, used in architecture and sculptures."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Marble.tga:Icon_ProvinceFeature_Marble#2" //GUID:0695a59ccf7b4e24a994382c5e0186d0
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Marble_60x60.tga:Icon_ProvinceFeature_Marble_60x60#2" //GUID:f45308ee5b039704483a44a525383085
+	
+	spawn_chance = 17
+	{
+		Mountains = 33
+	}
+	special = true
+}
+
+def LimestoneDeposit : ProvinceFeature
+{
+	name = "Limestone deposit"
+	flavor = "Limestone deposit description."
+	tooltip = "Precious stone, used in architecture, road building and sculpturing."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Limestone.tga:Icon_ProvinceFeature_Limestone#2" //GUID:b03458fa7335e1445b067d16bb8cf733
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Limestone_60x60.tga:Icon_ProvinceFeature_Limestone_60x60#2" //GUID:8bf489ef0fa07c545a5eeee094226508
+	
+	spawn_chance = 80 //very probable to have them at the same time
+}
+
+def IronOre : ProvinceFeature //DEFAULT
+{
+	name = "Iron Ore"
+	flavor = "Iron Ore description."
+	tooltip = "Iron is invaluable resource for military and industrial growth."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Iron.tga:Icon_ProvinceFeature_Iron#2" //GUID:8b731c415b5980344939a82008173ac9
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Iron_60x60.tga:Icon_ProvinceFeature_Iron_60x60#2" //GUID:c784f3e55b8b43c4ca95f2f03fef7edd
+	
+	spawn_chance = 17
+	{
+		Mountains = 33
+	}
+	special = true
+}
+
+def LodestoneDeposits : ProvinceFeature
+{
+	name = "Lodestone deposits"
+	flavor = "Lodestone description."
+	tooltip = "Lodestone is a very rare naturally magnetized mineral, needed for making magnetic compasses"
+	//icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Gold.png:Icon_ProvinceFeature_Gold#2" //GUID:d9ab8bef208f62c44a6c8bff4e27f5c9
+	//icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Gold_60x60.png:Icon_ProvinceFeature_Gold_60x60#2" //GUID:92ad9544dd08b3f4dbe4c355fb6363ce
+	
+	spawn_chance = 45 //should be one of the rarest due to low gameplay usage (but mines already are)
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Lodestone.tga:Icon_ProvinceFeature_Lodestone#2" //GUID:b1145e518aa6b8544be8b0cadaa14b97
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Lodestone_60x60.tga:Icon_ProvinceFeature_Lodestone_60x60#2" //GUID:637a8e4a75554c54c952272b89d0687b
+}
+
+def GoldOre : ProvinceFeature
+{
+	name = "Gold Ore"
+	flavor = "Gold Ore description."
+	tooltip = "Gold is the most precious metal, used mainly in jewellery and coin minting."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Gold.tga:Icon_ProvinceFeature_Gold#2" //GUID:f4ac0dbeb4ccf5b45b2b496aaa55ac72
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Gold_60x60.tga:Icon_ProvinceFeature_Gold_60x60#2" //GUID:f3be862bdda31ea40819cab326aeac98
+	
+	spawn_chance = 50 //should be rather rare (but mines already are)
+	area = [0, 0, 1, 0.7616] //excludes the northern parts, as there are little to no sources of gold existing in scandinavia
+}
+
+def SilverOre : ProvinceFeature
+{
+	name = "Silver Ore"
+	flavor = "Silver Ore description."
+	tooltip = "Silver is used in making silverware, coin minting, jewellery and decorations."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Silver.tga:Icon_ProvinceFeature_Silver#2" //GUID:5158179c4fb1fb24aaa417661fb14998
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Silver_60x60.tga:Icon_ProvinceFeature_Silver_60x60#2" //GUID:c1b91f362ff849047a1f6dff987a899a
+	
+	spawn_chance = 60 //should be rather rare (but mines already are and it is very needed)
+}
+
+/////////////////////////////////////////////              Coastal             //////////////////////////////////////////////////
+
+def Mountain : ProvinceFeature
+{
+	name = "Hills and Mountains"
+	flavor = "Mountains province feature flavor"
+	tooltip = "Provinces, surrounded by mountains, are easier to defend and often offer valuable ores."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Mountains.tga:Icon_ProvinceFeature_Mountains#2" //GUID:f84e61007c9352a41b355af54e29fb53
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Mountains_60x60.tga:Icon_ProvinceFeature_Mountains_60x60#2" //GUID:80a951fd253be144faff6de251cee17f
+	spawn_chance = 100
+	sort_id = 0
+}
+
+def Rivers : ProvinceFeature
+{
+	name = "Large Rivers"
+	flavor = "Large Rivers province feature flavor"
+	tooltip = "Fishing and trading prosper around large rivers."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Rivers.tga:Icon_ProvinceFeature_Rivers#2" //GUID:86f09521a72f4f84091ad110928d9d36
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Rivers_60x60.tga:Icon_ProvinceFeature_Rivers_60x60#2" //GUID:5ca7aa0246cccc24b92a7c0169e8bfa7
+	spawn_chance = 100
+	sort_id = 0
+}
+
+def Coastal : ProvinceFeature
+{
+	name = "Coastal"
+	flavor = "Coastal province feature flavor"
+	tooltip = "Provinces with a sea outlet and towns near the coasts have the potential to develop prosperous maritime trade, shipbuilding and fishing."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Coastal.tga:Icon_ProvinceFeature_Coastal#2" //GUID:bf1ce1c85c6140946927e074042ce52b
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Coastal_60x60.tga:Icon_ProvinceFeature_Coastal_60x60#2" //GUID:e566ab7c68668d2498afc5e75f53ddc6
+	spawn_chance = 100
+	sort_id = 0
+	show_in_castle = false
+}
+
+def Pirates : ProvinceFeature
+{
+	name = "Pirates"
+	tooltip = "The bane of the seas, they rob and sometimes even steal or destroy sea-faring vessels. Have high affinity to rum."
+	//icon = "Assets/UI/Elements/Common/Icons/RealmResources/Icon_Resource_Pirates.png:Icon_Resource_Pirates#2" //GUID:6daa6d25661381a438f02c822eeba665
+	category = "Society"
+	spawn_chance = 50
+	requre_costal = true
+	requre_distant_port = true
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Pirates_60x60.tga:Icon_ProvinceFeature_Pirates_60x60#2" //GUID:17804d103ed73b24c8afee901aaed2ce
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Pirates.tga:Icon_ProvinceFeature_Pirates#2" //GUID:54c3be7b0914c64448465e8d0c8b91ad
+}
+
+def SaltDeposit : ProvinceFeature
+{
+	name = "Salt Deposits"
+	flavor = "Salt Deposits description."
+	tooltip = "Either rock salt or brine, this resource is used as food ingredient, food preservation and even wound healing, thus it is a profitable trade good as well"
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Salt.tga:Icon_ProvinceFeature_Salt#2" //GUID:bde2f286873816c428646e2e246eec74
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Salt_60x60.tga:Icon_ProvinceFeature_Salt_60x60#2" //GUID:29c8d4a44a29bb94db186e7628c8f0ea
+	
+	spawn_chance = 8
+	{
+		Coastal = 12
+		Mountains = 12
+	}
+}
+
+def AmberDeposits : ProvinceFeature
+{
+	name = "Amber deposits"
+	flavor = "Amber description."
+	tooltip = "Fossilized tree resin, appreciated for its color and natural beauty. Amber is important trade resource, primarily used in jewellery."
+	icon = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Amber.tga:Icon_ProvinceFeature_Amber#2" //GUID:7be945ae0c94c9e479a08407d32e72da
+	icon_big = "Assets/UI/Elements/Common/Icons/ProvinceFeatures/Icon_ProvinceFeature_Amber_60x60.tga:Icon_ProvinceFeature_Amber_60x60#2" //GUID:c1fde21517874cb47a69416b813d7ccf
+	
+	spawn_chance = 40 //already very rare, since coastal is required and 1 such feature per settlement is allowed
+	requre_costal = true
+}
+
+
+
+def RealmFeaturesPreset
+{
+	// max settlement fetures per settlement type - 3
+	// resrict of features by number of settlement from given type 
+	// PF can exclude each other Silver exclude Gold and vice visa
+	// some settlement types must cap the number of PF to the current count the given settlement
+	// add bare minimum defaults after generation 
+	
+	int occurances = 4 // use 4/6 syntax for a random range
+	int preferred_min_distance = 2 // in realms 
+	bool requre_costal = false
+	
+	Settlements required_settlements
+	ProvinceFeature required_province_fetures
+	desired_in_realms = 100 // chance
+}
+
+RealmFeaturesPresets

@@ -1,0 +1,6 @@
+﻿def Prestige
+{
+	float max = 1000
+
+	float prestige_test_mod = 200
+}

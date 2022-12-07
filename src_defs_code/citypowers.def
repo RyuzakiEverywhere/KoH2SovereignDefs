@@ -1,0 +1,9 @@
+﻿def cityPower
+{
+	float min_value = 0
+	float max_value = 100
+}
+
+def tradePower : cityPower { }
+def religiousPower : cityPower { }
+def culturePower : cityPower { }

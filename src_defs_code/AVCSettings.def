@@ -1,0 +1,11 @@
+def AVCSettings
+{
+	int TileSize = 16 // the size (in "virtual pixels") of 1 tile (bit)
+	int TilesX = 4    // number of tiles in a row
+	int TilesY = 2    // number of rows
+
+	float Duration = 0.5 // how long each visual clue stays on the screen, in seconds
+
+	color clr0 = "255, 0, 255"   // the color of bit value 0
+	color clr1 = "0, 255, 0"     // the color of bit value 1
+}

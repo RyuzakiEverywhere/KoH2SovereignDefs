@@ -1,0 +1,6 @@
+def SDFSettings
+{	
+    int sdf_tex_res = 1024
+    int sdf_kingdom_scan_dist = 25
+    int sdf_realm_scan_dist = 25
+}

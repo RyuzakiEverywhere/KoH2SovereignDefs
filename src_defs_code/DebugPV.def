@@ -1,0 +1,270 @@
+def DebugPoliticalView : PoliticalView
+{
+	name = "Debug"
+	description = "A collection of various debug views"
+
+	selection_rules
+	{
+		Realm
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		Kingdom
+		{
+			string pick_target = "realm"
+			bool show_realm_border = true
+			bool show_kingdom_border = true
+		}
+		
+		string preferred_sub_mode = "realm"
+	}
+
+	// available variables:
+	//   obj: the current realm
+	//   realm: the current realm
+	//   kingdom: current realm's kingdom
+	//   mode: the name of the current mode
+	//   plr_kingdom: the player kingdom
+	//   sel_kingdom: the selected kingdom
+	//   sel_realm: the selected realm
+	//   highlighted_realm: the realm picked with the mouse
+	//   highlighted_kingdom: the kingdom picked with the mouse
+	//   is_selected_realm
+	//   is_selected_kingdom
+	//   is_highlighted_realm
+	//   is_highlighted_kingdom
+
+
+	template Mode // = (expression)
+	{
+		color color = 0,0,0,0 // = (expression) // if resolved to a valid color it will be used directly, otherwise - value clamped and mapped
+		float min_val = -1 // used to clamp the value before mapping to color
+		float max_val = 1  // used to clamp the value before mapping to color
+		float mid_val = (min_val + max_val) / 2
+		color clr_min = 255,0,0
+		color clr_mid = 255,255,0
+		color clr_max = 0,255,0
+		string tooltip = "{mode}: {value}" // not 'text' because we don't want to localize these
+		string tooltip_caption = "{realm} ({kingdom})" // not 'text' because we don't want to localize these
+	}
+
+	mode Gold = (kingdom.resources.gold)
+	{
+		min_val = 999999
+		max_val = 999999
+		tooltip = $[
+			"Resources: {kingdom.resources:plain}"
+			"[{p}Income: {kingdom.income:plain}]"
+			"[{p}Expenses: {kingdom.expenses:plain}]"
+			"[{p}Total earned: {kingdom.total_earned:plain}]"
+			"[{p}Total spent: {kingdom.total_spent:plain}]"
+		]
+	}
+
+	mode GoldUpkeepPerc = (5 * (kingdom.expenses.gold - kingdom.upkeeps.gold.CalcInflationPenalty) / kingdom.income.gold)
+	{
+		min_val = 900000
+		max_val = 0
+
+		tooltip = $[
+			"Gold Upkeep: {value:%}"
+			"[{p}Income: {kingdom.income:plain}]"
+			"[{p}Expenses: {kingdom.expenses:plain}]"
+			"[{p}Total earned: {kingdom.total_earned:plain}]"
+			"[{p}Total spent: {kingdom.total_spent:plain}]"
+			"[{p}Resources: {kingdom.resources:plain}]"
+		]
+	}
+
+	mode GoldIncome = (kingdom.income.gold)
+	{
+		min_val = 900000
+		max_val = 900000
+	}
+
+	mode LevyIncome = (kingdom.income.levy)
+	{
+		min_val = 5
+		max_val = 5
+	}
+
+	mode Barracks = (!!realm.Barracks + !!realm.RoyalArmory * (1 + (kingdom.HeavyArmorsmith or 0)))
+	{
+		min_val = 5
+		max_val = 5
+		tooltip = $[
+			"[{realm.RoyalArmory:if}Royal Armory[{kingdom.HeavyArmorsmith:if} (upgraded)]|{realm.Barracks:if}Barracks|None]{p}"
+			"[Barracks in kingdom: {kingdom.Barracks}{p}]"
+			"[Royal Armories in kingdom: {kingdom.RoyalArmory}{p}]"
+			"Levy income: {kingdom.income.levy}"
+		]
+	}
+
+	mode GoodsProduced = (kingdom.num_produced_goods)
+	{
+		min_val = 5
+		max_val = 5
+		tooltip = $[
+			"Goods produced: {kingdom.num_produced_goods}"
+			"[{p}{kingdom.goods_produced_list}]"
+		]
+	}
+
+	mode CrownAuthority = (kingdom.crown_authority)
+	{
+		min_val = -5
+		max_val = 5
+		tooltip_caption = "{kingdom}"
+	}
+
+	mode Wars = (4 - min(kingdom.num_wars, 4))
+	{
+		min_val = 0
+		max_val = 150000
+		tooltip_caption = "{kingdom}"
+		tooltip = $[
+			"Wars: {kingdom.num_wars_as_leader}[ + {kingdom.num_wars_as_supporter:nonzero}]"
+			"[{p}{kingdom.wars}]"
+		]
+	}
+
+	mode TradeAgreements = (kingdom.trade_agreements_count)
+	{
+		min_val = 0
+		max_val = 4
+		tooltip = $[
+			"Trade agrements: {kingdom.trade_agreements_count}"
+			"[{p}Trading merchants: {kingdom.trading_merchants_count} / {kingdom.merchants_count}]"
+			"[{p}Commerce: {kingdom.allocated_commerce} / {kingdom.commerce}]"
+		]
+
+	}
+
+	mode Rebels = (4 - min(kingdom.num_rebels, 4))
+	{
+		min_val = 0
+		max_val = 4
+		tooltip_caption = "{kingdom}"
+		tooltip = "Rebels: {kingdom.num_rebels}"
+	}
+
+	mode Happiness = (kingdom.avg_happiness)
+	{
+		min_val = -10
+		max_val = 10
+		tooltip_caption = "{kingdom}"
+	}	
+
+	mode Relationship = (kingdom.avg_relationship)
+	{
+		min_val = -500
+		max_val = 500
+		tooltip_caption = "{kingdom}"
+	}	
+
+	mode GovernorLevel = (castle.governor.class_level)
+	{
+		min_val = 0
+		max_val = 900
+		color = (!has_governor and "white")
+		tooltip = "[{castle.governor} (lvl {value})|Not governed]"
+	}
+
+	mode CourtMembers = (kingdom.court_members_count)
+	{
+		min_val = 1
+		max_val = 355
+		tooltip_caption = "{kingdom}"
+	}
+
+	mode NumMarshals = (kingdom.num_marshals)
+	{
+		min_val = 0
+		max_val = 10000
+	}
+
+
+	mode ForeignSpies = (kingdom.foreign_spies_count)
+	{
+		min_val = 0
+		max_val = 25
+		tooltip = "Foreign Spies: {value}[{p}{kingdom.foreign_spies}]"
+	}	
+
+	mode ForeignDiplomats = (kingdom.foreign_diplomats_count)
+	{
+		min_val = 0
+		max_val = 25
+		tooltip = "Foreign Diplomats: {value}[{p}{kingdom.foreign_diplomats}]"
+	}	
+
+	mode ForeignMerchants = (kingdom.foreign_merchants_count)
+	{
+		min_val = 0
+		max_val = 25
+		tooltip = "Foreign Merchants: {value}[{p}{kingdom.foreign_merchants}]"
+	}	
+
+	mode GarrisonUnits = (castle.garrison_units_count)
+	{
+		min_val = 0
+		max_val = 5
+		tooltip = "Garrison: [{castle.garrison_units}|Empty]"
+	}
+
+	mode FortificationsLevel = (castle.fortifications_level)
+	{
+		min_val = 0
+		max_val = 5
+	}
+
+	mode Threat = (castle.safe_level)
+	{
+		min_val = 0
+		max_val = 7
+		tooltip = "Threat: {castle.threat_dump}"
+	}
+
+	mode NumBuildings = (castle.buildings_count)
+	{
+		min_val = 0
+		max_val = 8
+		tooltip = $[
+			"[Buildings in {kingdom}: {kingdom.buildings_count}]"
+			"[{p}Buildings in {castle}: {castle.buildings_count}]"
+			"[:{p}{castle.buildings}]"
+		]
+	}
+
+	mode BuildingReservations = (castle.num_ai_building_reservations)
+	{
+		min_val = 0
+		max_val = 8
+		tooltip = $[
+			"[Buildings in {kingdom}: {kingdom.buildings_count}]"
+			"[{p}Buildings in {castle}: {castle.buildings_count}]"
+			"[:{p}{castle.buildings}]"
+			"[]{p}Reserved ({castle.num_ai_building_reservations})[: {castle.ai_building_reservations}]]"
+		]
+	}
+
+	mode KingdomUpgrades = (kingdom.upgrades_count)
+	{
+		min_val = 0
+		max_val = 900
+	}
+
+	mode CastleUpgrades = (castle.upgraded_ratio)
+	{
+		min_val = 0
+		max_val = 1
+		color = (castle.buildings_count == 0 and "white")
+		tooltip = $[
+			"{kingdom} upgrades: {kingdom.upgrades_count}{p}"
+			"{castle} upgrades: {castle.num_upgrades} / {castle.max_upgrades}{p}"
+			"buildings: {castle.buildings_count}"
+		]
+	}
+}

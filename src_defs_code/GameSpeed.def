@@ -1,0 +1,5 @@
+def GameSpeed
+{
+	speed_map =  [0.5,1,2,4,6,8,10]
+	speed_buttons = [1,2,3] // inxed in speed_map
+}

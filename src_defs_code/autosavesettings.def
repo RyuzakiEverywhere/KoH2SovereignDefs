@@ -1,0 +1,22 @@
+﻿def AutoSaveSettings
+{
+	prefab singletonHolder = "Assets/Standard Assets/Utility/Prefabs/AutoSaveManager.prefab" //GUID:795d188ed4ce6324a90e6c411b4d9e09
+
+	sting allowedScenes = ["europe"]
+
+	int numOfIncrementalAutoSaves = 5
+	int numOfIncrementalEvents = 3
+	float timeBetweenSaves = 300 //seconds
+
+	text campaignAutoSaveName = "Campaign {idx} Auto Save {number}"
+	text autoSaveName = "Auto Save {number}"
+	text EventName = "Event {number} - {reason}"
+	Event
+	{
+		text quitting = "Quit"
+		text player_eliminated = "Player eliminated"
+		text on_sync = "Save from host"
+		text on_disconnect = "Player Disconnect"
+		text battleview = "Leading battle"
+	}
+}
