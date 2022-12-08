@@ -1,0 +1,981 @@
+﻿template KingdomAction : Action
+{
+	owner_type = "Kingdom"
+	secondary = true
+	show_in_action_bar = false
+}
+
+template AddTraditionAction : KingdomAction
+{
+	name = "Adopt tradition"
+	tooltip = "Turn {tradition} into a tradition for your {kingdom.KingdomType}. All knights in the royal court who possess this skill can benefit from it."
+	//tooltip = "Debug action{p}{p}Current traditions:[{p}{cur_skill_traditions}| none]"
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SupportPretenderToTheThrone.png:Icon_Opportunity_SupportPretenderToTheThrone#2" //GUID:6a27e13407b09234c8a7781df242f45f
+	args = ["tradition", "int"]
+	prepare_sound_effect = "event:/sound_effects/interaction/adopt_tradition"
+	text picker_text = "{name} Cost: {cost}"
+	cost = (adopt_cost)
+	string tradition_type
+	
+	validate_prompts
+	{
+		text ok = "Click to adopt {tradition} as kingodm tradition."
+		text _cost = "{clr:gray}Not enough resources.{/clr}"
+		text invalid_args = "{clr:red_bright}None of your knights has learned that skill at maximum level.{/clr}"
+		text _no_targets = "{clr:red_bright}None of your knights has learned that skill at maximum level.{/clr}"
+		text _maxed_out = "{clr:red_bright}Your have adopted the maximum number of traditions.{/clr}"
+	}
+}
+
+def AddMilitaryTraditionAction : AddTraditionAction
+{
+	name = "Add military tradition"
+	tradition_type = "Military"
+}
+
+def AddNonMilitaryTraditionAction : AddTraditionAction
+{
+	name = "Add non-military tradition"
+	tradition_type = "NonMilitary"
+}
+
+def AddAnyTraditionAction : AddTraditionAction
+{
+	name = "Adopt tradition"
+	tradition_type = "All"
+}
+
+def IncreaseRankTraditionAction : KingdomAction
+{
+	name = "Increase rank"
+	tooltip = "Strengthen your practices in {tradition.name} [Cost: {upgarde_cost}]"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_Acttion_Educate.png:Icon_Acttion_Educate#2" //GUID:d7c9bcdcbc02f3641a626c0d1e245bd7
+	args = ["tradition"]
+	picker_text = "{name} Cost: {cost}"
+	cost = (upgrade_cost)
+}
+
+def AbandonTraditionAction : KingdomAction
+{
+	name = "Abandon"
+	tooltip = "Eradicate {tradition.name} as a tradition and lose all of its effects immediately."
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_StopAction.tga:Icon_CharacterAction_StopAction#1" //GUID:9fc339caa7b06dc41bdd4d2c34bd58f5
+	args = ["tradition"]
+	picker_text = "{name}"
+	confirmation_message = ConfirmAbandonTradition
+	validate_prompts
+	{
+		text ok = "Click to abandon this tradition."
+	}
+}
+
+def ConfirmAbandonTradition : Message
+{
+	caption = "Abandon tradition"
+	body = "Are you sure you wish to remove {tradition} from your traditions?"
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+template ChangeReligionAction : KingdomAction
+{
+	string target_religion
+	
+	cost = "5000g 1000p"
+	expense_category = "Religion"
+	prepare_duration = 180
+	
+	float min_same_religion_realms_perc = 30
+	
+	float sf_liege_same_religion = -30
+	float sf_liege_diff_religion = -10
+	float sf_liege_target_religion = 10
+	float success_base_chance = 10
+	
+	confirmation_message = ChangeReligionConfirmMessage
+	
+	prepare_message : ChangeReligionActionMessage
+	{
+		caption = "{prepare_status_text}"
+		icon = (owner.religion.message_icon)
+		secoundary_icon = (target_religion.icon)
+		bool success_check = (owner.religion = target_religion)
+		text completed = "[{success_check:if}We changed our religion!|Religion conversion failed]"
+		expire_time = 45
+	}
+	
+	validate_prompts
+	{
+		text _claming_caliphate = "Claiming caliphate"
+		text _is_caliphate = "Cannot change religion as a Caliphate"
+	}
+	
+	text pope_left_court = "[{p}   {blt}{i}{kingdom.has_pope:if} {pope} has left our court and returned to Rome{/i}]"
+	
+	// requirements
+	// {
+	// 	no_wars
+	// 	sf_points = 5
+	// }
+	
+	success_fail
+	{
+		sf_base = (success_base_chance)
+		{
+			text name = "Base chance"
+		}
+		sf_num_realms_following_new_religion = (5 * GetProvincesNumWithReligion(own_kingdom, target_religion))
+		{
+			text name = "Our provinces, following {target_religion:ism} (x5)"
+		}
+		sf_king_religion_ability = (2 * own_kingdom.king_religion_ability)
+		{
+			text name = "Our king's religion ability (x2)"
+		}
+		sf_king_diplomacyn_ability = (own_kingdom.king_diplomacy_ability)
+		{
+			text name = "Our King's diplomacy ability"
+		}
+		sf_crown_authority = 0/10
+		{
+			text name = "Our crown authority (x2)"
+		}
+		sf_num_neighbors_following_new_religion = (5 * GetNeighborsNumWithReligion(own_kingdom, target_religion))
+		{
+			text name = "Our neighbors, following {target_religion:ism}"
+		}
+		sf_we_are_pagans = (20 * own_kingdom.is_pagan)
+		{
+			text name = "We are pagans"
+		}
+		perc sf_king_leadership_skill = (25 * (GetSkillRank(own_kingdom.king, "Leadership") != 0))
+		{
+			text name = "Our king's Leadership skill"
+		}
+		perc sf_king_theology_skill = (25 * (GetSkillRank(own_kingdom.king, "Theology") != 0))
+		{
+			text name = "Our King's Theology skill"
+		}
+		perc sf_writing_tradition = ( 35 * HasTradition(own_kingdom, "WritingTradition"))
+		{
+			text name = "Writing tradition"
+		}
+		perc sf_learning_tradition = ( 15 * HasTradition(own_kingdom, "LearningTradition"))
+		{
+			text name = "Learning tradition"
+		}
+		
+		perc sf_num_realms_following_old_religion = (-5 * max(0, GetProvincesNumWithReligion(own_kingdom, own_kingdom.religion) - GetProvincesNumWithReligion(own_kingdom, target_religion)))
+		{
+			text name = "Our provinces, following {own_kingdom.religion:ism} (x5)"
+		}
+		perc sf_num_disloyal_realms = -5 // per province
+		{
+			text name = "Disloyal provinces (x5)"
+		}
+		perc sf_leading_crusade = -20
+		{
+			text name = "Leading crusade"
+		}
+		perc sf_crown_authority2 = -25/0
+		{
+			text name = "Our negative crown authority (x5)"
+		}
+		perc sf_wars = -10 //per war
+		{
+			text name = "Our wars (x10)"
+		}
+		perc sf_clergy_opinion = (map3_clamp(own_kingdom.opinions.ClergyOpinion, -10, 0, 10, -50, 0, 0))
+		{
+			text name = "Negative clergy opinion (x5)"
+		}
+		perc sf_nobility_opinion = (map3_clamp(own_kingdom.opinions.NobilityOpinion, -10, 0, 10, -30, 0, 0))
+		{
+			text name = "Negative nobility opinion (x3)"
+		}
+		perc sf_num_neighbors_following_old_religion = (-10 * GetNeighborsNumWithReligion(own_kingdom, own_kingdom.religion))
+		{
+			text name = "Our neighbors, following {own_kingdom.religion:ism} (x10)"
+		}
+		
+	}
+	
+	// what happens with the kingdom when religion is changed
+	outcomes
+	{
+		main success
+		{
+			//message { def = null } // prevent outcome message from showing up
+			message
+			{
+				text caption = "We changed our religion!"
+				text text = "After long debates and some use of force, our people and clergy accepted the new kingdom religion."
+			}
+			
+			also crown_authority = "religionChangeSuccess"
+			also change_rel_with_target_religion = "rel_change_religion_with_new_religion"
+			{
+				float liege = "rel_change_religion_with_new_religion_liege"
+			}
+			also change_rel_with_previous_religion = "rel_change_religion_with_previous_religion"
+			{
+				float papacy = "rel_change_religion_with_previous_religion_papacy"
+				float constantinople = "rel_change_religion_with_previous_religion_constantinople"
+			}
+		}
+		option fail
+		{
+			message
+			{
+				text caption = "Religion conversion failed"
+				text text = "Alas, we couldn't convince our people to accept {target_religion:ism}. This has led to major uproar in our kingdom..."
+			}
+			main kill_king_by_nobility = (chance_kk)
+			{
+				nob_value = (kingdom.opinions["NobilityOpinion"].value)
+				chance_kk = (5 + (nob_value < 0) * map(nob_value, -10, 0, 20, 5) + (nob_value >= 0) * map(nob_value, 0, 10, 5, 0))
+			}
+			also crown_authority = "religionChangeFail"
+			
+		}
+	}
+}
+
+
+def ChangeReligionConfirmMessage : Message
+{
+	caption = "Change religion"
+	body = "Are you sure you wish to try to change the religion of {kingdom}?{p}{p}Crown authority will be lost, more so if the conversion fails. If it succeeds, your {kingdom.religion.titles.Cleric:s} will be furious."
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+def BecomeCatholicAction : ChangeReligionAction
+{
+	name = "Accept Catholicism"
+	tooltip = "Accept Catholic Christianity and the spiritual leadership of the pope.{p}"
+	icon = Catholic.icon
+	string target_religion = "Catholic"
+	prepare_status_text = "Adopting Catholicism"
+	outcomes
+	{
+		main success
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Positive.png:Icon_Message_Catholic_Positive#2" //GUID:8c1fb46dfa6825f4590d3d7e5cca7741
+				sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ProvinceReligionConverted_Christian.tga:UI_Illustration_ProvinceReligionConverted_Christian#2" //GUID:186b9e6949a728c4a885921c2d05e3f6
+				voice_line = "narrator_voice:kingdom_religion_converted_catholic"
+				text caption = "We accepted Catholicism"
+				text text = "After long debates and some use of force, our people and clergy accepted the new kingdom religion. We now follow the path of Christ under the leadership of our infallible pope."
+			}
+		}
+	}
+	
+	success_fail
+	{
+		sf_we_hold_Rome = 25
+		{
+			text name = "We hold Rome"
+		}
+	}
+}
+
+def BecomeOrthodoxAction : ChangeReligionAction
+{
+	name = "Accept Orthodox Christianity"
+	tooltip = "Accept Orthodox Christianity and the spiritual leadership of the Ecumenical Patriarch of Constantinople. {p}"
+	icon = Orthodox.icon
+	string target_religion = "Orthodox"
+	prepare_status_text = "Adopting Orthodox Christianity"
+	outcomes
+	{
+		main success
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Orthodox_Positive.png:Icon_Message_Orthodox_Positive#2" //GUID:19cfbfbc1496e2542ab505a7a2a91a83
+				sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ProvinceReligionConverted_Christian.tga:UI_Illustration_ProvinceReligionConverted_Christian#2" //GUID:186b9e6949a728c4a885921c2d05e3f6
+				voice_line = "narrator_voice:kingdom_religion_converted_orthodox"
+				text caption = "We accepted Orthodox Christianity"
+				text text = $["After long debates and some use of force, our people and clergy accepted the new kingdom religion. We now follow the path of Christ under the wise guidance of the Ecumenical Patriarch."
+				"{pope_left_court}"]
+			}
+		}
+	}
+	
+	success_fail
+	{
+		sf_we_hold_Constantinople = 20
+		{
+			text name = "We hold Constantinople"
+		}
+	}
+}
+
+def BecomeSunniAction : ChangeReligionAction
+{
+	name = "Accept Sunni Islam"
+	tooltip = "Accept Sunni Islam as an official kingdom religion.{p}"
+	icon = Sunni.icon
+	string target_religion = "Sunni"
+	prepare_status_text = "Adopting Sunni Islam"
+	outcomes
+	{
+		main success
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Positive.png:Icon_Message_Sunni_Positive#2" //GUID:f5511aecdac645848b2848632094228f
+				sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ProvinceReligionConverted_Muslim.tga:UI_Illustration_ProvinceReligionConverted_Muslim#2" //GUID:c71bcd52bed8e7a45afba61664acb575
+				voice_line = "narrator_voice:kingdom_religion_converted_sunni"
+				text caption = "We accepted Sunni Islam"
+				text text = $["After long debates and some use of force, our people and clergy accepted the new kingdom religion. We now follow the path of Sunni Islam and the wise words of the prophet Muhammad and his successor, Abu Bakr."
+				"{pope_left_court}"]
+			}
+		}
+	}
+	
+	success_fail
+	{
+		sf_we_have_sunni_holy_lands = 10 //per land
+		{
+			text name = "We rule over Sunni holy lands"
+		}
+	}
+	
+}
+
+def BecomeShiaAction : ChangeReligionAction
+{
+	name = "Accept Shia Islam"
+	tooltip = "Accept Shia Islam as an official kingdom religion.{p}"
+	icon = Shia.icon
+	string target_religion = "Shia"
+	prepare_status_text = "Adopting Shia Islam"
+	outcomes
+	{
+		main success
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Shia_Positive.png:Icon_Message_Shia_Positive#2" //GUID:85f62290df2b3cf498ac54cedb6bd9a7
+				sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ProvinceReligionConverted_Muslim.tga:UI_Illustration_ProvinceReligionConverted_Muslim#2" //GUID:c71bcd52bed8e7a45afba61664acb575
+				voice_line = "narrator_voice:kingdom_religion_converted_shia"
+				text caption = "We accepted Shia Islam"
+				text text = $["After long debates and some use of force, our people and clergy accepted the new kingdom religion. We now follow the path of Shia Islam and the wise words of the prophet Muhammad and his successor, Ali ibn Abi Talib."
+				"{pope_left_court}"]
+			}
+		}
+	}
+	
+	success_fail
+	{
+		sf_we_hold_Baghdad = 20
+		{
+			text name = "We rule over Baghdad"
+		}
+	}
+}
+
+def RestorePapacyAction : KingdomAction
+{
+	name = "Restore Papacy"
+	tooltip = "Return Rome to the Papacy"
+	icon = Catholic.icon
+	prepare_duration = 30
+	prepare_status_text = "Restoring the Papacy"
+	
+	confirmation_message = RestorePapacyConfirmMessage
+	prepare_message : KingdomActionMessage
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_RestorePapacyAction.tga:Icon_Message_RestorePapacyAction#2" //GUID:5c92bc29a28bdd748841e3073c9dcea3
+		caption = "{prepare_status_text}"
+		bool success_check = (owner.game.religions.catholic.pope)
+		text completed = "[{success_check:if}We restored the Papacy|We failed to restore the Papacy]"
+		expire_time = 45
+	}
+	
+	cancel_events
+	{
+		catholic_hq_realm kingdom_changed
+		catholic_hq_realm battle_started
+	}
+	
+	cancelled_message_caption = "Papacy restoration halted"
+	cancelled_message_texts
+	{
+		text battle_started = "With the arrival of {attackers} at the gates of Rome, our attempts to restore the Papacy had to be put on hold."
+		text kingdom_changed = "Our ongoing arrangements to restore the Papacy were put to an abrupt end, after we lost control over Rome..."
+	}
+	
+	validate_prompts
+	{
+		text rome_under_siege = "Can't restore while Rome is under siege"
+		text rome_under_occupation = "Can't restore while Rome is occupied by rebels"
+	}
+}
+
+
+def RestorePapacyConfirmMessage : Message
+{
+	caption = "Restore the Papacy?"
+	body = "Your kingdom will no longer control Rome. This will reform the Papacy, with a new pope at its helm.{p}{p}Shall we proceed, Sire?"
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+def HoldAFeastAction : KingdomAction
+{
+	name = "Hold A Feast"
+	tooltip = "Organize an opulent feast in the name of your newborn! This will please the peasants and nobles in your {kingdom.KingdomType}."
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_HoldFeast.tga:Icon_KingdomAction_HoldFeast#2" //GUID:5ed4c0a7539c3524995abe3475e389b7
+	prepare_sound_effect = "event:/sound_effects/interaction/cheering"
+	cost
+	{
+		gold = (own_kingdom.S1)
+	}
+}
+
+def ClaimCaliphateAction : KingdomAction
+{
+	name = "Claim Caliphate"
+	tooltip = "Proclaim your might before the entirety of the Muslim world by attempting to claim the title of Caliph"
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_ClaimCaliphate.tga:Icon_KingdomAction_ClaimCaliphate#2" //GUID:1db69dc0272ad4b499ebb9799a56a159
+	cost = "3000g 1000p"
+	prepare_duration = 180
+	prepare_status_text = "Claiming caliphate"
+	ai_validate = (success_chance > 50)
+	confirmation_message = ClaimCaliphateConfirmMessage
+	float success_base_chance = 10
+	
+	validate_prompts
+	{
+		text _religion_changing = "changing religion in progress"
+	}
+	prepare_message : KingdomActionMessage
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_ClaimCaliphateAction.tga:Icon_Message_ClaimCaliphateAction#2" //GUID:ddfdd1b1d6df3fe42b4597f52b2b4159
+		bool success_check = (owner.is_caliphate)
+		text completed = "[{success_check:if}Caliphate claim succeeded|Caliphate claim failed]"
+		expire_time = 45
+	}
+	// requirements
+	// {
+	
+	// 	king_skills = [ "Leadership"]
+	// 	{
+	// 		text name = "Your king has Leadership skill"
+	// 	}
+	// 	not_vassal
+	// 	no_wars
+	// 	more_than_half_islamic_realms
+	// 	{
+	// 		text name = "More than half of our provinces follow Islam (either Shia or Sunni)"
+	// 	}
+	// 	sf_points = 40
+	// }
+	
+	success_fail
+	{
+		sf_base = (success_base_chance)
+		{
+			text name = "Base chance"
+		}
+		sf_king_religion_ability = (own_kingdom.king_religion_ability * 4)
+		{
+			text name = "Our king's religion ability (x4)"
+		}
+		sf_king_diplomacyn_ability = (own_kingdom.king_diplomacy_ability * 2)
+		{
+			text name = "Our king's diplomacy ability (x2)"
+		}
+		sf_crown_authority = 0/10
+		{
+			text name = "Our crown authority (x2)"
+		}
+		sf_positive_relationship_with_muslim_kingdoms = 30 // maps 0 .. 30
+		{
+			text name = "Our relations with Muslim kingdoms"
+		}
+		sf_our_muslim_vassals = 10 //per vassal
+		{
+			text name = "Our Muslim vassals (x10)"
+		}
+		sf_have_theology_tradition = 20
+		{
+			text name = "Theology tradition"
+		}
+		sf_we_are_great_power = 20
+		{
+			text name = "We are a Great Power"
+		}
+		sf_we_hold_Rome = 30
+		{
+			text name = "We hold Rome"
+		}
+		sf_we_hold_Constantinople = 20
+		{
+			text name = "We rule over Constantinople"
+		}
+		sf_we_have_muslim_holy_lands = 15 //per land
+		{
+			text name = "We rule over Muslim holy lands (x15)"
+		}
+		
+		// chance mitigating factors
+
+		perc sf_crown_authority2 = -25/0
+		{
+			text name = "Negative crown authority (x5)"
+		}
+		perc sf_existing_caliphates = -20 // per caliphate
+		{
+			text name = "Existing caliphates (x20)"
+		}
+		perc sf_negative_relationship_with_muslim_kingdoms = -50
+		{
+			text name = "Negative relationship with Muslim kingdoms"
+		}
+		perc sf_weak_scholars = -10 // 15 - highest_court_cleric_level
+		{
+			text name = "Lack of experienced scholar"
+		}
+		perc sf_we_are_too_small = -10 //per province for each realm below treshold(treshold = 5, we have 2, 10 per, result = 30)
+		{
+			int treshold = 5
+			text name = "Our kingdom is small"
+		}
+		perc sf_clergy_opinion = (map3_clamp(own_kingdom.opinions.ClergyOpinion, -10, 0, 10, -40, 0, 0))
+		{
+			text name = "Negative clergy opinion (x4)"
+		}
+		perc sf_nobility_opinion = (map3_clamp(own_kingdom.opinions.NobilityOpinion, -10, 0, 10, -20, 0, 0))
+		{
+			text name = "Negative nobility opinion (x2)"
+		}
+		
+	}
+	
+	outcomes
+	{
+		main success
+		{
+			message
+			{
+				text caption = "Caliphate claim succeeded"
+				text text = "Due to our achievements and renown, our claim was met with approval by the entirety of the Muslim world! For all kingdoms, we are now known as the Caliphate of {kingdom}."
+				sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ClaimCaliphateSuccess.tga:UI_Illustration_ClaimCaliphateSuccess#2" //GUID:8c4e737fd5ce1be4c833651791ad1c18
+				case Sunni = (religion.Sunni)
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Positive.png:Icon_Message_Sunni_Positive#2" //GUID:f5511aecdac645848b2848632094228f
+				}
+				case Shia = (religion.Shia)
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Shia_Positive.png:Icon_Message_Shia_Positive#2" //GUID:85f62290df2b3cf498ac54cedb6bd9a7
+				}
+				case default
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Positive.png:Icon_Message_Sunni_Positive#2" //GUID:f5511aecdac645848b2848632094228f
+				}
+			}
+			also rel_change_with_muslim = 300
+			{
+				text bullet = "Relations with all Islamic kingdoms: {outcome.amount:bonus_dark}"
+				amount = (outcome.value)
+			}
+			also crown_authority = "ClaimCaliphateActionSuccess"
+			also fame = 100
+			also opinion_change
+			{
+				opinion = "ClergyOpinion"
+				amount = 5
+				reason = "establish_caliphate"
+			}
+		}
+		option fail
+		{
+			message
+			{
+				text caption = "Caliphate claim failed"
+				text text = "Alas, our claim was not met with approval by the Muslim world. It seems we have not yet earned the right to be recognized as a Caliphate."
+				case Sunni = (religion.Sunni)
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Negative.png:Icon_Message_Sunni_Negative#2" //GUID:a38c9bc672bd0944c900424a7ebab08e
+				}
+				case Shia = (religion.Shia)
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Shia_Negative.png:Icon_Message_Shia_Negative#2" //GUID:f4f55f396dbd2894ebee69906cae7abc
+				}
+				case default
+				{
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Negative.png:Icon_Message_Sunni_Negative#2" //GUID:a38c9bc672bd0944c900424a7ebab08e
+				}
+			}
+			also rel_change_with_muslim = -200
+			{
+				text bullet = "Relations with all Islamic kingdoms: {outcome.amount:bonus_dark}"
+				amount = (outcome.value)
+			}
+			also fame = -100
+			also crown_authority = "ClaimCaliphateActionFail"
+		}
+	}
+	
+	cancel_events
+	{
+		own_kingdom royal_new_sovereign
+	}
+	cancelled_message_caption = "Caliphate claim halted"
+	cancelled_message_texts
+	{
+		text royal_new_sovereign = "Alas, the untimely demise of our {kingdom.king.title} has put an end to our attempts to become a caliphate. Let us pray that the newly appointed {kingdom.king} may one day fulfil his predecessor's ambitions."
+	}
+}
+
+def ClaimCaliphateConfirmMessage : Message
+{
+	caption = "Claim caliphate"
+	body = "Are you sure you wish to claim the holy title of caliph?{p}{p}If the claim is not accepted, crown authority, fame and relations with other Muslim kingdoms will decline."
+	buttons
+	{
+		text ok = "&Yes"
+		text cancel = "&Nevermind"
+	}
+}
+
+def AbandonCaliphateAction : KingdomAction //!!!currently hidden from the UI
+{
+	name = "Abandon Caliphate"
+	tooltip = "Abandon the Caliph title"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_RetreatBattle.png:Icon_RetreatBattle#2" //GUID:5f82c313bf274ca41ac672d7c6906ceb
+	
+	outcomes
+	{
+		main success = 100
+		{
+			message
+			{
+				text caption = "Caliphate Abandoned"
+				text text = "Our fame as a great caliphate once used to inspire our friends, while striking fear into the hearts of our enemies. Alas, that is now history, as our {kingdom.king.title} has publically abandoned his title of caliph."
+				icon = "Assets/UI/Elements/msg_icons/Icon_Message_Caliphate_Negative.png:Icon_Message_Caliphate_Negative#2" //GUID:2681446bd51c8104bb7e88c62996909a
+			}
+			also rel_change_with_muslim_friends = -200
+			{
+				float rel_treshold = 200
+				text bullet = "Relations with friendly Muslims: {outcome.amount:bonus_dark}"
+				amount = (outcome.value)
+			}
+			also rel_change_with_muslim_enemies = 200
+			{
+				float rel_treshold = -200
+				text bullet = "Relations with enemy Muslims: {outcome.amount:bonus_dark}"
+				amount = (outcome.value)
+			}
+			//also rel_change_with_muslim_enemies = +200
+			// {
+			// 	text bullet = "Relations with hostile muslims: {outcome.amount:bonus_dark}"
+			// 	amount = (outcome.value)
+			// }
+			also crown_authority = "AbandonCaliphateActionSuccess"
+			also opinion_change
+			{
+				opinion = "ClergyOpinion"
+				amount = -10
+				reason = "abandon_caliphate"
+			}
+		}
+	}
+}
+
+def CallForJihadAction : KingdomAction
+{
+	name = "Jihad"
+	tooltip = $[
+	"Call for a jihad and unite the Muslim world against a kingdom you lead a war against."
+	"[{p}Upkeep: {upkeep_jihad}{gold_icon}]"
+	]
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_CallForJihad.tga:Icon_KingdomAction_CallForJihad#2" //GUID:83659ad1f9a40884da9163721026ea01
+	
+	ai_validate = true
+	target = "kingdom"
+	cost
+	{
+		gold = (500 + SSum(own_kingdom, 1, 50))
+		piety = 1000
+	}
+	
+	
+	requirements
+	{
+		crown_authority = 0/5 //0 to 5 is valid
+		{
+			text name = "Crown Authority is above or equal to 0"
+		}
+		king_not_venerable //adult_or_younger_king -> changed by Veso
+		{
+			text name = "King is not venerable"
+		}
+		has_valid_target
+		{
+			text name = "We lead a war against a non-Muslim kingdom"
+		}
+		no_other_jihad
+		{
+			text name = "No other active jihad"
+		}
+	}
+}
+
+def EndJihadAction : KingdomAction
+{
+	name = "End Jihad"
+	tooltip = "End the jihad[ against {jihad_target}]"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_Siege_Assault.png:Icon_Siege_Assault#2" //GUID:eab494cf5e0ceb34283283129e32a3e2
+}
+
+def CloseTradeRouteAction : KingdomAction
+{
+	name = "Close Trade Route"
+	tooltip = "Close Trade Route"
+	icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_2#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+	
+	outcomes
+	{
+		main success = 100
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_2#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+				//text bullet = "{target} was executed"
+				buttons { audience; ok }
+				text caption = "Trade route closed"
+				case src_kingdom //player to others
+				{
+					def = DiplomacyOutcomeMessage
+					switch_value = (type)
+					case Manual
+					{
+						text text = [ "Frankly, we are disappointed by your decision to end our trade, {own_kingdom.king}.",
+									  "Suspending the trade with {own_kingdom} is bad news for us. We hope that you will reconsider.",
+									  "So, this concludes our trade? This is hardly a wise decision, but we expected it from {own_kingdom}.",
+									  "So, you don't want to trade with us anymore? Fine! {target_kingdom} has much more important trade partners anyway.",
+									  "To be honest, your goods always lacked the quality we are used to here in {target_kingdom}. We planned to end that trade route ourselves..."
+									]
+					}
+					case Auto
+					{
+						text text = ["The trade route between {own_kingdom} and {target_kingdom} is so neglected that we prefer to close it.",
+									 "Trade between our kingdoms is futile, {own_kingdom.king}. Our agreement is over!",
+									 "Trading with your kingdom seemed promising, yet our trade route is now barely holding together. We no longer consider {own_kingdom} as a trade partner.",
+									 "You are trying to trade with too many kingdoms, {own_kingdom.king}, more than {own_kingdom} traders can deal with. We are done trading with you.",
+									 "It seems you prefer other trade partners than us. So be it, but don't expect us to honor our trade agreement any longer.",
+									 "{own_kingdom} does not meet our demands and supply of goods. We are crossing you out from the list of our commercial partners."
+									]
+					}
+					text bullet = "Relations with {target_kingdom}: {rel_change_amount:bonus_dark}"
+				}
+				case target_kingdom //others to player
+				{
+					def = DiplomacyOutcomeMessage
+					switch_value = (type)
+					case Manual //player to player only
+					{
+						text text = ["We are not very pleased from the trade offers with your kingdom, so we decided to temporarily close cancel our trade agreement.",
+									 "Trading with {target_kingdom} turned out to be a great loss of time for us, {target_kingdom.king}. We are ending it here and now.",
+									 "We have trade partners with much higher value for {own_kingdom}, so sadly, we can no longer maintain our trade relations with {target_kingdom}."]
+					}
+					case Auto
+					{
+						text text = "{target_kingdom.king}, our merchants are overburdened right now and we just cannot maintain our side of our trade agreement. We have to close our trade route, at least temporarily."
+						
+					}
+					text bullet = "Relations with {src_kingdom}: {rel_change_amount:bonus_dark}"
+				}
+			}
+		}
+	}
+}
+
+
+def CloseTradeAgreementAction : KingdomAction
+{
+	name = "Trade agreement cancelled"
+	tooltip = "Trade agreement cancelled"
+	icon = "Assets/UI/Elements/msg_icons/msg_symbols.PNG:msg_symbols_2#1" //GUID:8885cf826a7679a41941e6a33445cc2f
+	
+	outcomes
+	{
+		main success = 100
+		{
+			message //auto message only, when no trade route open, AI to player only
+			{
+				buttons { audience; ok }
+				text caption = "Trade agreement cancelled"
+				def = null
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Opportunity_Merchant_Negative.png:Icon_Message_Opportunity_Merchant_Negative#2" //GUID:14ceb63c8a78b4d40bcfd924fd8d7135
+				case src_kingdom
+				{
+					def = DiplomacyOutcomeMessage
+					Kingdom kingdom = src_kingdom //the kingdom of the diplomatic message "kingdom"
+					text text = "We cant continue our trade with you."
+				}
+				case target_kingdom
+				{
+					def = DiplomacyOutcomeMessage
+					Kingdom kingdom = target_kingdom //the kingdom of the diplomatic message "kingdom"
+					text text = [ "We signed an agreement, but where are your traders, {their_kingdom.king}?! We are done waiting for them.",
+							 	   "You signed a trade agreement with {own_kingdom}, but what was the effect afterwards? None. That is the problem with diplomacy nowadays... Don't bother sending merchants our way.",
+							 	   "How do you expect us to honor our trade agreement, if you make no effort to even open a trade route. Forget it, we will not trade with {their_kingdom} anymore."
+							 	 ]
+				}
+			}
+		}
+	}
+}
+
+
+
+def AdvantagesClaimVictoryAction : KingdomAction
+{
+	name = "Claim Victory"
+	tooltip = "Proclaim the might and influence of your {kingdom.KingdomType} over the rest of the world by producing the most goods!"
+	
+	validate_prompts
+	{
+		text _multiplayer_non_grand_campaign = "Advantages victory is unattainable in this campaign mode"
+		text _not_all_advantages_met = "All advantages must be achieved first"
+	}
+}
+
+
+def UnExcommunicateAction : KingdomAction
+{
+	name = "Ask for forgiveness"
+	tooltip = "Repent and ask [{pope}|the pope] to forgive us and accept us back into the Catholic Church"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_UnExcommunicate.tga:Icon_CharacterAction_UnExcommunicate#2" //GUID:1813a5293bd859243ac844c0af11983f
+	
+	unique
+	
+	cost
+	{
+		piety = 1000
+		gold = (max( own_kingdom.S3, 5000 ))
+	}
+	
+	condition = (own_kingdom.is_catholic && own_kingdom.excommunicated)
+	enabled_condition = (!papacy.defeated)
+	
+	
+	prepare_duration = 60
+	prepare_status_text = "Asking [{pope}|the pope] for forgiveness"
+	
+	//validation_min_chance = 40 //does not work for non-merchant actions
+	prepare_message : KingdomActionMessage
+	{
+		caption = "{prepare_status_text}"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_ClaimCaliphateAction.tga:Icon_Message_ClaimCaliphateAction#2" //GUID:ddfdd1b1d6df3fe42b4597f52b2b4159
+		text completed = "[{success_check:if}We are no longer excommunicated!|Ask for Forgiveness failed]"
+		expire_time = 45
+	}
+	
+	// cancel_events
+	// {
+	// 	dying = (char.is_pope)
+	// }
+	
+	cancelled_message_caption = "Unexcommunication attempts halted"
+	
+	success_fail
+	{
+		sf_base = (15)
+		{
+			text name = "Base chance"
+			show_always = false
+		}
+		sf_relationship = (map(own_kingdom.relation_with_pope, -1000, 1000, -30, 30)) //(map(GetRelationship(own_character.kingdom, own_character.mission_kingdom),-1000,1000,0,50))
+		{
+			text name = "Our relations"
+		}
+		sf_class_level = (own_kingdom.king.class_level * 2)
+		{
+			text name = "King's level (x2)"
+		}
+		sf_cleric = (own_kingdom.king.is_cleric * 10)
+		{
+			text name = "King is Cleric"
+		}
+		sf_king_stars = (own_kingdom.king_religion_ability * 4)
+		{
+			text name = "King's Religion Ability (x4)"
+		}
+		sf_time_passed = (map_clamp(own_kingdom.excommunicated_duration, 0, 3600, -100, 0))
+		{
+			text name = "Time for contemplation"
+		}
+		sf_wars_with_catholics = -20/-100
+		{
+			text name = "Wars with Catholics"
+		}
+		sf_other_excommunicated = ((own_kingdom.religion.excommunicated_count - 1) * 5)
+		{
+			text name = "Other excommunicated kingdoms (x5)"
+		}
+	}
+	
+	outcomes
+	{
+		main success //(map(own_kingdom.relation_with_pope, 0, 100) + MapCL(owner, 0, 30)) //add also skills, time since excommunication, 
+		{
+			message
+			{
+				def = null //shown via OwnKingdomUnexcommunicated message
+			}
+		}
+		
+		option fail
+		{
+			message
+			{
+				def = ActionOutcomeMessage
+				text caption = "Pope refused our unexcommunication"
+				text text = "[{pope}|The pope] refused to accept our plea for forgiveness. He agreed that we are on the right path but there is still a long way to go before we are accepted back into the Catholic world."
+			}
+		}
+	}
+	
+	cancel_events
+	{
+		own_kingdom religion_changed = (!condition)
+		own_kingdom excommunicated = (!condition)
+		own_kingdom unexcommunicated = (!condition)
+		papacy_destroyed
+		{
+			sender = (papacy)
+			message = "kingdom_destroyed"
+		}
+	}
+	
+	cancelled_message_texts
+	{
+		text religion_changed = "Since we are now {own_kingdom.religion:ans}, {owner} had to abandon his task."
+		text excommunicated = "Since [{pope}|the pope] excommunicated us, {owner} had to abandon his task."
+		text unexcommunicated = "Since we are no longer excommunicated, {owner} had to abandon his task."
+		text papacy_destroyed = "Since {papacy} no longer exists, {owner} had to abandon his task."
+	}
+	
+	validate_prompts
+	{
+		text _enabled_condition = "{clr:red_bright}{papacy} does not exist{/clr}"
+	}
+	
+}

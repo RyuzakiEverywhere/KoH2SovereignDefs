@@ -1,0 +1,34 @@
+﻿def PlottingSkill : Skill
+{
+	name = "Plotting"
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Plotting_1.tga:UI_Icon_Skill_Plotting_1#2", //GUID:930dafc77a1beef428f99c03e8058ab8
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Plotting_2.tga:UI_Icon_Skill_Plotting_2#2", //GUID:05dcc3ff72c47f04d9fcaabcb74bcee0
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Plotting_3.tga:UI_Icon_Skill_Plotting_3#2" //GUID:219572cabaa731847ab2c863371bf70b
+	]
+	tooltip = "Greatly enchances a spy's ability to spread intrigue within his targets, in addition to thwarting potential foreign plotting."
+}
+
+extend Skill.effects
+{
+	skill PlottingSkill
+	{
+		
+		class Spy
+		{
+			slot_type = "primary"
+			mod cs_plotting_cost_perc = -10/-15/-25
+		}
+
+		class Diplomat
+		{
+			slot_type = "secondary"
+			mod cs_defpact_invplan_cost_and_upkeep_reduction_perc = 20/30/50
+		}
+	
+		tag Prison
+		{
+			action PlotToEscapeAction
+		}
+	}
+}

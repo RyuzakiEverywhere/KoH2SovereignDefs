@@ -1,0 +1,53 @@
+﻿def CourtesySkill : Skill
+{
+	name = "Courtesy"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Courtesy_1.png:UI_Icon_Skill_Courtesy_1#2" //GUID:9d32a91a21f03684ebb6bb9161b66446
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Courtesy_1.tga:UI_Icon_Skill_Courtesy_1#2", //GUID:8fa7d349fdfc48b4daea966a67aec9df
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Courtesy_2.tga:UI_Icon_Skill_Courtesy_2#2", //GUID:867ee51189f709d4ba3a39dbcc73f5c6
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Courtesy_3.tga:UI_Icon_Skill_Courtesy_3#2" //GUID:6612d9e2dc446234d81f6cac501a2cac
+	]
+	tooltip = "Politeness, often times neglected by some, can be helpful in many diplomatic circumstances."
+}
+
+extend Skill.effects
+{
+	skill CourtesySkill
+	{
+		Default
+		{
+			mod cs_mission_passive_rel_increase = 3/5/10 //per minute
+		}
+
+		tag Govern
+		{
+			mod cs_influence_per_governed_keep = 10/15/20
+		}
+		
+		class Diplomat
+		{
+			slot_type = "primary"
+			mod cs_diplomat_improve_relations_perc = 3/5/10
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_commerce_flat = 1/2/3
+			}
+		}
+		
+		class Spy
+		{
+			opportunity PuppetAssistElopementAction
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+		}
+	}
+}

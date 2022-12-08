@@ -1,0 +1,163 @@
+﻿def SalvoData
+{
+	prefab arrow_model = "Assets/Units/Arrow/Arrow.prefab" //GUID:1ca28fcf8540f1e4ca1701147fb62a3b
+	texture arrow_trail_texture = "Assets/Units/Arrow/ParticleFirecloud.psd" //GUID:18b40abc9100cdb4c9f247918ad1b10b
+	prefab projectile_particles
+	
+	// while flying
+	string arrow_shoot_sound_effect = "event:/sound_effects/battleview/archers/shooting_arrows_bow"
+	// on hit
+	string arrow_impact_sound_effect = "event:/sound_effects/battleview/archers/arrows_impact"
+	// at start + small delay
+	string reload_sound_effect
+	// at start, interrupts reload/release
+	string release_sound_effect
+	float reload_sound_delay = -1
+	bool splash_damage = false
+	float projectile_radius = 0.1
+	float min_shoot_range = 15 //minimum range of salvo
+	float max_shoot_range = 60 //maximum range of salvo
+	float max_shoot_angle = 55 //maximum angle with which arrow can be shoot (in degrees)
+	float min_shoot_angle = -60 //minimum angle with which arrow can be shoot (in degrees)
+	float shoot_height = 1 //offset for the start arrow position from center of shooting object
+	float min_shoot_speed = 18 //minimal initial shoot speed, shooting angle depends on this speed and distance to the target,					
+	float shoot_speed_randomization_mod = 0.05 //how much shoot speed could be modified, final speed value = shoot_speed - (rand(0,1)* shoot_speed * shoot_speed_randomization_mod)
+	float collision_check_offset = -1 //value added to the middle points when checking salvo passability
+	float max_end_position_offset = 3 //how much end position could differ from target position (randomized from 0 to the value)
+	float gravity = 10 //gravity value used for calculating parabola, do not use 0 value!
+	float friendly_fire_mod = 0.5
+	bool can_hit_fortification = false
+	float arrows_per_troop = 1
+	float explosion_force = -1
+	bool draw_after_landing = true
+}
+
+def ArrowSalvo : SalvoData
+{
+	arrow_model = "Assets/Units/Arrow/Arrow.prefab" //GUID:1ca28fcf8540f1e4ca1701147fb62a3b
+	arrow_trail_texture = "Assets/Units/Arrow/ParticleFirecloud.psd" //GUID:18b40abc9100cdb4c9f247918ad1b10b
+	
+	arrow_shoot_sound_effect = "event:/sound_effects/battleview/archers/shooting_arrows_bow"
+	arrow_impact_sound_effect = "event:/sound_effects/battleview/archers/arrows_impact"
+	reload_sound_effect = "event:/sound_effects/battleview/archers/reloading_arrows_bow"
+	reload_sound_delay = -1
+}
+
+def JennisarySalvo : ArrowSalvo
+{
+	max_shoot_range = 70
+}
+
+def CrossboltSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Crossbowman_Special_01.prefab" //GUID:07b8b2740d7d2d346a1c9f41c2090e69
+	max_shoot_angle = 30
+	arrow_shoot_sound_effect = "event:/sound_effects/battleview/archers/shooting_arrows_crossbow"
+	reload_sound_effect = "event:/sound_effects/battleview/archers/reloading_arrows_crossbow"
+	reload_sound_delay = 0
+	min_shoot_speed = 22
+}
+
+def LongbowSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Longbowman_Special_01.prefab" //GUID:99c293f52a907f04ba1f358ce4d41189
+	max_shoot_range = 80
+	min_shoot_speed = 20
+}
+
+def ShortbowSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Horseman_Archer_CE_01.prefab" //GUID:7fb7e85f65e9a2e4f8573ee94246f64d
+	min_shoot_range = 10
+	max_shoot_range = 40
+}
+
+def ShortbowSteppeSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Steppe_Cavalry_01.prefab" //GUID:7614b20774c7cb1448c6068198d1459a
+	min_shoot_range = 10
+	max_shoot_range = 50
+}
+
+def ShortbowMongolSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Mongol_Special_01.prefab" //GUID:7ad9505697db43749980a27c3515b554
+	min_shoot_range = 10
+	max_shoot_range = 50
+}
+
+def HeavybowMongolSalvo : ArrowSalvo
+{
+	arrow_model = "Assets/Units/Arrow/Arrow_Mongol_Special_01.prefab" //GUID:7ad9505697db43749980a27c3515b554
+	min_shoot_range = 10
+	max_shoot_range = 45
+}
+
+def CatapultSalvo : SalvoData
+{
+	arrow_model = "Assets/Units/BV_Trebuchet_01/Rock_00.prefab" //GUID:54ef26bc8a27e8e419efe83386cf90b1
+	// on impact
+	projectile_particles = "Assets/Units/BV_Catapult/CollisionExplosion 2.prefab" //GUID:d9426dff16c07df45a9d696c5975d63b
+	
+	arrow_shoot_sound_effect = "event:/sound_effects/battleview/siege_equipment/projectile/catapult"
+	arrow_impact_sound_effect = "event:/sound_effects/battleview/siege_equipment/impact/catapult"
+	reload_sound_effect = "event:/sound_effects/battleview/siege_equipment/reloading/catapult"
+	release_sound_effect = "event:/sound_effects/battleview/siege_equipment/release/catapult"
+	
+	// while flying
+	prefab particles = "Assets/Units/BV_Catapult/Fireball 1.prefab" //GUID:18f0a27daacc46843bfc4844f6c0569e
+	
+	splash_damage = true
+	projectile_radius = 2
+	min_shoot_range = 40
+	max_shoot_range = 100
+	float shoot_height = 5.25
+	float shoot_offset = 1
+	arrow_trail_texture = ""
+	can_hit_fortification = true
+	min_shoot_speed = 24
+	arrows_per_troop = 4
+	explosion_force = 4
+	random_shoot_time_offset = 0
+
+	draw_after_landing = false	
+}
+
+def RockSalvo : SalvoData
+{
+	arrow_model = "Assets/Units/BV_Trebuchet_01/Rock_00.prefab" //GUID:54ef26bc8a27e8e419efe83386cf90b1
+	// on impact
+	projectile_particles = "Assets/Units/BV_Trebuchet_01/CollisionExplosion 1.prefab" //GUID:c9c26db812f72db40b790f0419585cc6
+	
+	arrow_shoot_sound_effect = "event:/sound_effects/battleview/siege_equipment/projectile/trebuchet"
+	arrow_impact_sound_effect = "event:/sound_effects/battleview/siege_equipment/impact/trebuchet"
+	reload_sound_effect = "event:/sound_effects/battleview/siege_equipment/reloading/trebuchet"
+	release_sound_effect = "event:/sound_effects/battleview/siege_equipment/release/trebuchet"
+	
+	// while flying
+	prefab particles = "Assets/Units/BV_Trebuchet_01/Fireball.prefab" //GUID:d1f77a8c5a6a30749b5fbcd9a3e3f3ad
+	
+	splash_damage = true
+	projectile_radius = 2
+	min_shoot_range = 70
+	max_shoot_range = 160
+	float shoot_height = 15
+	float shoot_offset = 1
+	arrow_trail_texture = ""
+	can_hit_fortification = true
+	min_shoot_speed = 36
+	explosion_force = 4
+	random_shoot_time_offset = 0
+	
+	draw_after_landing = false	
+}
+
+def TowerSalvo : ArrowSalvo
+{
+	min_shoot_range = 1
+	max_shoot_range = 80 //keep this not less than longbowmen
+	shoot_height = 0 // manually set from each prefab grid
+	float height_randomized_offset = 0.1 //how much height position could differ from starting position (randomized from 0 to the value)
+	float width_randomized_offset = 2 //how much width position could differ from starting position (randomized from -value to the value)
+	
+}

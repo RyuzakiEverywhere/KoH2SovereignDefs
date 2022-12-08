@@ -1,0 +1,23 @@
+﻿def ConcealmentSkill : Skill
+{
+	name = "Concealment"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Concealment_1.png:UI_Icon_Skill_Concealment_1#2" //GUID:034d04cb26cd9ad4cb2a50eb21784a0f
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Concealment_1.tga:UI_Icon_Skill_Concealment_1#2", //GUID:bdde243b441418f41a676a6722612360
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Concealment_2.tga:UI_Icon_Skill_Concealment_2#2", //GUID:67f0f01750be31949b1d67e145f1fa20
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Concealment_3.tga:UI_Icon_Skill_Concealment_3#2" //GUID:ac3f40630d1f3eb44be3b2963b43b114
+	]
+	tooltip = "Reduces the likelihood of a spy to get caught while performing espionage against others."
+}
+
+extend Skill.effects
+{
+	skill ConcealmentSkill
+	{
+		class Spy
+		{
+			slot_type = "primary"
+			mod cs_spy_reveal_chance_reduction_perc = 5/10/15
+		}
+	}
+}

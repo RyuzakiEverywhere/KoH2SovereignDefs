@@ -1,0 +1,38 @@
+﻿def RhetoricSkill : Skill
+{
+	name = "Rhetoric"
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Rhetoric_1.tga:UI_Icon_Skill_Rhetoric_1#2", //GUID:78a317b20a1dac34ba8ac2233b441cfe
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Rhetoric_2.tga:UI_Icon_Skill_Rhetoric_2#2", //GUID:2a2bb11370437b94e80d3e765286e45e
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Rhetoric_3.tga:UI_Icon_Skill_Rhetoric_3#2" //GUID:6137d6deda29bf4478646f9442a58657
+	]
+	tooltip = "A silver tongue can open more doors than even the sharpest sword."
+}
+
+extend Skill.effects
+{
+	skill RhetoricSkill
+	{
+		Default
+		{
+		}
+		
+		tag Govern
+		{
+			governed_realm_mod rs_governor_books = 1/2/3
+		}
+		
+		class Diplomat
+		{
+			slot_type = "primary"
+			mod cs_diplomat_improve_opinions_CTS = 3/5/10
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+			kingdom_mod ks_culture_from_traditions = 10/15/20
+			mod cs_conversion_rate_perc = 10/15/25
+		}
+	}
+}

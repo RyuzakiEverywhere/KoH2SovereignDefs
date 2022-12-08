@@ -1,0 +1,44 @@
+def CoATemplates
+{
+	3x1_diagonal {
+		0 : CoatOfArmsPattern {
+			point position = 0, 0
+			point pivot = 0, 0
+			point scale = 0.1, 0.1
+		}
+		1 : CoatOfArmsPattern {
+			point pivot = 0.5, 0.5
+			point position = 0.5, 0.5
+			point scale = 0.1, 0.1
+		}
+		2 : CoatOfArmsPattern {
+			point pivot = 1, 1
+			point position = 1, 1
+			point scale = 0.1, 0.1
+		}
+	}
+	centered {
+		0 : CoatOfArmsPattern {
+			point position = 0.5, 0.5
+			point pivot = 0.5, 0.5
+			point scale = 0.1, 0.1
+		}
+	}
+	triangle_middle {
+		0 : CoatOfArmsPattern {
+			point pivot = 0.5, 0.5
+			point position = 0.25, 0.75
+			point scale = 0.1, 0.1
+		}
+		1 : CoatOfArmsPattern {
+			point pivot = 0.5, 0.5
+			point position = 0.5, 0.25
+			point scale = 0.1, 0.1
+		}
+		2 : CoatOfArmsPattern {
+			point pivot = 0.5, 0.5
+			point position = 0.75, 0.75
+			point scale = 0.1, 0.1
+		}
+	}
+}

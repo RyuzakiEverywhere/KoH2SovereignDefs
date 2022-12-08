@@ -1,0 +1,43 @@
+﻿def SiegecraftSkill : Skill
+{
+	name = "Siegecraft"
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Siegecraft_1.tga:UI_Icon_Skill_Siegecraft_1#2", //GUID:d64eaa19283d83740b8ccd14a2435355
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Siegecraft_2.tga:UI_Icon_Skill_Siegecraft_2#2", //GUID:fc46d5bdeaa3ad54bbc1459da28025c3
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Siegecraft_3.tga:UI_Icon_Skill_Siegecraft_3#2" //GUID:dba7963ef861258408838e516b44fa93
+	]
+	tooltip = "Proper knowledge of siege machinery and tactics enables both efficient besieging and stronger defenses."
+}
+
+extend Skill.effects
+{
+	skill SiegecraftSkill
+	{
+		Default
+		{
+			mod cs_army_defense_during_siege_perc = 10/15/20
+			mod cs_unlock_catapults = 1
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+			mod cs_siege_attack_perc = 5/10/15
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+	}
+}

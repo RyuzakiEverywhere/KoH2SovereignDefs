@@ -1,0 +1,54 @@
+﻿def BargainSkill : Skill
+{
+	name = "Bargain"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bargain_1.png:UI_Icon_Skill_Bargain_1#2" //GUID:c1cd0fcbbe6877a4a8e707e483eff3d3
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bargain_1.tga:UI_Icon_Skill_Bargain_1#2", //GUID:3d0f777065339c7449c6a8875142e059
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bargain_2.tga:UI_Icon_Skill_Bargain_2#2", //GUID:be6cd8d8dd973d04bb68d249223db328
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bargain_3.tga:UI_Icon_Skill_Bargain_3#2" //GUID:78f1bec32e735d244868a7e0c62daf1c
+	]
+	tooltip = "Teaches a knight the valuable concept of weighing all pros and cons, and then adding some more on one side of the scale."
+}
+
+extend Skill.effects
+{
+	skill BargainSkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_gold_in_town_per_good = 1/2/3
+		}
+		
+		class Merchant
+		{
+			slot_type = "primary"
+			mod cs_export_food_gold_increase_perc = 20/30/50
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_levy_per_village = 1/2/3
+			}
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+			mod cs_diplomat_actions_upkeep_reduction_perc = 10/15/25
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+			mod cs_bribe_cost_upkeep_reduction_perc = 10/15/20
+		}
+		
+		tag King
+		{
+			mod cs_hire_knight_cost_discount_perc = 50
+		}
+	}
+}

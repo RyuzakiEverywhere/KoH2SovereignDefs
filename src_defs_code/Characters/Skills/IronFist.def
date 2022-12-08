@@ -1,0 +1,45 @@
+﻿def IronFistSkill : Skill
+{
+	name = "Iron Fist"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_IronFist_1.png:UI_Icon_Skill_IronFist_1#2" //GUID:9799129d4f502f545b547a9fdc300f6c
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_IronFist_1.tga:UI_Icon_Skill_IronFist_1#2", //GUID:8a4eb0e537ff8d947a624126b30ab128
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_IronFist_2.tga:UI_Icon_Skill_IronFist_2#2", //GUID:140b78f0b90428c4e87acd728fcbf24f
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_IronFist_3.tga:UI_Icon_Skill_IronFist_3#2" //GUID:04a8715a2a024e34da5554f26adf1238
+	]
+	tooltip = "A ruthless approach holds its risks but also gets things done, especially in the hands of a skilled commander, diplomat or spy."
+}
+
+extend Skill.effects
+{
+	skill IronFistSkill
+	{
+		Default
+		{
+			mod cs_enemy_rebels_morale = -1/-3/-5
+			mod cs_pillage_gold_perc = 20/50/100
+			mod cs_gold_from_rebellions_perc = 20/50/100
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+			mod cs_establish_order_CTS = 10/15/25
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		tag King
+		{
+			kingdom_mod ks_rebel_morale = -3
+		}
+	}
+}

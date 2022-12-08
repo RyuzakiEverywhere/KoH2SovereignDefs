@@ -1,0 +1,275 @@
+﻿def Mercenary
+{
+	//visual 
+	// move kingodm related stuff to Mercenary kingodm def!
+	color map_color = "218,252,213" //DAFDD5FF
+	color primary_color = "187,43,43" //BC2B2BFF
+	color secondary_color = "245,54,54" //F53636FF
+	int coat_of_arms_index = 479
+	string kingdom_key = "MercenaryFaction"
+	
+	sprite icon
+	prefab banner = "Assets/Units/Banners/banner_mercenary.prefab" //GUID:b5e8c9d30fc2e9c40aa9db7ea2512b89
+	prefab banner_loyal = "Assets/Units/Banners/banner_mercenary_loyal.prefab" //GUID:fffaa6983599d5e4fa59fd78970593ac
+	prefab banner_hired = "Assets/Units/Banners/banner_mercenary_hired.prefab" //GUID:4939fa865b8350e499d0cac733d6ed80
+	prefab tents = "Assets/Europe/Tents/Mercenary/Camping_Mercenaries.prefab" //GUID:a6baa4c9187de68409d54900ce012ffc
+	
+	
+	//spawn
+	int max_mercs = 50 //total max mercenaries 
+	int max_mercs_per_realm = 1 //max mercenaries currently placed in one realm
+	int max_mercs_per_kingdom = 3 //max mercenaries currently placed in one kingdom
+	
+	float spawn_chance = 0.75 // % chance to spawn in a random of 0-100
+	float spawn_period = 60 //sec
+	float spawn_initial_wait = 1800 //sec
+	
+	//init
+	float refresh_interval_min = 600
+	float refresh_interval_max = 1200
+	int parent_realm_search_limit = 25
+	inf units_max_cnt = 8 //squads count limit
+	int units_max_tier = 2 //0 - Milita, 1 - single prerequsite, 2 -  two or more prerequsites
+	bool has_leader = false
+	
+	float intender_min_distance = 50
+	float buyer_max_distance = 8.5 // the maximum distance at which a buyer is considered valid
+	
+	text caption = "Mercenary Camp"
+	text description = "Bring an army to buy troops"
+	text description_headless_other = "These troops belonged to {former_owner}. Bring an army to hire individual troops."
+	text description_own_army = "Bring an army to gather your troops"
+	text description_current_action = "[{army.is_fleeing:if}Fleeing from enemies|In battle near {army.battle.realm}|Heading to join battle near {battle_target.realm}|Heading to siege {target_castle}|Heading to siege {target_keep}|Heading to plunder {target_settlement}|Heading to fight {target_army:short}|Resting]"
+	
+	int relocation_realm_depth = 2
+	float relocate_base_weight = 100
+	float relocate_wars_weight = 200
+	float relocate_merc_in_k_weight = 100
+	float relocate_merc_camps_mod = 0.2
+	
+	float dismiss_price_mod = 0.1
+	float price_increase_per_level = 25 // it's a percentage
+	float price_hire_mod = 1
+	float price_hire_unit_former_kingdom_discount_mod = 0.25
+	int attack_kingdom_max_distance = 5 // realms around mercenary's current location
+	
+	// on despawn timer
+	float move_chance_per_existing_merc_world = -5
+	float base_chance_move = 100
+	float min_chance_move = 50
+	float chance_become_rebel_per_negative_CA = 5
+	float supplies_consumption_rate_mod = 0
+	
+	
+	float fatigue_min = 0
+	float fatigue_cap = 1
+	float fatigue_loss = 0.002 // copied from rebels was 0.01, but rebels do that on a 5 second tick, this is per second
+	float fatigue_field = 0.2
+	float fatigue_pillage = 0.25
+	float fatigue_siege = 1
+	float fatigue_threshold = 0.65
+	
+	int max_level = 15
+	float exp_per_level = 100
+	int min_starting_level = 0
+	int max_starting_level = 4
+	
+	float heal_timer_interval = 30
+	float healing_rate = 0.05 // damage per heal timer tick
+	float reinforcement_starting_health = 0.5 // units that are created while the mercenary is healing start at (1 - this) damage
+	
+	// target pick
+	// these all get combined if they're valid - eg a merc could choose to join a battle where an allied kingdom is attacking an enemy keep - that's only a 1.25 attractiveness
+	// but if we're the ones attacking an enemy keep, that's a 1.25 * 100 = 125
+	float target_pick_defend_plunder = 2
+	float target_pick_defend_keep = 3
+	float target_pick_defend_town = 4
+	float target_pick_attack_plunder = 1
+	float target_pick_attack_keep = 1.25
+	float target_pick_attack_town = 1.5
+	float target_pick_help_own_kingdom_in_battle = 15 // our kingdom is either the attacker or defender in a battle
+	float target_pick_attack_army = 1
+	float target_pick_attack_army_manpower_ratio_max = 2
+	float target_pick_distance = 10
+}
+
+def MercenaryCommand
+{
+	text description
+	text text
+}
+
+def DismissCommand : MercenaryCommand
+{
+	description = "Disbanding"
+	text = "Dismiss {mercenary_leader} and let go of his army's services"
+}
+
+def MercenaryMission
+{
+	resource cost
+	resource upkeep
+	resource upkeep_for_tooltip
+	bool can_attack_rebels = false
+	bool can_attack_war_kingdoms = false
+	bool can_attack_crusade = false
+	
+	bool validate = (valid_in_lands && valid_mission)
+	bool valid_mission = true // check this one even after being hired, to see if the mission needs to stop (eg wars over, no rebels)
+	bool valid_in_lands = (merc.is_hired || merc.army.realm_in.kingdom == hire_kingdom)
+	
+	//only after being hired, check if the kingdom can afford this merc
+	bool validate_resources = (hire_kingdom.resources.gold > 0 || hire_kingdom.kingdom_gold_balance > 0)
+	
+	text caption = "Hire"
+	text description = $[
+	"[{hire_description}{p}{p}]"
+	"[{valid:if}Cost: {cost}{p}]"
+	"[{valid:if}Initial upkeep: {upkeep_for_tooltip}{p}]"
+	"[{valid_mission:if_not}{clr:red}{invalid_mission_description}{/clr}{p}]"
+	"[{valid_in_lands:if_not}{clr:red}{invalid_realm_kingdom}{/clr}]"
+	]
+	text hire_description = "Hire"
+	text invalid_mission_description
+	text invalid_realm_kingdom = "You cannot hire entire mercenary armies, situated in foreign lands."
+	
+}
+
+def HelpInWars : MercenaryMission
+{
+	text caption = "Hire for wars"
+	float base_cost = (merc.total_cost.gold * (1 + 0.1 * merc.army.leader.class_level))
+	cost
+	{
+		gold = (ceil(0.3 * base_cost * (0.8 + hire_kingdom.num_wars * 0.2) * (1 + 0.25 * hire_kingdom.num_mercenaries), 100))
+	}
+	upkeep
+	{
+		gold = (ceil(base_cost * 0.004 * (1 + 0.25 * (hire_kingdom.num_mercenaries-1)), 5))
+	}
+	upkeep_for_tooltip //to include the number increase
+	{
+		gold = (ceil(base_cost * 0.004 * (1 + 0.25 * hire_kingdom.num_mercenaries), 5))
+	}
+	
+	valid_mission = (hire_kingdom.num_wars > 0)
+	can_attack_war_kingdoms = true
+	hire_description = "Hire the entire army to help in our wars." //{upkeep.gold}
+	invalid_mission_description = "Our kingdom has no wars."
+	
+	// only show a message if he automatically stopped working for us, dismissing via button shouldn't show a message unless he rebels
+	dismiss_outcomes
+	{
+		main become_rebel = (-army.kingdom.crown_authority * 3 + 20)
+		{
+			condition = (mission_valid && !army.realm_in.is_sea_realm)
+			message
+			{
+				case no_money = (dismiss_reason == "no_money")
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries rebelled"
+					text text = "The minute we ran out of coin those greedy mercenaries that were aiding us became rebels and no longer obey our orders."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+				}
+				case default
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries rebelled"
+					text text = "Those cunning maggots we paid to aid us in our war got even greedier and no longer obey our orders - they became rebels and do as they please now."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+				}
+			}
+		}
+		option become_normal
+		{
+			message
+			{
+				case no_money = (dismiss_reason == "no_money")
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries refuse to fight"
+					text text = "Without regular payments, the mercenaries that we hired to help us in war decided they will no longer fight. Whoever offers enough coin can now hire them on their side."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Mercenaries_Negative.png:Icon_Message_Mercenaries_Negative#2" //GUID:8beb31dbf353e0140873cff2cfd9334f
+				}
+				case mission_invalid = (!manually_dismissed)
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries dismissed"
+					text text = "As we are now at peace, we dismissed the mercenaries we hired to fight on our side. They are now resting and looking for new contracts."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Mercenaries_Negative.png:Icon_Message_Mercenaries_Negative#2" //GUID:8beb31dbf353e0140873cff2cfd9334f
+				}
+			}
+		}
+	}
+}
+
+def HelpWithRebels : MercenaryMission
+{
+	text caption = "Hire against rebels"
+	float base_cost = (merc.total_cost.gold * (1 + 0.1 * merc.army.leader.class_level))
+	
+	cost
+	{
+		gold = (ceil(0.15 * base_cost * (0.8 + hire_kingdom.num_rebellions * 0.2) * (1 + 0.25 * hire_kingdom.num_mercenaries), 100))
+	}
+	upkeep
+	{
+		gold = (ceil(base_cost * 0.004 * (1 + 0.25 * (hire_kingdom.num_mercenaries-1)), 5))
+	}
+	upkeep_for_tooltip //to include the number increase
+	{
+		gold = (ceil(base_cost * 0.004 * (1 + 0.25 * hire_kingdom.num_mercenaries), 5))
+	}
+	valid_mission = (hire_kingdom.num_rebellions > 0)
+	can_attack_rebels = true
+	hire_description = "Hire the entire army to fight our rebels."
+	invalid_mission_description = "There are no rebellions within our kingdom."
+	
+	dismiss_outcomes
+	{
+		main become_rebel = (-army.kingdom.crown_authority * 3 + 20)
+		{
+			condition = (mission_valid && !army.realm_in.is_sea_realm)
+			
+			message
+			{
+				case no_money = (dismiss_reason == "no_money")
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries rebelled"
+					text text = "As our treasury is empty, the mercenaries we recruited to fight against the rebels in our kingdom turned rebels themselves and now our troubles are even bigger!"
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+				}
+				case default
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries rebelled"
+					text text = "That bunch of bandits that called themselves 'mercenaries' turned against us and started pillaging the lands themselves!"
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+				}
+			}
+		}
+		option become_normal
+		{
+			message
+			{
+				// only show a message if he automatically stopped working for us, dismissing via button shouldn't show a message
+				case mission_invalid = (!manually_dismissed)
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries dismissed"
+					text text = "As there are no longer rebels within our kingdom, we dismissed the mercenaries we hired to fight against them. They are now resting, ready for new contracts."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Mercenaries_Negative.png:Icon_Message_Mercenaries_Negative#2" //GUID:8beb31dbf353e0140873cff2cfd9334f
+				}
+				case no_money = (dismiss_reason == "no_money")
+				{
+					def = OutcomeMessage
+					text caption = "Mercenaries refuse to fight"
+					text text = "As we can no longer afford the services of our mercenaries, they refuse to take orders from us and fight our rebels."
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_Mercenaries_Negative.png:Icon_Message_Mercenaries_Negative#2" //GUID:8beb31dbf353e0140873cff2cfd9334f
+				}
+			}
+		}
+	}
+}

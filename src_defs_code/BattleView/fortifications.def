@@ -1,0 +1,71 @@
+﻿def Fortification
+{
+	float base_health = 1000
+	float hp_per_siege_defense_perc = 0.5
+	float max_health = (base_health * (100 + siege_defense * hp_per_siege_defense_perc) / 100)
+	float starting_damage = ((max_siege_defense - siege_defense) / max_siege_defense) // 0-1
+	float min_damage_per_fortification = 0
+	float max_damage_per_fortification = 1.15
+	float starting_health = (max(0, max_health * (1 - starting_damage * RndF(min_damage_per_fortification,max_damage_per_fortification))))
+	
+	string type = "Wall"
+	prefab healthbar_prefab = "Assets/UI/BattleView/UIP_FortificationHealthbar.prefab" //GUID:04a447a7f396f414c8d02853da4277ef
+	bool can_be_attacked = true
+	string attacking_melee_sound
+	string destroyed_wood_sound = "event:/sound_effects/battleview/fortification/destroyed_wooden"
+	string destroyed_stone_sound = "event:/sound_effects/battleview/fortification/destroyed_stone"
+	string destroyed_combined_sound = "event:/sound_effects/battleview/fortification/destroyed_default"
+	string gate_destroyed_wood_sound = "event:/sound_effects/battleview/gate/destroyed/wooden"
+	string gate_destroyed_metal_sound = "event:/sound_effects/battleview/gate/destroyed/metal"
+	
+	float max_secondary_health = 1500 // for gates
+	
+	float chance_ignore_marshal = 50
+	float chance_target_closest_archer = 0
+	float chance_target_closest_cavalry = 0
+	float chance_target_already_targetted_squad = 25 //this is reversed, 0 means always target closest, 100 - never attack engaged
+	float chance_ignore_cavalry = 0
+}
+
+
+def Ladder
+{
+	prefab prefab = "Assets/BattleView/Prefabs/Ladders/WallLadderVisual.prefab" //GUID:95158e04b9fcf1b40860b75d20fd41a8
+	prefab preview_prefab = "Assets/BattleView/Prefabs/Ladders/LadderPreview.prefab" //GUID:529c9f78f9e55ad4683dc24a0a22abc3
+	float ladder_leftover_duration = 30
+	float max_t_appear = 20 // appear if the squad is within 10m on his path
+}
+
+def Wall : Fortification
+{
+	base_health = 1000 // 10 hits from a trebuchet, assuming that none of them miss
+	type = "Wall"
+}
+
+def Gate : Fortification
+{
+	base_health = 1000
+	type = "Gate"
+	string attacking_melee_sound = "event:/sound_effects/battleview/units/attacking"
+}
+
+def RangedFortification : Fortification
+{
+	string salvo_def = "ArrowSalvo"
+	float shoot_interval = 4
+	float CTH = 20
+	type = "Tower"
+	int num_arrows = (5 + 0.5 * realm.rs_attrition_damage)
+	base_health = 400
+
+	chance_ignore_cavalry = 25
+}
+
+def Tower : RangedFortification
+{
+	string salvo_def = "TowerSalvo"
+	float shoot_interval = 4
+	float CTH = 40 //(15 + 0.5 * realm.rs_attrition_damage)//20
+	int num_arrows = (5 + 0.5 * realm.rs_attrition_damage)
+	//bool can_be_attacked = false
+}

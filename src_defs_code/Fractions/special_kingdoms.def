@@ -1,0 +1,74 @@
+// runtime created service kingdoms 
+
+def FactionKingdom
+{
+	// visual 
+	prefab banner 
+	int map_color = 0
+	int primary_color = 1
+	int secondary_color = 2
+
+	Nobility nobility_key = "OutlawNobility"
+	string nobility_level = "Duchy" { enum { Duchy; Kingdom; Empire } }
+	Names names_key = "EnglishNames"
+
+	string fraction_type = "Faction" { enum { Regular; Faction; RebelFaction; LoyalistsFaction; ReligiousFaction; Crusade; Exile } }
+
+}
+
+def ExileFaction : FactionKingdom
+{
+	// visual 
+	map_color = 0
+	primary_color = 1
+	secondary_color = 2
+	fraction_type = "Exile"
+	nobility_key = "ExileNobility"
+}
+
+def RebelsFaction : FactionKingdom
+{
+	primary_color = 0
+	map_color = 1
+	secondary_color = 2
+	fraction_type = "RebelFaction"
+}
+
+def ReligiousRebelsFaction : RebelsFaction
+{
+	// difrent coat of arms for religus rebels ?
+	fraction_type = "ReligiousFaction"
+}
+
+def LoyalistsFaction : FactionKingdom
+{
+	map_color = 0
+	primary_color = 1
+	secondary_color = 2
+	fraction_type = "LoyalistsFaction"
+}
+
+def CrusadeFaction : FactionKingdom
+{
+	map_color = 8
+	primary_color = 8
+	secondary_color = 9
+	
+	fraction_type = "Crusade"
+	nobility_key = "CrusaderNobility"
+	nobility_level = "Kingdom" 
+	names_key = "EnglishNames"
+	available_units_set = "CrusadeUnitSet"
+}
+
+def MercenaryFaction : FactionKingdom
+{
+	map_color = 21
+	primary_color = 21
+	secondary_color = 22
+
+	fraction_type = "Faction"
+	nobility_key = "Nobility"
+	nobility_level = "Duchy" 
+	names_key = "EnglishNames"
+}

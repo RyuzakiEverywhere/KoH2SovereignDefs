@@ -1,0 +1,74 @@
+﻿def Rebellion
+{
+    text name = "Rebellion"
+	int max_rebels = 4 //leader + 3 generals/rebels
+	float time_disband_after_no_zone = 240 //seconds
+
+	float become_famous_chance = 10; 
+
+    float plunder_wealth_threshold_lower = 3000
+    float plunder_wealth_threshold_upper = 20000
+    float plunder_chance_perc_lower_threshold = 100
+    float plunder_chance_perc_upper_threshold = 20
+    float despawn_score = (battles * time_factor * occupations_factor * kingdom_factor * famous_factor * player_lands)
+    {
+    	float player_lands
+    	{
+    		case is_player = (origin_kingdom.is_player)
+    		{
+    			float value = 0.5
+    		}
+    		case default
+    		{
+    			float value = 1
+    		}
+    	}
+    	float battles // prefer to despawn rebellions that aren't currently in battle, otherwise they can't declare independance
+    	{
+    		case has_occupied = (towns_occupied > 0)
+    		{
+    			float value = (!in_battle)
+    		}
+    		case default
+    		{
+    			float value = 1
+    		}
+    	}
+    	float time_factor = (map(time_exist, 0, 30, 0.1, 1) ^ 2) // time_exist is in minutes
+    	float occupations_factor = (1 + towns_occupied)
+	    float kingdom_factor = ((origin_kingdom.too_many_rebellions_per_province || origin_kingdom.too_many_rebellions_per_kingdom) * !is_famous * 9 + 1)
+	    float famous_factor 
+	    {
+	    	case is_famous
+	    	{
+	    		float value = 0.5
+	    	}
+	    	case default
+	    	{
+	    		float value = 1
+	    	}
+	    }
+	}
+
+    bonuses
+    {
+    	manpower
+    	{
+    		float per_level = 10
+    		float per_leader_level = 2
+    		float famous_leader = 20;
+    		float famous_general = 5;
+    		float famous_normal = 5;
+    	}
+    }
+
+    text wealth_description = "The amount of gold amassed by the rebellion. Whoever ends the uprising will receive the entire bounty."
+}
+
+def RebellionIndependence
+{
+	float time_interval = 600
+	//float time_interval_initial = 900 //Now based on crown authorty(values are in its def)
+	float chance_per_occupied_province = 20
+	float chance_when_fully_occupied_zone = 100 
+}

@@ -1,0 +1,34 @@
+﻿def NavigationSkill : Skill
+{
+	name = "Navigation"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Navigation_1.png:UI_Icon_Skill_Navigation_1#2" //GUID:e70aa605b77e768478c2b85a8e031b67
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Navigation_1.tga:UI_Icon_Skill_Navigation_1#2", //GUID:32a50ac3e8f867d4b9eec1a94bad63eb
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Navigation_2.tga:UI_Icon_Skill_Navigation_2#2", //GUID:72739aea93933114cabffed665a1c096
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Navigation_3.tga:UI_Icon_Skill_Navigation_3#2" //GUID:56742830b8806c94cb4da7b1f2707dcb
+	]
+	tooltip = "A good grasp of navigation improves ships' travel capabilities and bolsters the flow of coin."
+}
+
+extend Skill.effects
+{
+	skill NavigationSkill
+	{
+		Default
+		{
+			mod cs_army_morale_in_sea = 2/3/5
+		}
+		class Merchant
+		{
+			slot_type = "primary"
+			mod cs_gold_per_coastal_where_trading = 1/3/5
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			mod cs_naval_CTH = 5/10/20
+			mod cs_ships_level = 1/1/2 //!!! to fix when (if) we add additional level
+		}
+	}
+}

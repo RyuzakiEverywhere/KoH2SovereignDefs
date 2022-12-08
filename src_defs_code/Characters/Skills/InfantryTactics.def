@@ -1,0 +1,43 @@
+﻿def InfantryTacticsSkill : Skill
+{
+	name = "Infantry Tactics"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_InfantryTactics_1.png:UI_Icon_Skill_InfantryTactics_1#2" //GUID:ce9d9c5b418f9da4a82a574f74aeedcd
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_InfantryTactics_1.tga:UI_Icon_Skill_InfantryTactics_1#2", //GUID:0584f0ee9d6b4364f98a57f48b1f9a4f
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_InfantryTactics_2.tga:UI_Icon_Skill_InfantryTactics_2#2", //GUID:ca78137263e84604db94e877e1405e41
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_InfantryTactics_2.tga:UI_Icon_Skill_InfantryTactics_2#2" //GUID:ca78137263e84604db94e877e1405e41
+	]
+	tooltip = "Proper melee training turns ordinary foot soldiers into sturdy melee retinues, capable of withstanding any threat on the front line."
+}
+
+extend Skill.effects
+{
+	skill InfantryTacticsSkill
+	{
+		Default
+		{
+			mod cs_infantry_defense = 10/15/25
+			mod cs_defense_troops_resilience = 10/15/20
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+	}
+}

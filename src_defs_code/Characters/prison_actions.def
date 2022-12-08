@@ -1,0 +1,1156 @@
+﻿template PrisonAction : Action
+{
+	owner_type = "Kingdom"
+	target = "prisoner"
+	secondary = true
+	show_in_action_bar = false
+	voice_from_character = true
+	//show_in_character_widnow = true // temporary, for testing
+}
+
+def FreePrisonerAction : PrisonAction
+{
+	int forgive_court_rebel_CA_value = (round(map(target.class_level, 0, 15, -1, -3))) //!!! TEMPORARY FIX! Do not leave like this.
+	name = "[{target.is_local_player_forgivable:if}Forgive|Release]"
+	tooltip = $[
+		"Grant [{target:s}|the prisoner's] freedom and [{target.is_in_local_player_special_court:if}allow his return to our royal court|{target.is_in_local_player_court:if}allow his return to our royal court|release him from captivity].{p}{p}"
+		"[{target.kingdom.is_local_player:if}{target.is_rebel:if_not}{target.is_mercenary:if_not}{target.is_exiled:if_not}{blt} Our nobility opinion will be improved]"
+		"[{target.kingdom.is_local_player:if_not}{target.is_rebel:if_not}{target.is_mercenary:if_not}{target.is_exiled:if_not}{blt} This will improve our relations with [{target.kingdom}|his kingdom]{p}{blt} Our nobility opinion will be improved, if we are at peace]"
+		"[{target.is_rebel:if}{target.is_in_local_player_special_court:if}{blt} Our Crown Authority will decrease ({forgive_court_rebel_CA_value:bonus}){p}{blt} Our nobility opinion will be improved]"
+		"[{target.is_rebel:if}{target.is_important_relative:if}{target.is_in_local_player_special_court:if_not}{blt} Our Crown Authority will decrease ({forgive_court_rebel_CA_value:bonus}){p}{blt} Our nobility opinion will improve]"
+		"[{target.is_rebel:if}{target.is_important_relative:if_not}{target.is_in_local_player_special_court:if_not}{blt} Our Crown Authority will decrease ({CrownAuthority.release_non_court_rebel:bonus}){p}{blt} Our nobility opinion might decrease{p}{blt} Our peasantry opinion might be improved{p}{blt} Our {kingdom.cleric_title:s} opinion might be improved]"
+		"[{target.is_exiled:if}{blt} Our nobility opinion will be improved]"
+		"[{target.is_mercenary:if}{blt} Our nobility opinion will be improved]"
+	]
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_ReleasePrisoner.tga:Icon_KingdomAction_ReleasePrisoner#2" //GUID:64b117edc5a51d045a68136ea6b55ded
+	prepare_voice_line = "FreePrisoner"
+	outcomes
+	{
+		main success = 100
+		{
+			message
+			{
+				
+				case src_kingdom
+				{
+					switch_value = (target_kingdom.is_regular && own_kingdom != target_kingdom)
+					
+					case 1
+					{
+						def = DiplomacyPrisonOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Positive.png:Icon_Message_IncomingOffer_Positive#2" //GUID:a9f3b9652ebca5349a12a7fb31f62b0b
+						text caption = "{target.class} was released"
+						text text = ["We are grateful for the mercy you've shown to our nobleman, you are truly honourable, {src_kingdom.king}.",
+					   		"Your act of good will towards the imprisoned knight will not be forgotten by {target_kingdom}!",
+					   		"Freeing {target_kingdom:anian} nobleman is an act of valour we will not forget, {src_kingdom.king}.",
+					   		"Thank you for freeing our nobleman, {src_kingdom.king}. You might not have our friendship yet, but you have our respect!",
+					   		"Releasing our nobleman is one of the few good decisions you recently made, {src_kingdom.king}. We congratulate you for that.",
+					   		"We are grateful to you for that act of mercy, but don't assume that this redeems all the sins of {src_kingdom} towards us."]
+					}
+					
+					case default //everything but regular kingdom - including rebels and exiled
+					{
+						def = null
+					}
+				}
+				case target_kingdom
+				{
+					def = PrisonOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+					text caption = "Our {target.class} was released"
+					text text = ["The {src_kingdom:ians} released {target}! He is ready for new assignments.",
+								 "{target} returned from the {src_kingdom:ian} dungeon and claimed he was treated well there.",
+								 "{target} was freed from the {src_kingdom:ians} and returned in our court alive and well."]
+					string voice_line = "narrator_voice:imprisoned_court_member_released"
+				}
+				text bullet = "{target} was released"
+			}
+			also rel_change_released_prisoner
+			{
+				condition = (own_kingdom != target.kingdom)
+				
+				case src_kingdom
+				{
+					text bullet = "[Relations with {target_kingdom}: {relationship_release:bonus_dark}]"
+				}
+				case target_kingdom
+				{
+					text bullet = "[Relations with {src_kingdom}: {relationship_release:bonus_dark}]"
+				}
+			}
+		}
+		trigger free_prisoner_kingdom_trigger
+		{
+			target = (own_kingdom)
+			param = (target)
+		}
+		trigger free_prisoner_prisoner_trigger
+		{
+			//target = (target)
+			param = (own_kingdom)
+		}
+		
+	}
+}
+
+def ForgivePrisonerAction : FreePrisonerAction
+{
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_ForgiveCourtRebel.tga:Icon_KingdomAction_ForgiveCourtRebel#2" //GUID:6f74aeb62752060438f64453280356cf
+}
+
+def KillPrisonerAction : PrisonAction
+{
+	name = "Execute"
+	tooltip = $["Execute [{target}|prisoner] for his crimes.{p}{p}"
+	"[{target.kingdom.is_local_player:if}{target.is_rebel:if_not}{target.is_mercenary:if_not}{target.is_exiled:if_not}{blt} Our Crown Authority will decrease ({CrownAuthority.executePrisoner:bonus}){p}{blt} Nobility opinion will reduce]"
+	"[{target.kingdom.is_local_player:if_not}{target.is_rebel:if_not}{target.is_mercenary:if_not}{target.is_exiled:if_not}{blt} This will worsen our relations with [{target.kingdom}|his kingdom]{p}{blt} {target.kingdom:s} nobility opinion will reduce]"
+	"[{target.is_rebel:if}{target.is_in_local_player_special_court:if}{blt} Our Crown Authority will increase ({CrownAuthority.execute_rebel:bonus}){p}{blt} We will receive some gold{p}{blt} Nobility opinion will reduce]"
+	"[{target.is_rebel:if}{target.is_in_local_player_special_court:if_not}{blt} Our Crown Authority will increase ({CrownAuthority.execute_rebel:bonus}){p}{blt} We will receive some gold{p}{blt} Peasantry opinion will reduce{p}{blt} {kingdom.cleric_title:s} opinion might reduce{p}{blt} Nobility opinion might increase]"
+	"[{target.is_exiled:if}{blt} We will receive some gold{p}{blt} Nobility opinion will reduce]"
+	"[{target.is_mercenary:if}{blt} We will receive some gold{p}{blt} Nobility opinion will reduce]"]
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_Execute.tga:Icon_KingdomAction_Execute#2" //GUID:a13d2453e81ac2f4d801e674388e7e25
+	outcomes
+	{
+		main success = 100
+		{
+			case src_kingdom
+			{
+				//switch_value = (target_kingdom.type)
+				case Own = (target_kingdom == own_kingdom)
+				{
+					message
+					{
+						def = PrisonOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+						text caption = "We executed our {class_title}"
+						text bullet = "{target} was executed"
+						text text = "As ordered by {src_kingdom.king}, {target} was publicly beheaded in the town square of {src_kingdom.capital_realm}."
+					}
+					
+				}
+				case Regular = (target_kingdom.is_regular)
+				{
+					message
+					{
+						def = DiplomacyPrisonOutcomeMessage
+						buttons { audience; ok }
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Negative.png:Icon_Message_IncomingOffer_Negative#2" //GUID:f16b118485fa3de4ca358309faf0b723
+						text caption = "{class_title} was executed"
+						text text = ["You proved you are as savage as everybody says you are, {src_kingdom.king}.",
+						       "Blood will be paid with blood, {src_kingdom.king}. We will never forget your savegery!",
+						       "You really executed a prisoner of war?! One day you will pay for your crimes, {src_kingdom.king}.",
+						       "How dare you spill the noble {target_kingdom:ian} blood?! You are a mad beast, {src_kingdom.king}!",
+						       "Killing prisoners of war will NOT be tolerated. You're murderous reign will end soon!",
+						       "You made a mistake executing that prisoner! Honour is a virtue you surely don't possess, {src_kingdom.king}."]
+						text bullet = "{target} was executed"
+					}
+				}
+				case default //everything but regular kingdom - including rebels and exiled
+				{
+					message
+					{
+						def = null
+					}
+				}
+			}
+			case target_kingdom
+			{
+				message
+				{
+					def = PrisonOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+					text caption = "Our {class_title} was executed "
+					text bullet = "{target} was executed in {src_kingdom} "
+					text text = ["The savage {src_kingdom:ians} executed one of our prisoners!",
+								 "{target} was just hanged in {src_kingdom}.",
+								 "{target} was sentenced to death by decapitation in {src_kingdom} and the sentence was already carried out.",
+								 "There was no mercy for {target} and he was publicly executed this morning in {src_kingdom}.",
+								 "{target} was pronounced enemy of {src_kingdom} and swiftly executed."]
+					case king = (title_key == "King")
+					{
+						string voice_line = "narrator_voice:imprisoned_royal_court_member_executed"
+					}
+					case prince = (title_key == "Prince")
+					{
+						string voice_line = "narrator_voice:imprisoned_royal_court_member_executed"
+					}
+					case default
+					{
+						string voice_line = "narrator_voice:imprisoned_royal_court_member_executed"
+					}
+				}
+			}
+			also crown_authority = "executePrisoner"
+			{
+				condition = (!target.is_rebel && !target.is_mercenary && !target.is_exiled && !AreEnemies(own_kingdom, target_kingdom))
+			}
+			also rel_change_executed_prisoner
+			{
+				condition = (target.kingdom.is_regular)
+				case src_kingdom
+				{
+					text bullet = "[Relations with {target_kingdom}: {relationship_execute:bonus_dark}]"
+				}
+				case target_kingdom
+				{
+					text bullet = "[Relations with {src_kingdom}: {relationship_execute:bonus_dark}]"
+				}
+			}
+			trigger execute_prisoner_prisoner_trigger
+			{
+				target = (prisoner)
+				param = (own_kingdom)
+			}
+			trigger execute_prisoner_their_kingdom_trigger
+			{
+				target = (prisoner.kingdom)
+				param = (prisoner)
+			}
+			
+			trigger execute_prisoner_our_kingdom_trigger
+			{
+				target = (own_kingdom)
+				param = (prisoner)
+			}
+		}
+	}
+}
+
+// def KillPuppetAction : PrisonAction
+// {
+// 	name = "Execute"
+// 	tooltip = $["Execute [{target}|prisoner]{p}"]
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Assasinate.png:Icon_Assasinate#2" //GUID:d1b9934d3d6e46f47a0478fbc407fadb
+
+
+// 	outcomes
+// 	{
+// 		main success = 100
+// 		{
+// 			case src_kingdom
+// 			{
+// 				message
+// 				{
+// 					def = null
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// def TortureAction : PrisonAction
+// {
+// 	name = "Torture"
+// 	tooltip = $["Torture [{target}|prisoner] for information{p}"
+// 				"This will lower your Crown Authority"]
+// 	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_Torture.png:Icon_KingdomAction_Torture#2" //GUID:a3393db4999bffd40912b29c8bb093e0
+
+// 	outcomes
+// 	{
+
+// 		main success = 100 // will be disabled if prisoner has nothing to reveal
+// 		{
+// 			message
+// 			{
+// 				icon : TortureAction.icon
+// 				text caption = "Torture" //shouldn't come to this
+// 			}
+
+// 			option kingdom_revealed = 50
+// 			{
+// 				case src_kingdom
+// 				{
+// 					text caption = "Foreign spy revealed"
+// 					text message = ["{target} admitted he was spying for {target.reveal_kingdom}.",
+// 								    "After few days under the care of our torture masters, {target} admitted he is a spy of {target.reveal_kingdom}",
+// 								    "Confession was finally taken from {target} - he turned out to be {target.reveal_kingdom:s} spy."]
+// 				}
+// 				case target_kingdom
+// 				{
+// 					message
+// 					{
+// 						def = OutcomeMessage
+// 						text caption = "Puppet revealed"
+// 						text text = ["{src_kingdom} found out {target} was our puppet.",
+// 								     "{src_kingdom} have the confession of {target} he was spying for us and now they are really angry at us.",
+// 								     "It seems that {target} couldn't withstand the tortures in the {src_kingdom:s} dungeon and admitted he is spying for us."]
+// 					}
+// 				}
+
+// 				also rel_change = "rel_espionage_revealed"
+// 			}
+
+// 			option master_revealed
+// 			{
+// 				case src_kingdom
+// 				{
+// 					text caption = "Kingdom's espionage revealed"
+// 					text message = ["{target} admitted he was working for {target.reveal_master} from {target.reveal_kingdom}.",
+// 									"After days of torture, {target} confessed he was bribed by {target.reveal_master} from {target.reveal_kingdom} and begged for mercy.",
+// 									"{target} admitted he was spying for  {target.reveal_master} from {target.reveal_kingdom} in the minute our torture master entered his prison cell."]
+// 					text bullet = "{target.reveal_master} is now our prisoner"
+// 				}
+// 				case target_kingdom
+// 				{
+// 					message
+// 					{
+// 						def = OutcomeMessage
+// 						text caption = "Spy revealed"
+// 						text text = ["{src_kingdom} revealed {target.reveal_master} as our spy and he got captured.",
+// 									 "One of the imprisoned puppets of {target.reveal_master} couldn't withstand the tortures and ratted him out."]
+// 						text bullet = "{target.reveal_master} was imprisoned in {src_kingdom}"
+// 					}
+// 				}
+
+// 				also rel_change = "rel_espionage_revealed"
+// 			}
+// 		}
+// 		option fail
+// 		{
+// 			case src_kingdom
+// 			{
+// 				message
+// 				{
+// 					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+// 					text caption = "Interrogation failed"
+// 					text text = ["We could not exctract any useful information from {target}.",
+// 								 "Either {target} really knows nothing, or he is very though not to confess in the hands of our torture masters.",
+// 								 "{target} denied his guilt any to cover the foreign kingdom he was spying for."]
+// 				}
+// 			}
+
+// 			option nothing_found
+// 			{
+// 				also rel_change = "rel_torture_innocent"
+// 			}
+
+// 			option target_killed //!!! target_kingdom message?
+// 			{
+// 				text add_text = [" Unfortunately, he did not survive the torture.",
+// 								 " Though the torture master claims he was very gentle with his techniques, the prisoner died.",
+// 								 " His tortures were pushed to the limit and sadly, he didn't make it.",
+// 								 " It turned out that his health was not very good and he perished during one of the conversations on that matters.",
+// 								 " Probably due to the stress and guilt he felt, his condition worsened and he died."]
+// 				also rel_change = "rel_torture_killed"
+// 				text bullet = "[Relations with {target_kingdom}: {rel_torture_killed}]"
+// 			}
+// 		}
+// 	}
+// }
+
+// def AskForRansomAction : PrisonAction
+// {
+// 	name = "Ask for ransom"
+// 	tooltip = $["Ask for a ransom for [{target}|prisoner]{p}"
+// 				"If [{target_kingdom:ians}|his kingdom] agrees, you will receive [{target.ransom_price:plain}|some gold] for freeing him."]
+
+// 	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_AskForRansom.tga:Icon_KingdomAction_AskForRansom#2" //GUID:fac2448a6ae1940458c4b71b13b48077
+
+// 	outcomes
+// 	{
+// 		main success = 100 // please never do this (ransom_agreement_chance)
+// 		{
+// 			message { def = null } // goes to diplomacy
+// 		}
+// 		option fail
+// 		{
+// 			message
+// 			{
+// 				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+// 				text caption = "Ransoming failed"
+// 				text text = ["The {target.kingdom:ians} were not even interested in duscussion regarding {target:s} ransom.",
+// 						     "The {target.kingdom:ian} diplomats reject all our offers for negotiations of {target:s} ransom.",
+// 						     "Regardless of what {target} claims, {target.kingdom:ian} diplomats show no interest of discussing his release."]
+// 			}
+// 			also rel_change = "rel_decline_ransome_prisoner"
+// 		}
+// 		option no_money = 0
+// 		{
+// 			message
+// 			{
+// 				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+// 				text caption = "{target.class} ransoming failed"
+// 				text text = ["{target} was not ransomed because {target.kingdom} doesn't have enough gold.",
+// 							 "The gold we asked for {target} seems too much for {target.kingdom}.",
+// 							 "Either {target} is not as important as we expected for {target.kingdom}, or they really can't find the gold to pay for his release."]
+// 			}
+// 		}
+// 	}
+// }
+
+def HireLoyalistAction : PrisonAction
+{
+	args = ["Kingdom"]
+	name = "Deal"
+	tooltip = $["Offer {target} to become a rebel in a selected kingdom."]
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_Deal.tga:Icon_CharacterAction_Deal#2" //GUID:d1e01e2cf4caa544199e498956e3982f
+	cost
+	{
+		gold = (round((SSum(own_kingdom, 0.5) * (1 + target.class_level * 0.1) *(1 + target.kingdom.is_regular * (2 + target.is_prince))),100)) //* map3_clamp(GetRelationship(own_kingdom, arg), -1000, 0, 1000, 1, 1, 3)
+	}
+	
+	
+	text picker_text = "{cost}"
+	
+	float become_famous_chance = (target.GetClassLevel() * 3 - 30)
+	float fail_cooldown = 1000000000 //keeping the cooldown mechanic, but practically disallowing another atempt in the same game
+	
+
+	success_fail
+	{
+		sf_base = (60)
+		{
+			text name = "Base chance"
+		}
+		sf_knight_level = (-1 * target.class_level)
+		{
+			text name = "Knight's level"
+		}
+		sf_knight_is_prince = (-15 * target.is_prince)
+		{
+			text name = "Knight is prince"
+		}
+		sf_king_stars = (own_kingdom.king_espionage_ability * 2)
+		{
+			text name = "Our King's Espionage ability (x2)"
+		}
+		sf_positive_crown_authority = (MapCA(own_kingdom,0,0,10))
+		{
+			text name = "Our positive crown authority (x2)"
+		}
+		perc sf_negative_crown_authority = (MapCA(own_kingdom,-15,0,0))
+		{
+			text name = "Our negative crown authority (x3)"
+		}
+	}
+
+	outcomes
+	{
+		main early_success// = 60
+		{
+			message
+			{
+				case src_kingdom
+				{
+					def = PrisonOkGotoOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Positive.png:Icon_Message_Rebels_Positive#2" //GUID:98c851dbe2b371d48b23e62c5cd7310e
+					text caption = "Rebellion of our loyalists"
+					text text = ["{target} agreed to fight for us and is now leading a loyalist army in {target_kingdom}.",
+								 "With the secret aid of our kingdom, {target} now leads a rebellion in {target_kingdom}.",
+								 "As planned, there is a rebellion in {target_kingdom}, led by {target} and we are pulling the stings.",
+								 "Following our instructions, {target} leads a small rebel army in {target_kingdom}."]
+					string voice_line = "HirePrisonerAsLoyalistSuccess"
+				}
+				case prisoner_kingdom //use this for the other outcomes as well
+				{
+					def = PrisonOkGotoOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+					text caption = "Knight forced into rebellion"
+					text text = ["Our {target} agreed to fight for {own_kingdom} and is now leading a loyalist army in {target_kingdom}."]
+				}
+				case target_kingdom
+				{
+					def = PrisonOkGotoOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+					text caption = "Rebellion was provoked against us"
+					text text = ["{target} agreed to fight for {src_kingdom} and is now leading a loyalist army in our lands.",
+								 "There is a rebellion in our kingdom, officially led by {target}, but we are certain it is orchestrated by the {src_kingdom:ians}.",
+								 "It seems that {src_kingdom} are pulling the strings of {target}, who now started a rebellion against us.",
+								 "No doubt with {src_kingdom:ian} gold, that fool {target} managed to gather a small rebelious army and now marches against us."]
+				}
+			}
+			also rel_change = "rel_loyalists_spawned"
+		}
+		option fail
+		{
+			option go_rogue = 40
+			{
+				message
+				{
+					text caption = "Uncontrolled rebellion"
+					case src_kingdom
+					{
+						def = PrisonOkGotoOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+						text text = ["{target} agreed to fight against {target_kingdom}, but now refuses to take any orders from us.",
+									 "Once {target} gathered an army with our coins, he stopped obeying any orders from our kingdom and now chases his own goals in {target_kingdom}.",
+									 "We were foolish to trust {target}. He organized a rebelous army in {target_kingdom} indeed, but he refuses to follow our command anymore."]
+						string voice_line = "HirePrisonerAsLoyalistRogue"
+					}
+					
+					case target_kingdom
+					{
+						def = PrisonOkGotoOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+						text text = ["{target} agreed to fight against us, but now refuses to take any orders from {src_kingdom}, who supported him.",
+									 "Those fools the {src_kingdom:ians} supported {target}, who took their gold and raised an army in our kingdom, but now refuses to enter negotians neither with us, nor with them.",
+									 "Undeniably, {src_kingdom} were mislead by some false promises of {target}, who tricked them into supporting him. Now he leads a rebel army in our kingdom, loyal to nobody but himself."]
+					}
+				}
+				also crown_authority = "failed_spawn_loyalist"
+			}
+			option trick = 20
+			{
+				message
+				{
+					text caption = "Prisoner tricked you"
+					case src_kingdom
+					{
+						def = PrisonOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+						text text = ["{target} took the money we offered him to lead a rebellion and ran away to distant lands, never to be seen again.",
+									 "That ungrateful bastard {target} took our gold and disappeared! There will be no rebellion in {target_kingdom}.",
+									 "We made fools of ourselves, trusting in that scum, {target}. He tricked us to think he will organize a revolt in {target_kingdom}, but what he actually organized was his escape with our gold..."]
+						string voice_line = "HirePrisonerAsLoyalistFail"
+					}
+				}
+				also crown_authority = "failed_spawn_loyalist"
+			}
+			option refusal = 40
+			{
+				message
+				{
+					text caption = "Prisoner refused to lead a rebellion"
+					case src_kingdom
+					{
+						def = PrisonOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Action_Negative.png:Icon_Message_Action_Negative#2" //GUID:e4b41d0620e99ca47ac12a4dcfbd996e
+						text text = ["{target} refused to start a rebellion under your wing in {target_kingdom}.",
+									 "{target} declared with dignity, that he'd rather die than lead a rebel army under our command.",
+									 "{target} proved to be a bigger coward than we thought and refused to fight against {target_kingdom}, even with our support."]
+						string voice_line = "HirePrisonerAsLoyalistFail"
+					}
+				}
+			}
+		}
+	}
+}
+
+def AcceptRansomAction : PrisonAction
+{
+	name = "Accept ransom"
+	tooltip = "Receive a ransom of {target.ransom_price_gold}{gold_icon} for {target}. This will grant the prisoner his freedom and return him to {target.kingdom}."
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_AcceptRansom.tga:Icon_KingdomAction_AcceptRansom#2" //GUID:fac2448a6ae1940458c4b71b13b48077
+	
+	prepare_duration = 0
+	prepare_voice_line = "AcceptRansom"
+}
+
+def KingAudienceAction : PrisonAction
+{
+	name = "Open audience"
+	tooltip = "Begin diplomatic negotiations with {target.kingdom}"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_OpenAudiencePrisoner.tga:Icon_CharacterAction_OpenAudiencePrisoner#2" //GUID:c9d5acd9a801d3c49823c3b5b90ece11
+	prepare_duration = 0
+}
+
+def InviteExileToCourtAction : PrisonAction
+{
+	name = "Invite to court"
+	tooltip = "Try to invite {target} to our court"
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_TakeInCourt.tga:Icon_KingdomAction_TakeInCourt#2" //GUID:83ebf058fbb022c4988cc94d7cb7b786
+	prepare_duration = 0
+	prepare_voice_line = "InvitePrisonerToCourt"
+	
+	cost
+	{
+		gold = (map(target.class_level, 0, 15, 200, 2000))
+	}
+	
+	validate_prompts
+	{
+		text _no_free_court_slot = "You have no free court slot"
+	}
+}
+
+
+// def FreePuppetAction : PrisonAction
+// {
+// 	name = "Release"
+// 	tooltip = $["Grant [{target:s}|the prisoner's] freedom and release him from captivity.{p}"]
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Fleeing.png:Icon_Fleeing#2" //GUID:7eca2dd90ccef88449698571635976aa
+// 	outcomes
+// 	{
+// 		main success = 100
+// 		{
+// 			message
+// 			{
+// 				def = null
+// 			}
+// 		}
+// 	}
+// }
+
+def GlobalKillPrisonerAction : KingdomAction
+{
+	name = "Execute everyone"
+	tooltip = $["Execute all prisoners in the royal dungeon.{p}"
+				 "This will worsen our relations with the kingdoms of the prisoners."]
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_GlobalKill.png:Icon_KingdomAction_GlobalKill#2" //GUID:4f3456a2d799d29408bfeb4289152226
+	outcomes
+	{
+		main success
+		{
+			case src_kingdom
+			{
+				message
+				{
+					def = PrisonOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+					text caption = "Prisoners executed"
+					text text = $["Sire, all prisoners in our royal dungeon were swiftly executed, as you ordered."
+					"[ However, our act did not go unnoticed and we have angered some kingdoms."
+					"{p}{p}{blt}Relations worsened with {involved_kingdoms}]"]
+				}
+			}
+			case target_kingdom
+			{
+				message
+				{
+					def = null
+				}
+			}
+		}
+	}
+}
+
+def GlobalReleasePrisonerAction : KingdomAction
+{
+	name = "Release everyone"
+	tooltip = $["Grant every prisoner's freedom and release them from captivity.{p}"
+				 "This will improve our relations with the kingdoms of the prisoners."]
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_GlobalReleasePrisoner.png:Icon_KingdomAction_GlobalReleasePrisoner#2" //GUID:adda5e8aa1e7cae488243f4d76fe2aae
+	outcomes
+	{
+		main success
+		{
+			case src_kingdom
+			{
+				message
+				{
+					def = PrisonOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+					text caption = "Prisoners released"
+					text text = $["Sire, we've released all our prisoners and sent them back to their respective kingdoms, as per your request."
+					"[{p}{p}{blt}Relations increased with {involved_kingdoms}]"]
+				}
+			}
+			case target_kingdom
+			{
+				message
+				{
+					def = null
+				}
+			}
+		}
+	}
+}
+
+def AbandonAction : CharacterAction
+{
+	name = "Abandon"
+	tooltip = "Renounce {owner} and abandon him to his fate in the distant dungeon"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_Renounce.tga:Icon_CharacterAction_Renounce#2" //GUID:1fa30e8b6a15e2b4f98928aeadc143f0
+	show_in_action_bar = true
+	show_in_character_widnow = true
+	confirmation_message = RenounceMessage
+	voice_from_character = true
+	prepare_voice_line = "Renounce"
+	outcomes
+	{
+		main success
+		{
+			case target_kingdom
+			{
+				message
+				{
+					def = PrisonOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Positive.png:Icon_Message_KnightImprisoned_Positive#2" //GUID:e739776a08b7b294aa0fd2251a7df694
+					sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_RenouncedPrisoner.tga:UI_Illustration_RenouncedPrisoner#2" //GUID:78a79647b25462e4a8f727d68aa38f71
+					text caption = "A prisoner was renounced"
+					text text = ["{old_kingdom} renounced {obj}, who lays in our dungeon. Now that his allegiance is under question, we might have some use for him.",
+								 "We informed {obj} how {old_kingdom.king} renounced him. Now he knows how much his people care about him.",
+								 "{old_kingdom} just renounced our prisoner, {obj}. This is how they repay their knights for their loyalty.",
+								 "{old_kingdom} renounced {obj} - it seems they are not interested in any negotiations about his release."]
+					string voice_line = "narrator_voice:enemy_prisoner_renounced"
+				}
+			}
+			case src_kingdom
+			{
+				message
+				{
+					def = null
+				}
+			}
+		}
+	}
+}
+
+def OfferRansomAction : CharacterAction
+{
+	name = "Offer ransom"
+	tooltip = "Offer {owner.ransom_price} to {owner.prison_kingdom} for the release of {owner}" //!!! gold_icon seems to be embedded within owner.ransom_price, so no need for {gold_icon}
+	icon = "Assets/UI/Elements/Actions/Icon_KingdomAction_OfferRansom.tga:Icon_KingdomAction_OfferRansom#2" //GUID:132e081529edf404b969daa64996d966
+	show_in_action_bar = true
+	show_in_character_widnow = true
+	update_message_text = true
+	prepare_voice_line = "OfferRansom"
+	
+	ai_validate = true
+	
+	opportunity
+	{
+		chance_to_add_on_tick = 80
+		chance_to_del_on_tick = 5
+		activate_message = NewPrisonOpportunityAvailableMessage
+		deactivate_message = null //PlotNoLongerAvailableMessage - too spammy
+		min_active_time = 300
+	}
+	
+	src_messages
+	{
+		text new_opportunity = "My lord, we have gathered information that {owner.prison_kingdom} might be willing to free {owner}, if we pay them a ransom of {owner.ransom_price}."
+	}
+	
+	validate_prompts
+	{
+		text _no_money = "Not enough gold"
+		text _pending_offer = "Clear any ongoing offers with {owner.prison_kingdom} before executing this action!"
+	}
+	
+	outcomes
+	{
+		main success = 100 //please never do this (ransom_agreement_chance)
+		{
+			message { def = null } // goes to diplomacy offer
+		}
+		option fail
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+				text caption = "Ransoming failed"
+				text text = ["While traveling to {target_kingdom}, our messenger was brutally assaulted by filthy bandits. {owner} could not be ransomed.",
+							 "{target_kingdom} rejects all talks about {owner:s} release.",
+							 "{target_kingdom:ian} diplomats don't even want to hear what we can offer in exchange of {owner:s} release."]
+			}
+		}
+		option no_money = 0
+		{
+			message
+			{
+				sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+				text caption = "Ransoming failed"
+				text text = ["Ransoming {owner} negotiations failed, because we cannot pay {target_kingdom}.",
+							 "The {target_kingdom} were just about to accept our offer for the {owner:s} ransom, when we found out we cannot afford it.",
+							 "We couldn't collect the money we wanted to pay for {owner:s} ransom and now {target_kingdom} are angry at us for fooling them around."]
+			}
+		}
+	}
+}
+
+def PlotToEscapeAction : CharacterAction
+{
+	name = "Organize escape"
+	tooltip = "Have {owner} organize an escape"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_PlotToEscape.tga:Icon_CharacterAction_PlotToEscape#2" //GUID:8371ef8fee76c444d97de96906122f1a
+	prisoner = true
+	prepare_duration = 10
+	prepare_status_text = "{owner} is trying to escape from prison"
+	float price_modifier = 0.25
+	cost
+	{
+		gold = (round(owner.ransom_price_gold * price_modifier)) // we need a Resources * float operator
+	}
+	prepare_voice_line = "confirm_action"
+	cancel_voice_line = "CancelEscape"
+	success_voice_line = "action_succeeded"
+	fail_voice_line = "action_failed"
+
+	success_fail
+	{
+		sf_base = (40)
+		{
+			text name = "Base chance"
+		}
+
+		sf_knight_level = (owner.class_level)
+		{
+			text name = "Knight's level"
+		}
+
+		sf_knight_conspiracy = (conspiracy_bonus)
+		{
+			text name = "Conspiracy skill"
+		}
+
+		sf_king_is_spy = (own_kingdom.king.is_spy * 5)
+		{
+			text name = "Our King Is a Spy"
+		}		
+	
+		sf_king_stars = (own_kingdom.king_espionage_ability * 2)
+		{
+			text name = "Our King's Espionage ability (x2)"
+		}
+
+		sf_our_princess_in_tgt_kingdom = (10)
+		{
+			text name = "Our princess in their kingdom"
+		}
+		sf_our_queen_in_tgt_kingdom = (20)
+		{
+			text name = "Our queen in their kingdom"
+		}
+		sf_their_negative_CA = (MapCA(owner.prison_kingdom, 15, 0, 0))
+		{
+			text name = "Their negative crown authority (x3)"
+		}
+
+		perc sf_their_positive_CA = (MapCA(owner.prison_kingdom, 0, 0, -15))
+		{
+			text name = "Their positive crown authority (x3)"
+		}
+
+		perc sf_their_king_spy_class = (-1 * owner.prison_kingdom.king.is_spy * owner.prison_kingdom.king.class_level)
+		{
+			text name = "Their King's Spy level"
+		}
+	}
+	
+	outcomes
+	{
+		main success //= 30
+		{
+			message
+			{
+				case target_kingdom
+				{
+					def = OutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+					sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+					text caption = "{class_title} escaped from our dungeon"
+					text text = ["A prisoner slipped through our guards and escaped from our dungeon!",
+								 "There was jailbreak and one of our prisoners managed to leave our kingdom.",
+								 "{owner} escaped our dungeon - a well planned and executed escape, no doubt."]
+					text bullet = "{owner} returned to {src_kingdom}"
+				}
+				case src_kingdom
+				{
+					def = OutcomeMessage
+					voice_line = null
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+					sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+					text caption = "{class_title} escaped from a dungeon"
+					text text = ["Our knight successfully escaped from prison!",
+								 "Thanks to a carefully thought through and executed plan, we managed to bring {owner} out of the royal dungeon of {target_kingdom} and back home.",
+								 "It was very risky, but in the end {owner} managed to escape from the {target_kingdom:ian} captivity and returned alive and well."]
+					text bullet = "{owner} has returned to the royal court"
+				}
+			}
+		}
+		option fail
+		{
+			main owner_killed = 25
+			{
+				case target_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Positive.png:Icon_Message_KnightKilled_Positive#2" //GUID:db87a91f15c45084c9d03aabd7f888aa
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Failed escape attempt"
+						text text = ["A prisoner was caught trying to escape from our dungeon! Another rat, stopped in its tracks.",
+									 "Our guards prooved reliable once again and fought down a prisoner, who was about to escape our dungeon."]
+					}
+				}
+				case src_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Escape failed"
+						text text = ["Alas, our knight's attempt to escape from {target_kingdom:s} dungeon failed disastrously.",
+								     "The brave {owner} tried to escape from {target_kingdom:s} dungeon, but one of the guard's arrows pierced him through the heart."]
+					}
+				}
+				text bullet = "{owner} was killed"
+			}
+			option owner_executed = 25
+			{
+				case target_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Positive.png:Icon_Message_KnightKilled_Positive#2" //GUID:db87a91f15c45084c9d03aabd7f888aa
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Failed escape attempt"
+						text text = ["{owner} attempted to escape from our dungeon! Our guards made sure this won't happen again any time soon.",
+									 "{owner} made a pitiful attempt to escape our dungeon, which we forsaw and prevented.",
+									 "We received information about an escape plan of {owner}. The guards in our dungeon are now temporarily doubled."]
+					}
+				}
+				case src_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						voice_line = null
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Escape failed"
+						text text = ["{target_kingdom:s} guards could not be fooled by {owner}, as he was caught while trying to escape.",
+									 "The {target_kingdom:ians} found out about our plan for the escape of {owner} and doubled their guards. Now the escape seems impossible.",
+									 "It seems that somebody forwarned the {target_kingdom:ians} about our escape plan for {owner}, so it failed."]
+						
+					}
+				}
+				text bullet = "{owner} was executed"
+			}
+			option owner_imprisoned = 50
+			{
+				case target_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Positive.png:Icon_Message_KnightImprisoned_Positive#2" //GUID:e739776a08b7b294aa0fd2251a7df694
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Failed escape attempt"
+						text text = ["Our guards caught {owner} trying to escape! He is now under high security and further attempts of escape will be futile.",
+									 "{owner} was caught trying to dig a whole through the floor of his dungeon cell. A pitiful attempt - he is now moved and restrained.",
+									 "Someone tried to secretly bribe our guards in a plan to get {owner} out of our dungeon. All necessary precautions are taken to avoid that from happening."]
+					}
+				}
+				case src_kingdom
+				{
+					message
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Escape failed"
+						text text = ["Alas, our {owner:s} attemt to escape failed. He is now held under even higher security.",
+									 "The plan of {owner:s} escape seemed risky in the first place, but turned out even worse in execution - he was caught even before leaving his cell.",
+									 "Some information about {owner:s} escape reached the {target_kingdom:ian} guards and they made sure it will not happen."]
+					}
+				}
+			}
+		}
+	}
+}
+
+//hidden action, used for the normal InspireRiotAction and also for dungeon and spy actions
+def InspireRiotBaseAction : CharacterAction
+{
+	name = "Inspire riot"
+	tooltip = "Have {owner} inspire a riot in the {owner.prison_kingdom:ian} dungeon"
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_InstigateDungeonRiot.tga:Icon_Opportunity_InstigateDungeonRiot#2" //GUID:91f64fe6ec881274fa941be22004e176
+	prisoner = true
+	prepare_duration = 0
+	prepare_status_text = "{owner} is inspiring a riot in the {owner.prison_kingdom:ian} dungeon"
+	show_in_action_bar = false
+	show_in_character_widnow = false
+	
+	prepare_voice_line = "confirm_action"
+	cancel_voice_line = "CancelEscape"
+	success_voice_line = "action_succeeded"
+	fail_voice_line = "action_failed"
+
+	success_fail
+	{
+		sf_base = (30)
+		{
+			text name = "Base chance"
+		}
+
+		sf_knight_level = (owner.class_level * 2)
+		{
+			text name = "Knight's level (x2)"
+		}
+
+		sf_knight_conspiracy = (conspiracy_bonus)
+		{
+			text name = "Conspiracy skill"
+		}
+
+		sf_king_is_spy = (own_kingdom.king.is_spy * 5)
+		{
+			text name = "Our King Is a Spy"
+		}		
+	
+		sf_king_stars = (own_kingdom.king_espionage_ability * 2)
+		{
+			text name = "Our King's Espionage ability (x2)"
+		}
+
+		sf_our_princess_in_tgt_kingdom = 5
+		{
+			text name = "Our princess in their kingdom"
+		}
+		sf_our_queen_in_tgt_kingdom = 10
+		{
+			text name = "Our queen in their kingdom"
+		}
+		sf_their_negative_CA = (MapCA(owner.prison_kingdom, 15, 0, 0))
+		{
+			text name = "Their negative crown authority (x3)"
+		}
+
+		perc sf_their_positive_CA = (MapCA(owner.prison_kingdom, 0, 0, -15))
+		{
+			text name = "Their positive crown authority (x3)"
+		}
+
+		perc sf_their_king_spy_class = (-1 * owner.prison_kingdom.king.is_spy * owner.prison_kingdom.king.class_level)
+		{
+			text name = "Their King's Spy level"
+		}
+	}
+	
+	outcomes
+	{
+		main success //= (30 + conspiracy_bonus)
+		{
+			main revolt // chance calculated in code
+			{
+				int required_rebel_pop = 3 // if no realm have this much rebel pop, prisoner will only escape, won't form army
+				message
+				{
+					case target_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+						text caption = "Riot was organized"
+						text text = "{owner} organized a riot in our dungeon! He is no longer our prisoner.{p}{p}[Some knights escaped and returned to their Kingdoms: {escaped_prisoners}{p}][During the fight there were knights killed: {died_prisoners}]"
+					}
+					case src_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+						text caption = "Riot succeeded!"
+						text text = "Our {owner} successfully organized a riot in {target_kingdom:s} dungeon! He is no longer their prisoner.{p}{p}[Some knights escaped and returned to their Kingdoms: {escaped_prisoners}{p}][During the fight there were knights killed: {died_prisoners}]"
+					}
+				}
+			}
+			option escape
+			{
+				message
+				{
+					case target_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+						text caption = "Prisoner escaped"
+						text text = "{owner} tried to organize a riot in our dungeon! He is no longer our prisoner.{p}{p}He tried to form an army, but as our town has too little rebelious population, he only managed to escape."
+					}
+					case src_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Escaped.png:UI_Illustration_Dungeon_Escaped#2" //GUID:431f97f4c55a7f046b4eefdc15fb01ec
+						text caption = "{owner} escaped!"
+						text text = "Our {owner} successfully organized a riot in {target_kingdom:s} dungeon! He is no longer their prisoner.{p}{p}He couldn't form an army, but still managed to escape to the town in {own_kingdom.capital_realm}."
+					}
+				}
+				
+			}
+		}
+		option fail
+		{
+			main owner_killed = (death_chance)
+			{
+				message
+				{
+					case target_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Positive.png:Icon_Message_KnightKilled_Positive#2" //GUID:db87a91f15c45084c9d03aabd7f888aa
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Prisoners attempted a riot"
+						text text = ["A prisoner in our dungeon was caught and killed while trying to organize a riot.",
+									 "A small riot started in our royal dungeon, but it came to an early end when we killed the leader."]
+					}
+					case src_kingdom
+					{
+						def = OutcomeMessage
+						voice_line = null
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Riot failed"
+						text text = ["Our knight, who attempted to organize a riot, ended caught and killed by the {target_kingdom:ian} guards.",
+									 "The brave attempt of {owner} to fight for his freedom in {target_kingdom} ended with his heroic death."]
+					}
+					text bullet = "{owner} was killed"
+				}
+			}
+			option owner_executed = 50
+			{
+				message
+				{
+					case target_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Positive.png:Icon_Message_KnightKilled_Positive#2" //GUID:db87a91f15c45084c9d03aabd7f888aa
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Prisoners attempted a riot"
+						text text = ["We caught an instigator of a riot in our dungeon and as the law required, he was executed.",
+									 "Some of our prisoners were about to riot, but we caught and hanged the instigator."]
+					}
+					case src_kingdom
+					{
+						voice_line = null
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Riot failed"
+						text text = ["As our knight's attempts to organize a riot in {target_kingdom} were revealed, he was swiftly executed.",
+									 "There was no mercy for {owner}, when the guards in {target_kingdom} found out he was trying to organize a revlot.",
+									 "When the {target_kingdom:ians} found out {owner} is planning to start a rebellion in their royal dungeon, they didn't even bother to discuss with us his fate."]
+					}
+					text bullet = "{owner} was executed"
+				}
+			}
+			option owner_imprisoned = 25
+			{
+				message
+				{
+					case target_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Positive.png:Icon_Message_KnightImprisoned_Positive#2" //GUID:e739776a08b7b294aa0fd2251a7df694
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Prisoners attempted a riot"
+						text text = ["{owner} attempted to organize a riot! Our guards managed to dismantle his pitiful attempt swiftly.",
+									 "{owner} was caught trying to organize a riot! The threat has been dealt with and further ploys will be crushed."]
+					}
+					case src_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_Dungeon_Caught.png:UI_Illustration_Dungeon_Caught#2" //GUID:562b596b5ae2b0d448c4ff305fd67907
+						text caption = "Riot failed"
+						text text = ["{owner} was unable to organize a riot, as he was betrayed by one of his supposed supporters.",
+						"{owner} failed to organize a riot, as he was caught by one of {target_kingdom:s} guards.",
+						"{owner:s} attempts for organizing a riot were futile, as he failed to muster trustworthy allies. He was caught by {target_kingdom:s} guards.",
+						"{owner} failed to organize a riot. He is now under high security and further attempts of escape seem impossible."]
+					}
+				}
+			}
+		}
+	}
+}
+
+def InspireRiotAction : InspireRiotBaseAction
+{
+	show_in_action_bar = true
+	show_in_character_widnow = true
+	prepare_duration = 45
+}

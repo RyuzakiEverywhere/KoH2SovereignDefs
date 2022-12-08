@@ -1,0 +1,114 @@
+﻿def Talent
+{
+	text name
+	text affinity = "{name} affinity"
+	text tooltip_text
+	sprite icon
+	color color
+	int max_level = 5
+	level_colors
+	{
+		color 0 = 135,135,135 //878787FF
+		color 1 = 255,255,255 //FFFFFFFF
+		color 2 = 0,255,22 //00FF17FF
+		color 3 = 19,0,255 //1300FFFF
+		color 4 = 255,0,226 //FF00E3FF
+		color 5 = 255,153,0 //FF9900FF
+	}
+}
+
+def DiplomacyTalent : Talent
+{
+	name = "Diplomacy"
+	tooltip_text = "Diplomacy talent description"
+	color = 72,255,0 //48FF00FF
+	icon = ""
+}
+
+def ScholarshipTalent : Talent
+{
+	name = "Scholarship"
+	tooltip_text = "Scholarship talent description"
+	color = 0,255,255 //00FFFFFF
+	icon = ""
+}
+
+def ConspiracyTalent : Talent
+{
+	name = "Conspiracy"
+	tooltip_text = "Conspiracy talent description"
+	color = 196,0,150 //C50097FF
+	icon = ""
+}
+
+def RomanceTalent : Talent
+{
+	name = "Romance"
+	tooltip_text = "Romance talent description"
+	color = 210,103,176 //D267B0FF
+	icon = ""
+}
+
+def WarfareTalent : Talent
+{
+	name = "Warfare"
+	tooltip_text = "Warfare talent description"
+	color = 255,0,0 //FF0000FF
+	icon = ""
+}
+
+def LogisticsTalent : Talent
+{
+	name = "Logistics"
+	tooltip_text = "Logistics talent description"
+	color = 131,100,0 //836400FF
+	icon = ""
+}
+
+def LeadershipTalent : Talent
+{
+	name = "Leadership"
+	tooltip_text = "Leadership talent description"
+	color = 255,247,0 //FFF800FF
+	icon = ""
+}
+
+def NavigationTalent : Talent
+{
+	name = "Navigation"
+	tooltip_text = "Navigation talent description"
+	color = 0,1,255 //0002FFFF
+	icon = ""
+}
+
+def StewardshipTalent : Talent
+{
+	name = "Stewardship"
+	tooltip_text = "Stewardship talent description"
+	color = 54,8,119 //360978FF
+	icon = ""
+}
+
+def TradingTalent : Talent
+{
+	name = "Trading"
+	tooltip_text = "Trading talent description"
+	color = 255,184,0 //FFB900FF
+	icon = ""
+}
+
+def ArtsTalent : Talent
+{
+	name = "Arts"
+	tooltip_text = "Arts talent description"
+	color = 0,107,183 //006CB8FF
+	icon = ""
+}
+
+def ConstructionTalent : Talent
+{
+	name = "Construction"
+	tooltip_text = "Construction talent description"
+	color = 157,157,157 //9E9E9EFF
+	icon = ""
+}

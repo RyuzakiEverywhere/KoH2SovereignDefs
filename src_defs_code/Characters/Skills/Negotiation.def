@@ -1,0 +1,33 @@
+﻿def NegotiationSkill : Skill
+{
+	name = "Negotiation"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Negotiation_1.png:UI_Icon_Skill_Negotiation_1#2" //GUID:cf059bc5159faa641bd5facf4fa48a75
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Negotiation_1.tga:UI_Icon_Skill_Negotiation_1#2", //GUID:a6fe4db1eb7cd4d40b787e57040a2d64
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Negotiation_2.tga:UI_Icon_Skill_Negotiation_2#2", //GUID:a158823a792e7a245bf6754028194b58
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Negotiation_3.tga:UI_Icon_Skill_Negotiation_3#2" //GUID:b1ab3490b5beadd43acfc5b1890c2d97
+	]
+	tooltip = "An invaluable trait seen in most skilled negotiators, responsible for resolving countless wars throughout history."
+}
+
+extend Skill.effects
+{
+	skill NegotiationSkill
+	{
+		class Merchant
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_food_per_farm = 1/2/3
+			}
+		}
+		
+		class Diplomat
+		{
+			slot_type = "primary"
+			kingdom_mod ks_kingdom_traditions_influence = 20/30/50
+		}
+	}
+}
+

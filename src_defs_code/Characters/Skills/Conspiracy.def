@@ -1,0 +1,40 @@
+﻿def ConspiracySkill : Skill
+{
+	name = "Conspiracy"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Conspiracy_1.png:UI_Icon_Skill_Conspiracy_1#2" //GUID:2bce7f69a24e4334395734ccd7bce13f
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Conspiracy_1.tga:UI_Icon_Skill_Conspiracy_1#2", //GUID:64e374ab0d0e8174fad769c0801b88dd
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Conspiracy_2.tga:UI_Icon_Skill_Conspiracy_2#2", //GUID:8eaf60af7a1e5fb4eb4a1d0cf8f04712
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Conspiracy_3.tga:UI_Icon_Skill_Conspiracy_3#2" //GUID:d1cec5ef471ae3d4d802bcbbc4b6e3af
+	]
+	tooltip = "Allows one to recognize opportunities (of questionable morality) where most wouldn't dare looking."
+}
+
+extend Skill.effects
+{
+	skill ConspiracySkill
+	{
+		
+		Default
+		{
+			kingdom_mod ks_espionage_defense_skills_traditions = 2/3/5
+		}
+
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+
+		class Spy
+		{
+			slot_type = "primary"
+			mod cs_ruin_relations_perc = 10/15/20
+			mod cs_sow_dissent_chance = 5/10/20
+		}
+	}
+}

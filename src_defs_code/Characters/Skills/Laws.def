@@ -1,0 +1,58 @@
+﻿def LawsSkill : Skill
+{
+	name = "Laws"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Laws_1.png:UI_Icon_Skill_Laws_1#2" //GUID:60b2a6b2331416c4395c857ce637d989
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Laws_1.tga:UI_Icon_Skill_Laws_1#2", //GUID:42b92af036fdbef4bbd53fb11bcd689d
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Laws_2.tga:UI_Icon_Skill_Laws_2#2", //GUID:c383901eb6f54da4fb9108ea24fbfe82
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Laws_3.tga:UI_Icon_Skill_Laws_3#2" //GUID:91eeb404cd9f56c4f95610bfd9b79c98
+	]
+	tooltip = "Proper understanding of law and order allows imposing the most efficient measures while governing."
+}
+
+extend Skill.effects
+{
+	skill LawsSkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_stability_realm = 1/2/3
+			governed_realm_mod rs_governor_levy_in_town = 1/2/3
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "primary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_books_per_castle = 1/2/3
+			}
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+			kingdom_mod ks_culture_from_traditions = 5/10/20
+			tag Govern
+			{
+				governed_realm_mod rs_governor_books = 1/2/3
+			}
+		}
+		
+		class Spy
+		{
+			opportunity FrameAction
+			slot_type = "secondary"
+		}
+	}
+}

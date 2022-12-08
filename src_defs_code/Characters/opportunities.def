@@ -1,0 +1,18 @@
+def Opportunity
+{
+	float chance_to_add_on_tick = 40 // chance to "activate" the opportunity on each tick
+	float min_active_time = 300 // minimum time this opportunity will not be deactivated by chance (bellow)
+	float chance_to_del_on_tick = 20 // chance do deactivate (after min_active_time has passed) on tick
+	float cooldown = 180 // do not activate again for the same target this many seconds after deactivated
+	int max_targets = 0 // don't activate the opportunity for more than this different targets (<= 0: no maximum)
+	Message activate_message
+	Message deactivate_message
+}
+
+def PermanentOpportunity : Opportunity
+{
+	chance_to_add_on_tick = 100
+	chance_to_del_on_tick = 0
+	cooldown = 0
+	max_targets = 1
+}

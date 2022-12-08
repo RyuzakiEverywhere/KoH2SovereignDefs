@@ -1,0 +1,6 @@
+﻿
+def GovernModifiers
+{
+	int notGoverningRepeatTime = 300
+	int notGoverningRepeatTimePlusMinus = 120
+}

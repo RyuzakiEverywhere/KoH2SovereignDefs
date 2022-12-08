@@ -1,0 +1,325 @@
+﻿// inherit this to get the proper field types
+def OutcomeMessageParams
+{
+	Message def
+	sprite icon
+	text caption
+	text text
+	text bullet
+	sprite bullet_icon
+	texture illustration
+	string voice_line
+	string sound_effect
+}
+
+// each field must either:
+// - be text, indicating the bullet text
+// - inherit OutcomeMessageParams (only message defaults are specified)
+// - have children, eventually containing:
+//   - message = bullet text
+//   - message : OutcomeMessageParams (directly or indirectly)
+//   - some other non-message related values
+def OutcomeDefaults
+{
+	rel_change : OutcomeMessageParams
+	{
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			bullet = "[Relations with {outcome.tgt_kingdom}: {outcome.rel_change_amount:bonus_dark}{outcome.change_amount_nonzero:if}]"
+		}
+		case tgt_kingdom = (player == outcome.tgt_kingdom)
+		{
+			bullet = "[Relations with {outcome.src_kingdom}: {outcome.rel_change_amount:bonus_dark}{outcome.change_amount_nonzero:if}]"
+		}
+		case default
+		{
+			bullet = "[Relations between {outcome.src_kingdom} and {outcome.tgt_kingdom}: {outcome.rel_change_amount:bonus_dark}{outcome.change_amount_nonzero:if}]"
+		}
+		rel_change_amount = (RelationModifiers[outcome.value] || outcome.value)
+		change_amount_nonzero = (rel_change_amount != 0) //!!! does not work
+	}
+	rel_change2 : rel_change
+	rel_change3 : rel_change
+	rel_change4 : rel_change
+	rel_change5 : rel_change
+	rel_change_neighbor_kingdoms : OutcomeMessageParams
+	{
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			bullet = "[Relations with neighboring kingdoms: {outcome.rel_change_amount:bonus_dark}{outcome.change_amount_nonzero:if}]"
+		}
+		rel_change_amount = (RelationModifiers[outcome.value] || outcome.value)
+		change_amount_nonzero = (rel_change_amount != 0) //!!! does not work
+	}
+	rel_change_with_kingdoms : OutcomeMessageParams
+	{
+		// the specific outcome should define kingdoms_text
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			bullet = "[Relations with {outcome.kingdoms_text}: {outcome.rel_change_amount:bonus_dark}]"
+		}
+		rel_change_amount = (RelationModifiers[outcome.value] || outcome.value)
+	}
+	rel_change_with_kingdoms2 : rel_change_with_kingdoms
+	rel_change_with_kingdoms3 : rel_change_with_kingdoms
+	crown_authority : OutcomeMessageParams
+	{
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			bullet = "[Crown Authority: {outcome.change_amount:bonus_dark}{outcome.change_amount_nonzero:if}]"
+			change_amount = (CrownAuthority[outcome.value] || outcome.value)
+			change_amount_nonzero = (change_amount != 0) //!!! does not work
+		}
+	}
+	opinion_change : OutcomeMessageParams
+	{
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			bullet = "{outcome.opinion_name_def.name} opinion: {outcome.amount:bonus_dark}"
+			opinion_name_def = (src_kingdom.opinions[outcome.opinion].def)
+		}
+	}
+	prevent_opinion_drop : OutcomeMessageParams
+	{
+		case src_kingdom = (player == outcome.src_kingdom)
+		{
+			//bullet = "{outcome.opinion_name_def.name} opinion: {outcome.amount:bonus_dark}"
+			opinion_name_def = (src_kingdom.opinions[outcome.opinion].def)
+		}
+	}
+	give_gold : OutcomeMessageParams
+	{
+		bullet = "[{outcome.change_amount:bonus_dark}{outcome.change_amount_nonzero:if}{gold_icon}]"
+		change_amount = (outcome.value)
+		change_amount_nonzero = (change_amount != 0)
+	}
+	give_books : OutcomeMessageParams
+	{
+		bullet = "[{outcome.change_amount:bonus_dark}{outcome.change_amount_nonzero:if}{books_icon}]"
+		change_amount = (outcome.value)
+		change_amount_nonzero = (change_amount != 0)
+	}
+	give_piety : OutcomeMessageParams
+	{
+		bullet = "[{outcome.change_amount:bonus_dark}{outcome.change_amount_nonzero:if}{kingdom.piety_icon}]"
+		change_amount = (outcome.value)
+		change_amount_nonzero = (change_amount != 0)
+	}
+	convert_province_religion : OutcomeMessageParams
+	{
+		bullet = "{outcome.realm} was converted to {outcome.religion}"
+	}
+	fame : OutcomeMessageParams
+	{
+		bullet = "[{outcome.change_amount:bonus_dark}{outcome.change_amount_nonzero:if} Fame]"
+		change_amount = (outcome.value)
+		change_amount_nonzero = (change_amount != 0)
+	}
+	excommunicate : OutcomeMessageParams
+	{
+		bullet = "[{pope}|The Pope] has excommunicated [{outcome.kingdom}|{outcome.src_kingdom}|{outcome.tgt_kingdom}] from the Catholic church"
+	}
+	pope_leave : OutcomeMessageParams
+	{
+		bullet = "[{pope}|The Pope] has left the royal court of {pope.original_kingdom}"
+	}
+}
+
+def OutcomeMessage : Message
+{
+	icon = (outcome_icon || default_icon)
+	default_icon
+	
+	illustration = (outcome_illustration)
+	voice_line = (outcome_voice_line)
+	sound_effect = (outcome_sound_effect)
+	
+	caption = "{outcome_caption}"
+	body = "{outcome_text}[{outcome_add_text}][{p}{i}{outcome_bullets}{/i}]"
+}
+
+def OpinionOutcomeMessage : OutcomeMessage
+{
+	stack_group = "OurSmallChanges" //"DiplomacyMessage"
+	separate_stack = true
+	stack_priority = 140
+	expire_time = 60
+}
+
+def PositiveOpinionOutcomeMessage : OpinionOutcomeMessage
+{
+	//sound_effect = "event:/sound_effects/notification/message/opinion_increased" //sound effect not ready
+}
+
+def NegativeOpinionOutcomeMessage : OpinionOutcomeMessage
+{
+	//sound_effect = "event:/sound_effects/notification/message/opinion_dropped" //sound effect not ready 
+}
+
+def OkGotoOutcomeMessage : PrisonOutcomeMessage
+{
+	buttons { goto; ok }
+}
+
+def DiplomacyOutcomeMessage : OutcomeMessage
+{
+	buttons { audience; ok }
+	ui_prefab = "Assets/UI/Messages/UIP_DiplomacyMessage.prefab" //GUID:66f4cafdde854a44ea54a1dc645e2b26
+	body = "{align:left}{outcome_text}[{p}{i}{outcome_bullets}{/i}]{/align}"
+	
+}
+
+def DiplomacyPrisonOutcomeMessage : OutcomeMessage
+{
+	stack_group = "PrisonMessage"
+	buttons { audience; ok }
+	ui_prefab = "Assets/UI/Messages/UIP_DiplomacyMessage.prefab" //GUID:66f4cafdde854a44ea54a1dc645e2b26
+	body = "{align:left}{outcome_text}[{p}{i}{outcome_bullets}{/i}]{/align}"
+}
+
+def PrisonOutcomeMessage : OutcomeMessage
+{
+	stack_group = "PrisonMessage"	
+}
+
+def PrisonOkGotoOutcomeMessage : PrisonOutcomeMessage
+{
+	buttons { goto; ok }
+	stack_group = "PrisonMessage"
+}
+
+//============================= Action outcomes
+
+def ActionOutcomeDefaults : OutcomeDefaults
+{
+	// the "message" key is special case (not an outcome)
+	// use it it to define action-specific message defaults
+	message : OutcomeMessageParams
+	{
+		case src_kingdom
+		{
+			def = ActionOutcomeMessage
+		}
+	}
+	
+	success : OutcomeMessageParams
+	{
+		caption = "{owner.class} succeeded"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Action_Positive.png:Icon_Message_Action_Positive#2" //GUID:c0d9b6f451a156247aa4fb49231585a9
+		case src_kingdom
+		{
+			voice_line = (success_voice_line)
+		}
+	}
+	fail : OutcomeMessageParams
+	{
+		caption = "[{owner.class}|{class_title}] failed"
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Action_Negative.png:Icon_Message_Action_Negative#2" //GUID:e4b41d0620e99ca47ac12a4dcfbd996e
+		case src_kingdom
+		{
+			voice_line = (fail_voice_line)
+		}
+	}
+	owner_killed : OutcomeMessageParams
+	{
+		case src_kingdom
+		{
+			caption = "Our [{owner.class}|{class_title}] was killed"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Negative.png:Icon_Message_KnightKilled_Negative#2" //GUID:c69ba8b66f7a190468fa7cddb596098c
+		}
+		case mission_kingdom
+		{
+			caption = "{owner.kingdom:anian:cap} [{owner.class}|{class_title}] was killed"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightKilled_Positive.png:Icon_Message_KnightKilled_Positive#2" //GUID:db87a91f15c45084c9d03aabd7f888aa
+		}
+		bullet = "[{owner}|{target}] was killed"
+		sound_effect = "event:/sound_effects/notification/character/died"
+		
+	}
+	owner_imprisoned : OutcomeMessageParams
+	{
+		case src_kingdom
+		{
+			caption = "Our [{owner.class}|{class_title}] was captured"
+			bullet = "{owner} was imprisoned[ in {mission_kingdom}]"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Negative.png:Icon_Message_KnightImprisoned_Negative#2" //GUID:576cf88267f938d479147e5ac18e45d9
+		}
+		case mission_kingdom
+		{
+			caption = "{owner.kingdom:anian:cap} [{owner.class}|{class_title}] was captured"
+			bullet = "{owner} is now our prisoner"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnightImprisoned_Positive.png:Icon_Message_KnightImprisoned_Positive#2" //GUID:e739776a08b7b294aa0fd2251a7df694
+		}
+		sound_effect = "event:/sound_effects/notification/character/imprisoned"
+	}
+	owner_escaped : OutcomeMessageParams
+	{
+		case src_kingdom
+		{
+			caption = "Our [{owner.class}|{class_title}] was revealed"
+			bullet = "{owner} escaped and is returning to our court"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+		}
+		case mission_kingdom
+		{
+			caption = "{owner.kingdom:anian:cap} [{owner.class}|{class_title}] was revealed"
+			bullet = "{owner} escaped capture"
+			icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+		}
+	}
+}
+
+def ActionOutcomeMessage : OutcomeMessage
+{
+	caption = "[{outcome_caption}|{owner} completed his task]"
+}
+
+//============================= Offer outcomes
+
+def OfferOutcomeDefaults : OutcomeDefaults
+{
+	// the "message" key is special case (not an outcome)
+	// use it it to define action-specific message defaults
+	message : OutcomeMessageParams
+	{
+		switch_value = (game.plr_kingdom)
+		case from
+		{
+			def = DiplomacyOutcomeMessage
+		}
+		case default
+		{
+			def = null
+		}
+	}
+	
+	// accept : OutcomeMessageParams
+	// {
+	// 	caption = "{to} accepted our [{offer} ]offer"
+	// }
+	
+	// decline : OutcomeMessageParams
+	// {
+	// 	caption = "{to} declined our [{offer} ]offer"
+	// }
+	
+	accept : OutcomeMessageParams
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Positive.png:Icon_Message_IncomingOffer_Positive#2" //GUID:a9f3b9652ebca5349a12a7fb31f62b0b
+		caption = "{to} accepted our offer"
+		bullet = "Accepted: {name}"
+	}
+	
+	decline : OutcomeMessageParams
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_IncomingOffer_Negative.png:Icon_Message_IncomingOffer_Negative#2" //GUID:f16b118485fa3de4ca358309faf0b723
+		caption = "{to} declined our offer"
+		bullet = "Declined: {name}"
+	}
+	
+}
+
+def OfferOutcomeMessage : OutcomeMessage
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Neutral.png:Icon_Message_GenericEvent_Neutral#2" //GUID:d1b257a397cd3e2409cb96b95cb01190
+}

@@ -1,0 +1,879 @@
+﻿def KingdomStability
+{
+	float rebel_risk_base_period = 120
+	float rebel_risk_variable_period = 60
+	
+	//rebel armies, not rebellions
+	int max_rebels_per_kingdom = 20 
+	int max_rebels_per_game = 100
+
+	int max_rebellions_per_game = 20
+	int min_provinces_per_rebellion = 3 //RoundUp KingdomSize
+	int max_rebellions_per_AI_kingdom = 3 //for player we have this defined by difficulty settings
+
+	
+	/// UI
+	float stability_tooltip_threshold = -10 // in CA tooltip don't show cities with stability better than this
+	
+	//modifiers
+	// both positive and negative, works when signs of CA and stability are equal
+	float stability_increase_from_CA = 20
+	
+	// both positive and negative, works when signs of CA and stability are different
+	float stability_decrease_from_CA = 50
+	
+	// when claculation % of different religion/culture we add this to help tiny kingdoms
+	// differences count as 1 or 2 provinces based on difference
+	float stability_differences_added_provinces = 10
+	
+	// percent of adjusted province number with differences where stability drops kicks in
+	float stability_differences_min_perc = 30
+	float stability_differences_religion_max = 30
+	float stability_differences_culture_max = 15
+	float stability_pagan_tolerance_modifier = 0.5
+	
+	float max_risk_hunger = -50
+	float risk_global_leader_level = -0.5
+	float risk_global_rebel = 0 //-1
+
+	int max_rebellions_for_AI_kingdom_formula = (min(max_rebellions_per_AI_kingdom, ceil(realms_count/min_provinces_per_rebellion)))
+	int max_rebellions_for_Player_kingdom_formula = (min(max_player_rebellions, ceil(realms_count/min_provinces_per_rebellion)))
+	
+}
+
+def RebellionRisk
+{
+	/// UI
+	float low_stability_in_realm_message_threshold = -20 // if a realm has reached this low stability and has no active rebellion there, give a player reminder message
+	
+	risk_from_taxes = [0, 5, 10]
+	
+	float risk_happiness_mod = 1
+	float max_risk_from_happiness = 20
+	
+	float risk_happiness_mitigation_mod = 1
+	float max_happiness_mitigation = 80
+	
+	float risk_from_local_authority = [-20, -15, -10, -6, -3, 0, 1, 2, 3, 4, 5]
+	
+	float risk_rebellion_zone = -5
+	float risk_disloyal_population = -20
+	
+	float risk_occupied_by_rebels = -10
+	float risk_nearby_occupied_by_rebels = -10
+	float risk_nearby_occupied_by_our_loyalists = 0
+	
+	float risk_rebel_leader_base = -10
+	float risk_rebel_leader_per_general = -5
+	float risk_rebel_leader_per_rebel = -3
+	float risk_rebel_armies_in_neigbors_multiplier = 0.5
+	
+	float risk_religios_differences_multiplier = 1
+	float risk_cultural_differences_multiplier = 1
+	float risk_same_culture_family = -5
+	float risk_different_culture_family = -10
+	
+	float risk_per_occupied_realm_base = -3
+	float risk_per_occupied_realm_other_subreligion = -2
+	float risk_per_occupied_realm_other_mainreligion = -5
+	float risk_per_occupied_realm_other_subculture = -1
+	float risk_per_occupied_realm_other_mainculture = -3
+	float risk_per_occupied_realm_controller_army_in_town = 5
+	float risk_per_occupied_realm_other_per_controller_garrison = 0.5
+	float risk_per_occupied_realms_min = -1000000
+	float risk_per_occupied_realms_max = 0
+	
+	float risk_dead_king = 15 // !!! for future - increase this a lot (e.g. 30) - we want this an instant spawn check with no fading over-time
+	float dead_king_risk_period = 600 // !!! for future - remove this so it's not a fading modifier
+	
+	
+	float rebel_risk_base_period = 30
+	float rebel_risk_variable_period = 60
+	
+	float create_rebel_pop_mod = 1 // perc
+	float max_create_rebel_pop = 75
+	
+	float calm_rebel_pop_mod = 2.5 // perc
+	float max_calm_rebel_pop = 75
+	
+	rp_min_for_rebellion_spawn = 3
+	
+	chance_rebel_pop_take_action = [5, 7, 10, 30, 50, 70]
+	
+	float chance_to_reinforce = 40
+	float chance_to_rebel = 30
+	float chance_to_migrate = 0
+	
+	int max_rebels_per_realm = 1
+	
+	int max_migrants_per_realm = 3
+	int max_migrants_per_kingdom = 15
+	int max_migrants_per_game = 300
+	
+	int min_reinforce = 1
+	int max_reinforce = 6
+	int reinforce_gold = 50
+	
+	float rebellious_weight_base = 1
+	float rebellios_weight_per_rebel_population = 2
+	float rebellious_weght_governed = 3
+
+	int max_rebellious_population_per_risk = 1
+	int max_rebellious_population = (3 + round(-worker_slots * max_rebellious_population_per_risk * rebellion_risk / 100))
+
+	float min_time_before_attacking_towns = 300
+}
+
+def Rebel
+{
+	// visual 
+	prefab reinforcements = "Assets/Units/Rebel_Reiforcments/Rebel_Reiforcments_01.prefab" //GUID:af705a1e0a1e39b428d85ea67344d081
+	prefab banner = "Assets/Units/banner_prefab.prefab" //GUID:50a1b63e60347374494c8396ee2cd855
+	prefab tents = "Assets/Europe/Tents/Rebels/Camping_Rebels.prefab" //GUID:616a746750774ad4f84bd5f1596f3b75
+	prefab flag_famous_rebellion = "Assets/Units/Flags/Flag_Famous_Rebellion.prefab" //GUID:ca2fa22a3c6ba554eb6168e36dcfbdc1
+	
+	
+	bool useKingdomColors = true //obsolete
+	sprite icon
+	text type_name
+	text rebel_type
+	// initlazed data 
+	string fraction_type = "RebelFraction" { enum { Regular; Fraction; RebelFraction; LoyalistsFraction; ReligiousFraction } }
+	string kingdom_key = ""
+	float exp_per_level = 100
+	int starting_unit_cnt = 2
+	float supplies_consumption_rate_mod = 0
+	
+	leader_class_weights
+	{
+		float Marshal = 70
+		float Spy = 15
+		float Merchant = 5
+		float Diplomat = 5
+		float Cleric = 5
+	}
+	int units_max_tier = 0 // 0 - Milita, 1 - single prerequsite, 2 -  two or more prerequsites
+	float inital_wealth = 300
+	
+	float chance_sack = 10 //drop to 0 if the the attacked castle was just sacked by other army or if that realm is the last in the zone that is not occupied, goes to 100 is not allowed to <can_takeover_realm>
+	float chance_denounce_disband = 50
+	float rel_loyalty_change_mult = 0 //defines the relation drop when your loyalists do stuff to Kingdom
+	
+	float merc_chance_to_reinforce = 30
+	int merc_reinforce_range = 1 // in realms away, 1 - only in current realm, 2 - current realm and its neighbors, etc.
+	
+	//restrictions and abilities
+	float flee_distance = 15
+	float target_search_distance = 350
+	bool can_join_battles = true
+	bool can_attack_castle = false
+	bool can_takeover_realm = false
+	bool can_use_cavalry = false
+	
+	AvailableUnits units_types = []
+	int max_level = 15
+	string movement_restrictions = "RebellionZone" { enum { Realm; RebellionZone; Kingdom; World } }
+	string promotes_to
+	float min_promotion_period_time = 300
+	float max_promotion_period_time = 600
+	float promotion_general_num = 1 // if (rebels > generals + promotion_general_num) then promote
+	string change_to_rebel_def
+	string change_to_loyalist_def
+	
+	// per rebellion tick = 5 seconds
+	float fatigue_min = 0
+	float fatigue_cap = 1
+	float fatigue_loss = 0.1
+	float fatigue_field = 0.2
+	float fatigue_pillage = 0.25
+	float fatigue_siege_keep = 0.5
+	float fatigue_siege = 1
+	float fatigue_threshold = 0.5
+	float fatigue_chance_to_end_rest_below_threshold = 20
+	
+	float plunder_rebel_mod = 1
+	
+	float chance_join_court_on_independance = 0
+	
+	float chance_general_taking_leadership = 70
+	
+	float chance_disorder_takeover_realm = 0
+	
+	level_up_chances
+	{
+		float settlement = 50
+		float castle = 300
+		float open_field = 100
+		float leader_also_recieves_levels = 50
+	}
+
+	float rebel_army_defeated_reward_base = 125
+	float rebel_army_defeated_reward_leader_level = 25
+	float rebel_army_defeated_reward_general_level = 50
+	float rebel_army_defeated_reward = (!is_leader * (rebel_army_defeated_reward_base + rebel_army_defeated_reward_leader_level * rebellion.leader.class_level + is_general * rebel_army_defeated_reward_general_level *  army.leader.class_level))
+
+	float target_pick_defend_plunder = 2
+    float target_pick_defend_keep = 3
+    float target_pick_defend_town = 4
+    float target_pick_attack_plunder = 1
+    float target_pick_attack_keep = 1.25
+    float target_pick_attack_town = 1.4
+ 	float target_pick_distance = 10
+ 	
+	float heal_timer_interval = 5
+	float healing_rate = 0.05 // damage per heal timer tick
+	float reinforcement_starting_health = 0.5 // units that are created while the rebel is healing start at (1 - this) damage
+
+}
+
+def Migrant
+{
+	prefab prefab_unit = "Assets/Units/Migrant.prefab" //GUID:7960dd9c7ecabd24ebad09a6178cd26c
+	float spawn_chance = 50
+	float spawn_period = 120
+	reward = "200g"
+}
+
+def Rebels : Rebel
+{
+	type_name = "Rebels"
+	rebel_type = "Rebels"
+	useKingdomColors = false
+	starting_unit_cnt = 4
+	units_max_tier = 1
+	promotes_to = "GeneralRebels"
+	change_to_loyalist_def = "Loyalists"
+	fraction_type = "RebelFaction"
+	kingdom_key = "RebelsFaction"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebelType_Rebels.png:Icon_RebelType_Rebels#1" //GUID:235687d3e0d93b1499f6f8577ceb41dd
+	chance_disorder_takeover_realm = 10
+	//rebellion_start_voice_line =  "" //RebellionSpawnedMessage
+	//rebellion_defeated_voice_line = "" //RebelDefeatedMessage
+}
+
+def GeneralRebels : Rebels
+{
+	type_name = "Rebel general"
+	rebel_type = "Rebels"
+	can_use_cavalry = true
+	promotes_to = "LeaderRebels"
+	change_to_loyalist_def = "GeneralLoyalists"
+	units_max_tier = 1
+	starting_unit_cnt = 5
+	chance_join_court_on_independance = 70
+	tents = "Assets/Europe/Tents/Rebels/Camping_Famous_Rebels.prefab" //GUID:244be1d5117fc8b458b2cad0e6028592
+}
+
+def LeaderRebels : GeneralRebels
+{
+	type_name = "Rebel leader"
+	rebel_type = "Rebels"
+	change_to_loyalist_def = "LeaderLoyalists"
+	can_takeover_realm = true
+	can_attack_castle = true
+	units_max_tier = 2
+	starting_unit_cnt = 6
+	chance_join_court_on_independance = 100
+	tents = "Assets/Europe/Tents/Rebels/Camping_Famous_Rebels.prefab" //GUID:244be1d5117fc8b458b2cad0e6028592
+	banner = "Assets/Units/Banners/banner_rebel_leader.prefab" //GUID:b1b06d9d638d60b44ae8f7641b1a81f0
+}
+
+def Loyalists : Rebel
+{
+	type_name = "Loyalists"
+	rebel_type = "Loyalists"
+	useKingdomColors = true
+	starting_unit_cnt = 4
+	units_max_tier = 1
+	promotes_to = "GeneralLoyalists"
+	change_to_rebel_def = "Rebels"
+	fraction_type = "LoyalistsFaction"
+	kingdom_key = "LoyalistsFaction"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebelType_Loyalists.png:Icon_RebelType_Loyalists#2" //GUID:03e328917af8b1f4cb5b055afa82f6c6
+	banner = "Assets/Units/Banners/banner_loyalist.prefab" //GUID:8e8f4bed4eaab0b4ba90a62cf12de9e9
+	chance_disorder_takeover_realm = 25
+	//rebellion_start_voice_line = "" 	
+}
+
+def GeneralLoyalists : Loyalists
+{
+	type_name = "Loyalist general"
+	rebel_type = "Loyalists"
+	can_use_cavalry = true
+	can_takeover_realm = true
+	rel_loyalty_change_mult = 1
+	units_max_tier = 1
+	starting_unit_cnt = 5
+	chance_join_court_on_independance = 70
+	promotes_to = "LeaderLoyalists"
+	change_to_rebel_def = "GeneralRebels"
+	change_to_loyalist_def = "GeneralRebels"
+}
+
+def LeaderLoyalists : GeneralLoyalists
+{
+	type_name = "Loyalist leader"
+	rebel_type = "Loyalists"
+	change_to_rebel_def = "LeaderRebels"
+	can_attack_castle = true
+	units_max_tier = 2
+	starting_unit_cnt = 6
+	chance_join_court_on_independance = 100
+	banner = "Assets/Units/Banners/banner_loyalist_leader.prefab" //GUID:67241b1b1a861fa428327ed6a8ad766d
+}
+
+//////////////////////////////////////////////////////////////////
+/// SPAWN CONDITIONS
+
+def RebelSpawnCondition
+{
+	//debug
+	bool enable_periodic_spawn = true //turn ON/OFF rebels spawning from risk (NOTE: rebels from mercenaries continue to spawn)
+	
+	// irrelevant
+	//int max_rebels_per_realm = 3
+	//int max_rebels_per_kingdom = 15
+	//int max_rebels_per_game = 300
+	
+	text caption = "Rebellion Risk"
+	text text = "Generic description"
+	text reason = ""
+	sprite icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Wars.png:Icon_RebellionRisk_Wars#2" //GUID:01abee7411afa9b408fd0ed709abe7fc
+	bool hidden = false
+	float min_chance = 0
+	float max_chance = 100
+	float refresh_period = 300 // sec 
+	float refresh_interval_duration_modifier_min = 0.5
+	float refresh_interval_duration_modifier_max = 1.5
+	bool periodic = true
+	float spawn_chance
+	Rebel rebel
+	RebelAgenda agenda
+}
+
+
+def HappinessSpawnCondition : RebelSpawnCondition
+{
+	min_chance = 0
+	max_chance = 20
+	spawn_chance = #CalcHappinessSpawnCondition //Equals the total amount of happiness (if negative) (WIP)
+	rebel = [Loyalists]
+	agenda = [HappinessAgenda]
+	caption = "Happiness"
+	text = "Caused by low province happiness"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Happines.png:Icon_RebellionRisk_Happines#2" //GUID:0ccce50044e47c6439b7796fca628894
+}
+
+def TaxesSpawnCondition : RebelSpawnCondition
+{
+	min_chance = 1
+	max_chance = 20
+	spawn_chance = #CalcTaxesSpawnCondition //taxes * 10 (so, if taxes are at 30%, rebel risk is 3) (WIP)
+	rebel = [Rebels, Loyalists]
+	agenda = [TaxesAgenda]
+	caption = "Taxes"
+	text = "Caused by the accumulation of high taxes across the kingdom"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Taxes.png:Icon_RebellionRisk_Taxes#2" //GUID:08f43cafd7daaa44f9986cd188c71b44
+	hidden = true
+}
+
+def LoyalistsSpawnCondition : RebelSpawnCondition
+{
+	spawn_chance = #CalcLoyalistsSpawnCondition //an addiional +5 risk, if a province has any leftover foreign influence (WIP)
+	rebel = [Loyalists]
+	agenda = [NationalistAgenda]
+	caption = "Loyalists"
+	text = "Caused by foreign influence within provinces"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Loyalty.png:Icon_RebellionRisk_Loyalty#2" //GUID:820fcf22a33c840488be4faa6cf100fe
+}
+
+def ReligionSpawnCondition : RebelSpawnCondition
+{
+	spawn_chance = #CalcReligionSpawnCondition //Must implement religion
+	rebel = [Rebels] //[ReligiousRebels]
+	agenda = [ReligionAgenda]
+	caption = "Religion"
+	text = "Caused by multiple religions vying for power within provinces"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Religion.png:Icon_RebellionRisk_Religion#2" //GUID:2d6921fec4a7b954882dab9dcad82682
+}
+
+def WarSupportSpawnCondition : RebelSpawnCondition
+{
+	spawn_chance = #CalcWarSupportSpawnCondition //+5 risk for each war where our War Support is 0
+	rebel = [Rebels, Loyalists]
+	agenda = [WarsAgenda]
+	caption = "War Support"
+	text = "Caused by war exhaustion due to multiple wars"
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Wars.png:Icon_RebellionRisk_Wars#2" //GUID:01abee7411afa9b408fd0ed709abe7fc
+}
+
+
+def DynasticSpawnCondition : RebelSpawnCondition
+{
+	spawn_chance = #CalcDynasticSpawnCondition //Is currently spawned by events, e.g. The King has died.
+	rebel = [Rebels]
+	agenda = [DynastyAgenda]
+	caption = "Dynastic"
+	text = "Caused by various dynastic issues and ill-conducted diplomacy"
+	hidden = true
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Dynastic.png:Icon_RebellionRisk_Dynastic#2" //GUID:fcafcaea223a51843aed608c1522c205
+}
+
+
+def CrownAuthoritySpawnCondition : RebelSpawnCondition
+{
+	spawn_chance = #CrownAuthoritySpawnCondition //A negative mod when Crown Authority is below 0: [20, 15, 10, 6, 3]
+	rebel = [Rebels, Loyalists]
+	agenda = [NationalistAgenda]
+	caption = "Crown Authority"
+	hidden = true
+}
+
+def CrusadeEndSpawnCondition : RebelSpawnCondition
+{
+	periodic = false
+	spawn_chance = 100
+	rebel = [Loyalists, Rebels]
+	agenda = [CrusadeEndAgenda]
+	caption = "Cruasde Disarray Spawn Condition"
+}
+
+def MercenarySpawnCondition : RebelSpawnCondition
+{
+	periodic = false
+	spawn_chance = 100
+	rebel = [Rebels]
+	agenda = [MercenaryAgenda]
+	caption = "Unhired mercenary agenda"
+}
+
+
+//////////////////////////////////////////////////////////////////
+/// EVENTS
+
+
+def RebelEvent
+{
+	string event_name
+	RebelSpawnCondition relevant_conditions
+	float override_chance = 1
+}
+
+def SoverenChange : RebelEvent
+{
+	event_name = "soveren_changed"
+	relevant_conditions = [HappinessSpawnCondition, TaxesSpawnCondition, LoyalistsSpawnCondition]
+}
+
+def BorderCross : RebelEvent
+{
+	event_name = "border_crossed"
+	relevant_conditions = [LoyalistsSpawnCondition]
+}
+
+
+//////////////////////////////////////////////////////////////////
+/// AGENDAS
+def RebelAgenda
+{
+	text flavor = [ 
+		"We are sick of the lies of the goverment!",
+		"We will tolerate this corrupted goverment no more!"
+	]
+}
+
+def WarsAgenda : RebelAgenda
+{
+	
+	text flavor = [
+		"Countless wars are breaking our kingdom apart. Enough!",
+		"Our nation is riddled with needless warmongering. We won't stand for this!",
+		"Our nation leads futile wars while people are suffering!"
+	]
+}
+
+def ReligionAgenda : RebelAgenda
+{
+	text flavor = [
+		"We vie to rid our lands of all heathens!",
+		"These lands used to be holy once!",
+		"We deem our lands holy and fight to rid them of all heretics!"
+	]
+}
+
+def MercenaryAgenda : RebelAgenda
+{
+	text flavor = [
+		"No kingdom wanted to hire our army, so now we're self employed!",
+		"The kings gave us no gold, so we're asking their subjects for it!"
+	]
+}
+
+def HappinessAgenda : RebelAgenda
+{
+	text flavor = [
+		"We will not tolerate such miserable existence!",
+		"Our nation lives in misery!",
+		"The population is in despair!"
+	]
+}
+
+def NationalistAgenda : RebelAgenda
+{
+	text flavor = [
+		"A nation's footprint cannot be so easily erased!",
+		"We fight to restore our country's former glory, at any means necessary!"
+	]
+}
+
+def TaxesAgenda : RebelAgenda
+{
+	text flavor = [
+		"We refuse to pay such high taxes!",
+		"Your greed has left us with no land and food!",
+		"We fight to end the greed that is devouring our lands!",
+		"These high tithes are impossible to swallow.",
+		"People are choking on your taxes. When will this tyranny end?",
+		"We fight against tyranny and greed!",
+		"The strain these taxes put on our lives is unbearable!",
+		"People are dying of starvation because of your taxes!",
+		"We demand better taxation!",
+		"Nearly all of our produce goes into the greedy hands of our rulers!",
+		"These high taxes are putting our lifes at stake!"
+	]
+}
+
+def DynastyAgenda : RebelAgenda
+{
+	text flavor = [
+		"The throne is not fit for unwise men!",
+		"We refuse to serve under such a vile ruler!",
+		"Our king is a mongrel!",
+		"We will not live under the rule of a false king."
+	]
+}
+
+def NearbyRealmOccpation : RebelAgenda
+{
+	text flavor = [
+		"Our king is a mongrel!"
+	]
+	
+}
+
+def MercenaryDisarrayAgenda : RebelAgenda
+{
+	text flavor = [
+		"Our days of roaming the lands carelessly as hired hands are over."
+	]
+	
+}
+
+
+def CrusadeEndAgenda : RebelAgenda
+{
+	text flavor = [
+		"No longer have a home. We'll make these lands our new home."
+	]
+}
+
+
+
+//////////////////////////////////////////////////////////////////
+/// BOUNTY
+
+def Bounty
+{
+	text description = "{bounty_owner} has offered the hefty sum of {bounty_ammount} gold pieces for the head of {character}."
+	text description_no_bounty = "No king has deemed it worthy to set a bounty for the head of {character}."
+	
+	// low, mid, high)
+	int num_bounty_choices = 3
+	//NOTE:  array lenght must be max rabel level + 2 
+	float per_tier_amount = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 380, 400, 420, 440, 460, 480]
+}
+
+
+//////////////////////////////////////////////////////////////////
+/// TEST
+
+
+def FadingRebellionRiskModifier : FadingModifier
+{
+	stat = "ks_defeated_rebellion"
+	value = 15 // starts at 15 stability, slowly goes down to 0
+	duration = 0 // only fades out
+	fade_out_time = 1800 // 30 minutes
+	max_stacks = 3 // max 3 defeated rebellions
+	
+	float stability_unlinearity_mod = 3
+}
+
+def RealmFactionInfluence
+{
+	int spread_influence = 5
+	int spread_capture_tick_duration = 600
+	int spread_capture_chance = 5
+	int independence_tick_duration = 600
+	int independence_chance = 100
+	int loyalist_independence_timeout = 600
+}
+
+def RebellionRiskCategory
+{
+	text caption = "Total"
+	text text = "The sum of all stability categories."
+	sprite icon = "Assets/UI/Elements/Rebels/Icons/Icon_Cat_RebellionRisk_Overview.png:Icon_Cat_RebellionRisk_Overview#2" //GUID:15a383c05b3ca9f48b26b37e68bbede1
+	bool is_global = false
+	float min = -50
+	float max = 0
+	string stat_name
+}
+
+def RebellionRiskCategoryDisloyalPop : RebellionRiskCategory
+{
+	text caption = "Disloyal Population"
+	text text = "Provinces which are loyal to foreign kingdoms suffer from low stability."
+	sprite icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Taxes.png:Icon_RebellionRisk_Taxes#2" //GUID:08f43cafd7daaa44f9986cd188c71b44
+	is_global = false
+	min = -100
+	stat_name = "disloyal_population"
+}
+
+def RebellionRiskCategoryGovernors : RebellionRiskCategory
+{
+	caption = "Governors"
+	text = "Provincial governors may affect the stability of their demense and the provinces around it."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Dynastic.png:Icon_RebellionRisk_Dynastic#2" //GUID:fcafcaea223a51843aed608c1522c205
+	is_global = false
+	min = -20
+	max = 5
+	stat_name = "governor"
+}
+
+def RebellionRiskCategoryHappiness : RebellionRiskCategory
+{
+	caption = "Happiness"
+	text = "As happiness increases, so does stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Happines.png:Icon_RebellionRisk_Happines#2" //GUID:0ccce50044e47c6439b7796fca628894
+	is_global = false
+	min = -30
+	stat_name = "happiness"
+}
+
+def RebellionRiskCategoryReligiousTension : RebellionRiskCategory
+{
+	caption = "Religious Tension"
+	text = "Provinces which follow a religion that differences from that of their kingdom suffer from low stability."
+	icon = "Assets/UI/Elements/Rebels/Elements/UI_Rebel_Banner_Religious.png:UI_Rebel_Banner_Religious#2" //GUID:6285170f453e8154c8ad2974866cccdf
+	is_global = false
+	min = -15
+	stat_name = "religious_tension"
+}
+
+def RebellionRiskCategoryCultureTension : RebellionRiskCategory
+{
+	caption = "Cultural Tension"
+	text = "Provinces which follow a culture which differs from that of their kingdom suffer from low stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_CultureTension.png:Icon_RebellionRisk_CultureTension#2" //GUID:6aa8297e7bc46fd47972fe9977256b1c
+	is_global = false
+	min = -10
+	stat_name = "culture_tension"
+}
+
+def RebellionRiskCategoryDisorder : RebellionRiskCategory
+{
+	caption = "Disorder"
+	text = "Provinces in disorder suffer from low stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = false
+	stat_name = "disorder"
+}
+
+def RebellionRiskCategoryRebelPresence : RebellionRiskCategory
+{
+	caption = "Rebel Army Presence"
+	text = "Provinces with rebels roaming their territory suffer from low stability."
+	icon = "Assets/UI/Elements/Rebels/Elements/UI_Rebel_Banner_Generic.png:UI_Rebel_Banner_Generic#2" //GUID:da66526ce9d986f4f9b76a6bb6d93c2a
+	is_global = false
+	min = -8
+	stat_name = "rebel_leaders"
+}
+
+def RebellionRiskCategoryRebelOccupiedProvinces : RebellionRiskCategory
+{
+	caption = "Rebel Occupations"
+	text = "Provinces which are occupied by rebellions suffer from low stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Occupations.png:Icon_RebellionRisk_Occupations#2" //GUID:8564a55c3dc96c848b732916711fc1e9
+	is_global = false
+	stat_name = "rebel_occupations"
+}
+
+def RebellionRiskCategoryTraditions : RebellionRiskCategory
+{
+	caption = "Traditions"
+	text = "Various dynastic traditions may affect the stability of a kingdom."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "traditions"
+}
+
+def RebellionRiskCategoryTaxes : RebellionRiskCategory
+{
+	text caption = "Taxes"
+	text text = "Setting high taxes within a kingdom leads to lower stability."
+	sprite icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Taxes.png:Icon_RebellionRisk_Taxes#2" //GUID:08f43cafd7daaa44f9986cd188c71b44
+	is_global = true
+	min = -10
+	stat_name = "taxes"
+}
+
+def RebellionRiskCategoryCrownAuthority : RebellionRiskCategory
+{
+	caption = "Crown Authority"
+	text = "Positive crown authority increases stability, while negative reduces it."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Dynastic.png:Icon_RebellionRisk_Dynastic#2" //GUID:fcafcaea223a51843aed608c1522c205
+	is_global = true
+	min = -20
+	max = 5
+	stat_name = "crown_authority"
+}
+
+def RebellionRiskCategoryWar
+austion : RebellionRiskCategory
+{
+	caption = "War Exhaustion"
+	text = "Leading prolonged wars can greatly hinder a kingdom's stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Wars.png:Icon_RebellionRisk_Wars#2" //GUID:01abee7411afa9b408fd0ed709abe7fc
+	is_global = true
+	min = -30
+	stat_name = "wars"
+}
+
+def RebellionRiskCategoryDeadKing : RebellionRiskCategory
+{
+	caption = "Dead King"
+	text = "As people mourn the death of their king, a kingdom's stability takes a temporary hit."
+	icon = "Assets/UI/Elements/Rebels/Elements/UI_Rebel_Banner_Loyalist.png:UI_Rebel_Banner_Loyalist#2" //GUID:1f65e981294b4134dab5861796ac05e3
+	is_global = true
+	min = -5
+	stat_name = "dead_king"
+}
+
+def RebellionRiskCategoryHunger : RebellionRiskCategory
+{
+	caption = "Hunger"
+	text = "Insufficient food within a kingdom can cause problems with a kingdom's stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Taxes.png:Icon_RebellionRisk_Taxes#2" //GUID:08f43cafd7daaa44f9986cd188c71b44
+	is_global = true
+	min = -10
+	stat_name = "hunger"
+}
+
+def RebellionRiskCategoryRebelLeaders : RebellionRiskCategory
+{
+	caption = "Rebellion Leaders"
+	text = "Stability suffers with each active rebellion within a kingdom's lands."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Occupations.png:Icon_RebellionRisk_Occupations#2" //GUID:8564a55c3dc96c848b732916711fc1e9
+	is_global = true
+	stat_name = "rebel_leaders"
+}
+
+// def RebellionRiskCategoryStability : RebellionRiskCategory
+// {
+// 	caption = "Kingdom stability"
+// 	text = "Overall kingdom stability."
+// 	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+// 	is_global = true
+// 	stat_name = "stability"
+// }
+
+def RebellionRiskCategoryHelpTheWeak : RebellionRiskCategory
+{
+	caption = "Charity"
+	text = "Clerics who Help the Weak increase a kingdom's stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "cleric"
+}
+
+def RebellionRiskCategoryOpinions : RebellionRiskCategory
+{
+	caption = "Opinions"
+	text = "Various social casts can improve or hinder a kingdom's stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "opinions"
+}
+
+def RebellionRiskCategoryBuildings : RebellionRiskCategory
+{
+	caption = "Buildings"
+	text = "Various buildings within a kingdom can improve or hinder its stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = false
+	stat_name = "buildings"
+}
+
+def RebellionRiskCategoryDefeatedRebels : RebellionRiskCategory
+{
+	caption = "Defeated Rebellions"
+	text = "Crushing the resistance of an entire rebellion pleases the population of a kingdom, increasing its stability."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "defeated_rebels"
+}
+
+def RebellionRiskCategoryReligionDifferences : RebellionRiskCategory
+{
+	caption = "Religion Differences"
+	text = "Stability suffers if many provinces have beliefs that differ from ther kingdom's religion."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "religious_differences"
+}
+
+def RebellionRiskCategoryCultureDifferences : RebellionRiskCategory
+{
+	caption = "Cultural Differences"
+	text = "Stability suffers if many provinces follow cultures that differ from ther kingdom's culture."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "cultural_differences"
+}
+
+def RebellionRiskCategoryOwnSpies : RebellionRiskCategory
+{
+	caption = "Own Spies"
+	text = "Our spies control our people from the shadows, improving the stability of our kingdom."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "own_spies"
+}
+
+def RebellionRiskCategoryReligionBonuses : RebellionRiskCategory
+{
+	caption = "Caliphate"
+	text = "Caliphate."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = true
+	stat_name = "religous_bonuses"
+}
+
+def RebellionRiskCategoryPatriarch : RebellionRiskCategory
+{
+	caption = "Patriarch"
+	text = "Patriarch."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = false
+	stat_name = "patriarch_bonus"
+}
+
+def RebellionRiskCategoryEstablishOrder : RebellionRiskCategory
+{
+	caption = "Establish order failed."
+	text = "Establish order failed."
+	icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebellionRisk_Traditions.png:Icon_RebellionRisk_Traditions#2" //GUID:748f69311978b8444a9ad6117c5e310b
+	is_global = false
+	stat_name = "establish_order"
+}

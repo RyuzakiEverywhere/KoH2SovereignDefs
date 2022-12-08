@@ -1,0 +1,1232 @@
+﻿def Status
+{
+	text name
+	sprite icon
+	bool show_in_action_bar = true
+	bool show_in_window = true
+	bool show_in_portrait = false
+	bool show_singleton_action = false // show assistated action even if singleton
+	prefab ui_prefab = "Assets/UI/ObjectWindows/UIP_CharacterStatusWindow.prefab" //GUID:6b1c3c5f20043b0469bb0bc713e5a3cf
+	text status_text
+	
+	buttons
+	
+	int ui_order = 0 // not implemented
+}
+
+def StatusTooltip : Tooltip
+{
+	caption = "{name}"
+	text = "{status_text}"
+	context_action = "{current_context_action}"
+	visible_condition = (is_valid)
+	//prefab = "Assets/UI/Character/UIP_StatuslTooltip.prefab" //GUID:9bcbe59944e579d4e84ad868afb177b2
+}
+
+def CharacterStatus : Status
+
+def DeadStatus : CharacterStatus
+{
+	name = "Dead"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Dead.tga:Icon_CharacterStatus_Dead#2" //GUID:d6ff7622e1129e4419b9a9919910ba03
+	//status_text = "{owner} is dead"
+	
+	status_text = "{status_text}" //handled in C# = (status_texts[reasons || "default"])
+	status_texts
+	{
+		text default = "{owner} is dead."
+		text unknown = "{owner} died from unknown causes. Many tales with varying degrees of truth will hypothesize about his death for centuries to come."
+		text exile = "{owner} was exiled from his kingdom."
+		text old_age = "{owner} died of old age."
+		text defeated_in_combat = ["{owner} died while fighting bravely on the battlefield.",
+		"{owner} met his demise on the battlefield, struck by an arrow.",
+		"{owner} was killed by an enemy soldier, who thrust his sword in the back of the {owner.class_name}.",
+		"{owner} fell from his horse and got trampled by the enemy cavalry."]
+		text prison_break = ["{owner} died while attempting to escape imprisonment.",
+		"{owner} was killed by a prison guard, while attempting to break free from a foreign kingdom's royal dungeon.",
+		"{owner} tried to escape from his dungeon cell, but got caught and punished to death."]
+		text puppet_killed = "{owner} died while performing acts of espionage against his kingdom."
+		text assassinated = ["{owner} was secretly assassinated by a foreign spy.",
+		"{owner:s} death was arranged by a foreign spy, who was plotting the murder of the {owner.kingdom:ian}."]
+		text perish_during_torture = "{owner} died while being tortured by his captors."
+		text betrayer_killed = "{owner} was branded as a traitor and killed for performing acts of espionage against his kingdom."
+		text killed_in_action = "{owner} died while he was on a mission, performing his knightly duties."
+		text denied_new_religion = "{owner} refused to submit to a different religion and was banished from his kingdom."
+		text executed_in_prison = ["{owner} was brutally executed in a kingdom's royal dungeon.",
+		"{owner} was sentenced to death and died by the hands of a ruthless executioner.",
+		"{owner} met his demise in a kingdom's royal dungeon, where he was mercilessly executed."]
+		text incident = "{owner} had a fatal incident which led to his demise."
+		text killed_in_trade_expedition = "{owner} died while leading an expedition to distant lands."
+		text killed_in_trade_colony = "{owner} was killed by savages while maintaining a trade colony."
+	}
+}
+
+def DeadPatriarchStatus : DeadStatus
+{
+	name = "Dead Patriarch"
+}
+
+def EscapedStatus : CharacterStatus
+{
+	name = "Fugitive"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Escaped_02.tga:Icon_CharacterStatus_Escaped_02#2" //GUID:cc7b45811b8421147ba235a16ae81ee9
+	status_text = "The betrayer {owner} has fled our kingdom."
+}
+
+def MissingStatus : CharacterStatus
+{
+	name = "Missing"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Missing.tga:Icon_CharacterStatus_Missing#2" //GUID:26393aaa488264e4aa690a203c193696
+	status_text = "{owner} is no longer in our court."
+}
+
+def IdleInCourtStatus : Status
+{
+	name = "Idle in court"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IdleInCourt.tga:Icon_CharacterStatus_IdleInCourt#1" //GUID:9f33144e8185af04b964d64857ec6bae
+	
+	is_court_merchant = (owner.class_name = "Merchant")
+	is_court_marshal = (owner.class_name = "Marshal")
+	is_court_spy = (owner.class_name = "Spy")
+	is_court_cleric = (owner.class_name = "Cleric" && owner.is_patriarch = false)
+	is_court_diplomat = (owner.class_name = "Diplomat")
+	is_patriarch = (owner.is_patriarch)
+	is_pope = (owner.is_pope)
+	is_not_religious_character = (owner.is_pope = false && owner.is_patriarch = false)
+	
+	status_text = $[
+		"[{is_ecumenical_patriarch:if_not}{is_patriarch:if}The current head bishop of {owner.kingdom:s} Independent Church, rightfully elected for his wisdom and piety.]"
+		"[{is_ecumenical_patriarch:if}His All Holiness, the current head of the Orthodox Church, residing in Constantinople.]"
+		"[{is_pope:if}His Holiness, the head of the Catholic church not only spreads guidance and hope, but also possesses the power to excommunicate sinners and launch crusades.]"
+		"[{is_not_religious_character:if}{owner} is waiting for your orders.]"
+		"[{is_court_merchant:if} To make some gold, he needs us to sign a trade agreement and send him establish and maintain trade.]"
+		"[{is_court_marshal:if} He is getting impatient, lingering around without an army to lead.]"
+		"[{is_court_spy:if} He will be most useful if we let him infiltrate a kingdom - one we don't particularly like.]"
+		"[{is_court_diplomat:if} If we have no other plans for him, we can send him to improve our relations with a kingdom.]"
+		"[{is_court_cleric:if} Though he often repeats he is here to help, he seems to like spending a lot of time in prayer and rest.]" //nothing meaningful we can add at this point		
+	]
+}
+
+def OngoingActionStatus : CharacterStatus
+{
+	name = "{action.name}"
+	icon = (action.icon)
+	show_in_portrait = true
+	status_text = "[{action.running:if}{action.running_status_text}|{action.prepare_status_text}]"
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+}
+
+def OngoingActionStatusTooltip : Tooltip
+{
+	caption = "{action.name}"
+	text = "{status_text}"
+	visible_condition = (is_valid)
+}
+
+def ForHireStatus : CharacterStatus
+{
+	name = "For Hire"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_AvailableForAssignment.tga:Icon_CharacterStatus_AvailableForAssignment#2" //GUID:8c011c4c05f96c34d9e562269dce8f69
+	status_text = "{owner} is wandering in your capital, playing dice in inns and hoping to be hired. Hire him?"
+	buttons
+	{
+		hire
+		{
+			//sprite icon = "Assets/UI/Elements/Common/Icons/Icon_Hire.png:Icon_Hire#2" //GUID:8e1cbb0b2a714764fa78dde75a8bcad5
+			action = HireAction
+			text button_text = "{u}Yes ({cost}){/u}"
+			def tooltip : Tooltip
+			{
+				caption = "Hire"
+				text = "Hire {owner} ({cost})"
+			}
+		}
+	}
+	cost
+	{
+		// available variables:
+		//   kingdom
+		//   class_name
+		//   num_existing: number of non-royal characters of the same class currently in court
+		// IMPPORTANT: when showing tooltip for the hire button itself (the one which shows per-class popup) only kingdom is defined
+		gold = (200 + num_existing * 300)
+	}
+}
+
+def ForHireStatusTooltip : StatusTooltip
+{
+	caption = "Ready for Action"
+	text = "Sire, {owner} is eager to work for you."
+}
+
+def AvailableForAssignmentStatus : CharacterStatus
+{
+	name = "Ready for an Assignment"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_AvailableForAssignment.tga:Icon_CharacterStatus_AvailableForAssignment#2" //GUID:8c011c4c05f96c34d9e562269dce8f69
+	status_text = $[
+		"{owner} is ready for an assignment."
+		"[{cannot_hire_marshal:if}{p}{p}{clr:red_bright}{i}{HireNobleTooltip.hire_marshal_needs_town}{/i}{/clr}]"
+	]
+	buttons
+	{
+		assign
+		{
+			action = HireAction
+			//sprite icon = "Assets/UI/Elements/Common/Icons/Icon_Hire.png:Icon_Hire#2" //GUID:8e1cbb0b2a714764fa78dde75a8bcad5
+			text button_text = "Assign"
+			def tooltip : Tooltip
+			{
+				caption = "Assign"
+				text = "Assign {owner}"
+			}
+		}
+	}
+}
+
+
+def GoverningStatus : CharacterStatus
+{
+	name = "Governing town"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_Govern.tga:Icon_CharacterAction_Govern#2" //GUID:338137d863daedb42a04be7c2e790fa2
+	status_text = "{owner} is currently governing the town of {owner.governed_castle}"
+	
+	show_in_action_bar = (!owner.is_pope)
+	
+	// buttons
+	// {
+	// 	stop_governing { action = StopGoverningAction }
+	// 	reassign_governing { action = ReassignGovernCityAction }
+	// }
+}
+
+def GoverningStatusTooltip : HyperTextTooltip
+{
+	hypertext = GoverningTooltipHT
+	
+	tooltip_vars
+	{
+		governor = (owner)
+		castle = (owner.governed_castle)
+		realm = (owner.governed_castle.realm)
+	}
+}
+
+def NotGoverningStatusTooltip : HyperTextTooltip //StatusTooltip
+{
+	hypertext = NotGoverningTooltipHT
+	
+	tooltip_vars
+	{
+		governor = (owner)
+		castle = (owner.preparing_to_govern)
+		realm = (owner.preparing_to_govern.realm)
+	}
+}
+
+def NotGoverningStatus : CharacterStatus
+{
+	name = "[{preparing:if}Preparing to govern {target}|Not governing town]"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_NotGoverning.tga:Icon_CharacterStatus_NotGoverning#2" //GUID:c031536f5e7443a4580b8bbfa7cccbad
+	
+	negative_authority = (kingdom.crown_authority < 0)
+	status_text = $[
+		"[{preparing:if}{owner} is on his way to govern {target}.|{owner} is currently not governing a town.{p}{p}Governing will not interrupt or forbid other character actions and greatly boosts the production of a province.]{p}{p}"
+		"[{preparing:if}|{i}Click to assign as governor{/i}]"
+	]
+	// buttons
+	// {
+	// 	govern { action = GovernCityAction }
+	// }
+}
+
+def BanishedGovernorStatus : CharacterStatus
+{
+	name = "Banished from governing {owner.governed_castle_banished_from}"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Banished.png:Icon_CharacterStatus_Banished#2" //GUID:429f2f7fd7717e94ba194309ef77a934
+	status_text = "{owner} has been banished form governing {owner.governed_castle_banished_from}"
+	// buttons
+	// {
+	// 	govern { action = GovernCityAction }
+	// }
+}
+
+def LeadArmyStatus : CharacterStatus
+{
+	name = "Leading Army"
+	icon = (icons[army_status || "default"])
+	show_in_portrait = (owner.army.realm_in.is_sea_realm or army_status != "idle")
+	icons
+	{
+		sprite default = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Idle.tga:Icon_CharacterStatus_LeadingArmy_Idle#2" //GUID:f35eb9b1132601048ab9a0982f85ddb0
+		switch_value = (owner.location.realm_in.is_sea_realm)
+		case 1
+		{
+			sprite idle = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Sailing.tga:Icon_CharacterStatus_LeadingArmy_Sailing#2" //GUID:091c5c354fa72ce498a1de083cdd4e9d
+			sprite marching = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Sailing.tga:Icon_CharacterStatus_LeadingArmy_Sailing#2" //GUID:091c5c354fa72ce498a1de083cdd4e9d
+		}
+		case 0
+		{
+			sprite idle = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Idle.tga:Icon_CharacterStatus_LeadingArmy_Idle#2" //GUID:f35eb9b1132601048ab9a0982f85ddb0
+			sprite marching = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Marching.tga:Icon_CharacterStatus_LeadingArmy_Marching#2" //GUID:320197495a456e541b5d3c6876dc4a0e
+		}
+		sprite fighting = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Fighting.tga:Icon_CharacterStatus_LeadingArmy_Fighting#2" //GUID:c09d04f5a1b103044b1d69eaafa5ef89
+		sprite stationed = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Stationed.tga:Icon_CharacterStatus_LeadingArmy_Stationed#2" //GUID:45affbb6c3c788543adda388091696fe
+		sprite pillaging = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Pillaging.tga:Icon_CharacterStatus_LeadingArmy_Pillaging#2" //GUID:70679c97138259a4d8d1550b38e60afa
+		sprite besieging = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Besieging.tga:Icon_CharacterStatus_LeadingArmy_Besieging#2" //GUID:5d7648f1af835f64cbb34e77fe2ae7de
+		sprite defending = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_LeadingArmy_Defending.tga:Icon_CharacterStatus_LeadingArmy_Defending#2" //GUID:8a082676241d19642b42b6855d2e3849
+	}
+	status_text = "{status_text}" //handled in C# = (status_texts[army_status || "default"])
+	status_texts
+	{
+		text default = "{owner} is leading an army."
+		text idle = "{owner} [{owner.location.realm_in.is_sea_realm:if}has anchored his ship in the|is stationed near] {owner.location.realm_in}."
+		text marching = "{owner} is [{owner.location.realm_in.is_sea_realm:if}sailing through the|marching near] {owner.location.realm_in}."
+		text fighting = "{owner} is [{owner.location.realm_in.is_sea_realm:if}fighting {enemy_kingdom:ian} fleets in the|fighting {enemy_kingdom:ian} troops near] {owner.location.realm_in}."
+		text stationed = "{owner} is stationed near {army.castle}."
+		text pillaging = "{owner} is pillaging {army.battle.settlement.kingdom:anian} {army.battle.settlement} near {army.realm_in}."
+		text besieging = "{owner} is besieging [{army.battle.settlement.is_castle:if}{army.battle.settlement}|{enemy_kingdom:anian} {army.battle.settlement}]."
+		text defending = "{owner} is defending {army.battle.settlement} against {enemy_kingdom:s} advances."
+		
+	}
+	// buttons
+	// {
+	// 	disband_army
+	// 	{
+	// 		action = DisbandArmyAction
+	// 		//text button_text = "Disband"
+	// 	}
+	// 	disband_royal_marshal
+	// 	{
+	// 		action = DisbandRoyalMarshalArmyAction
+	// 		//text button_text = "Disband"
+	// 	}
+	// }
+}
+
+def InPrisonStatus : CharacterStatus
+{
+	name = "Prisoner"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_InPrison.tga:Icon_CharacterStatus_InPrison#2" //GUID:c2022e25b31be814081b8364707760cd
+	status_text = "{owner} is imprisoned by {owner.prison_kingdom}"
+}
+
+def BrightPersonStatus : CharacterStatus //!!! old status
+{
+	show_in_action_bar = false
+	ui_prefab = "Assets/UI/ObjectWindows/UIP_CharacterStatusWindow_BrightPerson.prefab"
+	name = "Bright person"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_BrightPerson.png:Icon_BrightPerson#2" //GUID:8b11e9f9ca2892044b07bb98bd9d8f93
+	int max_skill_cnt = 3
+	status_text = "{obj:s} affinity in certain fields of study"
+	prepare_status_text = "{obj:s} is gathering knowledge to be able to teach his skills"
+	text description = "[{has_skills:if}{owner} may teach other knights the following skills, in addition to those he already knows:|Have {owner} study a skill so he may teach it to other knights in the court:]"
+}
+
+def TradingWithKingdomStatus : CharacterStatus
+{
+	name = "Trading with {owner.mission_kingdom}"
+	icon = TradeWithKingdomAction.icon
+	status_text = $[
+		"{owner} is trading with {owner.mission_kingdom}{p}{p}"
+		"While trading with a kingdom, a merchant receives opportunities for additional actions from time to time.{p}{p}"
+		"Standing: {owner.trade_level_text}{p}{align:left}"
+		"{p}{b}Total gold income {owner.total_trade_gold_gain:bonus_no_sign}{gold_icon}{/b}{p}"
+		"{tab}{blt}{owner.trade_level_text}: {owner.trade_profit:bonus_no_sign}{gold_icon}{p}"
+		"[{owner.export_food_gold_gain:if}{tab}{blt}Food export: {owner.export_food_gold_gain:bonus_no_sign}{gold_icon}{p}]"
+		"[{owner.import_food_gold_upkeep:if}{tab}{blt}Food import: {owner.import_food_gold_upkeep:penalty_no_sign}{gold_icon}{p}]"
+		"[{owner.import_goods_gold_upkeep:if}{tab}{blt}Goods import: {owner.import_goods_gold_upkeep:penalty_no_sign}{gold_icon}{p}]"
+		"{p}{b}Total commerce upkeep: {owner.total_trade_commerce}{trade_icon}{/b}{p}"
+		"{tab}{blt}{owner.trade_level_text}: {owner.trade_commerce}{trade_icon}{p}"
+		"[{owner.export_food_commerce:if}{tab}{blt}Food export: {owner.export_food_commerce}{trade_icon}{p}]"
+		"[{owner.import_food_commerce:if}{tab}{blt}Food import: {owner.import_food_commerce}{trade_icon}{p}]"
+		"[{owner.import_goods_commerce:if}{tab}{blt}Goods import: {owner.import_goods_commerce}{trade_icon}]"
+		]
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+}
+
+// def EstablishedTradeRouteStatus : CharacterStatus
+// {
+// 	name = "Trading with {owner.mission_kingdom}"
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Trade.png:Icon_Action_Trade#2" //GUID:ece3ebf22f6d16a438700ade61500f57
+// 	status_text = "{owner} is currently holding our trade route with {owner.mission_kingdom}[ and is bringing {owner.trade_profit}{gold_icon} to our treasury]"
+// 	prepare_status_text = "Holding our trade route with {owner.mission_kingdom}"
+// }
+
+// def InTradeCenterStatus : CharacterStatus
+// {
+// 	name = "Trading in {owner.mission_realm}"
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Trade.png:Icon_Action_Trade#2" //GUID:ece3ebf22f6d16a438700ade61500f57
+// 	status_text = "{owner} is currently trading in {owner.mission_realm}[ and is bringing {owner.trade_profit:F0}{gold_icon} to our treasury]"
+// 	prepare_status_text = "Negotiating trade in {owner.mission_realm}"
+// }
+
+def InfiltratedKingdomStatus : CharacterStatus
+{
+	name = "Infiltrated in {owner.mission_kingdom}"
+	icon = InfiltrateKingdomAction.icon
+	status_text = "{owner} has infiltrated {owner.mission_kingdom} and awaits further orders {p}{p}While infiltrated in a kingdom, a spy receives opportunities for additional actions from time to time."
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+}
+
+def HasPuppetStatus : CharacterStatus
+{
+	name = "Bribed Noble"
+	icon = BribeNobleAction.icon
+	status_text = $[
+	"{own_character} has bribed {puppet} and can use him to our advantage."
+	"[{p} He holds a {puppet.pact}.]"
+	" [{puppet.prison_kingdom:if}While he is imprisoned, there is not much he can do, though.|{p}{p}[Opportunities for additional espionage actions[ {puppet.is_rebel:if}that may take advantage of his rebellion|, related to his duties as a {puppet.class_name} and a governor [of {puppet.governed_castle}],] will arise from time to time.]]"
+	"{p}{p}His 'loyalty' costs us an upkeep of {BribeNobleAction.upkeep}.[{p}{p}{is_our_pretender:if} He is also a pretender to the throne of {owner.mission_kingdom}, which costs us an additional upkeep of {PuppetSupportPretenderToTheThroneAction.upkeep}.]"]
+	
+	bool is_our_pretender = (puppet.is_pretender_to_the_throne && puppet.pretender_kingdom_loyal_to = own_kingdom)
+	
+	//!!! flavor1/flavor2 are unused for now
+	text flavor1 = ["He owes {own_character} some favors",
+	"He serves under {own_character:s} web",
+	"He secretly acts under {own_character:s} directives",
+	"For now, his loyalty lies with {own_character}",
+	"His loyalty is earned by {own_character:s} gold"]
+	
+	text flavor2 = "[{puppet.prison_kingdom:if} {puppet} is imprisoned | {flavor2_description}]"
+	
+	text flavor2_description = ["{puppet} is exposing additional opportunities for {own_character}",
+	"{puppet} is looking for opportunities to expose the nobles and aristocrats of {puppet.kingdom}",
+	"{puppet} is gathering rumors so that he may reveal compromising information about {puppet.kingdom} to {own_character}",
+	"{puppet} is on the lookout for potential rumors and opportunities that could cripple {puppet.kingdom}",
+	"{puppet} is seeking to expose any potential weaknesses of {puppet.kingdom}, so that {own_character} may act upon them",
+	"{puppet} is trying to create opportunities for {own_character} to hinder {puppet.kingdom:s} daily operations",
+	"{puppet} is gathering reports from his agents in {puppet.kingdom} and reporting opportunities directly to {own_character}"]
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+}
+
+def HasMarshalPuppetStatus : HasPuppetStatus
+
+def HasMerchantPuppetStatus : HasPuppetStatus
+
+def HasDiplomatPuppetStatus : HasPuppetStatus
+
+def HasSpyPuppetStatus : HasPuppetStatus
+
+def HasClericPuppetStatus : HasPuppetStatus
+
+def CollectingRumorsStatus : CharacterStatus //Placeholder spy status - not implemented! Activated by SpreadRumorsAction
+{
+	name = "Collecting rumors in {owner.mission_kingdom}"
+	icon = InfiltrateKingdomAction.icon
+	status_text = "{owner} is skulking around alleyways and brothels, in search of rumors."
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+}
+
+def ImprovingRelationsStatus : CharacterStatus
+{
+	name = "Improving relations with {owner.mission_kingdom}"
+	icon = ImproveRelationsAction.icon
+	show_in_portrait = true
+	status_text = $[
+		"{align:left}{owner} is improving our relations with {owner.mission_kingdom}."
+		"[{if_favorite}{p}  {blt} {owner} is {owner.mission_kingdom.king:s} favorite.]"
+		"[{if_fascinating}{p}  {blt} {owner} has fascinated {owner.mission_kingdom.queen}.]"
+		"[{owner.mission_kingdom.is_papacy:if}{p}  {blt} Diplomats are not very effective in {papacy}, a cleric would be much more effective.]"
+		"[{/align}{p}{align:right}Upkeep: {upkeep}]"
+	]
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }	
+	update_interval = 300/600
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.015, 5)) * (100 - own_character.cs_diplomat_actions_upkeep_reduction_perc)  / 100 , 1))
+	}
+	
+	rel_change_amount = (30 + from_CL * royal_bonus) * nerf_if_papacy * stat_mod // roughly half an hour for ~500 relatioship?
+	{
+		from_CL = (ceil(RndI(30, 60) * MapCL(owner, 1, 2)))
+		royal_bonus = (1 + owner.is_king  + owner.is_prince * 0.5)
+		nerf_if_papacy = (owner.mission_kingdom.is_papacy and 0.1 or 1)
+		stat_mod = (1 + owner.cs_diplomat_improve_relations_perc / 100)
+	}
+}
+
+def OnMissionInRomeStatus : CharacterStatus
+{
+	name = "On a mission in {catholic.hq_realm}"
+	icon = MissionInRomeAction.icon
+	show_in_portrait = true
+	status_text = $[
+		"{align:left}{owner} is studying in {catholic.hq_realm} and improving our relations with {papacy}."
+		"[{p}Income: {income:plain}]"
+		"[{/align}{p}{align:right}Upkeep: {upkeep}]"
+	]
+	// buttons
+	// {
+	// 	recall { action = RecallAction }
+	// }
+	update_interval = 300/600
+	resources income
+	{
+		piety = (owner.kingdom.is_catholic and (5 + owner.class_level))
+		books = (owner.kingdom.is_orthodox and 5)
+		trade = (owner.kingdom.is_orthodox and 5)
+	}
+	
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.01, 5)) , 5))
+	}
+	
+	// roughly half an hour for ~500 relatioship?		
+	rel_change_amount = (30 + ceil(rnd * cl_mul * (1 + royal_mul + cardinal_mul) * orthodox_mul))
+	{
+		rnd = (RndI(30, 60))
+		cl_mul = (MapCL(owner, 1, 2))
+		royal_mul = (owner.is_king + owner.is_prince * 0.5)
+		cardinal_mul = (owner.is_cardinal)
+		orthodox_mul = (owner.kingdom.is_orthodox and 0.5 or 1)
+	}
+}
+
+def OnMissionInConstantinopleStatus : CharacterStatus
+{
+	name = "On a mission in {orthodox.hq_realm}"
+	icon = MissionInConstantinopleAction.icon
+	show_in_portrait = true
+	status_text = $[
+		"{align:left}{owner} is studying in {orthodox.hq_realm}[{own_kingdom.is_not_constantinople_kingdom:if} and improving our relations with {constantinople_kingdom}]."
+		"[{p}Income: {income:plain}]"
+		"[{/align}{p}{align:right}Upkeep: {upkeep}]"
+	]
+	// buttons
+	// {
+	// 	recall { action = RecallAction }	// }	
+	update_interval = 300/600
+	catholic_books_income = (5 + ceil(map3_clamp(owner.kingdom.relation_with_constantinople_kingdom, -1000, 0, 1000, 0, 0, 10)))
+	orthodox_books_income = (5 + owner.class_level)
+	
+	resources income
+	{
+		books = (owner.kingdom.is_catholic and catholic_books_income or owner.kingdom.is_orthodox and orthodox_books_income)
+		piety = (owner.kingdom.is_orthodox and 5 + owner.class_level)
+		trade = (owner.kingdom.is_catholic and 5)
+	}
+	
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.01, 5)) , 5))
+	}
+	
+	// roughly half an hour for ~500 relatioship?		
+	rel_change_amount = (30 + ceil(rnd * cl_mul * (1 + royal_mul + cardinal_mul) * catholic_mul))
+	{
+		rnd = (RndI(30, 60))
+		cl_mul = (MapCL(owner, 1, 2))
+		royal_mul = (owner.is_king + owner.is_prince * 0.5)
+		cardinal_mul = (owner.is_cardinal)
+		catholic_mul = (owner.kingdom.is_catholic and 0.5 or 1)
+	}
+}
+
+
+def OnStudyStatus : CharacterStatus
+{
+	name = "{owner} is studying in {owner.mission_kingdom}"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_Study.tga:Icon_CharacterAction_Study#2" //GUID:a2202d72f02c90d49a2b109513e13942
+	show_in_portrait = true
+	status_text = $[
+		"{align:left}{owner} is gathering knowledge from the [{owner.mission_kingdom.is_christian:if}clerics|scholars] of {owner.mission_kingdom}."
+		"[{p}Income: {income:plain}]"
+		"[{/align}{p}{align:right}Upkeep: {upkeep}]"
+	]
+
+	resources income
+	{
+		books = (4 + ceil(owner.class_level/2))
+	}
+	
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.008, 5)) , 5))
+	}
+}
+
+def DiplomacyBecomeFavoriteStatus : CharacterStatus
+{
+	name = "Is favorite of the king in {owner.mission_kingdom}"
+	icon = ImproveRelationsAction.icon
+	status_text = "Owner is the king's favorite in {owner.mission_kingdom}"
+}
+
+def LovesStatus : CharacterStatus
+{
+	name = "Loves"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_Status_InLove.png:Icon_Status_InLove#2" //GUID:1fe1c68e85f480946957643658d9e507
+	status_text = "{owner} loves {beloved}"
+}
+
+def HasRoyalBloodStatus : CharacterStatus
+{
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsKing.tga:Icon_CharacterStatus_IsKing#2" //GUID:c95fa7e6ee2dca5418c4424464c21dca
+	
+	show_in_action_bar = (!is_pope)
+
+	bool spouse_kingdom_is_foreign = (spouse.kingdom_before_marriage != owner.kingdom)
+	bool has_important_relative_morale_bonus = (cs_important_relative_marshal_morale_bonus > 0)
+	bool has_important_relative_gold_bonus = (cs_important_relative_merchant_gold_bonus > 0)
+	bool has_important_relative_books_bonus = (cs_important_relative_cleric_books_bonus > 0)
+	bool has_important_relative_influence_bonus = (cs_important_relative_diplomat_influence_bonus > 0)
+	bool has_important_relative_espionage_defense_bonus = (cs_important_relative_spy_espionage_defense_bonus > 0)
+	
+	status_text = $[
+	"{additional_text}"
+	"[{p}{p}{is_married:if}{owner} is married to {spouse}[{spouse_kingdom_is_foreign:if} of {spouse.kingdom_before_marriage}]]"]
+	
+	case knight_is_king = (is_king)
+	{
+		icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsKing.tga:Icon_CharacterStatus_IsKing#2" //GUID:c95fa7e6ee2dca5418c4424464c21dca
+		name = "The {title} of {kingdom}"
+		text additional_text = "Our mighty king has bonuses in governing, warfare and better chances to succeed in most actions."
+	}
+	case knight_is_prince = (is_prince || is_rebel_prince || !is_important_relative)
+	{
+		switch_value = (owner.is_heir)
+		case 1
+		{
+			icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsPrince.tga:Icon_CharacterStatus_IsPrince#2" //GUID:5be839f79f801d34c8f79ef98b43a33d
+		}
+		case 0
+		{
+			icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsPrince.tga:Icon_CharacterStatus_IsPrince#2" //GUID:5be839f79f801d34c8f79ef98b43a33d
+		}
+		case default
+		{
+			icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsPrince.tga:Icon_CharacterStatus_IsPrince#2" //GUID:5be839f79f801d34c8f79ef98b43a33d
+		}
+		name = "[{is_heir:if}Heir|Prince]"
+		text additional_text = "[{is_rebel:if}{owner}, once a proud member of {original_kingdom:s} royalty, now leads a rebel army against his own brethren. As such, he no longer has the right to succeed the crown.|Our valiant prince [{is_heir:if}has been chosen as the rightful heir to {kingdom.king}|may succeed the crown from his father, when the time comes].]"
+	}
+	case knight_is_important_relative = (is_important_relative)
+	{
+		icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsImportantRelative.tga:Icon_CharacterStatus_IsImportantRelative#2" //GUID:d16cccabc0899b34cb743c47239552d4
+		name = "Important relative"
+		text additional_text = $["[{is_rebel:if}{owner}, once a proud member of {original_kingdom:s} royalty, now leads a rebel army against his own brethren. As such, he no longer has the right to succeed the crown.|A valued member of our previous royal family, who may succeed the crown when {kingdom.king} passes away without an heir.]"
+		"[{p}{p}{has_important_relative_morale_bonus:if}{CharacterStats.cs_important_relative_marshal_morale_bonus.name}: {cs_important_relative_marshal_morale_bonus:bonus} army morale]"
+		"[{p}{p}{has_important_relative_gold_bonus:if}{CharacterStats.cs_important_relative_merchant_gold_bonus.name}: {cs_important_relative_merchant_gold_bonus:bonus}{gold_icon}]"
+		"[{p}{p}{has_important_relative_books_bonus:if}{CharacterStats.cs_important_relative_cleric_books_bonus.name}: {cs_important_relative_cleric_books_bonus:bonus}{books_icon}]"
+		"[{p}{p}{has_important_relative_influence_bonus:if}{CharacterStats.cs_important_relative_diplomat_influence_bonus.name}: {cs_important_relative_diplomat_influence_bonus:bonus} influence]"
+		"[{p}{p}{has_important_relative_espionage_defense_bonus:if}{CharacterStats.cs_important_relative_spy_espionage_defense_bonus.name}: {cs_important_relative_spy_espionage_defense_bonus:bonus} espionage defense]"
+		]
+	}
+	// case knight_is_rebel = (is_rebel)
+	// {
+	// 	name = "[{is_prince:if}Prince|Important relative]"
+	// 	text additional_text = "{owner}, once a proud member of {original_kingdom:s} royalty, now leads a rebel army against his own bretheren. As such, he no longer has rights to succeed the crown." //insert useful information about potential interactions, once/if we add any
+	// }
+}
+
+def RebelStatus : CharacterStatus
+{
+	name = "Rebel court member"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsRebel.tga:Icon_CharacterStatus_IsRebel#2" //GUID:d3481e46c2b98794c99cde06472ed2f9
+	status_text = "[{owner.is_prisoner:if}{owner} lies shackled in our dungeon, for the crimes he committed against our {original_kingdom.KingdomType}.|{owner} has betrayed us and now leads his army against [{owner.is_loyalist:if_not}{owner.origin_realm.kingdom}|our {original_kingdom.KingdomType}]!]" //insert useful information about potential interactions, once/if we add any
+}
+
+def PopeStatus : CharacterStatus
+{
+	name = "Pope"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsPope.tga:Icon_CharacterStatus_IsPope#2" //GUID:17793341d6e9f4e4cb7d819ed74733e1
+	status_text = $[
+	"{owner.name} is the current {owner.title} ruling over {owner.kingdom}."
+	"[{p}{p}Effects from pope:{p}"
+	"{owner.kingdom.pope_bonuses_text}]"]
+}
+
+def PatriarchStatus : CharacterStatus
+{
+	name = "[{owner.is_ecumenical_patriarch:if}Ecumenical ]Patriarch"
+	switch_value = (owner.is_ecumenical_patriarch)
+	case 1
+	{
+		icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsEcumenicalPatriarch.tga:Icon_CharacterStatus_IsEcumenicalPatriarch#2" //GUID:61448857e1e31d041883dd93725f404e
+	}
+	case 0
+	{
+		icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IsPatriarch.tga:Icon_CharacterStatus_IsPatriarch#2" //GUID:77b56cf59bd9dec4fa775d5914503a44
+	}
+	status_text = $[
+	"{owner.name} is the current {owner.title} of {owner.kingdom}."
+	"[{p}{p}Effects from patriarch:{p}"
+	"{owner.kingdom.patriarch_bonuses_text}]"]
+}
+
+def LovesStatusTooltip : StatusTooltip
+{
+	caption = "Loves {beloved}"
+}
+
+def ReadingBookStatus : CharacterStatus
+{
+	name = "Reading a book"
+	icon = ReadBookAction.icon
+	status_text = "{owner} is reading '{book}'"
+}
+
+def IdleThroneRoom : CharacterStatus
+{
+	name = "Idle in throne room"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_IdleInThroneRoom.tga:Icon_CharacterStatus_IdleInThroneRoom#1" //GUID:e0b72deae593fdc4394d6843e19fc253
+	
+	switch_value = (character_age)
+	case Infant
+	{
+		switch_value = (sex)
+		case Female
+		{
+			name = "Growing"
+			status_text = ["{owner} is sleeping carelessly to the sounds of birds chirping.",
+			"{owner} is desperately trying to avoid the food given to her by the servants responsible for her day-to-day activities.",
+			"{owner} is learning to walk under the guidance of her caregivers.",
+			"{owner} is stealthily crawling through hallways in the royal palace - a fact yet unknown to her caregivers.",
+			"{owner} is joyfully playing with her fine assortment of toys."]
+		}
+		case Male
+		{
+			name = "Growing"
+			status_text = ["{owner} is sleeping carelessly to the sounds of birds chirping.",
+			"{owner} is desperately trying to avoid the food given to him by the servants responsible for his day-to-day activities.",
+			"{owner} is learning to walk under the guidance of his caregivers.",
+			"{owner} is stealthily crawling through hallways in the royal palace - a fact yet unknown to his caregivers.",
+			"{owner} is joyfully playing with his fine assortment of toys."]
+		}
+	}
+	
+	case Child
+	{
+		switch_value = (sex)
+		case Female
+		{
+			name = "Growing"
+			switch_value = (religion.key)
+			case Pagan
+			{
+				status_text = ["{owner} is playing with the hens and pigs at the forager's place - a rather lowly act most likely unbeknownst to her parents.",
+				"{owner} is throwing apples at passersby while trying to stay unnoticed.",
+				"{owner} is gleefully observing an ancient ritual, involving hooded ladies, burning incense and a goat.",
+				"{owner} is secretly trying out her mother's fine assortment of necklaces and bracelets, some of which seem to weigh more than her."]
+			}
+			case NonPagan = (!religion.Pagan)
+			{
+				status_text = ["{owner} is playing hide and seek in the royal chambers, while the days carelessly pass by.",
+				"{owner} is throwing apples at passersby while trying to stay unnoticed.",
+				"{owner} is playing with the hens and pigs at the forager's place - a rather lowly act most likely unbeknownst to her parents.",
+				"{owner} is secretly trying out her mother's finely embroidered silk dresses."]
+			}
+		}
+		case Male
+		{
+			name = "Growing"
+			status_text = ["{owner} is playing hide and seek in the royal chambers, while the days carelessly pass by.",
+			"{owner} is throwing apples at passersby while trying to stay unnoticed.",
+			"{owner} is playing with the hens and pigs at the forager's place - a rather lowly act most likely unbeknownst to his parents.",
+			"{owner} is trying out his new wooden sword on a bunch of hay dummies in the courtyard."]
+		}
+	}
+	
+	case Juvenile
+	{
+		switch_value = (sex)
+		case Female
+		{
+			switch_value = (owner.is_married)
+			case 0
+			{
+				name = "Growing"
+				switch_value = (religion.key)
+				case Pagan
+				{
+					status_text = ["{owner} is reading about the intricacies of ancient rituals aimed at pleasing the gods.",
+					"{owner} is dreaming about the day in which she will be able to join her father on the battlefield.",
+					"{owner} is secretly trying out her mother's fine assortment of necklaces and bracelets, some of which seem to weigh more than her."]
+				}
+				case NonPagan = (!religion.Pagan)
+				{
+					status_text = ["{owner} is reading about valiant heroes in distant castles and cunning thieves.",
+					"{owner} is browsing the kingdom's updated records of foreign heraldry - a matter not so interesting for a small child, but necessary nontheless.",
+					"{owner} is secretly trying out her mother's finely embroidered silk dresses.",
+					"{owner} is dreaming about the day in which she will be wed to a handsome and valiant knight.",
+					"{owner} is having a lesson in stewardship by the royal treasurer.",
+					"{owner} is learning embroidery and is getting quite good at it.",
+					"{owner} decided to spend a day in prayer.",
+					"{owner} is carefully studying religious books and manuscipts."]
+				}
+			}
+			case default
+			{
+				name = "Married"
+				status_text = ["{owner} is putting her knowledge of aristocratic etiquette into practice, by conversing with {owner.spouse.kingdom:s} nobles and highborn.",
+				"{owner} is browsing old records of foreign heraldry, now focusing on the parts dealing with {owner.spouse.kingdom}.",
+				"{owner} is being shown around {owner.spouse.kingdom:s} towns and castles.",
+				"{owner} is feeling somewhat out of place, as she sits next to a handful of {owner.spouse.kingdom:s} noblemen at a royal banquet.",
+				"{owner} just had a speech about our decaying world and the ruthless rulers of the other kingdoms."]
+			}
+		}
+		case Male
+		{
+			switch_value = (owner.is_married)
+			case 0
+			{
+				name = "Growing"
+				switch_value = (religion.key)
+				case Pagan
+				{
+					status_text = ["{owner} is being taught by the local shamans about ancient rituals and important beliefs.",
+					"{owner} is reading about his the past victories of famed warriors in his kingdom.",
+					"{owner} is practicing his fighting skills by wildly swinging an axe at his trusted teacher.",
+					"{owner} is sneaking through his father's throne room, not knowing exactly what he's looking for.",
+					"{owner} disappeared somewhere with a couple of his favorite court maidens.",
+					"{owner} participated in the annual celebrations of one of the smaller villages near the capitol and may have participated in brawl or not.",
+					"{owner} went hunting for rabbits and returned with two wild boars killed, instead.",
+					"{owner} is searching for his father all day long, insisting that he is ready for the royal court."]
+				}
+				case NonPagan = (!religion.Pagan)
+				{
+					status_text = ["{owner} is browsing the kingdom's updated records of foreign heraldry. After all, knowing your enemy is half the battle.",
+					"{owner} is being taught the proper aristocratic etiquette required for dealing with nobles and highborn.",
+					"{owner} is reading about his kingdom's history, undoubtedly focusing on the parts spotting pretty pictures and wondrous tales of valiant warriors in the midst of battle.",
+					"{owner} is practicing his fencing skills with his trusted teacher.",
+					"{owner} is sneaking through the castle's catacombs, not knowing exactly what he's looking for.",
+					"{owner} is having a lesson in stewardship by the royal treasurer.",
+					"{owner} is tending to the matters of his own estate near the capitol.",
+					"{owner} is preparing for a fighting tournament, which he claims he will easily win.",
+					"{owner} is reading a book about the art of war.",
+					"{owner} is riding his favorite horse whole day long.",
+					"{owner} is overseeing the new constructions in his personal estate."]
+				}
+			}
+			case default
+			{
+				name = "Married"
+				status_text = ["{owner} is being taught valuable fencing lessons by a renowned {owner.spouse.kingdom:ian} knight.",
+				"{owner} is reading about {owner.spouse.kingdom:s} history, sensing what he reads would be vital in his future duties as a husband to {owner.spouse}.",
+				"{owner} is browsing {owner.spouse.kingdom:s} updated records of foreign heraldry.",
+				"{owner} is feeling somewhat out of place as he is attending a banquet with his wife, {owner.spouse}.",
+				"{owner} and his wife are tending to the stewardship of their own estate near the capitol.",
+				"{owner} and his lovely wife have secluded themselves in one of the royal estates in the countryside, probably working on the continuation of the dynasty."]
+			}
+		}
+	}
+	
+	case default //all ages young and above should display this text as well
+	{
+		switch_value = (sex)
+		case Female
+		{
+			switch_value = (owner.is_married)
+			case 0
+			{
+				name = "In throne room"
+				switch_value = (religion.key)
+				case Pagan
+				{
+					status_text = ["{owner} is joined by her servants, gossiping about the most recent visitors of {owner.kingdom}.",
+					"{owner} is helping the local hunters by skinning some of their latest yield.",
+					"{owner} is weaving necklaces out of the bones of {owner.kingdom:s} fallen enemies.",
+					"{owner} is reading about ancient rituals, forgotten practices and the origins of mythical creatures.",
+					"{owner} is wandering aimlessly through the fields, past the town's walls.",
+					"{owner} is attending an important religious ritual, in which she plays a key part.",
+					"{owner} is observing a contest between several local young noblemen, who are trying to gain her affection."]
+				}
+				case NonPagan = (!religion.Pagan)
+				{
+					status_text = ["{owner} is joined by her maids, gossiping about the most recent visitors of {owner.kingdom}.",
+					"{owner} is taking leisurly strolls in the gardens, picking flowers and smelling the wonderful fresh air.",
+					"{owner} is embroidering a blouse with finely detailed lilies and poppies.",
+					"{owner} is reading about valiant heroes in distant castles and cunning thieves.",
+					"{owner} is wandering aimlessly through the fields, past the town's walls.",
+					"{owner} is helping her father with the stewardship of the capitol.",
+					"{owner} is attending an important religious ceremony and plans to discuss some important issues with the {owner.kingdom:ian} religious leaders.",
+					"{owner} is very busy with her late charitable activities and has no time for anything else at the moment.",
+					"{owner} devoted this day to prayer.",
+					"{owner} was visited by foreign ambassadors, who came to assess if she is fit to marry their king and bear children."]
+				}
+			}
+			case default //married
+			{
+				name = "In throne room"
+				status_text = ["{owner} is tending to important royal matters in {owner.spouse.kingdom}.",
+				"{owner} is greeting visitors at one of the estates granted to her by {owner.spouse.kingdom:s} {owner.spouse.kingdom.king}",
+				"{owner} is browsing {owner.spouse.kingdom:s} extensive collection of cookbooks, in search of what to order her maids to prepare for her and {owner.spouse}.",
+				"{owner} is joined by her maids, gossiping about the most recent visitors of {owner.spouse.kingdom}.",
+				"{owner} is double checking the reports of the royal treasurer of {owner.spouse.kingdom}.",
+				"{owner} is helping her husband with the stewardship of the capitol.",
+				"{owner} is very busy with her late charitable activities and has no time for anything else at the moment.",
+				"{owner} devoted this day to prayer.",
+				"{owner} greeted hundreds of people the last five days to hear their complaints and requests for help and aid them as she sees fit.",
+				"{owner} visited few towns to meet the people of {owner.spouse.kingdom} and see how they live and what troubles them.",
+				"{owner} counseled {owner.spouse} on some important matters he had troubles deciding on."]
+			}
+		}
+		
+		case Male
+		{
+			switch_value = (owner.is_married)
+			case 0
+			{
+				name = "Idle in throne room"
+				status_text = ["{owner} is tending to important royal matters.",
+	 			"{owner} is attending a royal banquet, eating and drinking to his heart's contents.",
+	 			"{owner} had a severe quarrel with his father, as he is still not trusted with any important tasks.",
+	 			"{owner} has secluded himself in his personal estate, where he is building a new banquet hall.",
+	 			"{owner} spent the last few days, checking the reports for the defensive fortifications of {owner.kingdom}.",
+	 			"{owner} met with the governors of the biggest towns in {owner.kingdom} to check their annual reports and hear their problems."]
+			}
+			case default
+			{
+				name = "Idle in throne room"
+				status_text = ["{owner} is tending to important royal matters alongside his wife, {owner.spouse}.",
+				"{owner} is attending a royal banquet with his wife, {owner.spouse}, who seems to have an appetite bigger than a fat, old king.",
+				"{owner} is hunting wild boars in {owner.spouse.kingdom:s} royal forests, accompanied by his loyal entourage.",
+	 			"{owner} spent the last few days, checking the reports for the defensive fortifications of {owner.kingdom}.",
+	 			"{owner} met with the governors of the biggest towns in {owner.kingdom} to check their annual reports and hear their problems.",
+	 			"{owner} spent the last few days in a countryside royal estate with {owner.spouse}, as they are expected to ensure the continuation of the dynasty."]
+			}
+		}
+	}
+}
+
+def MarriedStatus : CharacterStatus
+{
+	ui_prefab = "Assets/UI/ObjectWindows/UIP_CharacterStatusWindow_Marriage.prefab"
+	name = "Married"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Married.png:Icon_CharacterStatus_Married#2" //GUID:e3fc4c99e9cff064cab0bd1cee287ab7
+	show_in_action_bar = false
+	//switch_value = (spouse.kingdom_before_marriage)
+	case test = (owner.kingdom = spouse.kingdom_before_marriage) //case j2 = (j = 2) 
+	{
+		status_text = "{owner} is married for {spouse.name}, {spouse.title} of {owner.kingdom}."
+	}
+	
+	case default
+	{
+		status_text = "{owner} is married for {spouse.name}[{spouse.is_royal_child:if} of {spouse.kingdom_before_marriage}], {spouse.title} of {owner.kingdom}."
+	}
+	
+	
+	text status_spouse_text = ["This blessed marriage ensures the continuation of the proud dynasty.",
+							   "{owner} and {spouse} are a model family, much loved by the people of {owner.kingdom}.",
+							   "Many envy the harmonious marriage between {owner} and {spouse}."]
+}
+
+def WidowedStatus : MarriedStatus
+{
+	name = "Widowed"
+	show_in_action_bar = false
+	case test = (owner.kingdom = spouse.kingdom_before_marriage)
+	{
+		status_text = "{owner} was married for the deceased {spouse} of {owner.kingdom}."
+	}
+	
+	case default
+	{
+		status_text = "{owner} was married for the deceased {spouse.name}[ of {spouse.kingdom_before_marriage}], {spouse.title} of {spouse.kingdom}."
+	}
+	
+	
+	text status_spouse_text = ["May his soul find rest.",
+							   "May he rest in peace."]
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Widowed.png:Icon_CharacterStatus_Widowed#2" //GUID:2b62ab820aa34054a9f2c25cba33cb93
+}
+
+def ArmyStatus : Status
+
+def ArmyDisorginizedStatus : ArmyStatus
+{
+	name = "Disorganized"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Disorganized.png:Icon_CharacterStatus_Disorganized#2" //GUID:86ba26ac6cdba1440b8cfca19dc3ea44
+	stamina = (ArmyDisorganizedRule.cs_army_stamina_perc)
+	defense = (ArmyDisorganizedRule.cs_defense_flat)
+	speed = (ArmyDisorganizedRule.cs_army_speed_world_perc)
+	status_text = $["Army is in a temporary state of disarray!"
+	                "{p}Stamina: {stamina:bonus}"
+	                "{p}Defense: {defense:bonus}"
+	                "{p}Travel speed: {speed:bonus:%}"]
+}
+
+def ArmyStarvingStatus : ArmyStatus
+{
+	name = "Starving"
+	icon = "Assets/UI/Elements/Statuses/Icon_CharacterStatus_Starving.png:Icon_CharacterStatus_Starving#2" //GUID:426d475a47d5d7749adb5b9848816088
+	morale = (ArmyHungerRule.HungerCheck.cs_army_morale)
+	stamina = (ArmyHungerRule.HungerCheck.cs_army_stamina_perc)
+	status_text = $["Army supplies are depleted!"
+					"{p}Morale: {morale:bonus}"
+	                "{p}Stamina: {stamina:bonus:%}"] //!!! add army movement //cannot start a siege
+}
+
+def HelpTheWeakStatus : CharacterStatus
+{
+	name = "Committed to charity"
+	icon = HelpTheWeakAction.icon
+	show_in_portrait = true
+	float rr = (owner.cs_help_the_weak_stability + owner.cs_help_the_weak_cleric_effect * owner.class_level / 3)
+	status_text = "{owner} is spreading alms to those in need, increasing stability by {rr:bonus}.{p}{p}{align:right}Upkeep: {upkeep}"
+
+	resources upkeep
+	{
+		gold = (owner.help_the_weak_upkeep)
+	}
+}
+
+def ImportingFoodStatus : CharacterStatus
+{
+	name = "Importing food"
+	icon = ImportFoodAction.icon
+	status_text = "{owner} is importing {fooodAmount}{food_icon} from {owner.mission_kingdom}.{p}{p}{align:right}Upkeep: {gold}{gold_icon} {commerceUpkeep}{trade_icon}"
+}
+
+def ExportingFoodStatus : CharacterStatus
+{
+	name = "Exporting food"
+	icon = ExportFoodAction.icon
+	status_text = "{owner} is exporting {fooodAmount} food to {owner.mission_kingdom}, gaining {gold}{gold_icon}.{p}{p}{align:right}Upkeep: {fooodAmount}{food_icon} {commerceUpkeep}{trade_icon}"
+}
+
+def ImprovingOpinionsStatus : CharacterStatus
+{
+	name = "Improving Opinions"
+	icon = ImproveOpinionsAction.icon
+	show_in_portrait = true
+	status_text = "{owner} is trying to improve the opinion of the different social groups in our kingdom towards the rulership of our {kingdom.king.title}.{p}{p}{align:right}Upkeep: {upkeep}"
+	
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.015, 5)) * (100 - own_character.cs_diplomat_actions_upkeep_reduction_perc)  / 100 , 1))
+	}
+}
+
+def DiplomatSearchingStatus : CharacterStatus
+{
+	name = "Searching"
+	status_text = "{owner} is searching"
+	
+	int numKingdomsPerTick = 2
+	int timeoutPerKingdom = 300
+	update_interval = 60/120
+	show_in_action_bar = false
+	show_in_window = false
+}
+
+def SearchingForSpouseStatus : DiplomatSearchingStatus
+{
+	name = "Searching for a spouse for {character}"
+	icon = DiplomacySearchForSpouceAction.icon
+	show_in_portrait = true
+	status_text = "{owner} is traveling across foreign kingdoms in search of potential marriage candidates{p}{align:right}Upkeep: {upkeep}"
+	numKingdomsPerTick = 5
+	timeoutPerKingdom = 1800
+	update_interval = 180/300
+	
+	float gold_upkeep = (ceil(5 + 0.005 * own_kingdom.S1, 5))
+	resources upkeep
+	{
+		gold = (ceil(gold_upkeep - gold_upkeep * own_character.cs_diplomat_actions_upkeep_reduction_perc / 100))
+	}
+}
+
+
+def SearchingForHelpWithRebelsStatus : DiplomatSearchingStatus
+{
+	name = "Searching for help with rebels"
+	status_text = "{owner} is trying to persuade foreign kingdoms to deal with the rebels in our lands"
+	icon = DiplomacySearchForHelpWithRebelsAction.icon
+	show_in_portrait = true
+	numKingdomsPerTick = 5
+	timeoutPerKingdom = 1800
+	update_interval = 180/300
+}
+
+// def SearchingForPactMembersStatus : DiplomatSearchingStatus
+// {
+// 	name = "Searching members for {owner.pact}"
+// 	icon = FindPactMembersAction.icon
+// 	status_text = "{owner} is looking for foreign kingdoms willing to join our {owner.pact}"
+// 	show_in_portrait = true
+// 	numKingdomsPerTick = 5
+// 	timeoutPerKingdom = 1800
+// 	update_interval = 180/300
+// }
+
+
+def PeaceTalksStatus : CharacterStatus
+{
+	name = "Peace talks with {target_kingdom}"
+	icon = DiplomacyPeaceTalksPreparationAction.icon
+	status_text = "{owner} is trying to {target_kingdom} into peace{p}{p}{align:right}Upkeep: {upkeep}{gold_icon}"
+	show_in_portrait = false //the infinite action works as its visuals, we use the status for the ticks
+	
+	show_in_action_bar = false
+	show_in_window = false
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.015, 5)) * (100 - own_character.cs_diplomat_actions_upkeep_reduction_perc)  / 100 , 1))
+	}
+}
+
+
+template HoldingAPactStatus : CharacterStatus
+{
+	//name = "{owner} maintains a pact"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_CreateDefensivePact.tga:Icon_CharacterAction_CreateDefensivePact#2" //GUID:4c05409701f810745880aa5d900ec69b
+	//status_text = "{owner} is maintaining our {owner.pact}, making sure all actions and plans will be discussed and synchronized with the other pact members.{p}{p}Upkeep: {upkeep}{gold_icon}"
+	show_in_portrait = true
+}
+
+def HoldingADefensivePactStatus : HoldingAPactStatus
+{
+	name = "Maintaining a Defensive Pact"
+	icon = CreateDefensivePactAction.icon
+	status_text = "{owner} is maintaining {owner.pact:an}, making sure other pact members will come to our aid if {owner.pact.target} ever declares war against us.{p}{p}{align:right}Upkeep: {upkeep}"
+	show_singleton_action = true
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.01, 5)) * (100 - own_character.cs_diplomat_actions_upkeep_reduction_perc - own_character.cs_defpact_invplan_cost_and_upkeep_reduction_perc)  / 100 , 1))
+	}
+}
+
+def HoldingAnInvasionPlanStatus : HoldingAPactStatus
+{
+	name = "Maintaining an Invasion Plan"
+	icon = CreateOffensivePactAction.icon
+	status_text = "{owner} is maintaining {owner.pact:an}, allowing us lead other pact members into a potential war against {owner.pact.target}.{p}{p}{align:right}Upkeep: {upkeep}"
+	show_singleton_action = true
+	resources upkeep
+	{
+		gold = (ceil((5 + SSum(owner.kingdom, 0.01, 5)) * (100 - own_character.cs_diplomat_actions_upkeep_reduction_perc - own_character.cs_defpact_invplan_cost_and_upkeep_reduction_perc)  / 100 , 1))
+	}
+}
+
+
+def ImportingGoodStatus : CharacterStatus
+{
+	name = "Importing from {target}"
+	status_text = "{owner} has negotiated the import of {good} to our kingdom, thanks to his clever negotiating with local merchants."
+	icon = (good.icon)
+}
+
+def TradeExpeditionStatus : CharacterStatus
+{
+	name = "Managing colony in {random_fantasy_name}"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_Colonize.tga:Icon_CharacterAction_Colonize#2" //GUID:37af5036c7c4cc943adc304970c7fcf2
+	show_in_portrait = true
+	
+	status_text = $[
+		"{owner} has set up a trade colony in the distant lands of {random_fantasy_name}, bringing riches to our {owner.kingdom.KingdomType} while maintaining matters in our newfound outpost.{p}"
+		"{p}Profit: {profit}{gold_icon}"
+		"{p}Upkeep: {upkeep:upkeep_color}"
+		"{p}{p}{i}Click to abandon this colony and recall {owner}{/i}"
+		]
+	
+	fantasyNames {
+		text Mukarabe = "Mukarabe"
+		text Ntobo = "Ntobo islands"
+		text Gotongho = "Gotongho"
+		text Zimbania = "Zimbania"
+		text Ghoto = "Ghoto"
+		text Drumandi = "Drumandi"
+		text Lasaka = "Lasaka"
+		text Pesoko = "Pesoko"
+		text Asharobi = "Asharobi"
+		text Rukako = "Rukako"
+		text Bromanda = "Bromanda"
+		text Tlacochtitlan = "Tlacochtitlan"
+		text Kanococo = "Kanococo"
+		text Texopan = "Texopan"
+		text Bonakmul = "Bonakmul"
+		text Nakapak = "Nakapak"
+		text Tikapan = "Tikapan"
+		text Copalakal = "Copalakal"
+		text Cantoluhun = "Cantoluhun"
+		text Talenque = "Talenque"
+		text Jailau = "Jailau"
+		text Hanpung = "Hanpung"
+		text Hna = "Hna Treng"
+		text Gonyan = "Gonyan"
+		text Shlang = "Shlang Ngai"
+		text Kelaganu = "Kelaganu"
+		text Terengpung = "Terengpung"
+		text Phaga = "Phaga"
+		text Bohdanao = "Bohdanao"
+		text Sandegarao = "Sandegarao"
+		text Dombai = "Dombai"
+		text Vagmapur = "Vagmapur"
+		text Rasprahpantanham = "Rasprahpantanham"
+		text Bruhmer = "Bruhmer"
+		text Pargaghavati = "Pargaghavati"
+		text Raigapatna = "Raigapatna"
+		text Shivhani = "Shivhani"
+		text Ramaya = "Ramaya"
+	}
+	
+	float profit = #TradeExpeditionProfit
+	{
+		//(50 + f(owner.class_level) + def.gold_colonies_per_commerce_mod * max commerce) * (100 + ks_profit_from_colonies_perc) / 100)
+		float base = 20
+		float class_level_mod = 1
+		float gold_colonies_per_commerce_mod = 0.2
+	}
+	resources upkeep
+	{
+		trade = (ceil(20 + 0.005 * own_kingdom.S1, 5))
+	}
+	float chance_to_kill_perc = 1 //we can have up to 3 colonies right now, this is a lot
+	update_interval = 180/300 //kill timer
+}
+
+
+def NoPaganBeliefStatus : CharacterStatus
+{
+	name = "[{is_preparing_to_promote:if}Promoting {belief}|No promoted belief]"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_PromotePaganBelief.tga:Icon_CharacterAction_PromotePaganBelief#2" //GUID:de635e675e8459f4496e24de6f3276ae
+	status_text = $[
+		"[{is_preparing_to_promote:if}{owner} is preparing to promote {belief}. This will increase our kingdom's upkeep for beliefs to {next_upkeep}{gold_icon}.|{owner} does not promote any belief yet.]"
+		"[{can_promote:if}{p}{p}Promoting a new belief provides significant bonuses to the entire kingdom, but will [increase the cost of upkeeping our beliefs from {current_upkeep}{gold_icon} to {next_upkeep}{gold_icon}.|require an upkeep of {next_upkeep}{gold_icon}.]]"
+		"{p}{p}[{is_preparing_to_promote:if}{i}Our shaman is currently trying to promote a belief.{/i}|{can_promote:if}{i}Click to promote a belief.{/i}|[{too_many_beliefs:if}{clr:red}{i}We have promoted too many beliefs already.{/i}{/clr}|{clr:red}{i}Shamans cannot promote a belief while he is busy with other tasks.{/i}{/clr}]]"
+		"{p}{p}{align:right}Cost: {cost}"
+	]
+}
+
+def PaganBeliefStatus : CharacterStatus
+{
+	icon = (Pagan[beliefKey].icon)
+	
+}
+
+def PaganBeliefStatusTooltip : HyperTextTooltip
+{
+	hypertext = PaganBeliefStatusTooltipHT
+	
+}
+
+def WitchHuntStatus : CharacterStatus
+{
+	icon = WitchHuntAction.icon
+	show_in_action_bar = (!owner.is_pope)
+}
+
+def WitchHuntStatusTooltip : ActionTooltip
+{
+}

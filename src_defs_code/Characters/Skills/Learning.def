@@ -1,0 +1,52 @@
+﻿def LearningSkill : Skill
+{
+	name = "Learning"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Learning_1.png:UI_Icon_Skill_Learning_1#2" //GUID:611ba5934f1dd1044b0b9c03cc382a07
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Learning_1.tga:UI_Icon_Skill_Learning_1#2", //GUID:d771407543abaf440b4ceef21766d7f0
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Learning_2.tga:UI_Icon_Skill_Learning_2#2", //GUID:b0c38a810d95e774890db7edeb5ab38a
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Learning_3.tga:UI_Icon_Skill_Learning_3#2" //GUID:ed6fdd94cef2eef478e50cd0e4194f1b
+	]
+	tooltip = "A trait often seen in those hungry for knowledge and self-improvement, bolstering the rate and cost of learning new skills."
+}
+
+extend Skill.effects
+{
+	skill LearningSkill
+	{
+		Default
+		{
+			mod cs_troop_experience_gain_rate_perc = 10/15/20
+			kingdom_mod ks_culture_from_traditions = 3/5/10
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "primary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_books_per_village = 1/2/3
+			}
+		}
+	}
+}

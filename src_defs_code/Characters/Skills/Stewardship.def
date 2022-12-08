@@ -1,0 +1,64 @@
+﻿def StewardshipSkill : Skill
+{
+	name = "Stewardship"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Stewardship_1.png:UI_Icon_Skill_Stewardship_1#2" //GUID:d80f68a2392785f4a8acd33b27ca1e8e
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Stewardship_1.tga:UI_Icon_Skill_Stewardship_1#2", //GUID:ba294b3301b78fa4e95e0cb177442636
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Stewardship_2.tga:UI_Icon_Skill_Stewardship_2#2", //GUID:72e134e8108587d4991b8eea0a67aa8d
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Stewardship_3.tga:UI_Icon_Skill_Stewardship_3#2" //GUID:c20daaf2fb48185428553384818ca053
+	]
+	tooltip = "Improves a knight's knowledge of statecraft and governing."
+}
+
+extend Skill.effects
+{
+	skill StewardshipSkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_prod_gold_flat = 2/3/5
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_levy_per_keep = 1/2/3
+			}
+		}
+		
+		class Merchant
+		{
+			slot_type = "primary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_gold_per_village = 1/2/3
+			}
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_gold_per_religious_settlement = 1/2/3
+			}
+		}
+		
+		tag King
+		{
+			mod cs_settlement_recovery_perc = 100
+		}
+	}
+}

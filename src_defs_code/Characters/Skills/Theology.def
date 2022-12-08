@@ -1,0 +1,46 @@
+﻿def TheologySkill : Skill
+{
+	name = "Theology"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Theology_1.png:UI_Icon_Skill_Theology_1#2" //GUID:2ec5b83e6986e044a9fa06199f1bca3b
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Theology_1.tga:UI_Icon_Skill_Theology_1#2", //GUID:34beb0c5e541a164c9cbd22148a7edfb
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Theology_2.tga:UI_Icon_Skill_Theology_2#2", //GUID:911185f15a9a345408ec53f22b82b418
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Theology_3.tga:UI_Icon_Skill_Theology_3#2" //GUID:b59ac2e4c4600c844a3aa9303dfd6f05
+	]
+	tooltip = "Provides a deep understanding of faith and spirituality, inspiring others to follow one's religious beliefs."
+}
+
+extend Skill.effects
+{
+	skill TheologySkill
+	{
+		Default
+		{
+			mod cs_convert_chance_after_siege_perc = 10/15/25
+		}
+
+		class Cleric
+		{
+			slot_type = "primary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_piety_per_religous_settlement = 1/2/3
+				{
+					condition = (governed_castle.realm.is_same_k_religion)
+					recalc_on { kingdom_religion_changed; governed_realm_religion_changed }
+				}
+			}
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+		}
+		
+		tag Govern
+		{
+			governed_realm_mod rs_governor_piety = 1/2/3
+		}
+		
+	}
+}

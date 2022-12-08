@@ -1,0 +1,238 @@
+﻿def SquadBuff
+{
+	float base_cth = 0
+	float base_defense = 0
+	float base_cth_shoot = 0
+	float base_resilience_flat = 0
+	float base_cth_against_me = 0
+	float base_movement_speed = 0
+	
+	text caption
+	text description
+	text effects_text
+	
+	text cth_name = "Attack"
+	text defense_name = "Defense"
+	text cth_shoot_name = "Ranged attack"
+	text resilience_flat_name = "Resilience"
+	text cth_cavalry_name = "Attack"
+	text defense_against_ranged_name = "Defense against incoming ranged attacks"
+	text cth_against_me_name = "Attack bonus against this squad"
+	text movement_speed_name = "Movement speed"
+	
+	bool has_effects = true
+	float priority = -1 // if above 0, only one can be active at a time, and only the highest priority
+	
+	sprite nameplate_sprite
+	sprite nameplate_background
+}
+
+def SquadTreesBuff : SquadBuff
+{
+	// debuff to shooting and cavalry
+	// i think this stacks if you're a horse archer, essentially -40% ranged attacks, -20% melee ones
+	float base_cth_shoot = -30 // perc
+	float base_cth_cavalry = -20 // perc
+	float base_defense_against_ranged_mod = 50 // extra defense if you get hit by arrows while hiding in a forest
+	int min_trees_count = 4 // setting to 4 from the earlier 2 because we increased the grid size to 20
+	
+	caption = "Among trees"
+	description = "The squad is positioned among trees. Ranged and cavalry attack is reduced within the area, but defense against projectiles is increased."
+	effects_text = $[
+	"[{cth_shoot_name}: {CTH_shoot_mod:bonus:%}{p}]"
+	"[{cth_cavalry_name}: {CTH_cavalry:bonus:%}{p}]"
+	"[{defense_against_ranged_name}: {defense_against_ranged:bonus}{p}]"
+	]
+	
+	texture minimap_sprites = ["Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_01.psd", //GUID:19e2c1a30084eee4e8088f745b9b120e
+"Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_02.psd", //GUID:26374edf9a6b8224fa4844ecc89540be
+"Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_03.psd", //GUID:a74b4d946b7f7d74fb91ebed88dc9b5a
+"Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_04.psd", //GUID:990ca4f90c3232941bd182d95a112c92
+"Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_05.psd", //GUID:8b52db134da45fd4eaa6caaaea0e02d2
+"Assets/UI/BattleView/Elements/BV_Minimap_Icons_Grouped/BV_Trees_06.psd" //GUID:bdd671dc1eddcaa4faec9a5b97ae33f5
+]
+}
+
+def SquadHighGroundBuff : SquadBuff
+{
+	float base_cth_shoot_max = 20 //percent, maximum buff for shooting from higher place
+	float base_cth_shoot_min = -20 //percent, minimum buff for shooting from lower place
+	float min_height_diff = 1 //how much height difference is needed for buff to start working
+	float max_height_diff = 15 //how much height difference is needed for using max buff value
+}
+
+def SquadShootOverWallDebuff : SquadBuff
+{
+	base_cth_shoot = -20 //perc
+}
+
+def ClimbingBuff : SquadBuff
+{
+	caption = "Climbing"
+	description = "The squad is assaulting enemy fortifications and is at vulnerable position and state."
+	effects_text = $[
+	"{cth_against_me_name}: {cth_against_me:penalty}{p}"]
+	base_cth_against_me = (siege_defense * 0.5) // for attacker cth = (regular cth formula) * (1 + (this bonus) / 100f)
+}
+
+template TemporaryBuff : SquadBuff
+{
+	string trigger
+	float chance = 100
+	float duration = 60
+	bool validate = (!def.is_siege)
+}
+
+
+def RetreatBuff : SquadBuff // doesn't do anything, but all the logic already existed in the simulation squad and i didn't want to have to move it, so this exists only for UI and other buff purposes
+{
+	caption = "Retreating"
+	description = "These scared troops are retreating to a safer position, disobeying any orders until they calm down."
+	priority = 100
+	bool validate = (state == "Retreating" && !def.is_siege)
+	has_effects = false
+	
+}
+
+def DisorganizeBuff : TemporaryBuff
+{
+	priority = 95
+	chance = (variable_chance)
+	{
+		vars
+		{		
+			case heavy_disorganize = (disorganize > 1.3)
+			{
+				float variable_chance = 40
+			}
+			case medium_disorganize = (disorganize >= 0.9 && disorganize < 1.3)
+			{
+				float variable_chance = 20
+			}
+			case light_disorganize = (disorganize >= 0.5 && disorganize < 0.9)
+			{
+				float variable_chance = 10
+			}
+		}		
+	}
+	duration = 30
+	trigger = "took_damage"
+	
+	caption = "Disorganized"
+	description = "The squad has broken its ranks during the fray of battle."
+	effects_text = $[
+	"[{cth_name}: {CTH:bonus:%}{p}]"
+	"[{defense_name}: {defense:bonus:%}{p}]"
+	]
+	
+	base_cth = -50
+	base_defense = -30 // perc
+}
+
+def FierceBuff : TemporaryBuff
+{
+	caption = "Fierce"
+	description = "The squad has high morale and as its enemies flee, it seems as if nothing can stop it."
+	effects_text = $[	
+	"[{resilience_flat_name}: {resilience_flat:bonus:%}{p}]"
+	"[{cth_name}: {CTH:bonus:%}{p}]"
+	"[{movement_speed_name}: {movement_speed:bonus:%}{p}]"]
+	
+	trigger = "enemy_retreat"
+	chance = (20 + DecisiveBuff.enabled * 30)
+	
+	base_resilience_flat = 20
+	base_cth = 30
+	base_movement_speed = 20
+	
+	priority = 90
+}
+
+def DecisiveBuff : TemporaryBuff
+{
+	caption = "Decisive"
+	description = "The squad has high morale and as its enemies retreat, their resolve is increased even higher."
+	effects_text = $[	
+	"[{resilience_flat_name}: {resilience_flat:bonus:%}{p}]"
+	"[{cth_name}: {CTH:bonus:%}{p}]"
+	"[{movement_speed_name}: {movement_speed:bonus:%}{p}]"]
+	
+	trigger = "enemy_retreat"
+	chance = 20
+	
+	base_resilience_flat = 10
+	base_cth = 15
+	base_movement_speed = 10
+	
+	priority = 85
+}
+
+
+
+def TerrifiedBuff : SquadBuff // doesn't do anything, but all the logic already existed in the simulation squad and i didn't want to have to move it, so this exists only for UI and other buff purposes
+{
+	caption = "Terrified"
+	description = "The squad has extremely low morale and there is a chance it will permanently flee the battle."
+	priority = 80
+	bool validate = (morale < 5 && !def.is_siege)
+	has_effects = false
+}
+
+def ShakingBuff : SquadBuff // doesn't do anything, but all the logic already existed in the simulation squad and i didn't want to have to move it, so this exists only for UI and other buff purposes
+{
+	caption = "Shaking"
+	description = "The squad has low morale and it is likely to retreat to a safer position soon, disobeying any commands on its way to safety."
+	priority = 75
+	bool validate = (morale >= 5 && morale < 10 && !def.is_siege)
+	has_effects = false
+}
+
+
+def LowStaminaBuff : SquadBuff
+{
+	chance = 20
+	validate = (stamina < 5 && !def.is_siege)
+	duration = 15
+	trigger = "took_damage"
+	priority = 70
+	
+	base_cth = -25 // perc
+	base_defense = -25 // perc
+	movement_speed = -25
+	base_stamina_recovery_rate = -100 // 
+	
+	caption = "Exhausted"
+	description = "The squad has lost its stamina, which temporarily hinders its fighting capabilities."
+	effects_text = $[
+	"[{cth_name}: {CTH:bonus:%}{p}]"
+	"[{defense_name}: {defense:bonus:%}{p}]"
+	"[{movement_speed_name}: {movement_speed:bonus:%}{p}]"]
+	]
+}
+
+def DisheartenedBuff : TemporaryBuff
+{
+	chance = (20 + DisorganizeBuff.enabled * 30)
+	priority = 65
+	duration = 30
+	trigger = "took_damage"
+	
+	caption = "Disheartened"
+	description = "The squad has a rather low morale and might even retreat."
+	effects_text = $[
+	"[{cth_name}: {CTH:bonus:%}{p}]"
+	// "[{defense_name}: {defense:bonus:%}{p}]"
+	 "[{resilience_flat_name}: {resilience_flat:bonus}{p}]"
+	]
+	
+	
+	base_cth = -20
+	base_resilience_flat = -10
+}
+
+// // example of buff without any custom c#
+// def TestCustomBuff : SquadBuff
+// {
+// 	base_cth = 50
+// 	bool validate = (salvos == salvo_capacity)
+// }

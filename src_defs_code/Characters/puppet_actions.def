@@ -1,0 +1,2024 @@
+﻿def PuppetAction : CharacterAction
+{
+	show_in_action_bar = false
+	show_in_character_widnow = true
+	show_in_status // = HasPuppetStatus // override this in each action
+	{
+		target = (puppet)
+	}
+	
+	int rebels_max_distance = 4
+	
+	success_fail
+	{
+		sf_class_level = (5 + owner.class_level * 2) // *100 cheat
+		
+		sf_puppet_class_level = (5 + puppet.class_level * 2)
+		{
+			text name = "Their {puppet.class} Level"
+		}
+	}
+}
+
+def SpyResultMessage : OkMessage
+{
+	timeout = 600
+	sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+	sprite illustration = "Assets/UI/Messages/Illustrations/UI_Enemy_Spy_Success_Undetected.tga:UI_Enemy_Spy_Success_Undetected#2" //GUID:8dd910aa9f0c2b445b61e5b1529e1ef5
+}
+
+def PuppetPlot : SpyPlot
+{
+	decline_voice_line = "Decline"
+	prepare_voice_line = "confirm_action"
+	cancelled_voice_line = "spy_plot_cancelled"
+	success_voice_line = "action_succeeded"
+	fail_voice_line = "action_failed"
+	
+	show_in_character_widnow = true
+	opportunity
+	{
+		chance_to_add_on_tick = 35
+		chance_to_del_on_tick = 10
+	}
+	
+	cancel_events
+	{
+		target imprisoned
+		target kingdom_changed
+		//target dying  - part of the puppet lost messages. No need for duplicate cancel & message here.
+	}
+	cancelled_message_caption = "Plot halted: {action.name}"
+	cancelled_message_texts
+	{
+		text imprisoned = "In a rather unfortunate turn of events, {target} has ended up as a prisoner in {target.prison_kingdom:s} dungeon. Thus, {owner:s} plot has inadvertently come to an end."
+		text kingdom_changed = "Our puppet, {target}, no longer serves {owner.mission_kingdom:s} court. As a result, {owner:s} plot has inadvertently come to an end."
+	}
+}
+
+
+def ReleasePuppetAction : PuppetAction
+{
+	name = "Release Puppet"
+	tooltip = "Stop paying {target} and let go of his services to {owner}."
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_ReleasePuppet.tga:Icon_CharacterAction_ReleasePuppet#2" //GUID:8565481051c03494ba6fb8de8486bc38
+	show_in_status = HasPuppetStatus
+	
+	prepare_voice_line = "stop_supporting_pretender"
+	cancel_voice_line = null
+	cancelled_voice_line = null
+	success_voice_line = null
+	fail_voice_line = null
+	
+	prepare_duration = 0
+	
+	ai_validate = false
+	mission = "OnMission"
+	
+	success_fail : null
+	
+	outcomes : null
+	{
+		main success = 100
+		{
+			message { def = null }
+		}
+	}
+}
+
+
+def PuppetFleeKingdom : RecallAction
+{
+	name = "{owner} flees {owner.kingdom}"
+	tooltip = "{owner} will flee from {owner.kingdom}"
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_PlotToEscape.tga:Icon_CharacterAction_PlotToEscape#2" //GUID:8371ef8fee76c444d97de96906122f1a
+	
+	prepare_duration = 0
+	prepare_status_text = "{action.owner} is fleeing from {action.owner.kingdom}"
+	show_in_action_bar = false
+	show_in_character_widnow = false
+	
+	outcomes
+	{
+		main success = 100
+		{
+			case src_kingdom // already mentioned in other actions, so this can be skipped for now
+			{
+				message
+				{
+					def = null
+					// icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+					// text caption = "{obj.title} abandoned our kingdom"
+					// text text = "Our {obj.title}, {owner}, has fled from {owner.kingdom}! The circumstances behind his vanishing are a mystery for all, but one thing is for certain - he will no longer serve us."
+				}
+			}
+			case mission_kingdom
+			{
+				message
+				{
+					icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Positive.png:Icon_Message_KnighEscaped_Positive#2" //GUID:11be9b99c24cef249a6eae02cf524314
+					text caption = "{owner} abandoned his kingdom"
+					text text = "Our puppet, {owner}, got paranoid and decided that the {owner.kingdom:ians} will soon discover his insidious existence. Thus, he has fled from {owner.kingdom} and will no longer serve them."
+				}
+			}
+		}
+		//crown_authority -= "knightDesertion" <--- handled in C#
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//--------------------------------------------  Diplomat: Arrange Annexation  ------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetArrangeAnnexationAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_ArrangeAnnexation.tga:Icon_Opportunity_ArrangeAnnexation#2" //GUID:a90640e1af365bb448744babfcfe4e0d
+	name = "Arrange annexation"
+	tooltip = "Order {target} to arrange the annexation of some {owner.mission_kingdom:s} lands."
+	prepare_status_text = "{action.target} is fabricating letters and negotiating with {action.owner.mission_kingdom:s} governors, so that he can safely annex some of our vassal's lands."
+	
+	int min_checks_for_leftover_realms = 4
+	float leftover_realm_chance = 20 //context: {obj} is realm
+	int min_player_leftover_realms = 3 //players are left with up to X realms
+	puppet_classes = "Diplomat"
+	
+	int added_comparison_realms = 3
+	float kingdoms_comparison_perc = 70
+	
+	success_base_chance = 25
+	success_fail
+	{
+		sf_king_diplomacy_stars = (own_kingdom.king_diplomacy_ability * 3)
+		{
+			text name = "Our King's Diplomacy Ability (x3)"
+		}
+		
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		
+		perc sf_is_great_power = (-50 * owner.mission_kingdom.is_great_power)
+		{
+			text name = "They Are a Great Power"
+		}
+	}
+	
+	severity = "High"
+	
+	text inline_descr = "annex the kingdom of {owner.mission_kingdom}"
+	text mk_inline_descr = "annex our kingdom"
+	text no_valid_realms_outcome = "Although {target} had fell for our spy's alluring whispers, he simply could not arrange the annexation of {target.kingdom:s} territories, as all of them are occupied by rebels."
+	
+	src_messages
+	{
+		switch_value = (has_leftover_realms)
+		case 1
+		{
+			text success_undetected = ["[{no_valid_realms:if}{no_valid_realms_outcome}|{target} did the unthinkable and successfully arranged the annexation of {realms}! The people there are now part of our kingdom and no longer serve under the vile rulership of {owner.mission_kingdom}.]",
+			"[{no_valid_realms:if}{no_valid_realms_outcome}|Thanks to the efforts of {owner} and his puppet, {target}, {owner.mission_kingdom.king} was successfully persuaded into submitting {realms} into our control! While our vassal is now weaker, our sovereignty remains.]",
+			"[{no_valid_realms:if}{no_valid_realms_outcome}|{target} did it! The people of {realms} are greeting us as their new rulers, free from the shackles of {owner.mission_kingdom} and {owner.mission_kingdom.king:s} dominion.]"]
+			text success_revealed = ["[{no_valid_realms:if}{no_valid_realms_outcome}|{target} managed to convince {owner.mission_kingdom.king} that some of his people would be better off serving our {owner.kingdom.king}, resulting in the annexation of {realms}! Sadly, our puppet had to pay a price, and revealed our spy to the {owner.mission_kingdom.king.title}.]",
+			"[{no_valid_realms:if}{no_valid_realms_outcome}|{target} managed to arrange the annexation {realms} by poisoning the mind of {owner.mission_kingdom.king}! Unfortunately, our puppet couldn't keep {owner:s} participation in the plot a secret...]"]
+		}
+		case default
+		{
+			text success_undetected = "[{no_valid_realms:if}{no_valid_realms_outcome}|{owner} did it! Thanks to his influence over {target} and the local nobles, our spy managed to fabricate tha annexation of all of {target.kingdom:s} lands.]"
+			text success_revealed = "[{no_valid_realms:if}{no_valid_realms_outcome}|{owner:s} proficiency in forging diplomatic letters proved to be an invaluable skill, which resulted in the annexation of all of {target.kingdom:s} lands!]"
+		}
+		
+		text new_opportunity = "{target} has reported that the people in some of {target.kingdom:s} provinces are despondent towards {target.kingdom.king:s} rulership. Perhaps {owner} can take advantage of this 'unfortunate' situation, and arrange the annexation of their lands with the help of our puppet."
+		text fail_undetected = ["{target} could not find a way to arrange the annexation of any of {owner.mission_kingdom:s} lands. Luckily for us, his daring plot remained undetected.",
+		"{target} could not arrange the annexation of {owner.mission_kingdom}, even though he got close to {owner.mission_kingdom.king} and almost convinced him to sign a carefully prepared treaty.",
+		"Even though {owner.mission_kingdom:s} territories are but a speck on the global map, their people and nobilemen seem to be unshakeable. Both {owner} and {target} did their best, but in the end could not fabricate the annexation of any of our vassal's lands."]
+		text fail_revealed = ["Sire, {target} failed to arrange the annexation of some of {owner.mission_kingdom:s} lands. It turns out our puppet's knowledge of internal issues within his kingdom was insufficient. Even worse, his incompetence resulted in the reveal of our spy...",
+		"Sire, {owner} was revealed while attempting to arrange the annexation of some of {owner.mission_kingdom:s} lands! Regrettably, the fool trusted {target} too much, who backstabbed his master by reporting his plot directly to {owner.mission_kingdom.king}."]
+		//text plot_invalidated = "{owner} failed to organize the annexation of {owner.mission_kingdom} - the opportunity was no longer there!"
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "[{no_valid_realms:if}Our {owner.mission_kingdom.king.title} has been subject to the foul whispers of {src_kingdom:anian} spy! Fortunately, the intruder failed to achieve his plans in time.|Sire, we have lost control over {realms}! This devastating blow was dealt by {src_kingdom:anian} spy, no doubt with the help of someone in our court...]"
+		text fail_revealed = ["My Lord, we caught {src_kingdom:anian} spy attempting to commit dire crimes against our {owner.mission_kingdom.KingdomType}! He conspired against us by fabricating fake letters signed by {target.kingdom.king} himself, in an attempt to annex some of our lands.",
+		"Sire, we caught {src_kingdom:anian} spy trying to fabricate the annexation of some of our lands! Luckily, we managed to stop the rat just in time."]
+	}
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 1.5, 2.25))
+	float add_gold_cost = 500
+	
+	mission_kingdom_event = AnnexationEvent
+	
+	cancel_events
+	{
+		mission_kingdom stance_changed = (owner.mission_kingdom.vassal_of != own_kingdom)
+		mission_kingdom kingdom_destroyed
+	}
+	cancelled_message_caption = "Vassal annexation halted"
+	cancelled_message_texts
+	{
+		text stance_changed = "{owner} was forced to put a hasty end to his plot, as {owner.mission_kingdom} is no longer our vassal."
+		text kingdom_destroyed = "{owner} was forced to end his plot, as {owner.mission_kingdom} no longer stands on the map."
+	}
+}
+
+def AnnexationEvent : SpyResultMessage
+{
+	caption = "[{no_valid_realms:if}Foreign spy tried to take our provinces|We lost some provinces!]"
+	body = ["[{no_valid_realms:if}Sire, we've discovered a foreign spy trying to arrange the annexation of our lands!|Sire, we've lost control over {realms}! Evidently, our people were tricked by a foreign spy, as they pledged loyalty to {owner.kingdom.king} of {owner.kingdom}.]",
+	"[{no_valid_realms:if}A spy from another kingdom has been trying to annex our lands!|Sire, our people in {realms} have declared they are now loyal to {owner.kingdom}! All evidence points to a foreign spy secretly arranging our lands' surrender for some time. Maybe it's time to order a nation-wide witch hunt...]"]
+}
+
+
+
+// //----------------------------------------------------------------------------------------------------------------------------//
+// //-----------------------------------------------  Diplomat: Ruin Relations  -------------------------------------------------//
+// //----------------------------------------------------------------------------------------------------------------------------//
+// def PuppetRuinRelationsAction : PuppetPlot
+// {
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Spy_RuinRelations.png:Icon_Action_Spy_RuinRelations#2" //GUID:e5ae124c9345f2e43be9798617066a74
+// 	name = "Ruin relations"
+// 	tooltip = "{target} will worsen {owner.mission_kingdom:s} relations with another kingdom" //??? add selector for which kingdom - probably requires rethinking the mechanic
+// 	show_in_status = HasDiplomatPuppetStatus
+// 	prepare_status_text = "{action.puppet} is looking to dismantle his kingdom's political outlook"
+
+// 	puppet_classes = "Diplomat"
+
+// 	severity = "Low"
+// 	success_base_chance = 50
+// 	//reveal_base_chance = 30
+
+// 	text inline_descr = "ruin the relations of {owner.mission_kingdom} with another kingdom"
+// 	text mk_inline_descr = "ruin our relations with {rel_change_kingdom}"
+
+// 	src_messages
+// 	{
+// 		text success_undetected = ["{target} was able to spread doubt within the court of another kingdom. His kingdom is now one step closer to declaring war against the {rel_change_kingdom:ians}!",
+// 						"Thanks to {target:s} silver tongue and dastardly wits, {owner.mission_kingdom} now hates {rel_change_kingdom:s} guts.",]
+// 		text success_revealed = "{target} was successful in his attempts to tarnish the reputation between {owner.mission_kingdom} and {rel_change_kingdom}! Unfortunately, his own reputation was what caused his ploy to be revealed."
+// 		text fail_undetected = "It seems the diplomatic ties of {owner.mission_kingdom:s} are too stable to be ruined by {target}. Fortunately, our spy remains undetected."
+// 		text fail_revealed = "{target} failed to ruin {owner.mission_kingdom:s} relations with its diplomatic partner and was revealed!"
+// 		text plot_revealed = "Sire, we bear unforunate news - our {target} was caught in the act while he was forging fake letters of diplomacy in {owner.mission_kingdom}."
+// 	}
+// 	mission_kingdom_messages
+// 	{
+// 		text success_revealed = "We learned that {src_kingdom:anian} lied to the diplomats of several kingdoms, telling them our {owner.mission_kingdom.king.title} has lost his mind!"
+// 		text fail_revealed = "We found that {src_kingdom:anian} spy forged a letter, aiming to ruin our relations with another kingdom! The crisis was averted and the message was burned, but we should choose our diplomats more carefully."
+// 		text plot_revealed = "Sire, {src_kingdom:anian} spy was working towards ruining our kingdom's reputation! Thankfully we managed to stop the correspondence and dodged a potential political scandal."
+// 	}
+
+
+// 	mission_kingdom_event = RelationsRuinedEvent
+
+// }
+
+// def RelationsRuinedEvent : SpyResultMessage
+// {
+// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Generic_Spy.png:Icon_Action_Generic_Spy#2" //GUID:8fabffe00ddb7e442bdc7bffc086f6d0
+// 	caption = "Relations ruined"
+// 	body = ["Sire, someome has been secretly corresponding with {rel_change_kingdom} on our behalf. Our relations have worsened!",
+// 			"Someone have spread lies about our intentions towards {rel_change_kingdom} and now they are very reserved in all dealings with us.",
+// 			"A diplomat from  {rel_change_kingdom} was killed in our capital and that affected our relations with them greatly."]
+// }
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//------------------------------------------------  Marshal Leading army: Army Revolt  -----------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetArmyRevoltAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_ArmyRevolt.tga:Icon_Opportunity_ArmyRevolt#2" //GUID:d1ff3c55008ba3c4387f95d3e0510f77
+	name = "Army Revolt"
+	tooltip = "Persuade {target} to organize a revolt against the rulership of {owner.mission_kingdom.king}."
+	prepare_status_text = "{owner} is looking for ways to convince {target} to organize a revolt against his ruler, {owner.mission_kingdom.king}."
+	
+	severity = "High"
+	success_base_chance = 30
+	
+	int max_rebel_armies = 3
+	
+	success_fail
+	{
+		sf_army_negative_opinon = (max(0,target.kingdom.ks_enemy_plot_army_revolt_strength))
+		{
+			text name = "Their Army Opinion"
+		}
+		
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		
+		perc sf_their_puppet_class_level = (-1 * target.class_level)
+		{
+			text name = "Puppet Class Level"
+		}
+		perc sf_army_positive_opinon = (min(0,target.kingdom.ks_enemy_plot_army_revolt_strength))
+		{
+			text name = "Their Army Opinion"
+		}
+		
+	}
+	
+	// their_sf_stats
+	// {
+	// 	ks_enemy_plot_army_revolt_strength
+	// 	{
+	// 		multiplier = (-1)
+	// 	}
+	// }
+	
+	puppet_classes = "Marshal"
+	
+	text inline_descr = "organize a mass revolt amongst {owner.mission_kingdom:s} armies"
+	text mk_inline_descr = "organize a mass revolt amongst our armies"
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} has learned that {target:s} loyalty towards {owner.mission_kingdom.king} is waning. With the right persuasion, the {owner.mission_kingdom:ian} marshal can apparently be convinced to rebel against his {owner.mission_kingdom.king.title}!"
+		text success_undetected = ["{target} organized a revolt in {owner.mission_kingdom}! The kingdom's armies are now marching against their former ruler, thanks to our puppet's persuasion. [{revolt_leaders} followed him.]",
+								"{target} perceived that {owner.mission_kingdom:s} king is weak and has to fall. With the support of the army, he managed to organize a revolt![ {revolt_leaders} followed his lead.]"]
+		text success_revealed = ["Our puppet, {target}, successfully organized a revolt amongst {owner.mission_kingdom:s} ranks! Unfortunately, our spy was caught as the marshal's accomplice. [The troops of {revolt_leaders} have also decided to march against {owner.mission_kingdom}.]",
+		"{owner} was right – {owner.mission_kingdom:s} armies are dishonorable vagrants ready to backstab their ruler at any moment! The same can sadly be said about our puppet, who made sure {owner:s} part in this plot would not remain unknown. [Nevertheless, our job is done, as the troops of {revolt_leaders} now march against {owner.mission_kingdom.king:s} lands, alongside {target}.]"]
+		text fail_undetected = ["Alas, {target} failed to organize a revolt. It seems {owner.mission_kingdom:s} armies are indeed loyal to their ruler. Luckily for our spy, his dastardly plot remained undetected.",
+		"Unfortunately, our spy failed to organize a revolt in {owner.mission_kingdom}. Our reports say {owner} was seen in a semi-conscious drunken state while conspiring with one of {owner.mission_kingdom:s} marshals."]
+		text fail_revealed = ["{target:s} attempt to organize a revolt within {owner.mission_kingdom:s} armies failed disastrously, as he was betrayed by one of his conspirators. With his back against the wall, our puppet was forced to reveal the identity of his master - {owner}.",
+		"Trusting {target} was a mistake. Apparently, {owner} was supposed to meet him at night to negotiate the revolt of {owner.mission_kingdom:s} armies, but instead found a hired brigade of thugs."]
+	}
+	
+	text mission_kingdom_army_revolt_info = "{p}{p}{target} is leading a rebellion[, alongside {revolt_leaders}]."
+	
+	mission_kingdom_messages // what the target kingdom sees
+	{
+		text success_revealed = "There's been an insurgency within our ranks! {src_kingdom:anian} spy has been plaguing our marshals and some are now marching against us![{mission_kingdom_army_revolt_info}]"
+		text fail_revealed = ["Sire, we discovered a mass revolt in the making amongst our ranks, with {src_kingdom:anian} spy leading the plot![{mission_kingdom_army_revolt_info}]",
+		"We found out {src_kingdom:anian} spy has been corrupting our armies and trying to convince them to revolt![{mission_kingdom_army_revolt_info}]"]
+	}
+	
+	mission_kingdom_event = ArmyRevoltEvent
+	
+	float add_gold_cost = 1000
+	float ssums_base = (MapCA(owner.mission_kingdom, 1, 2))
+	float ssums_bias = 0.75
+	
+	cancelled_message_caption = "Army revolt plot halted"
+}
+
+// hidden action - instant, used for each additonal army leader to check if they'll rebel for PuppetArmyRevoltAction
+def PuppetArmyRevoltAdditionalAction : CharacterAction
+{
+	mission = "Ignore"
+	secondary = true
+	prepare_duration = 0
+	ai_validate = false
+	
+	show_in_action_bar = false
+	show_in_character_widnow = false
+	show_in_status = false
+	
+	int distance_to_puppet_realms = 1 //same+neighbors - within the rebellion zone
+	
+	success_fail
+	{
+		//available characters: own_character, puppet, master
+		sf_base = (0)
+		sf_class_level = (15 - own_character.class_level)
+		sf_authority = (25 - 5 * max(0, own_kingdom.crown_authority))
+		sf_is_close_to_puppet = (20 * is_close_to_puppet)
+		are_there_other_rebellions_in_realm = (10 * are_there_other_rebellions_in_realm)
+	}
+	
+	outcomes
+	{
+		main success //nothing here, PuppetArmyRevoltAction handles the messages, success/fail are only to trigger the SFs
+		{
+			message { def = null }
+		}
+		option fail
+		{
+			message { def = null }
+		}
+	}
+	
+}
+
+
+def ArmyRevoltEvent : SpyResultMessage
+{
+	caption = "Army Revolt"
+	body = ["My Lord, our armies have turned their backs against us and formed a rebellion! We suspect a foreign spy was behind this...[{mission_kingdom_army_revolt_info}]",
+			"Sire, a revolt has taken place amongst our ranks - our armies are marching against us! We disovered it was a foreign spy that was bribing them, but his identity remains shrouded in mystery...[{mission_kingdom_army_revolt_info}]",
+			"There's been an insurgency within our ranks! A foreign spy has been plaguing our marshals and some are now marching against us![{mission_kingdom_army_revolt_info}]"]
+	//"We have been betrayed! Our armies have turned their blades against us!"
+	voice_line = "narrator_voice:army_revolting"
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------  Switch sides  -----------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetSwitchSidesAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SwitchSides.tga:Icon_Opportunity_SwitchSides#2" //GUID:b59d8f60670807845abbad97a2331e12
+	name = "Switch sides"
+	tooltip = "Convince {target} to switch sides and join our court[{target.army:if}, along with his army]."
+	prepare_status_text = "{owner} is convincing {action.target} [{target.army:if}and his army ]to join our side."
+	
+	severity = "Mid"
+	success_base_chance = 25
+	//reveal_base_chance = 50
+	
+	//puppet_classes = "Marshal"
+	
+	float check_kingdom_size = 2 // we have to be twice bigger
+	
+	text inline_descr = "convince {target} to join our side"
+	text mk_inline_descr = "convince one of our marshals to join their side"
+	
+	validate_prompts
+	{
+		text _no_free_court_slot = "{clr:red}You need to have a free court slot to execute this plot.{/clr}"
+	}
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} has sensed that {target}, his loyal puppet, might be interested in joining our royal court! Say the word, and our spy will attempt to convince the {owner.mission_kingdom:ian} knight to abandon his {owner.mission_kingdom.KingdomType} and set on a journey to ours."
+		text success_undetected = ["Thanks to {owner:s} persuasiveness, {target} of {owner.mission_kingdom} has fled his kingdom and joined our royal court!",
+		"{owner} swayed the mind of {target} with easy, promising him vast riches and adoration if he decides to join our royal court. Without hesitation, our puppet abandoned {owner.mission_kingdom} and now serves under our {owner.kingdom.king.title}!",
+		"{owner} managed to convince {target} that his skills would be more valued in our {owner.kingdom.KingdomType}. Thus, our puppet set out on a journey to {owner.kingdom}, under the false pretences that he was tasked with an important mission by his now former {owner.mission_kingdom.king.title}."]
+		text success_revealed = ["{target} of {owner.mission_kingdom} has pledged his allegiance to us and now serves our royal court! Unfortunately, this act of treason wasn't left unnoticed and our {owner} was revealed.",
+		"{target} has arrived in our kingdom and pledged his loyalty to us! He managed to escape from {owner.mission_kingdom} with the help of {owner}, who organized an escape for his puppet by bribing some traders headed to our {owner.kingdom.KingdomType}. Unfortunately, someone overheard our spy while he was convincing the merchants to conceal {target} in their carts."]
+		text fail_undetected = ["{owner} did his best, but could not persuade {target} to join our side. It seems his puppet's loyalty to {owner.mission_kingdom} hasn't quite yet diminished.",
+		"{owner} attempted to convince {target} that he should leave {owner.mission_kingdom}, promising him vast riches and a position of power within our court. But even then, our puppet refused."]
+		text fail_revealed = ["{owner} nearly managed to convince {target} to join our ranks, but was in the end betrayed by his own puppet.",
+		"{target} turned out to be a coward and a backstabber. Not only did he refuse to abandon {owner.mission_kingdom} and join our court, but he also revealed his master, {owner}.",
+		"{owner} failed disastrously in his attempts to influence {target} to join our ranks! Our spy wasn't exactly careful as his letters of correpondence were found lying on the pavement by {owner.mission_kingdom:ian} guards, which led to his unfortunate reveal."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = ["There's been an insurrection within our ranks! {src_kingdom:anian:cap} spy has been plotting against, convincing {target} to join {src_kingdom:s} corrupt court.",
+		"My lord, {target} has betrayed us and has fled to {src_kingdom}! It seems {src_kingdom:anian:cap} spy has been testing our knight's waning loyalty for a while..."]
+		text fail_revealed = ["Sire, we caught {src_kingdom:anian:cap} spy trying to persuade one of our knights into joining his kingdom's wretched court!",
+		"My lord, we've caught {src_kingdom:anian} spy bribing one of our knights! He was attempting to persuade his puppet into switching sides and joining {src_kingdom:s} filthy court... Good thing we caught the scent of this foul plot early."]
+	}
+	
+	mission_kingdom_event = SwitchSidesEvent
+	cancelled_message_caption = "Switch sides plot halted"
+	
+	cancel_events
+	{
+		target became_king
+	}
+	cancelled_message_texts
+	{
+		text became_king = "Our puppet, {target}, has succeeded the crown of {owner.mission_kingdom}. As a result, {owner:s} chances to convince the {target.class} to join our court have quickly diminished."
+	}
+}
+
+def SwitchSidesEvent : SpyResultMessage
+{
+	caption = "{target} betrayed us"
+	body = ["We've been humiliated, my lord! {target}, formerly part of our royal court, has fled our {owner.mission_kingdom.KingdomType} and pledged his allegiance to {src_kingdom}. He was bribed by their spy, who must still be lurking somewhere in our kingdom...",
+	"We've received news that {target} was corrupted by a foreign spy, fleeing our {owner.mission_kingdom.KingdomType} and joining {src_kingdom:s} court. No wonder we haven't seen him at our weekly council meetings for some time...",
+	"{target} was influenced by a foreign spy and joined {src_kingdom:s} court! The betrayer left a parting letter at his homestead, but one should not waste precious ink on describing the vulgar contents sealed within...",
+	"Sire, the {src_kingdom:ians} have sent us a mocking letter, revealing that their spy has persuaded {target} to leave our {owner.mission_kingdom.KingdomType} and joined them! Perhaps we should consider increasing the wages of our knights..."]
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------  Marshal: Army Surrender  ------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetArmySurrenderAction : PuppetPlot //DISABLED
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SurrenderTown.tga:Icon_Opportunity_SurrenderTown#2" //GUID:4d1e5a510e0085041aa86109028c8511
+	name = "Surrender"
+	tooltip = "{target} will surrender!"
+	prepare_status_text = "{action.target} is mustering the courage to order his armies to surrender"
+	
+	puppet_classes = "Marshal"
+	
+	severity = "Mid"
+	success_base_chance = 45
+	//reveal_base_chance = 30
+	
+	text inline_descr = "convince {target} to surrender during battle"
+	text mk_inline_descr = "convince one of our marshals to surrender during battle"
+	
+	src_messages
+	{
+		text success_undetected = "{target} obeyed our commands and ordered his troops to surrender! As a reward for his loyalty, he is now part of our court[ and our armies marched into {captured_realm} uncontested][ and {defended_realm} is no longer under siege]."
+		text success_revealed = "{target} commanded his troops to surrender! He is now welcomed in our court[ and our armies marched into {captured_realm} uncontested][ and {defended_realm} is no longer under siege]. Unfortunately, our {owner} was caught by {owner.mission_kingdom} while arranging this event."
+		text fail_undetected = "Unfortunately, {target} refused to surrender during battle and we could not turn the tides of the battle. {owner:s} plot remained undetected."
+		text fail_revealed = "Even though {target} was promised vast riches by {owner}, he refused to surrender to our armies and remains loyal to {owner.mission_kingdom}. Our spy was revealed for his attempted plot!"
+		text plot_revealed = "{owner} was caught by some {owner.mission_kingdom:ian} road patrols while he was riding towards {target:s} camp to negotiate his armies surrender! Alas, our attempts to secure an easy win against {owner.mission_kingdom} were in vain."
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "{src_kingdom:anian:cap} spy seems to have planted the seed of doubt in our {target}, as he surrendered while fighting against {src_kingdom:s} armies!"
+		text fail_revealed = "We found out {src_kingdom:anian} spy was attempting to make one of our marshals surrender during battle!"
+		text plot_revealed = "We managed to catch {src_kingdom:anian} spy just as he was influencing one of our marshals to surrender during battle!"
+	}
+	
+	mission_kingdom_event = ArmySurrenderEvent
+	cancelled_message_caption = "Army surrender halted"
+}
+
+def ArmySurrenderEvent : OkGotoMessage
+{
+	sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+	caption = "Army surrendered"
+	body = ["Our armies have fled the battlefield[ near {realm}]!",
+			"The morale of our armies[ near {realm}] was low and they surrendered!",
+			"{target} surrendered his forces[ near {realm}] in the battle against our enemies and joined their ranks!"]
+}
+
+// !!! No longer used
+def PuppetArmyFleeAction : PuppetAction
+{
+	name = "Flee"
+	tooltip = "Force {target} to surrender the current battle and flee"
+	show_in_status = HasMarshalPuppetStatus
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//------------------------------------------------  Cleric: Spread Heresy  ---------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetSpreadHeresyAction : PuppetPlot //should be harder if there is Papacy, ecumenical, autocephaly, mecca, medina
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SpreadHeresy.tga:Icon_Opportunity_SpreadHeresy#2" //GUID:2ca9b50bd27deaf4b8ae4299eae3d7d5
+	name = "Spread Heresy"
+	tooltip = "Have your puppet spread pagan beliefs across {owner.mission_kingdom:s} lands"
+	prepare_status_text = "{action.target} is secretly attempting to spread pagan beliefs across {action.owner.mission_kingdom:s} lands."
+	
+	puppet_classes = "Cleric"
+	
+	severity = "Low"
+	success_base_chance = 35
+	//reveal_base_chance = 30
+	
+	int max_realms = 3 //heresy in up to 3 realms
+	float max_realms_perc = 20 //but not more than X perc of the kingdom's realms. min 1
+	
+	success_fail
+	{
+		sf_heresy_susceptibility_perc = (owner.mission_kingdom.ks_heresy_susceptibility_perc)
+		{
+			text name = "Susceptibility"
+			show_always = false
+		}
+	}
+	
+	text inline_descr = "spread heresy in {owner.mission_kingdom:s} lands"
+	text mk_inline_descr = "spread heresy in our lands"
+	
+	src_messages
+	{
+		text new_opportunity = "{target} is a trusted religious figurehead in many lands across {owner.mission_kingdom}. Perhaps he can begin preaching paganism among his followers, with the help of {owner}."
+		text success_undetected = ["Paganism are spreading in {realms}, thanks to {target:s} continued efforts to corrupt the beliefs of his kingdom's people!",
+		"The people in {realms} accepted {target} as a true prophet. But a prophet of new gods, as we wanted.",
+		"Due to our devious plan and {target:s} help, the people in {realms} started losing their belief and adopted paganism."]
+		text success_revealed = "The people of {realms} listen to every word {target} is preaching and now their religious beliefs are shaken. Unfortunately, our puppet accidentally mentioned {owner:s} name during a ceremony, revealing our spy's part."
+		text fail_undetected = "{target} could not shake the faith of the {owner.mission_kingdom:ians} - they proved to be more religious than we expected!"
+		text fail_revealed = ["The strong religious foundations of {owner.mission_kingdom} couldn't be shaken by {target}. Our {owner} was unfortunately revealed.",
+		"{target} tried to spread heresy in {owner.mission_kingdom} but quickly failed, as the people there turned out to be devout followers of {target.kingdom.religion:ism}. Somehow, the {owner.mission_kingdom:ians} also discovered that {owner} was the main figure behind this plot."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "{src_kingdom:anian:cap} has been spreading heresy in {realms}! Our people there have fallen back to pagan ways."
+		text fail_revealed = "We caught {src_kingdom:anian} trying to spread heresy in our lands! Luckily, our people were strong and resisted the spy's poisonous words."
+	}
+	
+	float ssums_base = 0.5
+	cost
+	{
+		piety = (500)
+	}
+	mission_kingdom_event = SpreadHeresyEvent
+	
+	cancelled_message_caption = "Heresy spreading halted"
+	cancel_events
+	{
+		mission_kingdom all_provinces_are_of_religion
+		{
+			condition = (param.key == "Pagan")
+		}
+	}
+	cancelled_message_texts
+	{
+		text all_provinces_are_of_religion = "It seems {owner:s} efforts are no longer required, as all of {owner.mission_kingdom:s} provinces have already adopted pagan beliefs."
+	}
+}
+
+def SpreadHeresyEvent : SpyResultMessage
+{
+	caption = "Heresy spreads in our kingdom"
+	body = ["People have started praising false gods in {realms}! After interrogating some of the locals, we discovered a foreign spy was spreading these false beliefs.",
+			"Sire, a spy is in our midst, spreading false beliefs in our lands! His name remains unknown, but his deed is sadly done. Our people in {realms} have succumbed to paganism.",
+			"A spy from another kingdom has been spreading heresy in {realms}! Our people there have fallen back to pagan ways."]
+	// "The people in {realms} have lost their religion! There is even an unconfirmed report of a human sacrifice in one of our villages.",
+	// "Our {owner.mission_kingdom.cleric_title:s} report that they are losing the trust of the people and the people in {realms} follow old and ungodly traditions!",
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------------  Cleric: Preach  -----------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetPreachAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_Preach.tga:Icon_Opportunity_Preach#2" //GUID:167f668bcd88be947adaf37b6a112505
+	name = "Preach our religion"
+	tooltip = "Have {owner} preach our religion in one of {owner.mission_kingdom:s} provinces"
+	prepare_status_text = "{owner} is handing out sacred holy texts to {owner.mission_kingdom:s} people, hoping to convert some of them to our religion."
+	
+	
+	int max_realms = 3 //heresy in up to 3 realms
+	float max_realms_perc = 20 //but not more than X perc of the kingdom's realms. min 1
+	
+	puppet_classes = "Cleric"
+	
+	severity = "Low"
+	success_base_chance = 35
+	//reveal_base_chance = 30
+	
+	text inline_descr = "convert some of {owner.mission_kingdom:s} provinces to {own_kingdom.religion} religion"
+	text mk_inline_descr = "convert some of our provinces to {own_kingdom.religion} religion"
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} has sensed that {owner.mission_kingdom:s} people are in dire need of spiritual guidance. With the help of our puppet, {target}, we can attempt to spread {owner.kingdom.religion:ism} within some of their lands!"
+		text success_undetected = ["Sire, {owner} successfully spread our religion in {realms}! The people there are now fully converted and share our beliefs.",
+		"It is amazing how, after only a brief time, {owner} managed to open the eyes of the people in {realms} and now they follow our religion."]
+		text success_revealed = ["Thanks to the influence of {owner} over {owner.mission_kingdom:s} clergy, {realms} now follow {owner.kingdom.religion:ism}! Unfortunately, a price had to be paid and our spy was revealed as the main instigator behind this sudden change.",
+		"With the help of {target}, {owner} spread the good word of {owner.kingdom.religion:ism} throughout {owner.mission_kingdom} and managed convert the religion of {realms}! However, the local {owner.mission_kingdom.cleric_title:s} quickly got suspicious and found out our spy was behind this, branding him as a heretic."]
+		text fail_undetected = ["The religious beliefs of the {owner.mission_kingdom:ians} proved tough to crack, as {owner} faced difficulties and failed to convert any of their provinces to {owner.kingdom.religion:ism}.",
+		"{owner} tried to spread {owner.kingdom.religion:ism} throughout {owner.mission_kingdom:s} lands, with the help of {target}. However, our spy quickly found out that his puppet had barely any knowledge of our religion, yet alone willingness to spread it amongst the people of {owner.mission_kingdom}.",
+		"{target} tried his best to help our spy in spreading {owner.kingdom.religion:ism} within {owner.mission_kingdom:s} lands. Alas, our {owner.mission_kingdom:ian} puppet's understanding of {owner.kingdom.religion:ism} was almost as his horrid as his utterance."]
+		text fail_revealed = ["Alas, the strong religious beliefs in {realms} couldn't be shaken. Blinded by rage, our puppet framed {owner} as his associate!",
+		"{owner:s} attempts to convert {realms} were met with fierce disapproval and failed. Our spy was revealed by {owner.mission_kingdom} and was branded a heretic!"]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "{src_kingdom:anian:cap} spy was revealed spreading his kingdom's religion in our lands! We managed to catch the spy, but we were too late: Our people in {realms} have now been converted to {owner.mission_kingdom.religion:ism}."
+		text fail_revealed = ["Sire, we found out that {src_kingdom:anian} spy was trying to spread {src_kingdom.religion:ism} amongst our lands! Luckily, his false preachings couldn't poison the minds of our people.",
+		"We caught {src_kingdom:anian} spy attempting to spread {src_kingdom.religion} beliefs in our lands! He couldn't do much, as we discovered his false preaching in time."]
+	}
+	
+	float ssums_base = 0.5
+	cost
+	{
+		piety = (500)
+	}
+	
+	mission_kingdom_event = PreachersEvent
+	
+	cancelled_message_caption = "Religion preaching halted"
+	cancel_events
+	{
+		mission_kingdom all_provinces_are_of_religion
+		{
+			condition = (param.key == owner.kingdom.religion.key)
+		}
+	}
+	cancelled_message_texts
+	{
+		text all_provinces_are_of_religion = "It seems {owner:s} efforts are no longer required, as all of {owner.mission_kingdom:s} provinces have already adopted {owner.kingdom.religion:ism}."
+	}
+}
+
+def PreachersEvent : SpyResultMessage
+{
+	caption = "False preachers in our kingdom"
+	body = ["Sire, false preachers have been spreading {owner.kingdom.religion:ism} in our lands, with the help of a foreign spy! Their teachings have already taken root in {realms}.",
+	        "Our people in {realms} have lost their faith and now follow {owner.kingdom.religion:ism}! A foreign spy has been spreading these false beliefs behind our backs...",
+	        "A foreign spy has been spreading his kingdom's religion in our lands! Our people in {realms} have now been converted to {owner.mission_kingdom.religion:ism}. Unfortunately, we couldn't catch the impostor."]
+	
+	case Catholic = (religion.Catholic)
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Catholic_Negative.png:Icon_Message_Catholic_Negative#2" //GUID:2cef172317bd25047bf6d8e6520f014e
+	}
+	case Orthodox = (religion.Orthodox)
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Orthodox_Negative.png:Icon_Message_Orthodox_Negative#2" //GUID:f288b32e1a0f09c438463931e7afbb19
+	}
+	case Sunni = (religion.Sunni)
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Sunni_Negative.png:Icon_Message_Sunni_Negative#2" //GUID:a38c9bc672bd0944c900424a7ebab08e
+	}
+	case Shia = (religion.Shia)
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Shia_Negative.png:Icon_Message_Shia_Negative#2" //GUID:f4f55f396dbd2894ebee69906cae7abc
+	}
+	case Pagan = (religion.Pagan)
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_Pagans_Negative.png:Icon_Message_Pagans_Negative#2" //GUID:e0d9a9b7d543d2d40b0682877dc9ecc7
+	}
+	case default
+	{
+		icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Negative.png:Icon_Message_GenericEvent_Negative#2" //GUID:f955d92cf71058746985a61f90487bb9
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------  Merchant: Rob treasury  -------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetStealTreasuryAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_StealTreasury.tga:Icon_Opportunity_StealTreasury#2" //GUID:3ca813382862f8244b54a3c02e966df8
+	name = "Rob the treasury"
+	tooltip = "Have {target} steal gold from {owner.mission_kingdom:s} treasury"
+	prepare_status_text = "{action.target} is scouting for hidden paths leading in and out of {action.owner.mission_kingdom:s} treasury"
+	
+	int gold_stolen_perc = 75
+	bool min_gold_stolen = 1000
+	bool give_gold_to_spy_kingdom = true
+	
+	puppet_classes = "Merchant"
+	
+	severity = "Mid"
+	success_base_chance = 35
+	//reveal_base_chance = 40
+	
+	text inline_descr = "steal a large amount of gold from {owner.mission_kingdom:s} treasury"
+	text mk_inline_descr = "steal gold from our treasury"
+	
+	src_messages
+	{
+		text new_opportunity = ["Sire, {owner} has apparently found a safe way to steal gold from {target.kingdom}. If we thread carefully, we can be rich off the backs of the unsuspecting {target.kingdom:ians} in no time.",
+		"{target}, our loyal puppet in {owner.mission_kingdom}, has revealed a location in {owner.mission_kingdom.capital_realm} where village tithes are transfered to the royal treasury. If we act quickly, we can intercept the exchange and steal all the gold."]
+		text success_undetected = ["The robbery plan of {owner} succeeded with the help of {target}! Soon, the {owner.mission_kingdom:ians} will find that {gold_amount}{gold_icon} is missing from their treasury.",
+		"With the help of a few hired thugs, {target} and {owner} intercepted a large shipment of gold headed to {owner.mission_kingdom.capital_realm}. They made quick work of the convoy and managed to steal {gold_amount}{gold_icon}, which just arrived in our treasury."]
+		text success_revealed = ["It was risky, but {target} succeeded - {gold_amount}{gold_icon} is now travelling from {owner.mission_kingdom:s} treasury to our capital! Sadly, our {owner} was caught while he was helping to transport the haul.",
+		"{target} tried to gain access to {owner.mission_kingdom:s} spending records, so that he conceal a large sum of gold and redirect it to our treasury. Alas, he was caught in the act. To save his skin, the {target.class_title} had to reveal our spy."]
+		text fail_undetected = ["{target} failed to sneak into {owner.mission_kingdom:s} treasury and could not steal any gold.",
+		"{target} claimed that he knows of a secret underground tunnel, leading directly to {target.kingdom:s} treasury. But when {owner} followed his puppet's directions, he ended up in the sewage of a keep belonging to a local lord."]
+		text fail_revealed = ["{target} tried to gain access to the {owner.mission_kingdom:ian} treasury, but the guards were smart enough not to trust him. He couldn't hide his tracks and it was later found out that {owner} was also revealed as a culprit.",
+		"It turned out that {target} is not that trusted by his ruler, as he was denied access to the royal trasury of {owner.mission_kingdom}. Our puppet also turned out to be a rat and reported {owner}!"]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = ["{src_kingdom:anian:cap} spy stole {gold_amount}{gold_icon} from our treasury with the help of one of our merchants!",
+		"Sire, we've been robbed! According to our records, {gold_amount}{gold_icon} is missing from our treasury. Our guards managed to catch {src_kingdom:anian} spy, who is most likely the culprit behind this."]
+		text fail_revealed = ["A greedy worm from {src_kingdom} was trying to steal from our treasury! We should tighten our security, lest other pesky spies attempt to rob us of our riches.",
+		"It is hard to believe, but we have proof that {src_kingdom:anian} was foolish enough to try to steal from our treasury!"]
+	}
+	
+	mission_kingdom_event = StolenTreasuryEvent
+	float ssums_base = 0.1
+	float ssums_bias = 0
+	
+	cancelled_message_caption = "Treasury stealing halted"
+}
+
+def StolenTreasuryEvent : SpyResultMessage
+{
+	caption = "Our treasury was robbed"
+	body = ["A foreign spy stole {gold_amount}{gold_icon} from our treasury, with the help of {target}! Even worse - our merchant has fled from our kingdom and vacated his seat in our court.",
+			"Sire, please forgive us, but {gold_amount}{gold_icon} is missing from our treasury! It seems that the vile act was done by {target}, who fled from our kingdom with the help of a foreign spy.",
+			"One of our merchants, that greedy bastard {target}, has robbed our treasury and fled the kingdom with {gold_amount}{gold_icon}! He acted alongside a foreign spy, who still lurks in our kingdom."]
+	//"Unfortunatelly, there is about {gold_amount}{gold_icon} missing from our treasury, together with the royal treasurer. We should have never trusted that snake, {target}!"
+	//"Sire, thieves have stolen {gold_amount}{gold_icon} from our royal treasury, aided by our royal treasurer - {target}. We will do our best to find and hang those criminals."
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------  Merchant: Fund rebels  --------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetFundRebelsAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_FundRebels.tga:Icon_Opportunity_FundRebels#2" //GUID:64cbc805ce6be8c49825bb094cb4390d
+	name = "Fund the local rebels"
+	tooltip = "Have {target} reinforce the rebel forces in {owner.mission_kingdom} with additional troops"
+	prepare_status_text = "{action.target} is secretly sending night-time shipments of royal weapons and armors to the local rebel leaders"
+	int max_rebel_armies = 3
+	int num_level_increases = 3
+	
+	puppet_classes = "Merchant"
+	
+	severity = "Low"
+	success_base_chance = 30
+	//reveal_base_chance = 50
+	
+	text inline_descr = "support the rebel armies in {owner.mission_kingdom}"
+	text mk_inline_descr = "support the rebels roaming our territories"
+	
+	src_messages
+	{
+		text new_opportunity = "My Lord, rebels are plaguing {owner.mission_kingdom}! Perhaps we can make the lives of {owner.mission_kingdom:ians} even harder, by reinforcing the local rebellion leaders with better weapons and armors. {target}, our puppet, can surely aid us."
+		text success_undetected = ["Thanks to {target}, our funds reached the rebels in {owner.mission_kingdom}! The {owner.mission_kingdom.KingdomType} will certainly have some troubles now.",
+		"{target} successfully funded the rebel armies of {owner.mission_kingdom} by bribing the right guards and setting up periodic shipments of weapons and armor."]
+		text success_revealed = ["With the help of {target}, {owner} managed to send fresh supplies and weapons to the rebel armies within {owner.mission_kingdom}, making then an even bigger threat! Unfortunately, the shipments were traced back to our spy.",
+		"{owner} managed to find a handful of {owner.mission_kingdom:ian} villagers that were willing to take arms and join the rebels in {owner.mission_kingdom}. While the local rebellions have grown in size, this also drew attention to our spy, who was revealed while agitating the locals."]
+		text fail_undetected = ["Alas, {target} failed to fund the rebel forces in {owner.mission_kingdom}. Our {owner} remains undetected.",
+		"{owner} tried his best, but could not find any safe way of sending shipments to the rebels in {owner.mission_kingdom}. It seems the {owner.mission_kingdom:ians} have upped their security, with an increased number of guards patroling towns and settlements."]
+		text fail_revealed = ["As {target} in {owner.mission_kingdom} was trying to secure reinforcements for the local rebels, he got ambushed and barely escaped alive. Unfortunately, our puppet also left his orders from {owner}.",
+		"Unknown guards in {owner.mission_kingdom} apprehended {target}, who was supposed to send reinforcements to the rebels there! To save his own live, our puppet had to reveal {owner} as a conspirer."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "My Lord, the filthly rebels that roam our lands have grown in size! All tracks lead to {src_kingdom:anian} spy, who was seen aiding known rebellion leaders."
+		text fail_revealed = ["We caught {src_kingdom:anian} spy, trying to recruit fresh troops for rebels in our lands! Our guards made sure the intruder's plot doesn't come to fruition.",
+		"Sire, we caught {src_kingdom:anian} spy negotiating with a rebel army in one of our provinces!"]
+	}
+	
+	add_gold_cost = (500 * owner.mission_kingdom.num_rebellions)
+	
+	mission_kingdom_event = RebelsStrethenedEvent
+	
+	cancelled_message_caption = "Rebel funding halted"
+	cancel_events
+	{
+		mission_kingdom rebellion_ended
+		{
+			condition = (owner.mission_kingdom.num_rebellions == 0)
+		}
+		mission_kingdom rebellion_zone_left
+		{
+			condition = (owner.mission_kingdom.num_rebellions == 0)
+		}
+	}
+	cancelled_message_texts
+	{
+		text rebellion_ended = "{owner} was forced to call back all his shipments, as all rebellions in {owner.mission_kingdom} have come to an end."
+		text rebellion_zone_left = "{owner} was forced to call back all his shipments, as the rebels in {owner.mission_kingdom} have relocated to more distant lands."
+	}
+}
+
+def RebelsStrethenedEvent : SpyResultMessage
+{
+	//Illustration below is PLACEHODLER - a better one can be produced if need be;
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_RebelsSpawned.tga:UI_Illustration_RebelsSpawned#2" //GUID:875ff297643bc6547a44561443ea41cc
+	
+	caption = "Rebels strengthened"
+	body = ["My Lord, the filthly rebels that roam our lands have grown in size! Most tracks lead to an unknown foreign spy, who was seen aiding known rebellion leaders.",
+	"Someone has been aiding to rebels in our lands, strengthening their forces behind our backs! We suspect it was a foreign spy.",
+	"Sire, a significant number of weapons and armors has gone missing from our royal arsenal. It seems a spy has been diverting them to the local rebels!"]
+	
+	// ["The rebels in our lands have amassed worryingly large resources and troops. They are significantly stronger now.",
+	// "We have to take care of the rebels in our lands. They are growing stronger day by day.",
+	// "The rebels in our kingdom have managed to gather additional troops and they are a bigger threat than we expected."]
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//---------------------------------------------------  Spy: Assassinate  -----------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetPlotAssassinationAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_PlotAssassination.tga:Icon_Opportunity_PlotAssassination#2" //GUID:f260d749af6c963499ab6471ce06dfd6
+	args = ["Character"]
+	name = "Plot assassination"
+	tooltip = "Organize the assassination of {arg} of {owner.mission_kingdom}"
+	prepare_status_text = "{owner} is plotting the assassination of {action.arg}"
+	
+	puppet_classes = "Spy"
+	
+	severity = "High"
+	success_base_chance = 25 //owner.kingdom.ks_own_murder_plots_CTS_perc moved to cs
+	//reveal_base_chance = 50
+	
+	
+	success_fail
+	{
+		sf_skills_and_traditions = (owner.cs_murder_plots_CTS_perc + owner.mission_kingdom.ks_enemy_murder_plots_CTS_perc)
+		{
+			text name = "Skills and traditions"
+		}
+	}
+	
+	text inline_descr = "organize the assassination of a member of {owner.mission_kingdom:s} royal family"
+	text mk_inline_descr = "organize the assassination of a member of our royal family"
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} believes he has found a way to stage the death of {arg}, without anyone noticing the act. Should our spy proceed with this daring plot?"
+		text success_undetected = ["Sire, our mission to eliminate a member of {owner.mission_kingdom:s} royal [{arg.is_royal_child:if}family|court] was successful! In the end, {target} managed to[{arg.is_young:if_not}{arg.is_adult:if_not}{arg.is_old:if_not}{arg.is_venerable:if_not} sneak into {arg:s} room and kill the poor child in [{arg.is_prince:if}his sleep|her sleep]|{arg.is_royal_child:if}{arg.is_infant:if_not}{arg.is_juvenile:if_not}{arg.army:if_not}{arg.mission_kingdom:if_not}poison {arg:s} drink during a royal banquet|{arg.army:if} slip into {arg:s} tent and poison his water| slip into {arg:s} dwelling and poison his wine] without being detected.",
+		"As we commanded, {target} successfully eliminated a member of {owner.mission_kingdom:s} royal [{arg.is_royal_child:if}family|court]! From what we heard, {arg} met their demise in what seemed like an accidental fall.",
+		"{target} proved to be a deadly assassin and carried out {owner:s} orders meticulously, taking the life of {arg} without anyone noticing."]
+		text success_revealed = ["It was a rather brutish display, but {target} successfully arranged the death of {arg}. Alas, our {owner} was revealed as a key conspirator.",
+		"With the help of {target}, {owner} managed to kill {arg} in their sleep! Our spy wasn't exactly quiet, though, and was heard by some nearby guards."]
+		text fail_undetected = ["Our puppet, {target}, failed to assassinate one of {owner.mission_kingdom:s} royal family members. Still, our spy remains undetected.",
+		"The guards in {owner.mission_kingdom} proved to be very careful and all of {target:s} plans for assassination couldn't be accomplished."]
+		text fail_revealed = ["After long planning and deliberation, {target:s} attempts to assassinate a member of {owner.mission_kingdom:s} royal family failed spectacularly.",
+		"{owner} planned the assassination of {arg} for many weeks, but when the time came he realized he isn't capable of murdering anybody. Drowned in sorrow, our spy even stopped paying {target} his bribes, which forced the {target.kingdom:ian} to reveal our spy."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "{arg} was found murdered! We couldn't find any traces that could point us to the killer. We did, however, find orders issued by {src_kingdom:s} {src_kingdom.king.title}."
+		text fail_revealed = "{src_kingdom:anian:cap} spy was trying to assassinate a member of our royal family! Luckily, no lives were lost."
+		text plot_revealed = "We found evidence that {src_kingdom:anian} spy was planning the assassination of a member within our royal family!"
+	}
+	
+	mission_kingdom_event = RoyalAssassinationEvent
+	
+	mission_kingdom_voice_lines
+	{
+		case princess = (arg.is_princess)
+		{
+			string success_undetected = "narrator_voice:princess_died"
+			string success_revealed = "narrator_voice:princess_died"
+		}
+	}
+	float ssums_base = (MapCA(owner.mission_kingdom, 1, 2))
+	float add_gold_cost = 500
+	
+	cancel_events
+	{
+		arg kingdom_changed
+		arg imprisoned
+		arg dying
+	}
+	
+	cancelled_message_caption = "Assassination attempt halted"
+	cancelled_message_texts
+	{
+		text kingdom_changed = "{arg} managed to narrowly escape {owner:s} clutches, as he no longer serves {owner.mission_kingdom:s} court."
+		text imprisoned = "{arg} is sadly out of our spy's reach, currently rotting in the dungeon of {arg.prison_kingdom}."
+		text dying = "{arg} is dead! A bit of a pity, as {target} was so excited to execute his assassination..."
+	}
+}
+
+def RoyalAssassinationEvent : SpyResultMessage
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+	//caption = "Our knight was assassinated"
+	caption = "Our {obj.title} was assassinated"
+	body = ["{arg} was found murdered! We couldn't find any traces that could point us to the killer. We did, however, find orders issued by someone outside our kingdom, most likely a foreign spy.",
+	"Sire, {arg} has been found lying dead! An unknown hooded figure was last seen with him, no doubt a foreign spy. The snake responsible for this must be hanged!",
+	"{arg} was found murdered! It seems like this was the work of a foreign spy, since we couldn't find any traces that could point us to the killer."]
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_DeadRoyalFamilyMember.tga:UI_Illustration_DeadRoyalFamilyMember#2" //GUID:30a3bf4c3206c05408a380788f31d050
+	voice_line = (outcome_voice_line)
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------  King: Hand over the crown  ------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetHandOverTheCrownAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_HandOverTheCrown.tga:Icon_Opportunity_HandOverTheCrown#2" //GUID:64206cbb6dfbdfa46b1c8a2fe99c4c57
+	name = "Hand over the crown"
+	tooltip = "Order {target} to arrange the handover of {target.kingdom:s} territories to us."
+	prepare_status_text = "{action.target} is looking for ways to arrange the handover of {action.owner.mission_kingdom:s} lands to us."
+	
+	int min_checks_for_leftover_realms = 4
+	float leftover_realm_chance = 20 //context: {obj} is realm
+	int min_player_leftover_realms = 3 //players are left with up to X realms
+	float gold_percent = 90 //stolen gold
+	
+	severity = "High"
+	success_base_chance = 30
+	
+	success_fail
+	{
+		perc sf_is_great_power = (-50 * owner.mission_kingdom.is_great_power)
+		{
+			text name = "They Are a Great Power"
+		}
+	}
+	
+	text inline_descr = "force {target} into handing their territories to us"
+	text mk_inline_descr = "persuade our {owner.mission_kingdom.king.title} to surrender some of his lands"
+	text no_valid_realms_outcome = "Although {target} of {target.kingdom} had fell for our spy's alluring whispers, he simply could not hand over his nation's territories, as all of them are occupied by rebels."
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		switch_value = (has_leftover_realms)
+		case 1
+		{
+			text success_undetected = ["[{no_valid_realms:if}{no_valid_realms_outcome}|{owner} succeeded in arranging the surrender of {realms} to us by convincing {target} to order the transfer himself! To save his life before getting lynched for his treason, the former {owner.mission_kingdom.king.title} was forced to abandon {owner.mission_kingdom}, which is now at war against us.]",
+		"[{no_valid_realms:if}{no_valid_realms_outcome}|A blessed day, Sire! We have gained control over {realms}, following {target:s} offical decree which ordered the handover. However, this drew anger upon our puppet's crown, forcing him to abandon his {owner.mission_kingdom.KingdomType}. Thus, we've been declared war by {owner.mission_kingdom}, which is now ruled by a new {owner.mission_kingdom.king.title}.]"]
+			text success_revealed = "[{no_valid_realms:if}{no_valid_realms_outcome}|My Lord, {target} has granted us control over {realms}! However, this caused major uproar amongst {owner.mission_kingdom:s} nobility, which forced our puppet to flee the {owner.mission_kingdom.KingdomType}.] Our spy's traces couldn't be kept secret, as he was linked to the events which transpired."
+		}
+		case default
+		{
+			text success_undetected = "[{no_valid_realms:if}{no_valid_realms_outcome}|Months of careful planning and preparation has paid off, as we now control all of {target.kingdom:s} territories! {owner} has proudly returned to our court, anticipating his next prey.]"
+			text success_revealed = "[{no_valid_realms:if}{no_valid_realms_outcome}|Sire, all of {target.kingdom:s} lands are in our possession, thanks to {owner} and his influence over {target}! Unfortunately for our spy, his momentous achievement wasn't left unnoticed.]"
+		}
+		text new_opportunity = "{owner} has reported that he can convince {target} to handover {target.kingdom:s} territories to us. Maybe the gold we pay to maintain the {target.title} as our puppet can finally be of use..."
+		text fail_undetected = ["{target} reported to our spy that now is not the best time to handover any of {owner.mission_kingdom:s} territories. After some talks he is concerned that the nobility of {owner.mission_kingdom} will rebel.",
+		"{target} refused to surrender any of his lands to our {owner.kingdom.KingdomType}. According to the {owner.mission_kingdom:ian} {owner.mission_kingdom.king.title}, {owner:s} ideas are 'ludicrous' and would get both of them hanged.",
+		"{owner} arranged a secret meeting with {target} and tried to convince the {owner.mission_kingdom:ian} to surrender some of his lands to our {owner.kingdom.KingdomType}. However, our spy was promptly asked to leave and never dare to speak of his plans to anyone else."]
+		text fail_revealed = ["{target} of {owner.mission_kingdom} refused to handover any of his territories to us! The mongrel turned out to be a traitor and ordered the capture of our spy.",
+		"Moments before signing the fateful papers, {target} of {owner.mission_kingdom} decided to refuse surrendering any of his lands to us. In a sudden flash of madness, he revealed our spy as a traitor!",
+		"Regrettably, {owner} refused to surrender any of his lands to us. The very suggestion angered the {target.title} greatly, so much that he immediately ordered the capture of our spy!"]
+		
+		list = "realms"
+		{
+			text final_separator = " and "
+		}
+	}
+	
+	mission_kingdom_messages
+	{
+		switch_value = (target.kingdom.is_player)
+		text success_revealed = "[{no_valid_realms:if}Our {owner.mission_kingdom.king.title} has been subject to the foul whispers of {src_kingdom:anian} spy! Luckily for us, the rat was too slow and could not harm us...|Our {owner.mission_kingdom.king.title} proved to be a meek ruler: {src_kingdom:anian} spy poisoned his mind and he agreed to surrender {realms} to {src_kingdom}!]"
+		text fail_revealed = ["{src_kingdom:anian:cap} spy was found plaguing {owner.mission_kingdom.king:s} mind, telling him lies so he would give away our provinces! Such a disastrous betrayal could have torn our kingdom apart.",
+		"Sire, we discovered {src_kingdom:anian} spy was secretly conversing with our {owner.mission_kingdom.king.title} with hopes of giving away our lands!"]
+	}
+	
+	mission_kingdom_event = CrownHandedOverEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 1.5, 2.5))
+	float ssums_bias = 0.75
+	
+	cancelled_message_caption = "Crown handover halted"
+}
+
+def CrownHandedOverEvent : SpyResultMessage
+{
+	caption = "[{no_valid_realms:if}Foreign spy tried to take our lands|We lost some provinces!]"
+	body = "[{no_valid_realms:if}Sire, we've discovered a foreign spy attempting to arrange the surrender of our lands!|Our {owner.mission_kingdom.king.title} has handed {realms} to {src_kingdom}! The cowardly traitor was under the influence of a foreign spy and has deserted our lands, putting us at war with {src_kingdom}. We must fight and take our lands back at once!]"
+}
+//----------------------------------------------------------------------------------------------------------------------------//
+//---------------------------------------------------  King: abandon caliphate  ------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+
+def PuppetAbandonCaliphateAction : PuppetPlot //DISABLED
+{
+	name = "Abolish caliphate"
+	tooltip = "Force {target} to abandon his title of caliph."
+	prepare_status_text = "{owner} is looking for ways to strip {action.target} of his caliph title."
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_AbandonCaliphate.tga:Icon_Opportunity_AbandonCaliphate#2" //GUID:546c7ff6d02d51a4e948e6046c69f92a
+	
+	severity = "High"
+	success_base_chance = 30
+	
+	text inline_descr = "force {target} into abandoning their caliph title"
+	text mk_inline_descr = "persuade our {owner.mission_kingdom.king.title} to abandon their caliphate title"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text success_undetected = "Sire, {owner} failed to convince  {owner.mission_kingdom.king} to abolish his caliph title. We are lucky he didn't lose his head in the process." //should never happen
+		text success_revealed = "Sire success_revealed PuppetAbandonCaliphateAction"
+		text fail_undetected = "Sire success_revealed PuppetAbandonCaliphateAction"
+		text fail_revealed = "Sire, fail_revealed PuppetAbandonCaliphateAction"
+		text plot_revealed = "Sire,plot_revealed PuppetAbandonCaliphateAction"
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "success_revealed PuppetAbandonCaliphateAction"
+		text fail_revealed = "fail_revealed PuppetAbandonCaliphateAction"
+		text plot_revealed = "plot_revealed PuppetAbandonCaliphateAction"
+	}
+	
+	mission_kingdom_event = AbandonCaliphateEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 1, 2))
+	float ssums_bias = 0.75
+}
+
+def AbandonCaliphateEvent : SpyResultMessage
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Caliphate_Negative.png:Icon_Message_Caliphate_Negative#2" //GUID:2681446bd51c8104bb7e88c62996909a
+	caption = "Caliph title abandoned"
+	body = "Our king has abandoned the caliph title! We are no longer a caliphate and the Muslim world will no longer consider us as their leader."
+}
+
+cancelled_message_caption = "Caliphate abolishment halted"
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//---------------------------------------------  Patriarch: Abolish Autocephaly  ---------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+
+def PuppetPlotAbolishAutocephaly : PuppetPlot
+{
+	name = "Abolish autocephaly"
+	tooltip = "Force {target} to subordinate {target.kingdom} to the Ecumenical Patriarch."
+	prepare_status_text = "{owner} is arranging the abolishment of {action.target:s} independent church."
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_AbolishAutocephaly.tga:Icon_CharacterAction_AbolishAutocephaly#2" //GUID:d75d0c1ced5cf5540b5e6efdf25b813c
+	
+	severity = "High"
+	success_base_chance = 20
+	
+	text inline_descr = "force {target} to subordinate {target.kingdom} to the ecumenical patriarch"
+	text mk_inline_descr = "force {target} to subordinate our church to the ecumenical patriarch"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text new_opportunity = "With the help of {target}, {owner} can attempt to force the subordination of {target.kingdom} to the ecumenical patriarch. This will strip the {target.kingdom:ian} church of its autocephalous state and hinder its clergy greatly."
+		text success_undetected = ["By pulling the right strings and promising hefty sums of gold, {owner} managed to convince {target} to announce the subordination of {target.kingdom}. Thus, his church is no longer an autocaphaly!",
+		"{target:s} corrupt loyalty to our spy proved far greater than we ever expected. Somehow, our puppet managed to convince his {target.kingdom.king.title} to officially announce the subordination of his church to the ecumenical patriarch!"]
+		text success_revealed = "The {target.kingdom:ian} church has subordinated to the ecumenical patriarch, thanks to {owner:s} plot! Alas, {target} proved to be a stubborn fool and revealed our spy as his conspirator."
+		text fail_undetected = "{owner} tried his best to persuade {target} into arranging the subordination of {target.kingdom:s} church. Alas, our puppet got too scared and denied to take any role in such a daring endeavour."
+		text fail_revealed = ["Using {target:s} already established connections within {target.kingdom:s} clergy, {owner} spent months convincing him, along with the local religious figureheads, that {target.kingdom:s} church should be subordinated. But by the time they agreed, our spy's role was far too obvious, leading to his reveal and the failure of his plot.",
+		"Alas, {owner} could not force the subordination of the {target.kingdom:ian} church. It seems his frequent visitations of {target} drew too much attention, which led to our spy's untimely reveal."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "Sire, {target} has publically announced that our church has subordinated to the Ecumenical Patriarch. What's done is done, but we managed to pinpoint the culprit behind this unexpected event as {owner.kingdom:ian} spy."
+		text fail_revealed = "It seems {owner} has been scheming right under our noses, trying to force {target} to subordinate our church to the Ecumenical Patriarch! Thankfully, we managed to reveal the {owner.kingdom:ian} rat before the ungodly deed could be done."
+	}
+	
+	mission_kingdom_event = AbolishAutocephalyEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 0.75, 1.5))
+	float ssums_bias = 0.75
+	
+	
+	cancel_events
+	{
+		mission_kingdom subordinated
+		mission_kingdom religion_changed
+	}
+	
+	cancelled_message_caption = "Autocephaly abolishment halted"
+	cancelled_message_texts
+	{
+		text subordinated = "{owner} had to let go of his attempts to forcefully subordinate {owner.mission_kingdom}, as it seems the event has already happened without our spy's help."
+		text religion_changed = "In a way, {owner:s} mission was a success. Albeit with a different ending, involving {owner.mission_kingdom} changing its religion to {owner.mission_kingdom.religion:ism}."
+	}
+	cost
+	{
+		piety = 1000
+	}
+}
+
+def AbolishAutocephalyEvent : SpyResultMessage
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_EcumenicalPatriarch_Negative.png:Icon_Message_EcumenicalPatriarch_Negative#2" //GUID:8deac7585daa3014b89abbddd07f2849
+	caption = "Subordinated to the ecumenical patriarch"
+	body = ["Sire, {target} has publically announced that our church has subordinated to the Ecumenical Patriarch. What's done is done, but we think that the culprit behind this unexpected event was a foreign spy.",
+	"We have lost our autocephalous state! {target} held a divine liturgy today, publicly announcing our subordination. A spy has surely clouded our patriarch's mind..."]
+	voice_line = "narrator_voice:our_kingdom_subordinated"
+}
+//----------------------------------------------------------------------------------------------------------------------------//
+//---------------------------------------------------  King: Vassalize  ------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetVassalizeAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_Vassalize.tga:Icon_Opportunity_Vassalize#2" //GUID:17675679b824d22478374ca558383728
+	name = "Vassalize"
+	tooltip = "Have {target} arrange the vassalization of {owner.mission_kingdom}. Upon success, {target} will no longer remain {owner:s} puppet."
+	prepare_status_text = "{action.target} is arranging the vassalization of {action.owner.mission_kingdom}"
+	
+	severity = "High"
+	success_base_chance = 35
+	//reveal_base_chance = 50
+	
+	success_fail
+	{
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		perc sf_caliph = (-30 * target.kingdom.is_caliphate)
+		{
+			text name = "They are a caliphate"
+		}
+	}
+	
+	text inline_descr = "arrange the vassalization of {owner.mission_kingdom}"
+	text mk_inline_descr = "arrange the vassalization of our lands"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text new_opportunity = "{owner} can convince {target} that {target.kingdom} should become our loyal vassal as a final favor, given how meek the {target.title} has become from all the gold we've been sending his way."
+		text success_undetected = ["{owner} convinced {target} to sign a royal decree, announcing that {owner.mission_kingdom} is now our loyal vassal! The nobles and aristocrats there were surely caught by surprise.",
+		"{owner} threatened {target} that he would send an assassin [to murder {target.spouse}|after him], unless he declares that {target.kingdom} is a vassal of {owner.kingdom}. Panicked and fearing for [{target.spouse:if}his wife's|his own] life, the {target.title} was forced to obey."]
+		text success_revealed = ["{owner.mission_kingdom} is now our vassal, thanks to {owner:s} deceitful plotting! Unfortunately, our spy's cover was compromised, as the fool spilled some sensitive information while celebrating his victory in the local tavern.",
+		"{owner} tricked {target} into signing a royal decree, which announced the vassalization of {target.kingdom} by {owner.kingdom}! Our spy presented the document as a trivial inquiry to build a statue in the name of the {target.title}. Realizing his mistake later, {target} went after our spy."]
+		text fail_undetected = ["{owner:s} mission to fabricate the vassalization of {owner.mission_kingdom} was unsuccessful, despite our spy's attempts to sway the mind of {target}.",
+		"{owner} tried to arrange the vassalization of {owner.mission_kingdom} by fabricating a fake royal decree. However, he quickly realized his lack of knowledge when it comes to writing legal documents. Discouraged and filled with shame, our spy headed to the local tavern."]
+		text fail_revealed = ["{target} failed to arrange the vassalization of {owner.mission_kingdom} behind the backs of their aristocrats.",
+		"The {owner.mission_kingdom:ian} nobility found out our spy was attempting to play them into submitting as our vassals!"]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = ["Our {owner.mission_kingdom.KingdomType} has surrendered to {src_kingdom} and we are now their vassals! It seems this was the work of {src_kingdom:anian} spy...",
+		"My Lord, we've become vassals of {owner.kingdom}! The royal decree which announced this unfortunate event was signed by our {target.king.title}, who admitted he was tricked by {owner.mission_kingdom:anian} spy."]
+		text fail_revealed = ["We found out that {src_kingdom:anian} spy was attempting to initiate the surrender of our lands! If we weren't so diligent, we would now be kneeling before another kingdom as vassals.",
+		"Undeniable evidence shows that {src_kingdom:anian} spy was devising a grand plan to sell our freedom and make us their vassal!"]
+	}
+	
+	mission_kingdom_event = VassalizedEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 1.5, 2.25))
+	float ssums_bias = 0.75
+	
+	bool is_our_vassal = (owner.mission_kingdom.vassal_of == owner.kingdom)
+	
+	
+	validate_prompts
+	{
+		text _enemies = "{clr:red}Cannot vassalize while at war.{/clr}"
+	}
+	
+	cancel_events
+	{
+		mission_kingdom stance_changed = (owner.mission_kingdom.vassal_of != null || AreEnemies(owner,owner.mission_kingdom))
+	}
+	cancelled_message_caption = "Forceful vassalization halted"
+	cancelled_message_texts
+	{
+		text stance_changed = "[{owner.mission_kingdom.is_vassal:if} {owner:s} efforts are no longer required, now that {owner.mission_kingdom} has become [{is_our_vassal:if}our vassal|a vassal of {owner.mission_kingdom.vassal_of}].|Entering war against {owner.mission_kingdom} has made {owner:s} task impossible. Perhaps the {owner.mission_kingdom:ians} will offer to become our vassals themselves, once they see our armies at their door.]"
+	}
+}
+
+def VassalizedEvent : SpyResultMessage
+{
+	caption = "We were vassalized"
+	body = ["Without any warning, {owner.mission_kingdom.king} signed a royal decree, declaring that our {owner.mission_kingdom.KingdomType} is now a vassal of {own_kingdom}! Our {owner.mission_kingdom.king.title} has either gone completely mad, or he was influenced by a foreign spy.",
+	"Our {owner.mission_kingdom.KingdomType} has surrendered to {own_kingdom} and we are now their vassals! Surely, this was orchestrated by an enemy spy."]
+}
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------------  Diplomat: Vassalize Small Kingdom  ----------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetVassalizeSmallKingdomAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_VassalizeSmallKingdom.tga:Icon_CharacterAction_VassalizeSmallKingdom#2" //GUID:b653fd37f01d27f40a0eb994e9ed4811
+	name = "Vassalize small kingdom"
+	tooltip = "Have {target} arrange the vassalization of {owner.mission_kingdom}"
+	prepare_status_text = "{action.target} is arranging the vassalization of {action.owner.mission_kingdom}"
+	
+	severity = "High"
+	success_base_chance = 20
+	//reveal_base_chance = 50
+	
+	float we_are_times_larger = 4
+	float max_target_kingdom_size = 2
+	float max_distance_to_them = 3
+	
+	puppet_classes = "Diplomat"
+	
+	success_fail
+	{
+		sf_relationship = (map(GetRelationship(own_kingdom, own_character.mission_kingdom),-1000,1000,-20,20))
+		{
+			text name = "Our relations"
+		}
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		perc sf_caliph = (-30 * target.kingdom.is_caliphate)
+		{
+			text name = "They are a caliphate"
+		}
+	}
+	
+	text inline_descr = "arrange the vassalization of {owner.mission_kingdom}"
+	text mk_inline_descr = "arrange the vassalization of our lands"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text new_opportunity = "{owner} can attempt to convince {target.kingdom.king} that {target.kingdom} should become our loyal vassal."
+		text success_undetected = ["{owner} convinced {owner.mission_kingdom.king} to sign a royal decree, announcing that {owner.mission_kingdom} is now our loyal vassal! The nobles and aristocrats there were surely caught by surprise.",
+		"{owner} managed to fabricate an official decree signed by {owner.mission_kingdom.king} himself, declaring that {owner.mission_kingdom} is a vassal to {owner.kingdom}! Nobody questioned the legality of the situation, even the {owner.mission_kingdom.king.title} himself."]
+		text success_revealed = ["{owner} successfully fabricated the vassalization of {owner.mission_kingdom}! Unfortunately, our spy's cover was compromised, as he spilled some sensitive information while celebrating his accomplishment in the local tavern.",
+		"{owner} proved that his {target.kingdom.king.title} trusts him greatly, as he convinced {owner.mission_kingdom.king} that {target.kingdom} should become a vassal of {owner.kingdom}. Sadly, our spy was betrayed by the {target.kingdom.king.title} moments later."]
+		text fail_undetected = ["{owner:s} mission to fabricate the vassalization of {owner.mission_kingdom} was unsuccessful, despite our spy's attempts to sway the mind of {target.kingdom.king}.",
+		"{owner} tried to use his expertise to arrange the vassalization of {target.kingdom}. Yet, our spy quickly realized that he has little to no influence over the diplomats of {target.kingdom}, let alone over {target.kingdom.king}."]
+		text fail_revealed = ["{owner} failed to arrange the vassalization of {owner.mission_kingdom}, even though he tried to gain the support of the local nobles and aristocrats. This drew some unwanted attention, which ultimately revealed the identity of {owner}.",
+		"The {owner.mission_kingdom:ian} nobility found out our spy was attempting to play them into submitting as our vassal! We should never have trusted {target}."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = ["Our {owner.mission_kingdom} has surrendered to {src_kingdom} and we are now their vassals! Surely, this was the work of {src_kingdom:anian} spy.",
+		"My Lord, we've become vassals of {owner.kingdom}! One of our diplomats admitted that {owner.mission_kingdom:anian} spy forced him to fabricate a letter and convince our {target.king.title} to sign it."]
+		text fail_revealed = ["We found out that {src_kingdom:anian} spy was attempting to initiate the surrender of our lands! If we weren't so diligent, we would now be kneeling before another kingdom as vassals.",
+		"Undeniable evidence shows that {src_kingdom:anian} spy was devising a grand plan to sell our freedom! If we weren't careful, we'd now be their vassals."]
+	}
+	
+	mission_kingdom_event = VassalizedSmallKingdomEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 1.2, 2))
+	float ssums_bias = 0.7
+	
+	bool is_our_vassal = (owner.mission_kingdom.vassal_of == owner.kingdom)
+	
+	
+	validate_prompts
+	{
+		text _enemies = "{clr:red}Cannot vassalize while at war.{/clr}"
+	}
+	
+	cancel_events
+	{
+		mission_kingdom stance_changed = (owner.mission_kingdom.vassal_of != null || AreEnemies(owner,owner.mission_kingdom))
+	}
+	cancelled_message_caption = "Forceful vassalization halted"
+	cancelled_message_texts
+	{
+		text stance_changed = "[{owner.mission_kingdom.is_vassal:if} {owner:s} efforts are no longer required, now that {owner.mission_kingdom} has become [{is_our_vassal:if}our vassal|a vassal of {owner.mission_kingdom.vassal_of}].|Entering war against {owner.mission_kingdom} has made {owner:s} task impossible. Perhaps the {owner.mission_kingdom:ians} will offer to become our vassals themselves, once they see our armies at their door.]"
+	}
+}
+
+def VassalizedSmallKingdomEvent : SpyResultMessage
+{
+	caption = "We were vassalized"
+	body = ["Without any warning, {owner.mission_kingdom.king} signed a royal decree, declaring that our {owner.mission_kingdom.KingdomType} is now a vassal of {own_kingdom}! Our {owner.mission_kingdom.king.title} has either gone completely mad, or he was influenced by a foreign spy.",
+	"Our {owner.mission_kingdom} has surrendered to {own_kingdom} and we are now their vassals! Surely, this was orchestrated by an enemy spy."]
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------  Governor: Declare independence  --------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetDeclareIndependenceAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_DeclareIndependence.tga:Icon_Opportunity_DeclareIndependence#2" //GUID:5214fca1a6be8ef47836bd91b1783aa6
+	name = "Back governor independence"
+	tooltip = "Convince {target} to form a new kingdom in [{target.governed_castle}|his governed domains]"
+	prepare_status_text = "{action.target} is planning the separation of [{action.target.governed_castle}|his governed province]"
+	
+	severity = "High"
+	success_base_chance = 30
+	//reveal_base_chance = 30
+	
+	text inline_descr = "convince one of {owner.mission_kingdom:s} governors to form an independent kingdom"
+	text mk_inline_descr = "corrupt {target} into forming an independent kingdom"
+	
+	success_fail
+	{
+		sf_rebel_population = (2 * target.governed_castle.realm.rebel_population)
+		{
+			text name = "Rebellious population in {target.governed_castle.realm} (x2)"
+		}
+		perc sf_loyalty = (max(0, (target.governed_castle.realm.majority_kingdom == own_kingdom) * (target.governed_castle.realm.majority_strength - 60)/2))
+		{
+			text name = "{target.governed_castle.realm:s} loyalty to our kingdom"
+		}
+	}
+	
+	validate_prompts
+	{
+		text _no_free_court_slot = "{clr:red}You need to have a free court slot to execute this plot.{/clr}"
+	}
+	
+	text kingdom_became_our_vassal = "{p}{p}{independence_kingdom} is now our sworn vassal."
+	text kingdom_became_their_vassal = "{p}{p}{independence_kingdom} is now a sworn vassal of {owner.kingdom}."
+	
+	src_messages
+	{
+		text new_opportunity = "{target} seems rather discontent with {target.kingdom.king:s} rule. Perhaps {owner} can convince his puppet to form a new kingdom under our sovereignty in his governed realm, {target.governed_castle.realm}."
+		text success_undetected = "Today is a fateful day for {target}, who managed to separate {independance_realm} from the clutches of his former kingdom![{independance_realm_turned_vassal:if}{kingdom_became_our_vassal}]"
+		text success_revealed = "Our loyal servant, {target}, renounced the control of his former king over {independance_realm}! While his plans were successful, our spy was caught as a conspirator.[{independance_realm_turned_vassal:if}{kingdom_became_our_vassal}]"
+		text fail_undetected = "{target}, the governor of {independance_realm}, failed to declare independence! We suspect that he was afraid to act decisively."
+		text fail_revealed = ["The noblemen in {independance_realm} turned out to be organized and patriotic, thus {target:s} efforts to separate that province failed.",
+		"{target:s} mission to separate {independance_realm} from {owner.mission_kingdom} could not come to fruition, as there were some complications in the process... Unfortunately, our spy was detected."]
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "Sire, we were betrayed by {target}, as he declared independence in {independance_realm}! {src_kingdom:anian:cap} spy was revealed as the instigator of these devious deeds.[{independance_realm_turned_vassal:if}{kingdom_became_their_vassal}]"
+		text fail_revealed = ["We almost lost sovereignty over {independance_realm}: {src_kingdom:anian} spy was pushing a large-scale plan for its independence!",
+		"A few of our noblemen in {independance_realm} confirmed that {src_kingdom:anian} spy was trying to convince them to support the separation of that province!"]
+	}
+	
+	mission_kingdom_event = CourtIndependanceEvent
+	float ssums_base = (MapCA(owner.mission_kingdom, 0.7, 1.7))
+	float add_gold_cost = 1000
+	
+	outcomes
+	{
+		success
+		{
+			also rel_change = "rel_puppet_declare_independence"
+			{
+				tgt_kingdom = (independence_kingdom)
+			}
+		}
+	}
+	
+	cancel_events
+	{
+		target stoped_governing
+	}
+	cancelled_message_caption = "Governor independence plot halted"
+	cancelled_message_texts
+	{
+		text stoped_governing = "{owner} has learned that {target} was stripped of his past governing rights. Thus, our plot to create an independent kingdom there has inadvertently come to an end."
+	}
+}
+
+def CourtIndependanceEvent : SpyResultMessage
+{
+	caption = "Province separated"
+	body = ["Sire, {independance_realm} has declared independence and is no longer part of our kingdom! Its former governor, {target}, must have been under the influence of a foreign spy, as our knight proclaimed himself {target.kingdom.king.title} and left our court.",
+	"Sire, we were betrayed by {target}, as he declared independence in {independance_realm}! A foreign spy was most likely the instigator of these devious deeds."]
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------  Governor: Surrender Town  -------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetSurrenderTownAction : PuppetPlot
+{
+	name = "Surrender town"
+	tooltip = "Have {target} surrender the town of {target.governed_castle} and secure [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] victory."
+	prepare_status_text = "{action.target} is preparing to surrender {action.target.governed_castle} to [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] armies"
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SurrenderTown.tga:Icon_Opportunity_SurrenderTown#2" //GUID:4d1e5a510e0085041aa86109028c8511
+	
+	bool we_are_attackers = (owner.kingdom == target.governed_castle.battle.attacker_kingdom)
+
+	severity = "Mid"
+	success_base_chance = 30
+	success_fail
+	{
+		sf_rebel_population = (2 * target.governed_castle.realm.rebel_population)
+		{
+			text name = "Rebellious population in {target.governed_castle.realm} (x2)"
+		}
+	}
+
+	outcomes
+	{
+		main success
+		{
+			option success_revealed
+			{
+				case target_kingdom
+				{
+					message
+					{
+						icon = "Assets/UI/Elements/msg_icons/Icon_Message_Siege_Positive.png:Icon_Message_Siege_Positive#2" //GUID:7a4538fbfc0905a44a8410edb93588b9
+					}
+				}
+				main owner_escaped = (escape_chance)
+				{
+					message
+					{
+						illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_WonEnemyCastle.tga:UI_Illustration_WonEnemyCastle#2" //GUID:f1afe2fc2e9fd3f47955adb370c199a0
+					}
+				}
+				option owner_imprisoned
+				{
+					message
+					{
+						illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_WonEnemyCastle.tga:UI_Illustration_WonEnemyCastle#2" //GUID:f1afe2fc2e9fd3f47955adb370c199a0
+					}
+				}
+				option owner_killed
+				{
+					message
+					{
+						illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_WonEnemyCastle.tga:UI_Illustration_WonEnemyCastle#2" //GUID:f1afe2fc2e9fd3f47955adb370c199a0
+					}
+				}
+			}
+		}
+	}
+	
+	text inline_descr = "persuade an enemy leader to surrender {target.governed_castle} to [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] armies during a siege battle"
+	text mk_inline_descr = "persuade {target} to surrender the town of {target.governed_castle} during a siege"
+	
+	src_messages // what the source (spy) kingdom sees
+	{
+		text new_opportunity = "We must act quickly, Sire. While [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] men are besieging the walls of {target.governed_castle}, our spy can order {target} to surrender the town and secure victory for the attackers!"
+		text success_undetected = ["{realm} was surrendered by {target}! Thanks to his ingenuity, [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] armies were able to march within the town and overtake it with little resistance.",
+		"Our cooperation with {target} paid off. To avoid useless bloodshed, he surrendered {realm} to [{we_are_attackers:if}us|{target.governed_castle.battle.attacker_kingdom}].",
+		"Thanks to {target}, [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] soldiers were greeted with bread and wine in {realm}. The province now belongs to [{we_are_attackers:if}us|{target.governed_castle.battle.attacker_kingdom}]!"]
+		text success_revealed = "{realm} was surrendered by {target} and the province [{we_are_attackers:if}is now ours|is now under {target.governed_castle.battle.attacker_kingdom:ian} control]! Unfortunately, our spy was captured by enemy forces just as he was about to escape from the castle."
+		text fail_undetected = ["{target} failed to surrender {target.governed_castle}, as he was unable to surrender the town to [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] armies.",
+		"It seems that bloodshed in {target.governed_castle} is inevitable, as {target} failed in arranging their surrender."]
+		text fail_revealed = "Due to the strong local military leaders, {target} was unable to surrender {target.governed_castle} to [{we_are_attackers:if}our|{target.governed_castle.battle.attacker_kingdom:s}] hands."
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "We've been fooled! Amidst the siege of {target.governed_castle}, the town was surrendered with the help of {src_kingdom:anian} spy! The town was unfortunately lost."
+		text fail_revealed = ["{src_kingdom:anian:cap} spy tried to take advantage of the people's fear in {target.governed_castle} and convince them to surrender! Thankfully, our subjects were not swayed by the intruder's poisonous words.",
+		"We found out that {src_kingdom:anian} spy plotted to surrender {target.governed_castle} during a siege battle! If we were a moment too slow, the town would now be at the hands of {target.governed_castle.battle.attacker_kingdom}."]
+	}
+
+	target_kingdom_messages
+	{
+		text success_revealed_caption = "Enemy town surrendered"
+		text success_revealed = "{target.governed_castle} is now under our control! We should be thankful to {owner}, who managed to convince the town's former governor to surrender the town to our armies."
+	}
+	
+	mission_kingdom_event = TownSurrenderedEvent
+	target_kingdom_event = TownSurrenderedOtherEvent
+
+	float ssums_base = (MapCA(owner.mission_kingdom, 0.2, 0.5))
+	float add_gold_cost = (200 + target.class_level * 50)
+	
+	cancel_events
+	{
+		target stoped_governing
+	}
+	cancelled_message_caption = "Town surrender halted"
+	cancelled_message_texts
+	{
+		text stoped_governing = "{owner} has learned that {target} was stripped of his past governing rights. Thus, our armies will have to take the town without the help of our puppet."
+	}
+}
+
+def TownSurrenderedEvent : SpyResultMessage
+{
+	caption = "Our town surrendered"
+	body = ["Sire, someone surrendered {realm} to our enemy... Our defenders were massacred and the province was lost! A commoner who managed to escape told us the grave news, claiming to have seen a spy performing the deed.",
+	"We've been fooled! Amidst the siege of {realm}, the town was surrendered with the help of a foreign spy! The province was unfortunately lost, with the intruder escaping before we could catch him."]
+}
+
+def TownSurrenderedOtherEvent : SpyResultMessage
+{
+	caption = "Town conquered"
+	body = "We've taken control over {target.governed_castle}! {target}, who was the town's governor, surrendered his control over it and let our armies march in freely." 
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Siege_Positive.png:Icon_Message_Siege_Positive#2" //GUID:7a4538fbfc0905a44a8410edb93588b9
+	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_WonEnemyCastle.tga:UI_Illustration_WonEnemyCastle#2" //GUID:f1afe2fc2e9fd3f47955adb370c199a0
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------  Crusader: Divert Crusade  -------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetDivertCrusadeAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_DivertCrusade.tga:Icon_Opportunity_DivertCrusade#2" //GUID:e97c43880658d9241a47417e772c6e07
+	name = "Divert crusade"
+	tooltip = "Have {owner} attempt to end the ongoing crusade by convincing {target} to rebel"
+	prepare_status_text = "{action.target} is convincing his armies to let go of their goal and stop the ongoing crusade"
+	
+	severity = "High"
+	success_base_chance = 30
+	//reveal_base_chance = 30
+	
+	float ssums_base = 1
+	float add_gold_cost = 1000
+	base_intrigue = (cost.gold / 500) //make this a quick action
+	
+	text inline_descr = "divert the ongoing crusade"
+	text mk_inline_descr = "convince {target:s} armies to let go of their goal and stop the ongoing crusade"
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} has reported that {target}, who is currently leading the crusade called by {pope}, can easily be persuaded to abandon his holy mission and convince his army to rebel."
+		text opportunity_lost = "{owner} lost his chance to divert the crusade"
+		
+		text success_undetected = ["{owner:s} persuasive skills paid off, and our plot to divert the current crusade was successful! The pope's army is no longer marching toward its target.",
+								   "The seed of doubt was planted in {target}, as he has given up leading the crusade. The pope's army is now nothing but a band of rebels!"]
+		text success_revealed = ["Sire, as we intended, {target:s} army has gone rogue! This puts an end to the crusade. Unfortunately, our spy was revealed as a conspirator.",
+		"{owner:s} silver tongue materialized into a convincing letter, which managed to convince {target} that he should end his crusade and force his men to become rebels! Sadly, the messenger who delivered the letter betrayed our spy and revealed his plot."]
+		text fail_undetected = ["{owner} used all his connections while trying to divert the crusade, but alas, even he couldn't affect such a great force already in motion.",
+		"Alas, {target} seemed far more determined in finishing his crusade than {owner} anticipated. Our puppet's will could not be shaken, and the crusade continues."]
+		text fail_revealed = ["{target} simply declined any discussions about diverting the crusade and furthermore reported {owner:s} plans and actions.",
+		"It seems that one of the generals in the crusade army exposed {owner} even before he managed to meet {target} and discuss the diversion of the crusade.",
+		"{owner} tried to send a letter to {target}, explaining why the crusade is unjust and how the {target.kingdom:ian} should stand against the Pope's evil scheming. However, the letter fell into the wrong hands, resulting in our spy's untimely reveal."]
+	}
+	
+	mission_kingdom_messages // what the target kingdom sees
+	{
+		text success_revealed = "{src_kingdom:anian:cap} spy clouded the mind of {target}, turning his holy crusade into a rebellion! The intruder will suffer for his sins."
+		text fail_revealed = "We learned that {src_kingdom:anian} spy almost managed to sabotage the crusade led by {target}! Thank God we caught the intruder's plot in time."
+		""]
+		//text plot_revealed = "We learned that {owner} is involved in a plot to turn our crusade rogue."
+	}
+	
+	mission_kingdom_event = CrusadeTurnedRogueEvent
+	
+	
+	cancel_events
+	{
+		target crusade_ended //mostly used for when going home
+	}
+	cancelled_message_caption = "Crusade diversion halted"
+	cancelled_message_texts
+	{
+		text crusade_ended = "The crusade has ended, and so has {owner:s} plot to divert it. Hopefully we can take advantage of the Pope's next advancements."
+	}
+	
+}
+
+def CrusadeTurnedRogueEvent : SpyResultMessage
+{
+	icon = "Assets/UI/Elements/msg_icons/Icon_Message_KnighEscaped_Negative.png:Icon_Message_KnighEscaped_Negative#2" //GUID:16663f8bd4ac6f84fa31fceb457a5b9c
+	caption = "Crusade got diverted"
+	body = ["The crusade our knight led no longer obeys commands from anyone - neither from us, nor from the Papacy. We suspect a spy has been bribing him for some time, leading to this sudden betrayal.",
+		    "A foreign spy clouded the mind of {target}, turning his holy crusade into a rebellion! The intruder must suffer for his sins..."]
+	//"Our crusade has come to a halt - its leader has gone rogue!"
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------  Pope: Excommunicate  ----------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetExcommunicateKingdomAction : PuppetPlot
+{
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_ExcommunicateKingdom.tga:Icon_Opportunity_ExcommunicateKingdom#2" //GUID:1491eecfe29ae8f45ae63a13439c008b
+	name = "Excommunicate kingdom"
+	tooltip = "Convince {target} to excommunicate {owner.mission_kingdom}"
+	prepare_status_text = "{action.owner} is convincing {action.target} to excommunicate {action.owner.mission_kingdom}"
+	
+	severity = "Mid"
+	success_base_chance = 25
+	//reveal_base_chance = 30
+	
+	text inline_descr = "convince {target} to excommunicate {owner.mission_kingdom}"
+	text mk_inline_descr = "convince {target} to excommunicate {owner.mission_kingdom}"
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} believes that {target} can be easily manipulted into excommunicating {owner.mission_kingdom}. Say the word, and our spy will put his plan into action."
+		text success_undetected = ["After {owner} spent a long time skulking around the Pope and his close ones, he finally managed to plant the seed of doubt and arrange the excommunication of {owner.mission_kingdom}.",
+		"{owner} managed to convince {target} that {owner.mission_kingdom} are ungodly heathens unworthy of calling themselves Christians. By our hand, the {owner.mission_kingdom:ians} have been officially excommunicated!",
+		"The stakes were high, but {owner} did it. Thanks to his careful silver tongue and convincing arguments, he managed to convince {target} to excommunicate {owner.mission_kingdom}!"]
+		text success_revealed = "Our influence over {target} proved to be enough, as {owner} managed to convince him to excommunicate {owner.mission_kingdom}! However, the {owner.mission_kingdom:ians} weren't so easily fooled and caught scent of our spy's role."
+		text fail_undetected = ["{owner} might have thought that {target} can be easily persuaded into excommunicating {owner.mission_kingdom}, but it turns out our spy was nothing but delusional. It's a miracle he wasn't revealed for his daring plot.",
+		"{owner} held a private meeting with {target}, in which he tried to explain why {owner.mission_kingdom} should be excommunicated for their sins towards the Catholic church. Unfortunately, the Pope seemed to care about gold more than anything else."]
+		text fail_revealed = "It seems {target} hasn't yet forgotten his humble {owner.mission_kingdom:ian} beginnings. Not only did he refuse to excommunicate {owner.mission_kingdom}, but he also publically denounced {owner} as a heretic and an enemy of the Catholic Church!"
+	}
+	
+	mission_kingdom_messages // what the target kingdom sees
+	{
+		text success_revealed = "Sire, we've been excommunicated from the Catholic church by [{pope}|The Pope]! Upon further investigation, we found out the deed wasn't just, and that {src_kingdom:anian} spy convinced the Pope to act against us."
+		text fail_revealed = "{src_kingdom:anian:cap} spy has been lurking in the shadows of our {owner.mission_kingdom.KingdomType}. Apparently, he was whispering in [{pope:s}|The Pope's] ear, hoping to convince him to excommunicate us!"
+	}
+	
+	cost
+	{
+		piety = ( 1000 )
+		gold = (SSum(owner.kingdom, 1.25, 50))
+	}
+	//mission_kingdom_event = PopeExcommunicateEvent //disabling this, because you already receive such a message via the generic logic
+	
+	cancel_events
+	{
+		mission_kingdom religion_changed //mostly used for when going home
+	}
+	cancelled_message_caption = "Excommunication plot halted"
+	cancelled_message_texts
+	{
+		text religion_changed = "{owner.mission_kingdom:s} recent conversion to {owner.mission_kingdom.religion:ism} has shocked the Catholic world, forcing {target} to travel back to Rome. Subsequently, our plot is no longer possible."
+	}
+}
+
+// def PopeExcommunicateEvent : SpyResultMessage
+// {
+// 	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Papacy_Negative.png:Icon_Message_Papacy_Negative#2" //GUID:f0551ed801c7eea4399d528cf21b09e0
+// 	caption = "We were excommunicated"
+// 	body = "Sire, we've been excommunicated from the Catholic church by [{pope}|The Pope]! "
+// }
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//------------------------------------------------  Rebel: Attack kingdom  ----------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+def PuppetRebelAttackOtherKingdomAction : PuppetPlot
+{
+	prepare_voice_line = "rebel_plot_confirmation"
+	
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_RebelAttackOther.tga:Icon_Opportunity_RebelAttackOther#2" //GUID:19a24f555e7db7d4ba1c2753c1c255e4
+	args = ["Kingdom"]
+	name = "Divert rebellion"
+	tooltip = "Convince {target} to turn his rebels against {arg}"
+	prepare_status_text = "{action.owner} is convincing {action.target} to order his rebel troops to attack {action.arg}"
+	
+	success_message = ["We succeeded in convincing {target} to attack {attacked_kingdom}! His troops are now marching against his new target.",
+					   "The rebel armies of {target} have accepted our plea to attack {attacked_kingdom}. They won't know what hit them!",
+					   "The rebel troops of {target} are preparing to raid the weakened lands of {attacked_kingdom}."]
+	
+	fail_message = ["{owner} failed to convince {target} to divert his efforts towards {attacked_kingdom}, as his mission faced some complications along the way.",
+					"{owner} reported that {target} has no interest of moving against {attacked_kingdom}.",
+					"{target} considered our suggestion for attack over {attacked_kingdom} lands, but he seems to lack the courage to lead his men there."]
+	src_messages
+	{
+		text new_opportunity = "{owner} can attempt to convince {target} to order his rebel troops to march against {arg}."
+		text success_revealed = "Although {target} agreed to attack {arg}, he was not so favorable towards our spy."
+		text success_undetected = "The rebel armies of {target} have accepted {owner:s} plea to attack {arg}. They won't know what hit them!"
+		text fail_revealed = "{owner} failed to convince {target} to divert his efforts towards {arg}, as his mission faced some complications along the way."
+		text fail_undetected = "{target} considered our suggestion for attack over {arg:s} lands, but he seems to lack the courage to lead his men there."
+	}
+	
+	outcomes
+	{
+		main success
+		{
+			case src_kingdom
+			{
+				message
+				{
+					text caption = "Rebellion diverted to {attacked_kingdom}"
+				}
+			}
+		}
+	}
+	
+	success_base_chance = 35
+	//reveal_base_chance = 30
+	
+	success_fail
+	{
+		// defense(%) ---------------------------------------------------------------------
+		// all negatives are summed up and multiply with the success chance to diminish it
+		// --------------------------------------------------------------------------------
+		perc sf_target_level = (-target.class_level)
+		{
+			text name = "Rebel Leader Level"
+		}
+		perc sf_divert_target_kingdom_size = (-map(arg.realms_count, 1, 15, 0, 25)) //(-arg.realms_count)
+		{
+			text name = "{arg:s} provinces"
+		}
+	}
+	
+	add_gold_cost = (400 + target.class_level * 100)
+	
+	mission_kingdom_event = RebelAttackOtherKingdomEvent
+	target_kingdom_event = RebelAttackUsEvent
+	
+	cancelled_message_caption = "Rebellion diversion halted"
+}
+
+
+def RebelAttackOtherKingdomEvent : SpyResultMessage
+{
+	caption = "Rebellion moved to {arg0}"
+	body = ["Sire, we've intercepted some letters of correspondence between {target} and a foreign noble - {owner.title} {owner.name:nolink}. It seems the rebellion leader has been dealing with a foreign spy, deciding to move his forces to {arg0}.",
+	"Our scouts are reporting that {target:s} rebellion has relocated to {arg0}. We also suspect a foreign spy influenced this decision, his identity so far remaining unknown."]
+}
+
+
+def RebelAttackUsEvent : SpyResultMessage
+{
+	caption = "A foreign rebellion approaches"
+	body = ["My Lord, we are threatened by a foreign rebellion! {target}, who had previously ravaged the lands of {mission_kingdom}, has decided to divert his men towards our lands.",
+	"A foreign rebellion is moving towards our lands! It is helmed by {target}, who had previously led his troops against {mission_kingdom}."]
+}
+
+// //----------------------------------------------------------------------------------------------------------------------------//
+// //------------------------------------------------  Rebel: Become Loyalist  --------------------------------------------------//
+// //----------------------------------------------------------------------------------------------------------------------------//
+// def PuppetTurnRebelIntoLoyalist : PuppetPlot
+// {
+
+// 	prepare_voice_line = "rebel_plot_confirmation"
+// 	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_RebelBecomeLoyalist.tga:Icon_Opportunity_RebelBecomeLoyalist#2" //GUID:b6ae38dc0b8b2234fbbce7d9f6c0ba0a
+// 	name = "Turn rebellion into loyalist"
+// 	tooltip = "Convince {target} to become our loyalist"
+// 	prepare_status_text = "{action.owner} is convincing {action.target} to become a loyalist rebel fighting for our crown."
+
+// 	text inline_descr = "bribe {target} to become our rebel loyalist"
+// 	text mk_inline_descr = "convince {target} to become a rebel loyalist fighting in {action.owner.kingdom:s} name"
+
+// 	prepare_duration = 30
+
+// 	src_messages
+// 	{
+// 		text new_opportunity = "{owner} has reported that he can use his leverage over {target}, influencing the rebel to make his rebellion loyal to our crown."
+// 		text success_undetected = ["By our command, {target} has become a rebel loyal to our crown! All men who support him fight valiantly in the name of our {owner.kingdom.king.title}.",
+// 		"{owner} convinced {target} to become our loyalist! The {owner.mission_kingdom:ian} rebel and all who support him now march in the name of our {owner.kingdom.king.title}."]
+// 		text success_revealed = "{target} proved his loyalty to our spy and agreed to make his rebellion loyal to our crown! However, many of the rebel's supporters weren't so happy about changing their allegiance and made sure to reveal our spy to the {owner.mission_kingdom:ians}."
+// 		text fail_undetected = "After being beaten and chased away from {target:s} camp, {owner} quickly learned that dealing with rebels is a pretty risky endeavour. Thus, we could not convince the {owner.mission_kingdom:ian} to become our loyalist."
+// 		text fail_revealed = "{owner} visited {target:s} camp multiple times, hoping to convince the rebel to become our loyalist. Unfortunately for our spy, his visitations were noticed by a handful of {owner.mission_kingdom:ian} agents that were observing the area."
+// 	}
+
+// 	success_fail
+// 	{
+// 		// defense(%) ---------------------------------------------------------------------
+// 		// all negatives are summed up and multiply with the success chance to diminish it
+// 		// --------------------------------------------------------------------------------
+
+// 		perc sf_target_level = (-target.class_level)
+// 		{
+// 			text name = "Rebel Leader Level"
+// 		}
+// 	}
+
+// 	success_base_chance = 40
+// 	//reveal_base_chance = 20
+
+// 	add_gold_cost = (300 + target.class_level * 50)
+
+// 	mission_kingdom_event = RebelTurnedLoyalistEvent
+
+// 	cancelled_message_caption = "Loyalist conversion halted"
+// }
+
+// def RebelTurnedLoyalistEvent : SpyResultMessage
+// {
+// 	icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+// 	illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_RebellionSpawned.png:UI_Illustration_RebellionSpawned#2" //GUID:2f01d8026258db6459402331dd99dfe3
+// 	caption = "Rebellion turned loyalist"
+// 	body = ["Sire, we've received reports that the armies supporting {target:s} rebellion have started to march under {owner.mission_kingdom:ian} banners! We suspect a spy was behind this.",
+// 	"{target:s} rebellion has become loyal to {owner.mission_kingdom}! The betrayer is surely bribed by a foreign spy, acting behind our backs.",
+// 	"Sire, {target:s} rebellion has become loyal to {owner.mission_kingdom}! It seems the betrayer is working together with a foreign spy, after all..."]
+// }
+
+//----------------------------------------------------------------------------------------------------------------------------//
+//------------------------------------------------  Puppet: Become pretender to the throne -----------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------//
+
+
+def PuppetSupportPretenderToTheThroneAction : PuppetPlot
+{
+	name = "Support pretender"
+	tooltip = "Have {owner} attempt to support {target} of the court of {owner.mission_kingdom} to become their king"
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_SupportPretenderToTheThrone.tga:Icon_Opportunity_SupportPretenderToTheThrone#2" //GUID:3a42b7a7c2228a44194aed3c89b92bd3
+	prepare_status_text = "{owner} is looking for ways to support {action.target} in his claim of the {action.target.kingdom:ian} throne"
+	success_voice_line = "action_succeeded"
+	
+	severity = "Mid"
+	success_base_chance = 35
+	//reveal_base_chance = 20
+	
+	opportunity
+	{
+		chance_to_add_on_tick = 30
+		chance_to_del_on_tick = 0
+	}
+	
+	src_messages
+	{
+		text new_opportunity = "{owner} recognized that {target} is well-respected within {owner.mission_kingdom:s} nobility, making him the ideal candidate for {owner.mission_kingdom.king:s} crown. Thus, our spy can attempt to secure his puppet's claim to the throne of {owner.mission_kingdom}."
+		//text opportunity_lost = "{owner} can no longer support {target:s} claim to the throne."
+		
+		text success_undetected = ["{owner} pulled a lot of strings and made sure that, in time, {target} will have a chance to claim {target.kingdom.king:s} crown. For now, our role remains shrouded in secrecy.",
+		"{owner} found out that {owner.mission_kingdom.king} has a reputation for his questionable romantic escapades throughout the years. Even better, there is some evidence mentioning {target} as his bastard son! Using this information, {owner} managed to convince {owner.mission_kingdom:s} most prominent nobles that his puppet has solid pretences to {owner.mission_kingdom:s} crown."]
+		text success_revealed = ["After speaking with the right nobles, {owner} managed to secure {target:s} claim to {target.kingdom:s} crown. Sadly, our puppet didn't exactly keep his pretences a secret, as the fool was overheard by some of {target.kingdom.king:s} men while boasting in the local tavern, ultimately revealing our spy.",
+		"{owner} used {target:s} illustrous following throughout the highest eschelons of {owner.mission_kingdom} and made sure that the {owner.mission_kingdom:ian} would have ample support as a pretender to {owner.mission_kingdom.king:s} crown! The good news ends here, though, as our spy was revealed during one of his many meetings with {owner.mission_kingdom:s} highborn."]
+		text fail_undetected = ["{owner} couldn't manage to strengthen {target:s} claim to the crown. Our favorite proved too unpopular among the nobility and even piles of gold can't change that.",
+								"That arrogant fool {target} refused our support and threatened {owner} that he will be arrested the next time he approaches him once more."]
+		text fail_revealed = ["{owner} couldn't manage to strengthen {target:s} claim to the crown. As our spy got too daring, the {target.kingdom:ians} found out about our influence over {target} and immediately stood against his claim.",
+		"The foolish {target} turned out too proud and honorable and refused our support. He even used that to his benefit and announced what {owner} offered him to gain the affection of the local nobility."]
+		text plot_invalidated = "Due to the turn of events, it is now impossible for {owner} to support {target:s} claim of the crown."
+	}
+	
+	mission_kingdom_messages // what the target kingdom sees
+	{
+		text success_revealed = ["Due to the support of {src_kingdom:anian}, {target} increased his influence over our nobility and now he is supported as the future bearer of the crown.",
+	 							 "Though we now know {target} has his connections with {src_kingdom:anian} spies, he got too powerful and it seems likely that he will take the crown after {target.kingdom.king:s} death."]
+		text fail_revealed = ["{src_kingdom:anian} spy tried to bribe our noblemen into supporting {target} in his claim to the crown, but we ended that cunning scheme.",
+		"{target} reported that a {src_kingdom:anian} spy contacted him and offered help in usurping the crown after {target.kingdom.king:s} death! Our honorable knight, of course, refused."]
+	}
+	
+	float ssums_base = 1.5
+	float ssums_bias = 0.75
+	
+	float gold_cost_mod = (1 - owner.cs_support_pretender_cost_reduction_perc/100)
+	float gold_upkeep = (round((5 + SSum(owner.mission_kingdom, 0.02, 5))*(1 - owner.cs_support_pretender_cost_reduction_perc/100)))
+	
+	cancelled_message_caption = "Support pretender plot halted"
+	cancel_events
+	{
+		target became_king
+	}
+	cancelled_message_texts
+	{
+		text became_king = "{target} became the ruler of {owner.mission_kingdom}, even without our spy's involvement! Now that there is no need to plant a pretender, {owner} has ended his plot."
+	}
+}
+
+def StopSupportingPretenderToTheThroneAction : PuppetAction
+{
+	name = "Stop supporting pretender"
+	tooltip = "Stop paying {target}. He will no longer be a pretender to the throne in {owner.mission_kingdom}."
+	icon = "Assets/UI/Elements/Actions/Icon_CharacterAction_StopSupportingPretender.tga:Icon_CharacterAction_StopSupportingPretender#2" //GUID:d8020f3a15e226e4a8fec8e711d63d57
+	show_in_status = HasPuppetStatus
+	
+	prepare_voice_line = "stop_supporting_pretender"
+	cancel_voice_line = null
+	cancelled_voice_line = null
+	success_voice_line = null
+	fail_voice_line = null
+	
+	prepare_duration = 0
+	
+	ai_validate = false
+	mission = "OnMission"
+	
+	success_fail : null
+	
+	outcomes : null
+	{
+		main success = 100
+		{
+			message { def = null }
+		}
+	}
+}
+
+
+def PuppetAssistElopementAction : PuppetPlot
+{
+	args = ["Character", "Character"]
+	name = "Assist elopement"
+	tooltip = "Have our puppet {target} arrange marriage between {arg} of {arg.kingdom} and our {arg1}."
+	prepare_status_text = "{action.target} is arranging a marriage between {arg} of {arg.kingdom} and our {arg1}."
+	icon = "Assets/UI/Elements/Actions/Icon_Opportunity_AssistElopement.tga:Icon_Opportunity_AssistElopement#2" //GUID:ad9585a3bbaf1a2489082ac9dd38c947
+	
+	puppet_classes = "Diplomat"
+	
+	severity = "Mid"
+	success_base_chance = 25
+	
+	src_messages
+	{
+		text new_opportunity = "{target} may attempt to form royal ties with {arg.kingdom}, by arranging a wedding between {arg} and our {arg1}."
+		text success_undetected = ["Behind the back of {owner.mission_kingdom.king}, {target} managed to arrange a marriage between our {arg1} and {arg} of {arg.kingdom}!",
+		"{target} thought that arranging a marriage between {arg1} and {arg} would be tough, but it turns out that the prince and princess truly love eachother! With the blessing of {owner.mission_kingdom:anian} {owner.mission_kingdom.cleric_title}, the two lovebirds got secretly married and we now have royal ties with {owner.mission_kingdom}."]
+		text success_revealed = "Following the instructions of our spy, {target} found a {owner.mission_kingdom:ian} {owner.mission_kingdom.cleric_title}, gathered a handful of willing witnesses and officially wed {arg} and {arg1} in [{target.kingdom.is_christian:if}in a secluded church|a secluded location]. But when {owner.mission_kingdom.king} discovered what had happend, he immediately ordered a witch hunt and discovered our spy."
+		text fail_undetected = "Sire, {owner} has reported that {arg1} and {arg} would simply refuse to be wed."
+		text fail_revealed = "While {owner} managed to forcefully wed our {arg1} to {arg} of {arg.kingdom}, he failed to foresee the event in which {arg} betrays and reveals him."
+	}
+	
+	mission_kingdom_messages
+	{
+		text success_revealed = "Sire, we've been informed that a secret marriage between our {arg} and {arg1} has just taken place! We also revealed {owner} of {owner.kingdom} as the culprit behind this."
+		text fail_revealed = "Sire, we caught {owner} of {owner.kingdom} trying to arrange marriage between our kingdoms! Fortunately for us, {arg} revealed the rat before matters could escalate."
+	}
+	
+	mission_kingdom_event = AssistElopementEvent
+	
+	float ssums_base = (MapCA(owner.mission_kingdom, 0.75, 1.5))
+	float add_gold_cost = 500
+	
+	became_pope
+	
+	cancel_events
+	{
+		arg1 arg1_died
+		{
+			message = "dying"
+		}
+		tararg1get arg1_became_pope
+		{
+			message = "became_pope"
+		}
+		arg1 arg1_became_cardinal_elect
+		{
+			message = "became_cardinal_elect"
+		}
+		arg1 arg1_became_ecumenical_patriarch
+		{
+			message = "became_ecumenical_patriarch"
+		}
+		arg1 arg1_got_married
+		{
+			message = "got_married"
+		}
+		arg1 arg1_kingdom_changed
+		{
+			message = "kingdom_changed"
+		}
+		arg1 arg1_is_patriarch_changed
+		{
+			condition (arg1.is_patriarch)
+			message = "is_patriarch_changed"
+		}
+		arg arg_died
+		{
+			message = "dying"
+		}
+		arg arg_became_pope
+		{
+			message = "became_pope"
+		}
+		arg arg_became_cardinal_elect
+		{
+			message = "became_cardinal_elect"
+		}
+		arg arg_became_ecumenical_patriarch
+		{
+			message = "became_ecumenical_patriarch"
+		}
+		arg arg_got_married
+		{
+			message = "got_married"
+		}
+		arg arg_kingdom_changed
+		{
+			message = "kingdom_changed"
+		}
+		arg arg_is_patriarch_changed
+		{
+			condition (arg.is_patriarch)
+			message = "is_patriarch_changed"
+		}
+		
+	}
+	
+	
+	cancelled_message_caption = "Elopement plot halted"
+	cancelled_message_texts
+	{
+		text arg1_died = "As {arg1.kingdom} mourns the death of {arg1}, {owner} was forced to end his attempts to arrange marriage."
+		text arg1_became_pope = "{arg1} may no longer get married, as his newly gained duties as Pope forbid him to wed. This has put an end to {owner:s} plot."
+		text arg1_became_cardinal_elect = "{arg1} may no longer get married, as his newly gained duties as cardinal-elect forbid him to wed. This has put an end to {owner:s} plot."
+		text arg1_became_ecumenical_patriarch = "{arg1} may no longer get married, as his newly gained duties as Ecumenical Patriarch forbid him to wed. This has put an end to {owner:s} plot."
+		text arg1_got_married = "Alas, {owner} attempts to arrange elopement were too slow. {arg1} is now married to {arg1.spouse}."
+		text arg1_kingdom_changed = "[{arg1.is_rebel:if}With {arg1} now fighting against our people as a rebel|As {arg1} has deserted our kingdom], {owner:s} can no longer arrange their marriage."
+		text arg1_is_patriarch_changed = "{arg1} may no longer get married, as his newly gained duties as patriarch forbid him to wed. This has put an end to {owner:s} plot."
+		text arg_died = "{arg:s} untimely death has ruined {owner:s} plans to arrange their marriage with {arg1}, forcing our spy to put an end to his plot."
+		text arg_became_pope = "{arg} may no longer get married, as his newly gained duties as Pope forbid him to wed. This has put an end to {owner:s} plot."
+		text arg_became_cardinal_elect = "{arg} may no longer get married, as his newly gained duties as cardinal-elect forbid him to wed. This has put an end to {owner:s} plot."
+		text arg_became_ecumenical_patriarch = "{arg} may no longer get married, as his newly gained duties as Ecumenical Patriarch forbid him to wed. This has put an end to {owner:s} plot."
+		text arg_got_married = "Alas, {owner} attempts to arrange elopement were too slow. {arg} is now married to {arg.spouse}."
+		text arg_kingdom_changed = "Sire, we've received news that {arg} [{arg.is_rebel:if}has turned rebel|no longer resides in {owner.mission_kingdom}]! Thus, {owner:s} plot is no longer possible."
+		text arg_is_patriarch_changed = "{arg} may no longer get married, as his newly gained duties as patriarch forbid him to wed. This has put an end to {owner:s} plot."
+	}
+}
+
+def AssistElopementEvent : SpyResultMessage
+{
+	caption = "Royal Marriage"
+	body = ["Sire, we've been informed that a secret marriage between our {target} and {arg} has just taken place! We don't know who was behind this, but now we have royal ties with {arg.kingdom}. Most certainly, a spy is also in our midst...",
+	"{target} and {arg} married during a secret ceremony, which means we now have royal ties with {arg.kingdom}! Either the couple was too madly in love, or all of it was fabricated by a foreign spy..."]
+}

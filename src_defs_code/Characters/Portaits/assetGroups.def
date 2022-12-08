@@ -1,0 +1,104 @@
+﻿def AssetGroup
+{
+	color skinColor = ["255,255,255"]
+	color hairColor = ["83,39,0"]
+	color clothesColor1 = []
+	color clothesColor2 = []
+}
+def Slavic : AssetGroup
+{
+	
+}
+def WesternEurope : AssetGroup
+{
+	
+}
+def Mediteranean : AssetGroup
+{
+	
+}
+def Byzantian : AssetGroup
+{
+	
+}
+def Culture
+{
+	text name
+	group : AssetGroup
+}
+def Nordic : Culture
+{
+	group = Slavic
+}
+def Slav : Culture
+{
+	group = Slavic
+}
+def Baltic : Culture
+{
+	group = Slavic
+}
+def Caucasian : Culture
+{
+	group = Slavic
+}
+def Russ : Culture
+{
+	group = Slavic
+}
+def Steppe : Culture
+{
+	group = Slavic
+}
+def French : Culture
+{
+	group = WesternEurope
+}
+def German : Culture
+{
+	group = WesternEurope
+}
+def Brit : Culture
+{
+	group = WesternEurope
+}
+def Welsh : Culture
+{
+	group = WesternEurope
+}
+def Swiss : Culture
+{
+	group = WesternEurope
+}
+def Scot : Culture
+{
+	group = WesternEurope
+}
+def Irish : Culture
+{
+	group = WesternEurope
+}
+def Byz : Culture
+{
+	group = Byzantian
+}
+def Italian : Culture
+{
+	group = Mediteranean
+}
+def Arab : Culture
+{
+	group = Mediteranean
+}
+def Turk : Culture
+{
+	group = Mediteranean
+}
+def Berber : Culture
+{
+	group = Mediteranean
+}
+def Spanish : Culture
+{
+	group = Mediteranean
+}

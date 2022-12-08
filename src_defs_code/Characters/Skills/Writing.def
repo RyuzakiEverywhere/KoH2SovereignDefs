@@ -1,0 +1,51 @@
+﻿def WritingSkill : Skill
+{
+	name = "Writing"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Writing_1.png:UI_Icon_Skill_Writing_1#2" //GUID:2770a1518008c8840ae50c65b809d3a3
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Writing_1.tga:UI_Icon_Skill_Writing_1#2", //GUID:f0c83421c02977442ac6afb0821aac78
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Writing_2.tga:UI_Icon_Skill_Writing_2#2", //GUID:2e43f9b4b7a796f44ae4451e96eb6cc7
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Writing_3.tga:UI_Icon_Skill_Writing_3#2" //GUID:2322f4f7dcd8a9142abf34403388b2be
+	]
+	tooltip = "An ability rarely seen even in knights of high stature. Boosts the output of written works in various situations."
+}
+
+extend Skill.effects
+{
+	skill WritingSkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_books = 1/2/3
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+			tag Govern
+			{
+				governed_realm_mod rs_governor_commerce_flat = 1/2/3
+			}
+			kingdom_mod ks_kingdom_traditions_influence = 2/3/5
+			
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+			kingdom_mod ks_kingdom_traditions_influence = 5/10/15
+		}
+		
+		class Cleric
+		{
+			slot_type = "primary"
+			kingdom_mod ks_culture_from_traditions = 5/10/20
+			
+			tag Govern
+			{
+				governed_realm_mod rs_governor_books_per_religious_settlement = 1/2/3
+			}
+			
+		}
+	}
+}

@@ -1,0 +1,42 @@
+﻿def CavalryTacticsSkill : Skill
+{
+	name = "Cavalry Tactics"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_CavalryTactics_1.png:UI_Icon_Skill_CavalryTactics_1#2" //GUID:c17d9389d9b3ca64c973c25ff040be5f
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_CavalryTactics_1.tga:UI_Icon_Skill_CavalryTactics_1#2", //GUID:1264847e190c04f45840f25da45bbbd4
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_CavalryTactics_2.tga:UI_Icon_Skill_CavalryTactics_2#2", //GUID:52cd46bc928c45a47be07d27c68f4088
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_CavalryTactics_3.tga:UI_Icon_Skill_CavalryTactics_3#2" //GUID:5426defe76fd02a41ac8d4ebb9dfab4e
+	]
+	tooltip = "A fine horse is often times a badge of honor, allowing its master to ride swiftly while dealing with his opponents mercilessly."
+}
+
+extend Skill.effects
+{
+	skill CavalryTacticsSkill
+	{
+		Default
+		{
+			mod cs_cavalry_CTH_perc = 3/5/10
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+	}
+}

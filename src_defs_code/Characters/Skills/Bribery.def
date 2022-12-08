@@ -1,0 +1,30 @@
+﻿def BriberySkill : Skill
+{
+	name = "Bribery"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bribery_1.png:UI_Icon_Skill_Bribery_1#2" //GUID:37a0564d6ff539a41aa407e7aca58af0
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bribery_1.tga:UI_Icon_Skill_Bribery_1#2", //GUID:077565cd8691502418d2524304ba27ac
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bribery_2.tga:UI_Icon_Skill_Bribery_2#2", //GUID:2feaad445a6645f43aa9b3b2e0b60db4
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Bribery_3.tga:UI_Icon_Skill_Bribery_3#2" //GUID:94b9d42c27411664aac70b6c48ef3b93
+	]
+	tooltip = "Improves the chances for bribing other knights, at the cost of increasing corruption within the kingdom."
+}
+
+extend Skill.effects
+{
+	skill BriberySkill
+	{
+		class Merchant
+		{
+			slot_type = "secondary"
+			mod cs_base_trading_income = 1/2/3
+			kingdom_mod ks_espionage_defense_skills_traditions = 1/2/3
+		}
+
+		class Spy
+		{
+			slot_type = "primary"
+			mod cs_bribe_CTS_perc = 5/10/15
+		}
+	}
+}

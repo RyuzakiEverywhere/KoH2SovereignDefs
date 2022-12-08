@@ -1,0 +1,60 @@
+def BattleTactic
+{
+	text name
+	text tooltip
+	//bool condition = (...)
+	//units [ = "UnitType"] [{ ... }]
+}
+
+def VolleysTactic : BattleTactic
+{
+	name = "Volleys!"
+	units { Ranged, HeavyRanged }
+}
+
+def LureToAmbushTactic : BattleTactic
+{
+	name = "Lure to ambush!"
+	units { Cavalry }
+}
+
+def EncircleTactic : BattleTactic
+{
+	name = "Encirle!"
+	condition = (#CalcArmySizeRatio >= 1.5)
+}
+
+def HoldGroundsTactic : BattleTactic
+{
+	name = "Hold Grounds!"
+}
+
+def SkirmishTactic : BattleTactic
+{
+	name = "Skirmish!"
+	units { Infantry, Militia }
+}
+
+def SteadyAdvanceTactic : BattleTactic
+{
+	name = "Steady Advance!"
+	units { HeavyInfantry }
+}
+
+def HitAndRunTactic : BattleTactic
+{
+	name = "Hit and Run!"
+	units { Cavalry }
+}
+
+def ChaseAndKillTactic : BattleTactic
+{
+	name = "Chace and Kill!"
+	units { Cavalry }
+}
+
+def ShockChargeTactic : BattleTactic
+{
+	name = "Shock Charge!"
+	units { HeavyCavalry }
+}

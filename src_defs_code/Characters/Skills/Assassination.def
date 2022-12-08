@@ -1,0 +1,24 @@
+﻿def AssassinationSkill : Skill
+{
+	name = "Assassination"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Assassination_1.png:UI_Icon_Skill_Assassination_1#2" //GUID:8d3bba11fb656a145971f8f0199366ce
+	icon = [
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Assassination_1.tga:UI_Icon_Skill_Assassination_1#2", //GUID:cda055f5c7006054aaa839064a12cf2c
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Assassination_2.tga:UI_Icon_Skill_Assassination_2#2", //GUID:96d0b415ec6549546a0f56ef274a73d5
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Assassination_3.tga:UI_Icon_Skill_Assassination_3#2" //GUID:08fd745d76fb9f74a9edf571d49a4572
+	]
+	
+	tooltip = "A spy adept in the art of assassination is a valuable asset for any kingdom that isn't afraid to spill some blood."
+}
+
+extend Skill.effects
+{
+	skill AssassinationSkill
+	{
+		class Spy
+		{
+			slot_type = "primary"
+			mod cs_murder_plots_CTS_perc = 3/5/10
+		}
+	}
+}

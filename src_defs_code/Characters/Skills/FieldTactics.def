@@ -1,0 +1,43 @@
+﻿def FieldTacticsSkill : Skill
+{
+	name = "Field Tactics"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_FieldTactics_1.png:UI_Icon_Skill_FieldTactics_1#2" //GUID:7aaf01e5327e83d449c488dc21725ecc
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_FieldTactics_1.tga:UI_Icon_Skill_FieldTactics_1#2", //GUID:fa977c229b0197742b9ff96a909f7b47
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_FieldTactics_2.tga:UI_Icon_Skill_FieldTactics_2#2", //GUID:2c6d13c3f61624f44a2bd83a716d08f4
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_FieldTactics_3.tga:UI_Icon_Skill_FieldTactics_3#2" //GUID:bb66aafae861cae4b96e502b6a4c5bc9
+	]
+	tooltip = "The art of maneuvering swiftly around your opponents is a momentous trait of any skilled leader."
+}
+
+extend Skill.effects
+{
+	skill FieldTacticsSkill
+	{
+		Default
+		{
+			mod cs_army_defense_perc = 5/10/20
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+			mod cs_natural_terrain_bonus_perc = 20/30/50
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+	}
+}

@@ -1,0 +1,327 @@
+def BattleviewOverview
+{
+	bool skip_on_restart = true
+
+	string voice_line // Play this voiceline when the camera centers on this location.
+
+	float delay = 4 // When the camera is centered on this object, wait 4 seconds before transitioning to the next location.
+
+	// --- BATTLE SEQUENCES ---
+
+	// Each battle describes the sequence + timing by which the camera should move between locations.
+	// Locations can be our_army, their_army, citadel, walls, gates, towers, capture_points, etc. They are used differently depending on the batle type.
+		
+	// points can inherit from another points field, so the value at the end is the order they get sorded in
+	// eg their_army = 0 comes first, then our_army = 1, and so on
+
+
+	/// OPENFIELD
+	points field_battle 
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:open_field_es_enemy"
+		}
+		capture_point = 1// closest to player squad
+		{
+			voice_line = "narrator_voice:capture_point"
+		}
+		our_army = 100 // generally last
+		{
+			voice_line = "narrator_voice:open_field_ps_player"
+		}
+	}
+
+	points field_battle_vs_rebels : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:open_field_es_rebels" 
+		}
+	}
+
+	points field_battle_vs_famous_rebels : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:open_field_es_famous_rebels" 
+		}
+	}
+
+	points field_battle_vs_loyalist_rebels : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:open_field_es_loyalists" 
+		}
+	}
+
+	points they_caught_us_disorganized : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:player_crossing_enemy" 
+		}
+	}
+
+	points we_caught_enemy_disorganized : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_crossing_player" 
+		}
+	}
+
+	/// ASSAULT
+	points enemy_assaults_us : field_battle
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_castle_assault_enemy" 
+		}
+		citadel = 1
+		{
+			offset_y = -10
+			voice_line = "narrator_voice:enemy_castle_assault_castle"
+		}
+		gate = 2// closest to player squad
+		{	
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:enemy_castle_assault_gates_broken"
+			}
+			case default
+			{
+				voice_line = "narrator_voice:enemy_castle_assault_gates"
+			}
+		}
+		tower = 3// closest to player squad
+		{
+			offset_y = 5
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:enemy_castle_assault_towers_broken"
+			}		
+			case default
+			{
+				voice_line = "narrator_voice:enemy_castle_assault_towers"	
+			}
+		}
+		wall = 4// closest to player squad
+		{	
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:enemy_castle_assault_wall_broken"
+			}
+		}
+		capture_point = 4// closest to player squad
+		{
+			voice_line = "narrator_voice:capture_point"
+		}
+		our_army = 100 // generally last
+		{
+			voice_line = "narrator_voice:enemy_castle_assault_player"
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:enemy_has_initiative_assault"
+		}
+	}
+
+	points we_assault_enemy : enemy_assaults_us
+	{
+		their_army = 0
+		{
+			voice_line = "narrator_voice:friendly_castle_assault_enemy" 
+		}
+		citadel = 1
+		{
+			offset_y = -15
+			voice_line = "narrator_voice:friendly_castle_assault_castle"
+		}
+		gate = 2// closest to player squad
+		{	
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:friendly_castle_assault_gates_broken"
+			}
+			case default
+			{
+				voice_line = "narrator_voice:friendly_castle_assault_gates"
+			}
+		}
+		tower = 3// closest to player squad
+		{
+			offset_y = 5
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:friendly_castle_assault_towers_broken"
+			}	
+			case default
+			{
+				voice_line = "narrator_voice:friendly_castle_assault_towers"	
+			}	
+		}
+		wall = 4// closest to player squad
+		{	
+			case destroyed = (destroyed)
+			{
+				voice_line = "narrator_voice:friendly_castle_assault_walls_broken"
+			}
+		}
+		capture_point = 4// closest to player squad
+		{
+			voice_line = "narrator_voice:capture_point"
+		}
+		our_army = 100 // generally last
+		{
+			voice_line = "narrator_voice:friendly_castle_assault_player"
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:we_have_initiative_assault"
+		}
+	}
+
+	/// BREAK SIEGE
+	points enemy_breaks_siege_from_inside : we_assault_enemy
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_break_siege_inside_enemy" 
+		}
+		our_army = 100
+		{
+			voice_line = "narrator_voice:enemy_break_siege_inside_player" 
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:enemy_has_initiative_break_siege_inside"
+		}
+	}
+
+	points we_break_siege_from_inside : enemy_assaults_us
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:friendly_break_siege_inside_enemy" 
+		}
+		our_army = 100
+		{
+			voice_line = "narrator_voice:friendly_break_siege_inside_player" 
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:we_have_initiative_break_siege_inside"
+		}
+	}
+
+	points we_break_siege_from_inside_rebels : we_break_siege_from_inside
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:friendly_break_siege_inside_rebels" 
+		}
+	}
+
+	points enemy_breaks_siege_from_outside : enemy_breaks_siege_from_inside
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_break_siege_outside_enemy" 
+		}
+		our_army = 100
+		{
+			voice_line = "narrator_voice:enemy_break_siege_outside_player" 
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:enemy_has_initiative_break_siege_outside"
+		}
+	}
+
+	points we_break_siege_from_outside : we_break_siege_from_inside
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:friendly_break_siege_outside_enemy" 
+		}
+		our_army = 100
+		{
+			voice_line = "narrator_voice:friendly_break_siege_outside_player" 
+		}
+		initiative = 101
+		{
+			voice_line = "narrator_voice:we_have_initiative_break_siege_outside"
+		}
+	}
+
+	points we_break_siege_from_outside_rebels : we_break_siege_from_outside
+	{	
+		their_army = 0
+		{
+			voice_line = "narrator_voice:friendly_break_siege_outside_rebels" 
+		}
+	}
+
+	/// PLUNDER
+	points enemy_pillages_us : field_battle
+	{		
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_plunder_enemy" 
+		}
+		our_army = 100
+		{
+			voice_line = "narrator_voice:enemy_plunder_player" 
+		}
+	}
+
+	points enemy_pillages_us_rebels : enemy_pillages_us
+	{		
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_plunder_rebels" 
+		}
+	}
+
+	points enemy_pillages_us_famous_rebels : enemy_pillages_us
+	{		
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_plunder_famous_rebels" 
+		}
+	}
+
+	points enemy_pillages_us_loyalists : enemy_pillages_us
+	{		
+		their_army = 0
+		{
+			voice_line = "narrator_voice:enemy_plunder_loyalists" 
+		}
+	}
+
+	points we_pillage_enemy : field_battle
+	{		
+		our_army = 0
+		{
+			voice_line = "narrator_voice:friendly_plunder_player" 
+		}
+		their_army = 1
+		{
+			voice_line = "narrator_voice:friendly_plunder_enemy" 
+		}
+		capture_point = 2// closest to player squad
+		{
+			voice_line = "narrator_voice:capture_point"
+		}
+	}
+
+	points we_pillage_enemy_rebels : we_pillage_enemy
+	{		
+		their_army = 1
+		{
+			voice_line = "narrator_voice:friendly_plunder_rebels" 
+		}
+	}
+}

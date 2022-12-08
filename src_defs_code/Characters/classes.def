@@ -1,0 +1,632 @@
+﻿def CharacterClass
+{
+	text name
+	text description
+	sprite icon
+	sprite icon_extended
+	sprite icon_class_select
+	color color = 128,128,128
+	color color2
+	
+	skill_slots = [ "primary", "primary", "primary", "secondary", "secondary"]
+	
+	royal_abilities
+	{
+		male
+		{
+			int value = [0,5]
+		}
+		female
+		{
+			int value = [1,3]
+			int max_count = 2
+		}
+		ability_names
+		{
+			text Warfare = "Warfare"
+			text Economy = "Economy"
+			text Diplomacy = "Diplomacy"
+			text Religion = "Religion"
+			text Espionage = "Espionage"
+		}
+		ability_descriptions
+		{
+			text Warfare = "This ability mainly boosts the morale of all armies and garrison troops.{p}{p}Abilities of a king (and queen) affect their kingdom's government, regardless what their professions are.{p}{p}Besides the kingdom-wide effects, abilities do not affect the king's personal performance. Princes' and princesses' abilities do not have any effect, until they become kings and queens."
+			text Economy = "This ability mainly boosts trade income and reduces the cost for Buildings and Upgrades.{p}{p}Abilities of a king (and queen) affect their kingdom's government, regardless what their professions are.{p}{p}Besides the kingdom-wide effects, abilities do not affect the king's personal performance. Princes' and princesses' abilities do not have any effect, until they become kings and queens."
+			text Diplomacy = "This ability mainly increases kingdom's diplomatic influence and chances of success of few grand-scale actions.{p}{p}Abilities of a king (and queen) affect their kingdom's government, regardless what their professions are.{p}{p}Besides the kingdom-wide effects, abilities do not affect the king's personal performance. Princes' and princesses' abilities do not have any effect, until they become kings and queens."
+			text Religion = "This ability mainly increases kingdom's cultural power and chances of success of some religious actions to succeed.{p}{p}Abilities of a king (and queen) affect their kingdom's government, regardless what their professions are.{p}{p}Besides the kingdom-wide effects, abilities do not affect the king's personal performance. Princes' and princesses' abilities do not have any effect, until they become kings and queens."
+			text Espionage = "This ability mainly increases espionage defense and chance to reveal enemy spies.{p}{p}Abilities of a king (and queen) affect their kingdom's government, regardless what their professions are.{p}{p}Besides the kingdom-wide effects, abilities do not affect the king's personal performance. Princes' and princesses' abilities do not have any effect, until they become kings and queens."
+		}
+	}
+	
+	opportunities
+	{
+		float recalc_tick = 120/300 // how often we check for new opportunities (per owner)
+		int max_count = 4 // maximum number of activate opportunities (per owner)
+		float min_time_before_new_opportunity = 60 // don't spam the user with new opportunities (per owner)
+	}
+	
+	string class_level_king_ability
+	
+	opportunities_button
+	{
+		sprite icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Diplomat_Call_For_Peace.png:Icon_Action_Diplomat_Call_For_Peace#2" //GUID:cfb02fc10c8278844b97769f519dcb82
+		text tooltip_title = "Exploits and Opportunities"
+		text tooltip_body = "Click to view what opportunities are available"
+		float bar_min
+		float bar_max
+		float bar_cur
+	}
+	
+	actions
+	{
+		HireAction
+		ExileAction
+		ForgetCharacterAction
+		RemoveRebelFromCourtAction
+		RecallAction
+		RecallToThroneRoomAction
+		DisbandArmyAction
+		DisbandRoyalMarshalArmyAction
+		GovernCityAction
+		StopGoverningAction
+		ReassignGovernCityAction
+		AssignNewGovernCityAction
+		CampArmyAction
+		HealArmyUnitAction
+		GatherArmyAction
+		LearnNewSkillAction
+		IncreaseSkillRankAction
+		ReadBookAction
+		AbandonAction
+		OfferRansomAction
+		PuppetFleeKingdom
+		AppointNewArmyLeaderAction
+		EstablishOrderAction
+		PuppetPretenderTakeCrownAction
+		PuppetArmyRevoltAdditionalAction
+		CancelMainAction
+		InspireRiotBaseAction
+		ChangeHeirAction
+		ArmyResupplyCastleAction
+	}
+	
+	voice_lines
+	{
+		///not implemented - on hold until having a discussion, since some of those will be replaced with virtual events, or have some other changes/additons.
+		///Implementation comments will be added later on
+		
+		//"character_voice:exile_crusader"
+		//"character_voice:renounce"
+		//"character_voice:stop_governing"
+		//"character_voice:send_abroad"
+		//"character_voice:arrived_abroad"
+		//"character_voice:educate"
+		//"character_voice:action_confirmation_excommunicate"
+		//"character_voice:action_confirmation_unexcommunicate"
+		//"character_voice:action_confirmation_grandindependence"
+		//"character_voice:action_confirmation_crusade"
+		//"character_voice:action_failed"
+		//"character_voice:decline"
+
+		//Battleview
+		string battle_enemy_squads_leaving_city = "character_voice:enemy_getting_out"
+		string battle_TowersCapturePoint_taken_by_us = "character_voice:we_captured_tower"
+		string battle_TowersCapturePoint_taken_by_enemy = "character_voice:enemy_captured_tower"
+		string battle_enemy_hiding_behind_walls = "character_voice:enemy_hiding_walls" ///!!! delay is hardcoded 3 seconds realtime, too much of a hassle to make it universally have a delay per class, per voiceline
+		string battle_enemy_ladders_placed = "character_voice:enemy-ladders_placed" // the '-' should be a '_', but its wrong in the VO.csv, so it's wrong here too
+		string battle_our_ladders_placed = "character_voice:our_ladders_placed"
+		string battle_enemy_broke_gate = "character_voice:enemy_broke_gate"
+		string battle_enemy_broke_wall = "character_voice:enemy_broke_wall"
+		string battle_enemy_broke_tower = "character_voice:enemy_destroyed_tower"
+		string battle_we_broke_gate = "character_voice:we_broke_gate"
+		string battle_we_broke_wall = "character_voice:we_broke_wall"
+		string battle_we_broke_tower = "character_voice:we_destroyed_tower"
+
+		//Greetings 
+		string select_character_voice_line = "character_voice:greet"
+		string greet_at_sea_voice_line = "character_voice:greet_at_sea"
+		string greet_defending_siege_voice_line = "character_voice:greet_defending_siege"
+		string greet_besieging_voice_line = "character_voice:greet_besieging"
+		string greet_in_battle_voice_line = "character_voice:greet_in_battle"
+		string greet_rebel_voice_line = "character_voice:greet_rebel"
+		string greet_rebel_our_loyalist_voice_line = "character_voice:greet_rebel_our_loyalist"
+		string greet_crusader_voice_line = "character_voice:greet_crusader"
+		string greet_unhired_mercenary = "character_voice:unhired_mercenary_greet"
+		
+		
+		string select_own_prisoner_voice_line = "character_voice:greet"
+		string select_enemy_prisoner_voice_line = "character_voice:greet"
+		//a while ago, there was a suggestion to use "character_voice:imprisoned" voice on enemy_prisoner selection, as well as being randomly triggered and as if the comee from the dungoen (using marshal/merchant/etc. roles instead)
+		///(play select_enemy_prisoner_voice_line for icon.OnSelect in dungeon)
+		string hire_voice_line = "character_voice:greet"
+		string send_abroad = "character_voice:send_abroad"
+		string arrived_abroad = "character_voice:arrived_abroad"
+		
+		string confirm_action = "character_voice:action_confirmation"
+		string action_succeeded = "character_voice:action_success" // "character_voice:action_fail" - review implementation if there is any 
+		string action_failed = "character_voice:action_failed"
+		string cancel_action = "character_voice:cancel_action"
+		string action_cancelled = "character_voice:action_cancelled"
+		
+		//Common 
+		string Decline = "character_voice:decline"
+		string Exile = "character_voice:exile"
+		string Renounce = "character_voice:renounce"
+		string Govern = "character_voice:govern_action"
+		string StopGoverning = "character_voice:stop_governing"
+		string Recall = "character_voice:recall_home" //review implementation 
+		string RecallThroneRoom = "character_voice:recall_throne_room"
+		string GovernPrepInterrupted = "character_voice:govern_prep_interrupted"
+		string RemoveCourtRebel = "character_voice:remove_rebel_court"
+		
+		string learn_skill_voice_line = "character_voice:educate"
+		string skill_level_up_voice_line = "character_voice:educate"
+		
+		string Call_To_Arms = "character_voice:call_to_arms"
+		string Disband_Army = "character_voice:disband_army"
+		
+		//Military Actions - all characters should switch their roles to marshal.
+		
+		string Board = "character_voice:embark"
+		string Land = "character_voice:disembark"
+		string Attack = "character_voice:attack_army" //"character_voice:attack_rebel_army"		
+		string Move = "character_voice:move"
+		string Camp = "character_voice:make_camp"
+		string Fortify = "character_voice:fortify_here"
+		string Deploy = "character_voice:enter_own_castle"
+		string LeaveCastle = "character_voice:leave_castle"
+		string RefillArmy = "character_voice:refill_army"
+		string ResupplyArmy = "character_voice:resupply_army_food"
+		string BreakSiegeFromOutside = "character_voice:break_siege_from_outside"
+		string AttackRebels = "character_voice:attack_rebel_army"
+		//string EstablishOrderSuccess = "" //using "narrator_voice:disorder_ended" instead
+		//string EstablishOrderFail = "" //using "narrator_voice:establish_order_failed" instead
+
+		//take into consideration that some of those are probably implemented in battles.def already.
+		string Pillage = "character_voice:pillage"
+		string Siege = "character_voice:lay_siege"
+		string Retreat = "character_voice:retreat"
+		string Refuse = "character_voice:refuse"
+		string Stop = "character_voice:stop"
+		string AssaultTown = "character_voice:assault_town"
+		string BreakSiegeFromInside = "character_voice:break_siege_from_inside"
+		
+		// Prison-related
+		string AcceptRansom = "character_voice:accept_enemy_prisoner_ransom"
+		string InvitePrisonerToCourt = "character_voice:invite_prisoner_to_our_court"
+		string FreePrisoner = "character_voice:release_enemy_prisoner"
+		string HirePrisonerAsLoyalistSuccess = "character_voice:deal_prisoner_success"
+		string HirePrisonerAsLoyalistFail = "character_voice:deal_prisoner_fail"
+		string HirePrisonerAsLoyalistRogue = "character_voice:deal_prisoner_fail_go_rogue"
+		string OfferRansom = "character_voice:our_prisoner_ransomed"
+		string CancelEscape = "character_voice:cancel_escape_own_prisoner"
+
+		// Mercenary voices
+		string HireMercenaryUnit = "character_voice:visit_mercenaries"
+		string HireMercenaryArmy = "character_voice:hire_mercenary_army"
+		string DismissMercenaryArmy = "character_voice:dismiss_mercenary"
+		
+		//Bettle Commentaries
+		// "character_voice:enemy_reinforcements"
+		// "character_voice:player_heavy_losses"
+		// "character_voice:enemy_heavy_losses"
+		// "character_voice:enemy_army_fled"
+		// "character_voice:enemy_army_shaking"
+		// "character_voice:enemy_broke_gate"
+		// "character_voice:enemy_broke_wall"
+		// "character_voice:enemy_captured_tower"
+		// "character_voice:enemy_destroyed_tower"
+		// "character_voice:enemy_getting_out"
+		// "character_voice:enemy_hiding_walls"
+		// "character_voice:enemy-ladders_placed"
+		// "character_voice:enemy_surrenders"		
+		// "character_voice:our_army_shaking"
+		// "character_voice:our_ladders_placed"
+		// "character_voice:we_destroyed_tower"
+		// "character_voice:we_surrender"
+		// "character_voice:enemy_king_captured"
+		// "character_voice:enemy_prince_captured"
+		// "character_voice:enemy_leader_captured"
+		// "character_voice:enemy_king_killed"
+		// "character_voice:enemy_prince_killed"
+		// "character_voice:enemy_leader_killed"
+		// "character_voice:we_broke_gate"
+		// "character_voice:we_broke_wall"
+		// "character_voice:we_captured_tower"				
+	}
+	
+	sound_effects
+	{
+		string hire_sound_effect = ""
+		string select_character_sound_effect = ""
+		string select_prince_class_sound_effect = ""
+	}
+	
+	bool can_be_picked_randomly_at_start = false
+}
+
+def ClasslessPrince : CharacterClass
+{
+	name = "Prince"
+	actions : null
+	{
+		ChangeHeirAction
+	}
+}
+
+def Marshal : CharacterClass
+{
+	name = "Marshal"
+	description = "Marshal are unmatched army leaders, proficient in the art of war.{p}{p}The main starting advantages of these knights are that they can lead a full-sized army, increase their troops morale and establish order in provinces.{p}[{p}Marshal wages will increase by {marshal_wages_increase}{gold_icon}[{kingdom.marshal_wages:if} (up to {new_marshal_wages}){gold_icon}].]"
+
+	color = 255,0,0 //FF0000FF	
+	icon = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Marshal.png:UI_Icon_Class_Marshal#1" //GUID:8558d4d9be740ab40bd4aa18012e4b37
+	icon_extended = "Assets/UI/Elements/Common/Icons/Class/Icon_Class_Marshal.tga:Icon_Class_Marshal#2" //GUID:b2f0935a9a307ac4a85e15802a78dbcd
+	icon_class_select = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Marshal_Color.psd:UI_Icon_Class_Marshal_Color#1" //GUID:a7be3b65540b88e4995f4224f0d0b768
+	class_level_king_ability = "Warfare"
+	
+	ai_category = "Military"
+	ai_min_court_count = (2 + min(num_wars, 2))
+	ai_max_court_count = 4
+	
+	actions
+	{
+		ForcedCrusadeAction
+	}
+	
+	voice_lines
+	{
+		string exile_crusader = "character_voice:exile_crusader"
+	}
+
+	sound_effects
+	{
+		string hire_sound_effect = "event:/sound_effects/interaction/character/marshal"
+		string select_character_sound_effect = "event:/sound_effects/interaction/character/marshal"
+		string select_prince_class_sound_effect = "event:/sound_effects/interaction/character/marshal"
+	}
+	
+	can_be_picked_randomly_at_start = true
+}
+
+def Merchant : CharacterClass
+{
+	name = "Merchant"
+	description = "Once a trade agreement is signed, merchants can organize and maintain the trade with a selected kingdom, filling your treasury with coins better than any other.{p}{p}The main starting advantages of these knights are their ability to trade, import goods and the high income bonuses where they govern.{p}"
+	
+	color = 255,205,0 //FFCD00FF
+	icon = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Merchant.png:UI_Icon_Class_Merchant#2" //GUID:62a9c2d970fd0dc408fd059c3905592c
+	icon_extended = "Assets/UI/Elements/Common/Icons/Class/Icon_Class_Merchant.tga:Icon_Class_Merchant#2" //GUID:24f3697345a8b2f4786d4cce7f79c339
+	icon_class_select = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Merchant_Color.psd:UI_Icon_Class_Merchant_Color#2" //GUID:69e5f36933749ae4ba4d59d06820c0e2
+	class_level_king_ability = "Economy"
+	
+	ai_category = "Economy"
+	ai_max_court_count = 4
+	
+	opportunities
+	{
+		float recalc_tick = 120/300 // how often we check for new opportunities (per owner)
+		int max_count = 4 // maximum number of activate opportunities (per owner)
+		float min_time_before_new_opportunity = 60 // don't spam the user with new opportunities (per owner)
+	}
+	
+	opportunities_button
+	{
+		icon = "Assets/UI/Elements/Fame/UI_Icon_KingdomAdvantige_MercantileCompany.png:UI_Icon_KingdomAdvantige_MercantileCompany#2" //GUID:7126174a2ca6f6648b892e07d9d8dc55
+		tooltip_title = "Trade Opportunities"
+		tooltip_body = "Click to view what opportunities are available"
+	}
+	
+	actions
+	{
+		TradeWithKingdomAction
+		//TestTradeOpportunity
+		ExpandTradeAction
+		SupplyArmyAction
+		ImportFoodAction
+		ImportFoodActionV2
+		ImportFoodActionV3
+		ImportFoodActionV4
+		ExportFoodAction
+		ExportFoodActionV2
+		ExportFoodActionV3
+		ExportFoodActionV4
+		CancelFoodImportAction
+		CancelFoodExportAction
+		ShunForeignMerchantAction
+		//SecureMercenariesAction
+		ExquisiteRansomOfferAction
+		ImportGoodAction
+		CancelImportGoodAction
+		LucrativeImportAction
+		ProfitableDealAction
+		TradeExpeditionAction
+		RecallFromTradeExpeditionAction
+	}
+	
+	float trade_balance = 1
+	
+	voice_lines
+	{
+		string trade_expedition = "character_voice:trade_expedition"
+		string colony_established = "character_voice:colony_established"
+		string trade_expedition_success = "character_voice:trade_expedition_success"
+		string import_food = "character_voice:import_food"
+		string supply_army_success = "character_voice:supply_army_success"
+		string import_good_success = "character_voice:import_good_success"
+		string export_food = "character_voice:export_food"
+		string exquisite_ransom_action = "character_voice:exquisite_ransom_action"
+		string shun_foreign_merchant = "character_voice:shun_foreign_merchant"
+		string cancel_shun_foreign_merchant = "character_voice:cancel_shun_foreign_merchant"
+		string shun_foreign_merchant_cancelled = "character_voice:shun_foreign_merchant_cancelled"
+		string shun_foreign_merchant_failed = "character_voice:shun_foreign_merchant_failed"
+	}
+	
+	sound_effects
+	{
+		string hire_sound_effect = "event:/sound_effects/interaction/character/merchant"
+		string select_character_sound_effect = "event:/sound_effects/interaction/character/merchant"
+		string select_prince_class_sound_effect = "event:/sound_effects/interaction/character/merchant"
+	}
+	
+	can_be_picked_randomly_at_start = true
+}
+
+def Diplomat : CharacterClass
+{
+	name = "Diplomat"
+	description = "Diplomats can greatly improve the relations with a selected Kingdom, as well as the opinion of the people towards the crown.{p}{p}Additional advantages of these knights are their ability to maintain a defensive pact or invasion plan and their high governing bonuses on commerce and food production.{p}[{p}Diplomat wages will increase by {diplomat_wages_increase}{gold_icon}[{kingdom.diplomat_wages:if} (up to {new_diplomat_wages}{gold_icon})].]"
+	
+	color = 0,128,0
+	icon = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Diplomat.png:UI_Icon_Class_Diplomat#2" //GUID:97fcbc930c0c2ac4790c776ac54cfa04
+	icon_extended = "Assets/UI/Elements/Common/Icons/Class/Icon_Class_Diplomat.tga:Icon_Class_Diplomat#2" //GUID:d1be6adfdb40f6443860928e0ea5d42e
+	icon_class_select = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Diplomat_Color.psd:UI_Icon_Class_Diplomat_Color#2" //GUID:480bbfd2d84e0f54cae956aea72b24e5
+	class_level_king_ability = "Diplomacy"
+	
+	ai_category = "Diplomacy"
+	ai_max_court_count = 2
+	
+	actions
+	{
+		ImproveRelationsAction
+		ImproveOpinionsAction
+		CreateDefensivePactAction
+		CreateOffensivePactAction
+		//FindPactMembersAction
+		//DiplomacySendGiftAction
+		//DiplomacyBecomeFavoriteAction
+		//DiplomacySearchForSpouceAction
+		//DiplomacySearchForHelpWithRebelsAction
+		OpenAudienceAction
+		DiplomacyPeaceTalksPreparationAction
+		DiplomacyPeaceTalksAction
+		DissolveDefensivePactAction
+		DissolveOffensivePactAction
+	}
+	
+	voice_lines
+	{
+		//class-specific
+		string negotiate_peace = "character_voice:negotiate_peace"
+		string cancel_peace_negotiations = "character_voice:cancel_peace_negotiations"
+		string peace_negotiations_cancelled = "character_voice:peace_negotiations_cancelled"
+		string peace_negotiations_started = "character_voice:peace_negotiations_started"
+		string create_pact = "character_voice:create_pact"
+		string dissolve_pact = "character_voice:dissolve_our_pact"
+		string improve_opinions = "character_voice:improve_opinions"
+		string improve_opinions_recall = "character_voice:improve_opinions_recall"
+		string improve_relations_cancelled = "character_voice:improve_relations_cancelled"
+	}
+	
+	sound_effects
+	{
+		string hire_sound_effect = "event:/sound_effects/interaction/character/diplomat"
+		string select_character_sound_effect = "event:/sound_effects/interaction/character/diplomat"
+		string select_prince_class_sound_effect = "event:/sound_effects/interaction/character/diplomat"
+	}
+	
+	can_be_picked_randomly_at_start = true
+}
+
+def Cleric : CharacterClass
+{
+	name = "[{kingdom.cleric_title}|Cleric]"
+	text fallback_name = "Cleric" // used to prevent infinite loops in "name" expansion when there is no kingdom
+	
+	description = $[
+			"[{kingdom.is_catholic:if}{kingdom.cleric_title:s} strengthen the faith and knowledge of the folk and can become cardinals or even the pope.{p}{p}They are able to peacefully end disorder in provinces, convert the religion of provinces and visit Constantinople and Rome to increase relations, piety and book production.{p}]"
+			"[{kingdom.is_orthodox:if}{kingdom.cleric_title:s} strengthen the faith and knowledge of the folk and can become patriarchs of the Ecumenical church or Autocephaly.{p}{p}They are able to peacefully end disorder in provinces, convert the religion of provinces and visit Constantinople and Rome to increase relations, piety and book production.{p}]"
+			"[{kingdom.is_sunni:if}{kingdom.cleric_title:s} strengthen the faith and knowledge of the folk.{p}{p}They are able to peacefully end disorder in provinces, convert the religion of provinces and travel around the world for various benefits.{p}]"
+			"[{kingdom.is_shia:if}{kingdom.cleric_title:s} strengthen the faith and knowledge of the folk.{p}{p}They are able to peacefully end disorder in provinces, convert the religion of provinces and travel around the world for various benefits.{p}]"
+			"[{kingdom.is_pagan:if}{kingdom.cleric_title:s} strengthen the faith of the folk, but are also able to promote one belief and lead a full-sized army.{p}{p}Additionally, they are able to peacefully end disorder in provinces and convert the religion of provinces to paganism.{p}]"
+			"[{p}{kingdom.cleric_title} wages will increase by {cleric_wages_increase}{gold_icon}[{kingdom.cleric_wages:if} (up to {new_cleric_wages}{gold_icon})].]"
+			]
+	
+	color = 95,241,255 //60F2FFFF
+	icon = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Cleric.png:UI_Icon_Class_Cleric#2" //GUID:af0eedeb9181aae45876364c7d0f9c88
+	icon_extended = "Assets/UI/Elements/Common/Icons/Class/Icon_Class_Cleric.tga:Icon_Class_Cleric#2" //GUID:405a0512f7d0a8e42bc1ef6f34eac664
+	icon_class_select = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Cleric_Color.psd:UI_Icon_Class_Cleric_Color#2" //GUID:e36d8ba054300ec4d9118c069725a624
+	class_level_king_ability = "Religion"
+	
+	ai_category = "Religion"
+	ai_max_court_count = (1 + is_pagan)
+	
+	opportunities
+	{
+		float recalc_tick = 120/300 // how often we check for new opportunities (per owner)
+		int max_count = 3 // maximum number of activate opportunities (per owner)
+		float min_time_before_new_opportunity = 60 // don't spam the user with new opportunities (per owner)
+	}
+	
+	actions
+	{
+		ExcommunicateAction
+		CrusadeAction
+		AskToExcommunicateEnemyAction
+		PopeLeaveAction
+		PopeGrantIndependanceAction
+		//MissionInRomeAction
+		//MissionInConstantinopleAction
+		
+		BolsterCultureAction
+		ClericStudyAction
+		HelpTheWeakAction
+		AdoptPopulationAction
+		ConvertProvinceReligionAction
+		AskForCrusadeAction
+		AutocephalyAction
+		SubordinateAction
+		OpenChoosePatriarchAction
+		
+		PromotePaganBeliefAction
+		ChangePaganBeliefAction
+		StopPromotingPaganBeliefAction
+		
+		GoOnAJourneyAction
+		PacifyRebelsAction
+		AppeaseClergyAction
+		ArrangePeaceAction
+		EnlightmentMissionAction
+		ReligiousMissionAction
+		DiplomaticMissionAction
+		GainNeighborsLoyaltyAction
+		ReligionSpreadAction
+	}
+	
+	voice_lines
+	{
+		//class-specific
+		string mission_cancelled = "character_voice:mission_cancelled"
+		string crusade_confirmed = "character_voice:action_confirmation_crusade"
+		string go_on_a_journey = "character_voice:go_on_a_journey"
+		string journey_continues = "character_voice:journey_continues"
+		string journey_completed = "character_voice:journey_completed"
+		string convert_province_to_christian = "character_voice:convert_province_to_christian"
+		string convert_province_to_muslim = "character_voice:convert_province_to_muslim"
+		string convert_province_to_pagan = "character_voice:convert_province_to_pagan"
+		string cancel_province_conversion = "character_voice:cancel_province_conversion"
+		string help_the_weak = "character_voice:help_the_weak"
+		string help_the_weak_recall = "character_voice:help_the_weak_recall"
+		string promote_pagan_belief = "character_voice:promote_pagan_belief"
+		string cancel_pagan_belief = "character_voice:cancel_pagan_belief"
+		string pagan_belief_adopted = "character_voice:pagan_belief_adopted"
+		string autocephaly_action = "character_voice:autocephaly_action"
+		string cancel_autocephaly_action = "character_voice:cancel_autocephaly_action"
+		string confirm_excommunicate = "character_voice:action_confirmation_excommunicate"
+		string decline_excommunicate = "character_voice:excommunicate_enemy_decline"
+		string confirm_crusade = "character_voice:action_confirmation_crusade"
+		string confirm_independence = "character_voice:action_confirmation_grandindependence"
+		string decline_papacy_excommunicated = "character_voice:decline_papacy_excommunicated"
+		string decline_papacy_leave_court = "character_voice:decline_papacy_leave_court"
+	}
+	
+	sound_effects
+	{
+		string hire_sound_effect = "event:/sound_effects/interaction/character/cleric"
+		string select_character_sound_effect = "event:/sound_effects/interaction/character/cleric"
+		string select_prince_class_sound_effect = "event:/sound_effects/interaction/character/cleric"
+	}
+	
+	can_be_picked_randomly_at_start = true
+}
+
+def Spy : CharacterClass
+{
+	name = "Spy"
+	description = "Spies are masters of intrigue, capable of providing considerable intelligence and facilitating shady but important deeds in a selected rival kingdom.{p}{p}Additionally, they provide kingdom stability and espionage defense bonuses, as well as gold and levies in the provinces they govern.{p}[{p}Spy wages will increase by {spy_wages_increase}{gold_icon}[{kingdom.spy_wages:if} (up to {new_spy_wages}{gold_icon})].]"
+	
+	color = 249,34,225 //F923E2FF
+	icon = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Spy.png:UI_Icon_Class_Spy#2" //GUID:4be1d5245303bbc4398c512163c8f742
+	icon_extended = "Assets/UI/Elements/Common/Icons/Class/Icon_Class_Spy.tga:Icon_Class_Spy#2" //GUID:3d3c0933744d66f40aa5097872b52a40
+	icon_class_select = "Assets/UI/Elements/Common/Icons/Class/UI_Icon_Class_Spy_Color.psd:UI_Icon_Class_Spy_Color#2" //GUID:d4e410e84a0677c4e86bf329ec7f5d0e
+	class_level_king_ability = "Espionage"
+	
+	ai_category = "Espionage"
+	ai_max_court_count = 1
+	
+	opportunities
+	{
+		float recalc_tick = 60/90 // how often we check for new opportunities (per owner)
+		int max_count = 8 // maximum number of activate opportunities (per owner)
+		float min_time_before_new_opportunity = 30 // don't spam the user with new opportunities (per owner)
+	}
+	
+	// opportunities_button
+	// {
+	// 	icon = "Assets/UI/Elements/Common/Icons/Icon_Action_Spy_SowDissent.png:Icon_Action_Spy_SowDissent#2" //GUID:38e949bb7fa3667449027101d76800a0
+	// 	tooltip_title = "Exploits and Opportunities"
+	// 	tooltip_body = "Click to view what opportunities are available"
+	// 	bar_min = 0
+	// 	bar_max = (max_intrigue)
+	// 	bar_cur = (intrigue)
+	// }
+	
+	actions
+	{
+		CancelSpyPlotAction
+		WitchHuntRevealAction
+		ForceRevealAction
+		PrinceBecomesKingRevealAction
+		
+		InfiltrateKingdomAction
+		RuinRelationsAction
+		SowDissentAction
+		PlotHelpOurPrisonersEscapeAction
+		HelpFriendlyPrisonersEscape
+		InstigateDungeonRiot
+		BribeNobleAction
+		ProvokeWarAction
+		SpyMurderAction
+		AssassinateRebellionLeader
+		AbductRebellionLeader
+		InspireRebellion
+		BurnFoodStorageAction
+		OpenTheGatesAction
+		InciteLoyalistRebellionAction
+		TurnRebelIntoLoyalist
+		WitchHuntAction
+		
+		// puppet actions
+		ReleasePuppetAction
+		//StopSupportingPretenderToTheThroneAction
+		PuppetArrangeAnnexationAction
+		PuppetArmyRevoltAction
+		PuppetSwitchSidesAction
+		//PuppetArmySurrenderAction
+		PuppetSpreadHeresyAction
+		PuppetPreachAction
+		PuppetStealTreasuryAction
+		PuppetFundRebelsAction
+		PuppetPlotAssassinationAction
+		PuppetHandOverTheCrownAction
+		//PuppetAbandonCaliphateAction
+		PuppetVassalizeAction
+		PuppetVassalizeSmallKingdomAction
+		PuppetDeclareIndependenceAction
+		PuppetSurrenderTownAction
+		PuppetDivertCrusadeAction
+		//PuppetRebelAttackOtherKingdomAction
+		PuppetExcommunicateKingdomAction
+		//PuppetSupportPretenderToTheThroneAction //temporarily removed; if adding it, remember to add back StopSupportingPretenderToTheThroneAction
+		PuppetPlotAbolishAutocephaly
+	}
+	
+	voice_lines
+	{
+		//class-specific
+		string infiltrate_kingdom_cancelled = "character_voice:infiltrate_kingdom_cancelled"
+		string witch_hunt_action = "character_voice:witch_hunt_action"
+		string cancel_spy_plot_action = "character_voice:cancel_spy_plot_action"
+		string rebel_plot_confirmation = "character_voice:rebel_plot_confirmation"
+		string stop_supporting_pretender = "character_voice:stop_supporting_pretender"
+		string spy_plot_cancelled = "character_voice:spy_plot_cancelled"
+	}
+	
+	sound_effects
+	{
+		string hire_sound_effect = "event:/sound_effects/interaction/character/spy"
+		string select_character_sound_effect = "event:/sound_effects/interaction/character/spy"
+		string select_prince_class_sound_effect = "event:/sound_effects/interaction/character/spy"
+	}
+}

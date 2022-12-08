@@ -1,0 +1,69 @@
+﻿def ArcherySkill : Skill
+{
+	name = "Archery"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Archery_1.png:UI_Icon_Skill_Archery_1#2" //GUID:105fab8f0a5f0944f864f5e97adc6bbf
+	icon = [
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Archery_1.tga:UI_Icon_Skill_Archery_1#2", //GUID:8bbfd62d23d5db94db7f4b2adddbe103
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Archery_2.tga:UI_Icon_Skill_Archery_2#2", //GUID:4afe5ab52a326b642ae2c67eebbb4f32
+		"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Archery_3.tga:UI_Icon_Skill_Archery_3#2" //GUID:5448fac5bb61692419e98c222e288bbb
+	]
+	tooltip = "From striking down a nimble hare in the forest to dispatching a sworn enemy rushing towards you, a bow always comes in hand."
+}
+
+extend Skill.effects
+{
+	skill ArcherySkill
+	{
+		Default
+		{
+			mod cs_ranged_CTH_perc = 3/5/10
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+			mod cs_friendly_fire_reduction_perc = 10/20/50
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+			opportunity HuntingIncidentAction
+			mod cs_hunting_incident_chance_perc = 5/10/15
+			
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+	}
+}
+
+// ------ EXAMPLES OF OTHER DEF USES BELOW ------
+
+// class Spy
+// {
+// 	mod cs_debug = 1/2/3 //!!!temporary, for testing, to be removed
+// 	{
+// 		tradition = 10
+// 		text tooltip = "[{prefix_icons} ]{active_fmt}Test per-mod tooltip: {mod_value}{/active_fmt}"
+// 	}
+// 	tag Tradition
+// 	{
+// 		action SowDissentAction //!!!temporary, for testing, to be removed
+// 	}
+// }
+// tag King
+// {
+// 	mod cs_archers_range_perc = 15
+// }
+// tag Govern
+// {
+// 	mod cs_siege_attrition_damage = 15 //{ perc }
+// }

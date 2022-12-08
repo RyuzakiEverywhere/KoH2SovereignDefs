@@ -1,0 +1,46 @@
+﻿def StrategySkill : Skill
+{
+	name = "Strategy"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Strategy_1.png:UI_Icon_Skill_Strategy_1#2" //GUID:4475ebef657347f4e887e4969db1710a
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Strategy_1.tga:UI_Icon_Skill_Strategy_1#2", //GUID:3b8ed13b1e439c1489cadee989fdc611
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Strategy_2.tga:UI_Icon_Skill_Strategy_2#2", //GUID:b24c7748ea4cede4a9fdf7592ce4ca49
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Strategy_3.tga:UI_Icon_Skill_Strategy_3#2" //GUID:d1981ac6a7bafc747a45800ed7034f02
+	]
+	tooltip = "Proper planning is key, especially when dealing with foreign matters."
+}
+
+extend Skill.effects
+{
+	skill StrategySkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_levy_per_keep = 1/2/3
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+			kingdom_mod ks_kingdom_traditions_influence = 10/20/30
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			mod cs_natural_terrain_bonus_perc = 5/10/20
+		}
+		
+		class Diplomat
+		{
+			slot_type = "primary"
+			kingdom_mod ks_kingdom_traditions_influence = 10/15/20
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+			mod cs_spy_reveal_chance_reduction_perc = 3/5/10
+		}
+	}
+}

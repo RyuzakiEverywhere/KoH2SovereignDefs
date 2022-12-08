@@ -1,0 +1,17 @@
+﻿// def ConstructionSkill : Skill
+// {
+// 	name = "Construction"
+// 	icon = "Assets/UI/Elements/Common/Icons/Skills_Character/UI_Icon_Skill_Construction.png:UI_Icon_Skill_Construction#2" //GUID:685cdebcd5ab7024d834332b7dd68cc6
+// 	tooltip = "Construction has different effect on different classes..."
+// }
+
+// extend Skill.effects
+// {
+// 	skill ConstructionSkill
+// 	{
+// 		Default
+// 		{
+// 		}
+// 	}
+// }
+

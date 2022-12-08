@@ -1,0 +1,44 @@
+﻿def TradingSkill : Skill
+{
+	name = "Trading"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Trading_1.png:UI_Icon_Skill_Trading_1#2" //GUID:525e34f99a2bc8a4fb742dc7f0050943
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Trading_1.tga:UI_Icon_Skill_Trading_1#2", //GUID:4cd4cbf975bad954eb0248b9b29912bb
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Trading_2.tga:UI_Icon_Skill_Trading_2#2", //GUID:246cb8423453f8249b685f7dc79e7a20
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Trading_3.tga:UI_Icon_Skill_Trading_3#2" //GUID:2f9b5d41a5b603c4e9c4de21dc91ff19
+	]
+	tooltip = "An invaluable skill which allows one to extract the profit out of any situation."
+}
+
+extend Skill.effects
+{
+	skill TradingSkill
+	{
+		tag Govern
+		{
+			governed_realm_mod rs_governor_prod_food_flat = 1/2/3
+			governed_realm_mod rs_governor_commerce_per_village = 1/2/3
+		}
+		
+		class Merchant
+		{
+			slot_type = "primary"
+			mod cs_base_trading_income = 2/3/5
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+		}
+	}
+}

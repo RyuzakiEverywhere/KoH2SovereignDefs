@@ -1,0 +1,97 @@
+﻿def AttractorSettings
+{
+	int max_peasants = 150
+	float max_wander_distance = 100
+	float time_between_spawns = 7
+	animation_settings
+	{
+		Grasscutting
+		{
+			bool use_radius = true
+			float radius_idle_duration = 6/8
+			float idle_duration = 10/15
+		}
+		Sweeping
+		{
+			bool use_radius = true
+			float radius_idle_duration = 8/10
+			float idle_duration = 15/20
+		}
+	}
+}
+
+def WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Male_01/Male_Villager.prefab" //GUID:812e6fdf17f7fb4488e0e55d716bab8d
+	allowed_animations = ["Idle", "Shoveling", "Hammering", "Woodcutting", "Grasscutting", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithSack", "MoveWithWheat"]
+	float idle_duration = 10/15
+	float move_speed = 2.1
+	float squad_run_away_threshold_dist = 100
+}
+
+def FemalePeasant : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Female_01/Female_Villager_Animation_BV.prefab" //GUID:5cb1f3f0ef569c847a7d066291c19144
+	allowed_animations = ["Idle", "Sweeping", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithMenci", "MoveWithBasket"]
+	float idle_duration = 10/15
+	float move_speed = 1.8
+}
+
+def WanderPeasant2 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Male_02/Male_Villager_02.prefab" //GUID:79b0f9b82bc190b408ad88169d408afa
+	allowed_animations = ["Idle", "Shoveling", "Hammering", "Woodcutting", "Grasscutting", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithSack", "MoveWithWheat"]
+	float idle_duration = 10/15
+	float move_speed = 2.1
+	float squad_run_away_threshold_dist = 100
+}
+
+def FemalePeasant2 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Female_02/Female_Villager_02.prefab" //GUID:60fd3b63d0183984fb874fd54ab54591
+	allowed_animations = ["Idle", "Sweeping", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithMenci", "MoveWithBasket"]
+	float idle_duration = 10/15
+	float move_speed = 1.8
+}
+
+def WanderPeasant3 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Male_03/Male_Villager_03.prefab" //GUID:72f944b739c34254bb4cf0c5ca467462
+	allowed_animations = ["Idle", "Shoveling", "Hammering", "Woodcutting", "Grasscutting", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithSack", "MoveWithWheat"]
+	float idle_duration = 10/15
+	float move_speed = 2.1
+	float squad_run_away_threshold_dist = 100
+}
+
+def FemalePeasant3 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Female_03/Female_Villager_03.prefab" //GUID:0f81b4086d144d545b7eb154877e20e3
+	allowed_animations = ["Idle", "Sweeping", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithMenci", "MoveWithBasket"]
+	float idle_duration = 10/15
+	float move_speed = 1.8
+}
+
+def WanderPeasant4 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Male_04/Male_Villager_04.prefab" //GUID:0b9f31ddbcbfc614a9725d7b4db43a74
+	allowed_animations = ["Idle", "Shoveling", "Hammering", "Woodcutting", "Grasscutting", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithSack", "MoveWithWheat"]
+	float idle_duration = 10/15
+	float move_speed = 2.1
+	float squad_run_away_threshold_dist = 100
+}
+
+def FemalePeasant4 : WanderPeasant
+{
+	prefab model = "Assets/Units/Peasants/Female_04/Female_Villager_04.prefab" //GUID:3c6c4e5721d334d45a1ffce0d0a95d3d
+	allowed_animations = ["Idle", "Sweeping", "Sitting"]
+	allowed_move_animations = ["Move", "MoveWithMenci", "MoveWithBasket"]
+	float idle_duration = 10/15
+	float move_speed = 1.8
+}

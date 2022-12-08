@@ -1,0 +1,60 @@
+﻿def LogisticsSkill : Skill
+{
+	name = "Logistics"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Logistics_1.png:UI_Icon_Skill_Logistics_1#2" //GUID:bdc12b4b037ed3445ad054121faf5b81
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Logistics_1.tga:UI_Icon_Skill_Logistics_1#2", //GUID:0118b5d067b043d4eb940ecae59f6289
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Logistics_2.tga:UI_Icon_Skill_Logistics_2#2", //GUID:9b54ebc1991aa0d4080286513cc9ac27
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Logistics_3.tga:UI_Icon_Skill_Logistics_3#2" //GUID:3aae9195008da264198415653c373b2b
+	]
+	tooltip = "Improves food storage and transportation techniques, in addition to enabling the import of goods from distant kingdoms."
+}
+
+extend Skill.effects
+{
+	skill LogisticsSkill
+	{
+		
+		Default
+		{
+			mod cs_army_speed_world_perc = 2/3/5
+		}
+		
+		class Merchant
+		{
+			slot_type = "primary"
+			
+			tag Govern
+			{
+				governed_realm_mod rs_governor_commerce_per_good = 1/2/3
+			}
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			mod cs_army_supply_usage_perc = -20/-30/-50
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+		}
+		
+		tag Govern
+		{
+			governed_realm_mod rs_governor_max_food_town = 50/100/200
+		}
+		
+	}
+}

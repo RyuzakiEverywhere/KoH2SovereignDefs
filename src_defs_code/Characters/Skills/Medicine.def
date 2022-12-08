@@ -1,0 +1,57 @@
+﻿def MedicineSkill : Skill
+{
+	name = "Medicine"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Medicine_1.png:UI_Icon_Skill_Medicine_1#2" //GUID:975be715cddb4904f8012c53378d2cfb
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Medicine_1.tga:UI_Icon_Skill_Medicine_1#2", //GUID:32996e8d09b70b34787505f6b97a6c3b
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Medicine_2.tga:UI_Icon_Skill_Medicine_2#2", //GUID:1061a3336c6b9264b987dc7986af4041
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Medicine_3.tga:UI_Icon_Skill_Medicine_3#2" //GUID:b5fb300b7abd42f4490a3d368ab5d67d
+	]
+	tooltip = "Expertise in this ancient, ever-expanding field improves one's proficiency in healing."
+}
+
+extend Skill.effects
+{
+	skill MedicineSkill
+	{
+		Default
+		{
+			mod cs_army_refill_cost_perc = -10/-20/-50
+		}
+		
+		tag Govern
+		{
+			governed_realm_mod rs_governor_max_population = 2/3/5
+		}
+		
+		class Marshal
+		{
+			slot_type = "secondary"
+			
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+			mod cs_base_trading_income = 1/2/3
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+			mod cs_murder_plots_CTS_perc = 2/3/5
+		}
+		
+		class Cleric
+		{
+			slot_type = "primary"
+			kingdom_mod ks_culture_from_traditions = 5/10/20
+			
+			tag Govern
+			{
+				governed_realm_mod rs_governor_workers_per_village = 1/2/3
+			}
+			
+		}
+	}
+}

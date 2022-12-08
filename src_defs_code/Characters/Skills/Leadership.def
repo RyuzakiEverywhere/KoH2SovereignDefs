@@ -1,0 +1,59 @@
+﻿def LeadershipSkill : Skill
+{
+	name = "Leadership"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Leadership_1.png:UI_Icon_Skill_Leadership_1#2" //GUID:b5bda102761de784b92b33ad9ec0f55d
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Leadership_1.tga:UI_Icon_Skill_Leadership_1#2", //GUID:e0e69a1905ae5a941a09fa338679d32b
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Leadership_2.tga:UI_Icon_Skill_Leadership_2#2", //GUID:9e343c2af742e8e4facb61c8bc19a53b
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Leadership_3.tga:UI_Icon_Skill_Leadership_3#2" //GUID:ef3a461ac9561df4291409f406c733c6
+	]
+	text tooltip = "Those who lead by example not only strike fear into their opponents, but also inspire their own and strengthen morale."
+}
+
+extend Skill.effects
+{
+	skill LeadershipSkill
+	{
+		Default
+		{
+			mod cs_army_morale = 1/2/3 { text mod_name = "Skill: {defs.Skill.LeadershipSkill}" }
+		}
+		
+		class Marshal
+		{
+			slot_type = "primary"
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Spy
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "secondary"
+		}
+		
+		tag Prison
+		{
+			action InspireRiotAction
+		}
+		
+		tag King
+		{
+			kingdom_mod ks_king_leadership_influence = 100
+			kingdom_mod ks_chance_avoid_opinion_drops_perc = 15
+		}
+		
+	}
+}

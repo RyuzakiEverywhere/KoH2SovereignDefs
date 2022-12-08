@@ -1,0 +1,40 @@
+﻿def CharitySkill : Skill
+{
+	name = "Charity"
+	//icon = "Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Charity_1.png:UI_Icon_Skill_Charity_1#2" //GUID:cc674b17df8b8cd41b656cbc60a45f24
+	icon = [
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Charity_1.tga:UI_Icon_Skill_Charity_1#2", //GUID:12d9288ccdd4df544a629b46b418ce94
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Charity_2.tga:UI_Icon_Skill_Charity_2#2", //GUID:e4c9e145b4a14e740bb2d3dbe7f26711
+	"Assets/UI/Elements/Common/Icons/Skills/UI_Icon_Skill_Charity_3.tga:UI_Icon_Skill_Charity_3#2" //GUID:b63127e5dfa3a004199aae9aff19e9eb
+	]
+	tooltip = "A noble act of giving alms and providing help to those in need."
+}
+
+extend Skill.effects
+{
+	skill CharitySkill
+	{
+		tag Govern
+		{
+			mod cs_happiness_boost = 5/10/20
+			governed_realm_mod rs_governor_workers_per_village = 1/2/3
+		}
+		
+		class Merchant
+		{
+			slot_type = "secondary"
+		}
+		
+		class Diplomat
+		{
+			slot_type = "secondary"
+		}
+		
+		class Cleric
+		{
+			slot_type = "primary"
+			action HelpTheWeakAction
+			mod cs_help_the_weak_stability = 3/5/10
+		}
+	}
+}

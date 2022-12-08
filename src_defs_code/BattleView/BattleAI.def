@@ -1,0 +1,262 @@
+﻿def BattleAI
+{
+	// DIFFICULTY SETTINGS
+	// values are per difficulty: <easy>/<normal>/<hard>/<very_hard>
+	// "/*** ***/" are difficulty notes,
+	// in general too big changes in regard to normal difficulty could create weird unbalanced situations, so keep up the scale :)
+	// and remember that some values are different for specific battles and needs to be changed there
+
+	float update_interval = 4 / 4 / 4 / 4	//how often ai is updated 	/*** lower values should make ai react quicker (values under 1s could make game run slower), bigger values will make ai more clunky ***/
+	float change_decision_ratio = 1.5 / 1.5 / 1.5 / 1.5 // commands with a priority 1.5 times or higher than the current command will interrupt it 	/*** avoid too low values to avoid hysteresis loop ***/
+	float change_decision_ratio_in_other_combat = 1.75 / 1.75 / 1.75 / 1.75 // to make it harder to change decision if already fighting other unit 	/*** could be less for easier difficulties, and more for harder ***/
+	float change_decision_ratio_in_combat = 0.75 / 0.75 / 0.75 / 0.75  // to make it easier to attack unit that you are already fighting /*** could be less for easier difficulties, and more for harder ***/
+	
+	/// command mods - take into account that most command priorities range from 0-100 (hard clamps in some situations like grid threat)
+	/// command mods are allowed to take the priority past the 100 maximum
+	float attack_command_mod = 1 / 1 / 1 / 1	// /*** could make ai more or less aggressive in overall, but its probably better to touch other attack modificators ***/
+	/// Attack priorities for sorting squad assignments
+	// base priority
+	float threat_mod = -1 / -1 / -1 / -1 // prioritize less threatening areas of the map /*** could make ai less fearful but too big value could allow for suicidal actions ***/
+	float noble_bonus = 0 / 5 / 10 / 15 // prioritize the noble units /*** a little bigger value for higher difficulties could make player life harder ***/
+	float shock_mod = 1 / 1.2 / 1.4 / 1.6 // prioritize low morale units /*** bigger value for higher difficulties and lower for easy should do it ***/
+	float noble_attacked_bonus = 10 / 10 / 10 / 10 // prioritize units attacking your nobles /*** bigger values could help keep ai noble alive but also drag away units from other player forces ***/
+	float archer_attacked_bonus = 0 / 5 / 7 / 10 //prioritize units attacking your archers /*** bigger values could help keep ai archers alive but also drag away units from other player forces ***/
+	float siege_eq_attacked_bonus = 0 / 5 / 7 / 10//prioritize units attacking your siege eq	/*** bigger values could help keep ai siege eq alive but also drag away units from other player forces ***/
+	float drop_per_squad = 10 / 10 / 10 / 10 //how much priority should drop per squad added to command /*** lower values will make more units attack single player unit (probably better for high difficulty?) ***/
+	
+	// additional per-troop order priority
+	float infantry_archer_attacker_bonus = 0 / 5 / 10 / 15 // prioritize sending infantry units if enemy is attacking your archers /*** it probably doesnt matter that much as if attacked by cavalry they are probably dead and they can run away from infantry ***/
+	float anti_cavalry_bonus = -5 / -10 / -20 / -25 // (dont)prioritize anti-cavalry units if you are cavalry, or prioritize cavalry units if you're anti-cavalry /*** could be bigger on easy and a little lower for hard ***/
+	float cavalry_vs_ranged_bonus = 0 / 10 / 15 / 20 // prioritize archers more if you are cavalry /*** could be less on easy and a little more for hard ***/
+	float cavalry_vs_lone_squad_mod = 1.25 / 1.25 / 1.25 / 1.25 // prioritize squads with low threat if you are cavalry /*** will make more often cavalry be dragged away from main battle, but could help in avoiding one unit point capturing ***/
+	float distance_mod = -0.2 / -0.2 / -0.2 / -0.2 // prioritize units closer to you /*** it probably doesnt matter much for difficulty settings ***/
+	float speed_mod = 0 / 0 / 0 / 0 //was 10 // prioritize units that are slower than you /*** bigger will make cavalry prefer to attack infantry and infantry avoid cavalry (!!! spearmen also) ***/
+	float health_mod = 2 / 2 / 2 / 2 // prioritize units that are weaker than you /*** probably could be little more for hard, and less for easy ***/
+	float climbing_squad_bonus = 0 / 8 / 12 / 15 //prioritize units that are climbing /*** it probably doesnt matter much for difficulty settings ***/
+	float threat_comparison_mod = 0.5 / 0.5 / 0.5 / 0.5 // used to prioritize units that are slightly more powerful than enemy /*** lower values will allow more idiotic attacks, so could be lower for easy ***/
+	float optimal_threat_advantage = 5 / 5 / 5 / 5 // how much powerful should be optimal unit for attack (in threat x10 scale) /*** should be the same for all difficulties ***/
+	float morale_mod = 0.1 / 0.1 / 0.1 / 0.1 // prioritize units that have less morale than you /*** probably could be little more for hard, and less for easy, formula: lPriority += (attacker_morale - target_morale) * ai.def.morale_mod ***/
+	float fighting_other_bonus = -20 / -15 / -10 / -5 // if unit is fighting with other enemy should not change it for another one easily /*** could be less for easier difficulties (to not avoid player initialized fights), and more for harder ***/
+	float already_fighting_bonus = 20 / 15 / 10 / 5 // if unit is fighting with enemy should have priority to continue fight with him /*** could be less for easier difficulties (to not avoid player initialized fights), and more for harder ***/
+	float not_engaged_attack_dist_mod = 0.5 / 0.5 / 0.5 / 0.5 //multiplier for max attack distance when none of the squads is fighting /*** could be same for all difficulties ***/
+	
+	// attackers per target /*** probably could be -1 for easy but be careful, better not make bigger to avoid too much squads in one place ***/
+	int max_cavalry_per_squad = 2 / 2 / 2 / 2 
+	int max_infantry_per_squad = 3 / 3 / 3 / 3 
+	int max_ranged_per_squad_ranged = 3 / 3 / 3 / 3 
+	int max_ranged_per_squad_melee = 2 / 2 / 2 / 2 
+	
+	float charge_dist = 40 / 45 / 50 / 50 // double time if within this distance to the target /*** slighty lower distance will make squad charge later keeping more stamina but slower moving towards enemy ***/
+	
+	float attack_command_safe_shooting_range_mod = 0.7 / 0.7 / 0.7 / 0.7 //Min safe shooting range for archers /*** could be less for easy, archers will start avoiding later ***/
+	
+	float eng_engage_perc = 75 / 75 / 75 / 75 // if this much of your army is engaged, you can only attack/retreat /*** could be a little less for hard? to not just watch your friends being slaughtered ***/
+	float est_engage_perc_max = 60 / 65 / 70 / 75 // if estimation is above this percent, you can only attack /*** doesnt really matter player will lose anyway ***/
+	float est_engage_perc_min = 30 / 20 / 15 / 10 // if estimation is below this percent, you can only attack /*** could be little bigger on easy for faster suicide ***/
+	float max_attack_dist = 100 / 100 / 100 / 100 // cavalry/ranged will only attack enemies within this range, otherwise try to keep formation
+	float max_attack_dist_cavalry_vs_lone_squad = 100 / 150 / 175 / 200 //cavalry could attack lone squads that are far away /*** could be a little more on hard and less on easy ***/
+	float max_optimal_position_search_dist = 0 / 10 / 15 / 20 //distance for searching better position for archers
+
+	/// retreating
+	float retreat_command_mod = 0.5 / 0.8 / 0.9 / 1 // /*** on easy  this could be little lower so squads will fight also in worse situation ***/
+	float retreat_command_mod_noble = 1.5 / 2 / 2.5 / 3 // only if there are more than 1 enemy, or your current enemy isn't an enemy noble /*** on easy  this could be little lower so noble squad will fight also in worse situation ***/
+	float retreat_command_max_time = 16 / 14 / 12 / 10 // max retreat time /*** on easy this could be little bigger so squads will escape further if they decide to escape ***/
+	float retreat_command_cd_time = 30 / 30 / 30 / 30 // base AI retreat cooldown to not retreat all the time /*** on easy this could be little bigger ***/
+	float max_retreat_dist = 30 / 26 / 23 / 20 // how far you should try to retreat /*** on easy this could be little bigger so squads will escape further if they decide to escape ***/
+	float retreat_command_threat_mod = 90 / 90 / 90 / 90 // mod for threat around squad
+	
+	///defend /*** rather there is no need to tweak it for different difficulties ***/
+	float defend_max_dist = 600 / 600 / 600 / 600 //max defend distance, added to prevent units to defend when they are on the other side of map.
+	float defend_command_mod = 1 / 1 / 1 / 1 // mod for neutral capture points
+	float defend_command_mod_victory = 1 / 1 / 1 / 1 //prioritize defending capture points that are important.
+	float defend_defender_mod = 1 / 1 / 1 / 1 //mod for defending side
+	float defend_attacker_mod = 1 / 1 / 1 / 1 //mod for attacking side
+	float defend_additional_radius = 20 / 20 / 20 / 20 //additional threat scan radius for capture point.
+	float defend_distance_value_base = 55 / 55 / 55 / 55 //how important is enemy distance to point
+	float defend_threat_mod = 20 / 20 / 20 / 20 // how imporant is threat to defending point
+	float defend_importance_mod = 1 / 1 / 1 / 1 // prioritize more important capture points
+	float defend_gate_mod = 1.3 / 1.3 / 1.3 / 1.3 //focus on gate mod
+	float defend_fortification_mod = 0.7 / 0.7 / 0.7 / 0.7 //dont prioritize fortifications when city is open
+	float defend_targeting_point_mod = 6 / 6 / 6 / 6//focus on point that is targeted by enemy squads
+	float defend_archer_bonus = -10 / -10 / -10 / -10 //value added to archers priority for defending points
+	float defend_noble_bonus = -5 / -5 / -5 / -5 //value added to noble priority for defending points
+	float defend_speed_mod = -2 / -2 / -2 / -2 //modificator for value added to squad priority (bonus = defend_speed_mod * squed_speed)
+	float defend_per_cp_diff_bonus = 5 / 5 / 5 / 5 //priority bonus per every enemy capture point difference
+	float defend_last_cp_mod = 3 / 3 / 3 / 3 //modificator for defending last capture point
+	float defend_per_targeting_enemy_amount_bonus = 0.5 / 0.5 / 0.5 / 0.5 //how many defenders shoud be added per one attacking unit targeting point
+	float defend_per_enemy_in_range_amount_bonus = 0.5 / 0.5 / 0.5 / 0.5 //how many defenders shoud be added per one attacking unit in cp range
+	int defend_base_squads_ammount = 3 / 3 / 3 / 3 //base ammount of units to defend point
+	
+	///defend subcommands:
+	///the squads are choosing one of the subcommands when assigned to defend command
+	///attack subcommand - attack one of enemy squads in capture point radius + defend_additional_radius
+	///intercept subcommand - attack one of enemy squads targeting capture point (only valid if enemy squad is closer to defending squad than to capture point)
+	///avoid subcommand - avoid ranged fire and still stand in capture point range - or attack enemy ranged units if there is no other choice
+	///protect point subcommand - just stay inside the capture point radius
+	float defend_scmd_attack_base_priority = 60	/ 60 /60 / 60						//base priority of attack subcommands (this subcommand priority is lowered per every squad doing it)
+	float defend_scmd_attack_capturing_bonus = 20 / 20 / 20 / 20					//prioritize squads that are capturing point
+	float defend_scmd_attack_distance_bonus = -0.05	/ -0.05 / -0.05 / -0.05			//prioritize squads near capture point
+	float defend_scmd_attack_already_in_melee_bonus = -10 / -10 / -10 / -10			//prioritize squads that are not fighting anyone, bonus added per every squad in melee with target
+	float defend_scmd_intercept_base_priority = 60 / 60 / 60 / 60					//base priority of intercept subcommand (this subcommand priority is lowered per every squad doing it)
+	float defend_scmd_intercept_already_in_melee_bonus = -15 / -15 / -15 / -15		//prioritize squads that are not fighting anyone, bonus added per every squad in melee with target
+	float defend_scmd_intercept_distance_bonus = -0.05 / -0.05 / -0.05 / -0.05		//prioritize closer enemy squads targeting cp
+	float defend_scmd_intercept_speed_mul = 2 / 2 / 2 / 2							//prioritize faster squads when choosing squads for this subcommand
+	float defend_scmd_avoid_base_priority = 39 / 39 / 39 / 39						//base priority of attack subcommands
+	float defend_scmd_avoid_avoid_range = 10 / 10 / 10 /10							//how far should squad go of enemy missile range
+	float defend_scmd_protect_point_base_priority = 20 / 20 / 20 / 20				//base priority of protect point subcommand
+	float defend_scmd_protect_point_enemy_capturing_bonus = 20 / 20 / 20 / 20 		//bonus added when enemy is capturing point
+
+	///capture /*** rather there is no need to tweak it for different difficulties ***/
+	float capture_defender_mod = 1 / 1 / 1 / 1 //mod for defending side
+	float capture_attacker_mod = 1 / 1 / 1 / 1 //mod for attacking side
+	float capture_mod_range_min = 1 / 1 / 1 / 1 //mod for min random range mod
+	float capture_mod_range_max = 1 / 1 / 1 / 1 //mod for max random range mod
+	float capture_threat_base = 90 / 90 / 90 / 90 // base threat value
+	float capture_threat_mod = 4 / 4 / 4 / 4 //mod for threat around capture point /*** We are searching for capture point with lower threat ***/
+	float capture_importance_mod = 40 / 40 / 40 / 40 // bonus mod to important capture points
+	float capture_distance_mod = 1 / 1 / 1 / 1 // mod for distance penalty
+	float capture_gate_mod = 1.3 / 1.3 / 1.3 / 1.3 //mod for gate when there is no passage inside 
+	float capture_fortification_mod = 1 / 1 / 1 / 1 // mod for fortification type of capture point
+	float capture_max_dist = 110 / 110 / 110 / 110 // max distance from capture point to execute command 
+	float capture_per_cp_diff_bonus = 5 / 5 / 5 / 5 //priority bonus per every enemy capture point difference
+	
+	///keep formation
+	float keep_formation_defender_mod = 20 / 20 / 20 /20 // /*** doesnt matter for difficulty the values are low anyway ***/
+	float keep_formation_attacker_mod = 20 / 20 / 20 / 20 // /*** doesnt matter for difficulty the values are low anyway ***/
+	bool keep_formation_defensive_mode = false / false / false / false
+	float keep_formation_range_main = 200 / 200 / 200 / 200 // Max range to join main formations
+	float keep_formation_range_sub = 150 / 150 / 150 / 150 // Max range to join sub formations
+	float keep_formation_additional_safe_distance = 70 / 70 / 70 / 70 // Additional distance for units to stay away from unreachable range enemies
+	
+	//Destroy wall command
+	float destroy_wall_base = 100 / 100 / 100 / 100 //Base value for destroying walls when there currently no wall destroyed /*** doesnt matter for difficulty ***/
+	float destroy_wall_destroyed_mod = 0.5 / 0.5 / 0.5 / 0.5 //Mod to apply after any wall is destroyed /*** could make siege eq focus more on troops so could be lower on higher difficulty ***/
+	
+	// Following army commanders
+	float follow_command_base = 5 / 5 / 5 / 5 //Base value for follow command for siege eq /*** doesnt matter for difficulty ***/
+	
+	float flanking_chance = -1 / -1 / -1 / -1 //Chance for dividing some cavalry from main formation to attack from flank /*** higher chance will make cavalry flank more often, could be adjusted for difficulties ***/
+	float treat_like_group_distance = 70 / 70 / 70 / 70 //how far away squad can be from any other group squad /*** should be the same for every difficulty, better not touch :) ***/
+
+	//formation changing (choosing best formation for combat situation, checked every tick)
+	float low_tier_formation_change_chance = 0.01 / 0.1 / 0.2 / 1;
+	float mid_tier_formation_change_chance = 0.02 / 0.2 / 0.4 / 1;
+	float high_tier_formation_change_chance = 0.03 / 0.3 / 0.6 / 1;
+}
+
+def BattleAIOpenField : BattleAI
+{
+	keep_formation_defender_mod = 20 / 20 / 20 / 20
+	keep_formation_attacker_mod = 20 / 20 / 20 / 20
+	
+	not_engaged_attack_dist_mod = 0.75 / 0.75 / 0.75 / 0.75
+	
+	retreat_command_mod = 1 / 1 / 1 / 1
+	
+	capture_mod_range_min = 0.75 / 0.75 / 0.75 / 0.75
+	capture_mod_range_max = 1 / 1 / 1 / 1
+	
+	defend_command_mod = 0.1 / 0.1 / 0.1 / 0.1
+	defend_additional_radius = 10 / 10 / 10 / 10
+	defend_distance_value_base = 60 / 60 / 60 / 60
+	defend_threat_mod = 1 / 1 / 1 / 1
+	defend_targeting_point_mod = 8 / 8 / 8 / 8
+	defend_base_squads_ammount = 0 / 0 / 0 / 0
+	defend_per_targeting_enemy_amount_bonus = 1 / 1 / 1 / 1
+	defend_per_enemy_in_range_amount_bonus = 1 / 1 / 1 / 1
+	defend_speed_mod = 2 / 2 / 2 / 2
+	
+	flanking_chance = 0.25 / 0.25/ 0.25 / 0.25
+}
+
+def BattleAIOpenFieldAdvantage : BattleAIOpenField
+{
+	flanking_chance = 1 / 1 / 1 / 1
+	
+	drop_per_squad = 13 / 13 / 13 / 13
+}
+
+def BattleAIOpenFieldMoreUnits : BattleAIOpenField
+{
+	capture_max_dist = 150 / 150 / 150 / 150
+	flanking_chance = 0.9 / 0.9 / 0.9 / 0.9
+}
+
+def BattleAIOpenFieldLessUnitsAdvantage : BattleAIOpenField
+{	
+	drop_per_squad = 15 / 15 / 15 / 15
+	capture_attacker_mod = 0.9 / 0.9 / 0.9 / 0.9
+	capture_defender_mod = 0.9 / 0.9 / 0.9 / 0.9
+	cavalry_vs_ranged_bonus = 15 / 15 / 15 / 15
+	anti_cavalry_bonus = -25 / -25 / -25 / -25
+	capture_distance_mod = 1.2 / 1.2 / 1.2 / 1.2
+	max_infantry_per_squad = 2 / 2 / 2 / 2
+	shock_mod = 1.1 / 1.1 / 1.1 / 1.1
+	distance_mod = -0.15 / -0.15 / -0.15 / -0.15
+	retreat_command_mod = 1.05 / 1.05 / 1.05 / 1.05
+}
+
+def BattleAIOpenFieldLessUnitsDisadvantage : BattleAIOpenField
+{
+	flanking_chance = 0.05 / 0.05 / 0.05 / 0.05
+	
+	drop_per_squad = 7 / 7 / 7 / 7
+	capture_attacker_mod = 0.8 / 0.8 / 0.8 / 0.8
+	capture_defender_mod = 0.8 / 0.8 / 0.8 / 0.8
+	cavalry_vs_ranged_bonus = 15 / 15 / 15 / 15 
+	anti_cavalry_bonus = -25 / -25 / -25 / -25
+	capture_distance_mod = 1.3 / 1.3 / 1.3 / 1.3
+	max_infantry_per_squad = 2 / 2 / 2 / 2
+	max_cavalry_per_squad = 1 / 1 / 1 / 1
+	shock_mod = 1.2 / 1.2 / 1.2 / 1.2
+	distance_mod = -0.15 / -0.15 / -0.15 / -0.15
+	retreat_command_mod = 1.05 / 1.05 / 1.05 / 1.05
+	max_attack_dist_cavalry_vs_lone_squad = 120 / 120 / 120 / 120
+	cavalry_vs_lone_squad_mod = 1.6 / 1.6 / 1.6 / 1.6
+}
+
+def BattleAIPlunder : BattleAIOpenField
+{
+	
+}
+
+def BattleAIAssault : BattleAI
+{
+	drop_per_squad = 5 / 5 / 5 / 5
+	
+	defend_defender_mod = 1 / 1 / 1 / 1
+	defend_attacker_mod = 0.3 / 0.3 / 0.3 / 0.3
+	defend_command_mod_victory = 1.1 / 1.1 / 1.1 / 1.1
+	defend_threat_mod = 10 / 10 / 10 / 10
+	defend_additional_radius = 20 / 20 / 20 / 20
+	defend_distance_value_base = 40 / 40 / 40 / 40
+	
+	capture_defender_mod = 0.7 / 0.7 / 0.7 / 0.7
+	
+	keep_formation_attacker_mod = 25 / 25 / 25 / 25
+	keep_formation_defender_mod = 1 / 1 / 1 / 1
+	
+	max_attack_dist_cavalry_vs_lone_squad = 110 / 110 / 110 / 110
+}
+
+def BattleAIBreakSiege : BattleAI
+{
+	attack_command_mod = 1 / 1 / 1 / 1
+
+	max_attack_dist = 110 / 110 / 110 / 110
+
+	defend_defender_mod = 0.4 / 0.4 / 0.4 / 0.4
+	defend_attacker_mod = 1 / 1 / 1 / 1
+	defend_additional_radius = 30 / 30 / 30 / 30
+	defend_distance_value_base = 35 / 35 / 35 / 35
+	
+	capture_attacker_mod = 0.4 / 0.4 / 0.4 / 0.4
+	capture_distance_mod = 1.5 / 1.5 / 1.5 / 1.5
+	
+	keep_formation_defender_mod = 30 / 30 / 30 / 30
+	keep_formation_attacker_mod = 30 / 30 / 30 / 30
+	
+	retreat_command_mod = 1.1 / 1.1 / 1.1 / 1.1
+	
+	max_attack_dist_cavalry_vs_lone_squad = 100 / 100 / 100 / 100
+}

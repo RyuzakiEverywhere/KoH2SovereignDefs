@@ -1,0 +1,57 @@
+﻿def CapturePoint
+{
+	float radius_mod = 1
+	material material = "Assets/BattleView/CapturePoint/CapturePointSelection.mat" //GUID:7edfa4e15df63784a966a7dde71dda9b
+	sprite icon = "Assets/UI/Elements/Common/Icons/Buildings/UI_Structure_WatchTowers.png:UI_Structure_WatchTowers#2" //GUID:0f0d22303f8c62349ac306c39aa0c3e7
+	text name = "Capture Point"
+	bool count_victory = true
+	text tooltip = $["Move troops here to take hold of this critical position. Controlling all capture points will secure victory for your forces.{p}{p}"
+	"Controlled by: {controller} ({control:F0}%)[{is_capturing:if}{p}Contested by: {challenger}]"]
+	sprite minimap_icon_own = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Green_Star.psd:Element_UI_Minimap_Green_Star#2" //GUID:0524c6d9fec2cd441887b47bf186074a
+	sprite minimap_icon_enemy = "Assets/UI/BattleView/Elements/Minimap/Element_UI_Minimap_Red_Star.psd:Element_UI_Minimap_Red_Star#2" //GUID:ea6c0a1b76bb5614c97b97b433503f2e
+	float minimap_scale = 2
+	float capture_time = (13 + 2 * friendly_squads) // friendly to the camp
+	
+	color friendly_flag_color = "0,115,15" //00730FFF
+	color enemy_flag_color = "139,0,0" //8C0000FF
+
+	string OurCapturePointTakenByUs = "narrator_voice:our_capture_point_taken_by_us"
+	string OurCapturePointTakenByEnemy = "narrator_voice:our_capture_point_taken_by_enemy"
+	string EnemyCapturePointTakenByUs = "narrator_voice:enemy_capture_point_taken_by_us"
+	string EnemyCapturePointTakenByEnemy = "narrator_voice:enemy_capture_point_taken_by_enemy"
+
+	string EnemyAttemptsTakeOurCapturePoint = "narrator_voice:enemy_attempts_to_take_our_capture_point"
+	string WeAttemptTakeOurCapturePoint = "narrator_voice:we_attempt_to_take_our_capture_point"
+	string EnemyAttemptTakeEnemyCapturePoint = "narrator_voice:enemy_attempts_to_take_enemy_capture_point"
+	string WeAttemptTakeEnemyCapturePoint = "narrator_voice:we_attempt_to_take_enemy_capture_point"
+}
+
+def TowersCapturePoint : CapturePoint
+{
+	text name = "Tower"
+	icon = "Assets/UI/Elements/Common/Icons/Settlements/UI_Settlement_Keep.png:UI_Settlement_Keep#2" //GUID:eacddc57c3644064298f7a77ed54d6a7
+	count_victory = false
+	
+	capture_time = (10 * (100 + siege_defense * 0.3) / 100)
+
+	// character plays these
+	OurCapturePointTakenByUs = ""
+	OurCapturePointTakenByEnemy = ""
+	EnemyCapturePointTakenByUs = ""
+	EnemyCapturePointTakenByEnemy = ""
+}
+
+def GatesCapturePoint : CapturePoint
+{
+	text name = "Gate"
+	icon = "Assets/UI/Elements/Common/Icons/Fortifications/Icon_Fortifications_2.png:Icon_Fortifications_2#2" //GUID:1aa311c07806a954bac5b03b169a3aaa
+	count_victory = false
+	
+	capture_time = (10 * (100 + siege_defense * 0.3) / 100)
+}
+
+def ArmyCampCapturePoint : CapturePoint
+{
+	text name = "Camp"
+	icon = "Assets/UI/Elements/Common/Icons/Icon_Mercs.psd:Icon_Mercs#1" //GUID:d698de99a8e103b4cb503743e8b22995
+}
