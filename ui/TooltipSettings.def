@@ -1,5 +1,0 @@
-﻿def TooltipSettings
-{
-	prefab simple_prefab = "Assets/UI/Elements/Tooltips/SimpleTooltip.prefab" //GUID:c36711a6512bc434090ed75a96e8edef
-	prefab caption_prefab = "Assets/UI/Elements/Tooltips/CaptionTooltip.prefab" //GUID:9d3843e0d00ed5e43a7c04ca1a718286
-}
