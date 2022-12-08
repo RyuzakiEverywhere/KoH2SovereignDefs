@@ -1,0 +1,47 @@
+﻿///////////////////////////////////
+// BUTTONS
+
+def ButtonAudioSet
+{	
+	//string roll_over = "event:/sound_effects/interface/default/roll_over"
+	string click = "event:/sound_effects/interface/default/click"
+}
+
+def DefaultAudioSetPaper : ButtonAudioSet
+{
+	roll_over = "event:/sound_effects/interface/paper/roll_over"
+	click = "event:/sound_effects/interface/paper/click"
+}
+
+def DefaultAudioSetMetal : ButtonAudioSet
+{
+	//roll_over = "event:/sound_effects/interface/default/roll_over" //obsolete
+	click = "event:/sound_effects/interface/default/click"
+}
+
+def DefaultTitleAudioSet : ButtonAudioSet
+{
+	//roll_over = "event:/sound_effects/interface/default/roll_over" 
+	click = "event:/sound_effects/interface/default/click"
+}
+
+///////////////////////////////////
+// WINDOWS
+
+def WindowAudioSet
+{
+	string open
+	string close
+}
+
+def DefaultWindowAudioSet : WindowAudioSet
+{
+	open = ""
+	close = "" 
+}
+
+def NotificationAudioSet : WindowAudioSet
+{
+	open = ""
+	close = ""
+}

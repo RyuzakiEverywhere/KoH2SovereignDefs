@@ -1,0 +1,747 @@
+def IncomePanel
+{
+	prefab total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Left.prefab" //GUID:701483736ee918844920a1e2e4747335
+	prefab subtotal = "Assets/UI/Elements/KingdomIncome/UIP_IncomeSubtotal.prefab" //GUID:292a7473e3f270741a8f24e75403fa71
+	prefab row = "Assets/UI/Elements/KingdomIncome/UIP_IncomeRow.prefab" //GUID:43e7b5493f40d0747a69b72e4def3de7
+	prefab separator = "Assets/UI/Elements/KingdomIncome/UIP_IncomeSeparator.prefab" //GUID:a7d327847e162804c83d500accfd9368
+	bool show_dash_if_zero = true
+	bool show_subtotal_tooltips = true
+}
+
+def KingdomGoldIncomePanel : IncomePanel
+{
+	total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Left.prefab" //GUID:701483736ee918844920a1e2e4747335
+	total Income = "TOTAL"
+	{
+		text label = "Income"
+		string value_form = "temp_income_window_bonus"
+		text description = "The amount of gold our {kingdom.KingdomType} currently gathers"
+	}
+	
+	subtotal Base = "Kingdom.ks_base_gold_income"
+	{
+		text label = "Base Income"
+		text description = "A basic sum of gold gathered from all facets of {kingdom:s} economy."
+	}
+		
+	subtotal RoyalLands = "ROYAL_LANDS"
+	{
+		text label = "Royal Lands"
+		text description = "The amount of coins gathered from all governed provinces - their full gold income."
+	}
+
+	subtotal Provinces = "PROVINCES"
+	{
+		text label = "Provinces"
+		text description = "The amount of coins gathered from all ungoverned provinces - {kingdom.def.tax_rates:%} from their gold income."
+	}
+	
+	// details Taxes = "TAXES"
+	// {
+	// 	text label = "Taxes"
+	// 	text description = "The amount of coins gathered from all ungoverned provinces, determined by the current tax rates."
+	// 	string value_form = "bonus"
+	// }
+	
+	subtotal Trade = "SUBTOTAL"
+	{
+		text label = "Trade"
+	}
+	
+	// row RoyalTrade = "ROYAL_TRADE"
+	// {
+	// 	text label = "Royal Trade"
+	// }
+	
+	// details PassiveTrade = "Kingdom.CalculateGoldFromPassiveTrade"
+	// {
+	// 	text label = "Passive Trade"
+	// 	text description = "Gold from small trade between our kingdom and the ones we have trade agreements with."
+	// }
+	
+	details ForeignTrade = "Kingdom.CalculateGoldFromMerchants"
+	{
+		text label = "Our Merchants"
+		text description = "Gold brought by our merchants who trade with other kingdoms or maintain distant expeditions."
+		string value_form = "bonus"
+	}
+	
+	details VisitingTraders = "Kingdom.CalculateGoldFromForeignMerchants"
+	{
+		text label = "Visiting Merchants"
+		text description = "Foreign merchants who visit our {kingdom.KingdomType} generate a steady supply of gold, thanks to our trade agreements with their respective kingdoms."
+		string value_form = "bonus"
+	}
+	
+	details TradeCenters = "Kingdom.CalculateUntaxedGoldFromTradeCenters"
+	{
+		text label = "Trade Centers"
+		text description = "Gold generated within the bustling trade centers of our {kingdom.KingdomType}. Trade centers become more profitable as their influence expands to surrounding provinces."
+		string value_form = "bonus"
+	}
+	
+	details GoodsProducedAndImported = "Kingdom.CalculateGoldFromGoods"
+	{
+		text label = "Goods"
+		text description = "Goods which we produce and import."
+		string value_form = "bonus"
+	}
+	
+	details ImportantRelatives = "Kingdom.CalculateGoldFromImportantRelatives"
+	{
+		text label = "Important Relatives"
+		text description = "Gold brought by connections from our wealthy relatives."
+		string value_form = "bonus"
+	}
+	
+	details ExportFood = "Kingdom.CalcImportAndExportGold"
+	{
+		text label = "Food Export"
+		text description = "Gold brought by our merchants who export food to foreign kingdoms."
+		string value_form = "bonus"
+	}
+
+	details ExcessResources = "Kingdom.CalculateGoldFromExcessResources"
+	{
+		text label = "Books, Faith and Military"
+		text description = "Gold from Books, {religion.piety} and/or Levy produced over our kingdom's capacity to use and store."
+		string value_form = "bonus"
+	}
+
+	subtotal Taxes = "TAXES"
+	{
+		text label = "Taxes[ ({ks_tax_rate:temp_income_window_bonus:%})]"
+		//text description = "Income from all provinces, governed or not."
+	}
+	
+	details TaxesRate = "TAXES_RATE"
+	{
+		text label = "Base value[ ({Kingdom.ks_tax_rate.base_value:temp_income_window_bonus:%})]"
+		text description = "The common tax amount, collected from all provinces, governed or not."
+		string value_form = "bonus"
+	}
+	
+	details TaxesCrownAuthority = "TAXES_AUTHORITY"
+	{
+		text label = "From Crown Authority[ ({Kingdom.ks_tax_rate.from_authority.value:nonzero:temp_income_window_bonus:%})]"
+		text description = "Higher crown authority increases the amount of taxes, that can be successfully collected."
+		string value_form = "bonus"
+	}
+	
+	details TaxesTraditions = "TAXES_TRADITIONS"
+	{
+		text label = "From Traditions[ ({Kingdom.ks_tax_rate.from_traditions.value:nonzero:temp_income_window_bonus:%})]"
+		text description = "Additional gold from taxes, due to adopted traditions."
+		string value_form = "bonus"
+	}
+	
+	details TaxesSkills = "TAXES_SKILLS"
+	{
+		text label = "From Skills[ ({Kingdom.ks_tax_rate.from_skills.value:nonzero:temp_income_window_bonus:%})]"
+		text description = "Additional gold from taxes, due to skills learned."
+		string value_form = "bonus"
+	}
+	
+	subtotal IncomeModifiers = "TOTAL_PERC"
+	{
+		text label = "Other Modifiers[ ({perc:temp_income_window_bonus:%})]"
+	}
+	
+	details Religion = "Kingdom.ks_prod_gold_perc"
+	{
+		text label = "Religion[ ({perc:temp_income_window_bonus:%})]"
+		text description = "Gold received from various religious events and practices within our {kingdom.KingdomType}."
+		string value_form = "bonus"
+	}
+	
+	// details Authority = "Kingdom.CalcCrownAuthorityGoldPerc"
+	// {
+	// 	text label = "Authority[ ({perc:temp_income_window_bonus:%})]"
+	// 	text description = "Our crown authority determines how much gold we manage to gather from our provinces."
+	// 	string value_form = "bonus"
+	// }
+	
+	details Corruption = "Kingdom.CalcCorruptionGoldPerc"
+	{
+		text label = "Corruption[ ({perc:temp_income_window_bonus:%})]"
+		text description = "Income may be reduced if corruption sets its roots within our {kingdom.KingdomType}."
+		string value_form = "bonus"
+	}
+	
+	subtotal VassalTributes = "Kingdom.CalcVassalGold"
+	{
+		text label = "Vassal Tributes [({ks_vassal_tax_perc:temp_income_window_bonus:%})] "
+		text description = "Regular payments of gold sent to us by our loyal vassals.[{p}{p}{vassals_text}]"
+		tooltip_setup = "UIIncomePanel.SetupVassalTributesTooltip"
+	}
+	
+	subtotal JizyaTax = "Kingdom.CalcGoldFromJizya"
+	{
+		text label = "Jizya Tax[ ({ks_jizya_tax_perc:%})]"
+		condition = (is_muslim)
+		text description = "Income from all non-muslim provinces within our {kingdom.KingdomType}."
+	}
+}
+
+def KingdomGoldUpkeepPanel : IncomePanel
+{
+	total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Right.prefab" //GUID:f4c6d7f37b7abc0469cc219993302421
+	
+	total Expenses = "TOTAL"
+	{
+		text label = "Expenses"
+		string value_form = "temp_income_window_penalty"
+		text description = "The amount of gold our {kingdom.KingdomType} currently loses"
+	}
+	
+	subtotal Military = "SUBTOTAL"
+	{
+		text label = "Military"
+	}
+	
+	details Marshals = "MARSHAL_WAGES"
+	{
+		text label = "Marshal Wages"
+		text description = "Gold paid for the services of all marshals within our royal court, excluding the king and his children."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details ArmyUpkeep = "Kingdom.CalcArmiesGoldUpkeep"
+	{
+		text label = "Army Upkeep"
+		text description = "Gold paid for hired mercenaries and special units which require additional upkeep."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details JihadUpkeep = "Kingdom.CalcJihadUpkeep"
+	{
+		text label = "Jihad Upkeep"
+		text description = "Leading a jihad costs a hefty amount of gold, in order to maintain any military planning and logistics."
+		string value_form = "penalty_no_sign"
+		condition = (is_muslim)
+	}
+	
+	subtotal Economy = "SUBTOTAL"
+	{
+		text label = "Economy"
+	}
+	
+	details BuildingsUpkeep = "Kingdom.CalcBuildingsUpkeep"
+	{
+		text label = "Buildings Upkeep"
+		text description = "Maintenance costs for all buildings which require gold in order to function properly."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details ImportingGoods = "Kingdom.CalcUpkeepGoldFromGoodsImport"
+	{
+		text label = "Imported Goods"
+		text description = "Upkeep for all goods which our merchants import from foreign kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details ImportFood = "Kingdom.CalcUpkeepGoldFromFoodImport"
+	{
+		text label = "Food Import"
+		text description = "Gold paid by our merchants who import food from foreign kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	subtotal Diplomacy = "SUBTOTAL"
+	{
+		text label = "Diplomacy"
+	}
+	
+	details Diplomats = "DIPLOMAT_WAGES"
+	{
+		text label = "Diplomat Wages"
+		text description = "Gold paid for the services of all diplomats within our royal court, excluding the king and his children."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details ImproveRelations = "Kingdom.CalcImproveRelationsUpkeep"
+	{
+		text label = "Improve Relations"
+		text description = "Gold required by our diplomats who improve our relations with foreign kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details ImproveOpinions = "Kingdom.CalcImrpoveOpinionsUpkeep"
+	{
+		text label = "Improve Opinions"
+		text description = "Gold required by our diplomats who improve the opinions of all casts within our {kingdom.KingdomType}."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details PeaceTalks = "Kingdom.CalcPeaceTalksUpkeep"
+	{
+		text label = "Peace Talks"
+		text description = "Gold required by our diplomats who negotiate peace with enemy kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details DefensivePacts = "Kingdom.CalcDefensivePactsUpkeep"
+	{
+		text label = "Defensive Pacts"
+		text description = "Gold required by our diplomats who maintain defensive pacts against other kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details InvasionPlans = "Kingdom.CalcInvasionPlansUpkeep"
+	{
+		text label = "Invasion Plans"
+		text description = "Gold required by our diplomats who maintain invasion plans against other kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	// details SearchingForSpouse = "Kingdom.CalcSearchingForSpouseUpkeep"
+	// {
+	// 	text label = "Searching For Spouse"
+	// 	string value_form = "penalty_no_sign"
+	// }
+	
+	subtotal Espionage = "SUBTOTAL"
+	{
+		text label = "Espionage"
+	}
+	
+	details Spies = "SPY_WAGES"
+	{
+		text label = "Spy Wages"
+		text description = "Gold paid for the services of all spies within our royal court, excluding the king and his children."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details Bribes = "Kingdom.CalcBribesUpkeep"
+	{
+		text label = "Bribes"
+		text description = "Payments of gold, secretly sent to foreign knights who serve our spies."
+		string value_form = "penalty_no_sign"
+	}
+
+	//keep the texts for translation, but 'disable' the field
+	disabled SupportPretenders = "Kingdom.CalcSupportPretendersUpkeep"
+	{
+		text label = "Support pretender to the throne"
+		text description = "Paid gold to our pretenders to the throne in other kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details RuinRelations = "Kingdom.CalcRuinRelationsUpkeep"
+	{
+		text label = "Ruin Relations"
+		text description = "Gold required to maintain our spies' attempts to the deteriorate the relations of foreign kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details SowDissent = "Kingdom.CalcSowDissentUpkeep"
+	{
+		text label = "Sow Dissent"
+		text description = "Gold required to maintain our spies' attempts to anger the opinion groups of foreign kingdoms."
+		string value_form = "penalty_no_sign"
+	}
+	
+	subtotal Religion_Culture = "SUBTOTAL"
+	{
+		text label = "Religion and Culture"
+	}
+	
+	details Clerics = "CLERIC_WAGES"
+	{
+		text label = "{kingdom.cleric_title:s}"
+		text description = "Gold paid for the services of all {kingdom.cleric_title:s} within our royal court, excluding the king and his children.."
+		string value_form = "penalty_no_sign"
+	}
+	
+	// details MissionInRome = "Kingdom.CalcMissionInRomeUpkeep"
+	// {
+	// 	text label = "Mission In Rome"
+	// 	text description = "Gold required by our clerics who are sent on a mission in Rome."
+	// 	string value_form = "penalty_no_sign"
+	// }
+	
+	// details MissionInConstantinople = "Kingdom.CalcMissionInConstantinopleUpkeep"
+	// {
+	// 	text label = "Mission In Constantinople"
+	// 	text description = "Gold required by our clerics who are sent on a mission in Constantinople."
+	// 	string value_form = "penalty_no_sign"
+	// }
+
+	details Study = "Kingdom.CalcStudyUpkeep"
+	{
+		text label = "Studies in foreign kingdoms"
+		text description = "Gold required by our clerics who are sent on a study."
+		string value_form = "penalty_no_sign"
+		condition = (is_pagan)
+	}	
+	
+	details Preaching = "Kingdom.CalcPreachGoldUpkeep"
+	{
+		text label = "Preaching"
+		text description = "Gold required to support all of our clerics which are currently preaching [{kingdom.religion:ism}]."
+		string value_form = "penalty_no_sign"
+	}
+	
+	details Journeys = "Kingdom.CalcJourneyGoldUpkeep"
+	{
+		text label = "Journeys"
+		text description = "Gold required to support all of our clerics which are currently on a journey."
+		string value_form = "penalty_no_sign"
+		condition = (is_muslim)
+	}
+	
+	details HelpTheWeak = "Kingdom.CalcHelpTheWeakUpkeep"
+	{
+		text label = "Charity"
+		text description = "Gold required to support all of our clerics which are currently committed to charity."
+		string value_form = "penalty_no_sign"
+	}
+	
+	
+	details PaganBeliefs = "Kingdom.CalcPaganBeliefsUpkeep"
+	{
+		text label = "Pagan Beliefs"
+		text description = "Gold required to support all of our beliefs which are currently being promoted throughout our kingdom"
+		string value_form = "penalty_no_sign"
+		condition = (is_pagan)
+	}
+	
+	details BolsterCulture = "Kingdom.CalcBolsterCultureUpkeep"
+	{
+		text label = "Bolster Culture"
+		text description = "Gold required to support all of our {kingdom.cleric_title:s} who are strengthening the culture of our people"
+		string value_form = "penalty_no_sign"
+	}
+	
+	subtotal TributeToSovereign = "Kingdom.CalcSovereignTax"
+	{
+		text label = "Tribute to sovereign"
+		text description = "Regular payments of gold which we must send to our sovereign. [Currently, this is {kingdom.vassal_of}.|Currently, we have none.]"
+	}
+	
+	subtotal Disorder = "Kingdom.CalcDisorderUpkeep"
+	{
+		text label = "Disorder"
+		text description = "Expenses caused by all provinces in our {kingdom.KingdomType} which are currently in disorder."
+	}
+	
+	subtotal Inflation = "Kingdom.CalcInflationPenalty"
+	{
+		text label = "Inflation[ ({inflation_perc:nonzero:%:temp_income_window_penalty})]"
+		text description = "Expenses caused by the excessive amount of gold stockpiled in our royal treasury."
+	}
+}
+
+def KingdomPietyIncomePanel : IncomePanel
+{
+	show_subtotal_tooltips = false
+	total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Religion.prefab" //GUID:4871424c150353e45bdc2fea464d4f82
+	subtotal = "Assets/UI/Elements/KingdomIncome/UIP_IncomeSubtotal_Religion.prefab" //GUID:e734f9ceb155c6d498adcd8b297d408b
+	show_dash_if_zero = false
+	total Income = "TOTAL"
+	{
+		text label = "[{religion.piety}|Piety]"
+		text description = "{clr:flavor_text}Religious power enables the {kingdom.cleric_title:s} of our kingdom to perform their actions in support of the crown.{/clr}"
+		text value_formating = "{kingdom.resources.piety} (+{value})"
+		bool force_show_description = true
+	}
+
+	details RoyalLands = "ROYAL_LANDS"
+	{
+		text label = "Royal Lands"
+		string value_form = "bonus"
+	}
+	
+	details Provinces = "NON_ROYAL_LANDS"
+	{
+		text label = "Provinces"
+		string value_form = "bonus"
+	}
+	
+	details Clerics = "Kingdom.CalcFaithFromClerics"
+	{
+		text label = "Clerics"
+		string value_form = "bonus"
+	}
+
+	// details MissionInRome = "Kingdom.CalcMissionInRomePietyIncome"
+	// {
+	// 	text label = "Mission In Rome"
+	// 	string value_form = "bonus"
+	// }
+	
+	// details MissionInConstantinople = "Kingdom.CalcMissionInConstantinoplePietyIncome"
+	// {
+	// 	text label = "Mission In Constantinople"
+	// 	string value_form = "bonus"
+	// }
+	
+	details Advantages = "Kingdom.ks_prod_piety_advantages"
+	{
+		text label = "Advantages"
+		string value_form = "bonus"
+	}
+
+	details Tradition = "Kingdom.ks_prod_piety_traditions"
+	{
+		text label = "Traditions"
+		string value_form = "bonus"
+	}
+
+	details Opinions = "Kingdom.ks_prod_piety_opinions"
+	{
+		text label = "Opinions"
+		string value_form = "bonus"
+	}
+
+	details ReligionPerc = "Kingdom.ks_prod_piety_religion_perc"
+	{
+		text label = "Religion modifiers[ ({perc:bonus_dark:%})]"
+		string value_form = "bonus"
+	}
+	
+	details LiegeRein = "Kingdom.ks_liege_rein_perc"
+	{
+		text label = "Sovereign influence[ ({perc:bonus_dark:%})]"
+		condition = (ks_liege_rein_perc != 0)
+		string value_form = "bonus"
+	}
+
+	details Others = "Kingdom.ks_prod_piety_perc"
+	{
+		text label = "Other modifiers[ ({perc:bonus_dark:%})]"
+		string value_form = "bonus"
+	}
+}
+
+def KingdomBooksIncomePanel : IncomePanel
+{
+	total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Religion.prefab" //GUID:4871424c150353e45bdc2fea464d4f82
+	subtotal = "Assets/UI/Elements/KingdomIncome/UIP_IncomeSubtotal_Religion.prefab" //GUID:e734f9ceb155c6d498adcd8b297d408b
+	show_dash_if_zero = false
+	show_subtotal_tooltips = false
+	total Income = "TOTAL"
+	{
+		text label = "[{religion.books}|Books]"
+		text description = "{clr:flavor_text}Determines how effective our kingdom is in spreading its culture to other provinces, ultimately converting their population's loyalty.{/clr}"
+		text value_formating = "{kingdom.resources.books} (+{value})"
+		bool force_show_description = true
+	}
+	
+	details RoyalLands = "ROYAL_LANDS"
+	{
+		text label = "Royal Lands"
+		string value_form = "bonus"
+	}
+	
+	details Provinces = "NON_ROYAL_LANDS"
+	{
+		text label = "Provinces"
+		string value_form = "bonus"
+	}
+	
+	details Clerics = "Kingdom.CalcBooksPerCleric"
+	{
+		text label = "Clerics"
+		string value_form = "bonus"
+	}
+	
+	details ImportantRelatives = "Kingdom.CalcBooksFromImportantRelatives"
+	{
+		text label = "Important relatives"
+		string value_form = "bonus"
+	}
+	
+	details FromPiety = "Kingdom.CalcBooksFromFaith"
+	{
+		text label = "{kingdom.religion.piety} ({kingdom.ks_piety_converted_to_books_perc}%)"
+		string value_form = "bonus"
+	}
+
+	// details MissonRome = "Kingdom.CalcMissionInRomeBooksIncome"
+	// {
+	// 	text label = "Mission in Rome"
+	// 	string value_form = "bonus"
+	// }
+	
+	// details ConstantinopleRome = "Kingdom.CalcMissionInConstantinopleBooksIncome"
+	// {
+	// 	text label = "Mission in Constantinople"
+	// 	string value_form = "bonus"
+	// }
+
+	details Study = "Kingdom.CalcStudyBooksIncome"
+	{
+		text label = "Studies in foreign kingdoms"
+		string value_form = "bonus"
+		condition = (is_pagan)
+	}
+
+	details Tradition = "Kingdom.ks_prod_books_traditions"
+	{
+		text label = "Traditions"
+		string value_form = "bonus"
+	}
+
+	details Goods = "Kingdom.ks_prod_books_goods"
+	{
+		text label = "Goods"
+		string value_form = "bonus"
+	}
+
+	details Religion = "Kingdom.ks_prod_books_religion"
+	{
+		text label = "Religion"
+		string value_form = "bonus"
+	}
+
+	details ReligionPerc = "Kingdom.ks_prod_books_religion_perc"
+	{
+		text label = "Religion modifiers[ ({perc:bonus_dark:%})]"
+		string value_form = "bonus"
+	}
+
+	details Others = "Kingdom.ks_prod_books_perc"
+	{
+		text label = "Other modifiers[ ({perc:ks_prod_books_perc:%})]"
+		string value_form = "bonus"
+	}
+
+	total Culture = "CULTURE"
+	{
+		text label = "Cultural power"
+		text description = $[
+			"{clr:flavor_text}Determines how effective our kingdom is in spreading its culture to other provinces, ultimately converting their population's loyalty.{/clr}"
+			"{p}"
+			// ks_base_culture mods
+			"[{p}Books: {kingdom.ks_base_culture.from_books:value:F1:bonus_no_sign}]"
+			"[{p}Faith: {kingdom.ks_base_culture.from_faith:value:F1:bonus_no_sign}]"
+			"[{p}Goods: {kingdom.ks_base_culture.from_goods:value:F1:bonus_no_sign}]"
+			"[{p}Universities: {kingdom.ks_base_culture.universities:value:F1:bonus_no_sign}]"
+			"[{p}Skills and Traditions: {kingdom.ks_base_culture.from_traditions:value:F1:bonus_no_sign}]"
+			"[{p}Advantages: {kingdom.ks_base_culture.from_advantages:value:F1:bonus_no_sign}]"
+			"[{p}Buildings and upgrades: {kingdom.ks_base_culture.from_buildings:value:F1:bonus_no_sign}]"
+			"[{p}Settlements: {kingdom.ks_base_culture.from_governed_monasteries:value:F1:bonus_no_sign}]"
+			"[{p}Controlling the Pope: {kingdom.ks_culture_from_pope:value:F1:bonus_no_sign}]"
+			
+			// ks_culture flat mods
+			"[{p}Influence: {kingdom.ks_culture.from_influence:value:F1:bonus_no_sign}]"
+			
+			// ks_culture perc mods
+			"[{p}---------------------{kingdom.ks_culture.perc:if}]"
+			"[{p}King: {kingdom.ks_culture.king_effect:value:%:bonus_no_sign}]"
+			"[{p}Crown Authority: {kingdom.ks_culture.from_ca:value:%:nonzero:bonus_no_sign}]"
+			"[{p}Opinions: {kingdom.ks_culture.from_opinions:value:%:bonus_no_sign}]"
+			"[{p}Great Power: {kingdom.ks_culture.great_power:value:%:bonus_no_sign}]"
+		]
+	}
+	
+	total Influence = "INFLUENCE"
+	{
+		text label = "Influence"
+		text description = $[
+			"{clr:flavor_text}The influence of our kingdom has a direct effect on the outcome of our diplomatic negotiations. The more influence we have, the greater the likelihood of other kingdoms accepting some of our offers.{/clr}"
+			"{p}"
+			// ks_base_influence mods
+			"[{p}King's Leadership: {kingdom.ks_base_influence.from_kings_leadership:value:F1:bonus_no_sign}]"
+			"[{p}Skills and Traditions: {kingdom.ks_base_influence.from_traditions:value:F1:bonus_no_sign}]"
+			"[{p}Goods: {kingdom.ks_base_influence.from_goods:value:F1:bonus_no_sign}]"
+			"[{p}Advantages: {kingdom.ks_base_influence.from_advantages:value:F1:bonus_no_sign}]"
+			"[{p}Governed Keeps: {kingdom.ks_base_influence.from_governed_keeps:value:F1:bonus_no_sign}]"
+			"[{p}Caliphate: {kingdom.ks_base_influence.from_caliphate:value:F1:bonus_no_sign}]"
+			"[{p}Holy Lands: {kingdom.ks_base_influence.from_holy_lands:value:F1:bonus_no_sign}]"
+			// you cannot be the papacy and see this "[{p}Papacy: {kingdom.ks_base_influence.from_papacy:value:F1:bonus_no_sign}]"
+			"[{p}Important Relatives: {kingdom.ks_base_influence.from_important_relatives:value:F1:bonus_no_sign}]"
+			"[{p}Controlling the Pope: {kingdom.ks_influence_from_pope:value:F1:bonus_no_sign}]"
+			
+			// ks_influence flat mods
+			"[{p}Culture: {kingdom.ks_influence.from_culture:value:F1:bonus_no_sign}]"
+			
+			// ks_influence perc mods
+			"[{p}---------------------{kingdom.ks_influence.perc:if}]"
+			"[{p}King: {kingdom.ks_influence.king_effect:value:%:bonus_no_sign}]"
+			"[{p}Crown Authority: {kingdom.ks_influence.from_ca:value:%:bonus_no_sign}]"
+			"[{p}Opinions: {kingdom.ks_influence.from_opinions:value:%:bonus_no_sign}]"
+			"[{p}Great Power: {kingdom.ks_influence.great_power:value:%:bonus_no_sign}]"
+		]
+	}
+	
+}
+
+def KingdomTradeIncomePanel : IncomePanel
+{
+	total = "Assets/UI/Elements/KingdomIncome/UIP_IncomeTotal_Old.prefab" //GUID:66bbb44158a5d404d845cd16cd9a99e6
+	subtotal = "Assets/UI/Elements/KingdomIncome/UIP_IncomeSubtotal_Old.prefab" //GUID:48100cb4fdf7bc64bbc316f4630fb546
+	
+	total Income = "TOTAL"
+	{
+		text label = "Commerce"
+		text description = "Combined commercial potential of {plr_kingdom}, needed as an upkeep for merchant actions like trading with kingdoms, maintaining imports and exports and trade colonies"
+		//string value_form = "bonus_dark_no_sign"
+	}
+	
+	subtotal Provinces = "SUBTOTAL_PROVINCES"
+	{
+		text label = "Provinces"
+		text description = "Commercial potention from {plr_kingdom:s} benefits, related to the provinces it controls"
+	}
+	
+	row RoyalLands = "ROYAL_LANDS"
+	{
+		text label = "Royal Lands"
+		text description = "Commercial potential from the settlements, buildings and upgrades of {plr_kingdom:s} governed provinces"
+	}
+	
+	row UngovernedProvinces = "NON_ROYAL_LANDS"
+	{
+		text label = "Ungoverned Provinces"
+		text description = "Commercial potential from the settlements, buildings and upgrades of {plr_kingdom:s} ungoverned provinces"
+	}
+	
+	subtotal Kingdom = "SUBTOTAL"
+	{
+		text label = "Kingdom"
+		text description = "Commercial potention from {plr_kingdom:s} benefits, not related to provinces"
+	}
+	
+	row Base = "Kingdom.ks_base_commerce"
+	{
+		text label = "Base"
+		text description = "The base commercial potential of each kingdom"
+	}
+	
+	row Religion = "Kingdom.ks_commerce_religion"
+	{
+		text label = "Religion"
+		text description = "Bonus commercial potential for all {plr_kingdom.religion.name:ans}"
+	}
+
+	row Goods = "Kingdom.ks_commerce_goods"
+	{
+		text label = "Goods"
+		text description = "Commercial potential, gained by desired trade goods the kingdom produces or imports"
+	}
+	
+	//details MissionInRome = "Kingdom.CalcMissionInRomeTradeIncome"
+	row MissionInRome = "Kingdom.CalcMissionInRomeTradeIncome"
+	{
+		text label = "Mission In Rome"
+		text description = "Commercial potential from mission of a {plr_kingdom.religion.titles.Cleric} in Rome"
+	}
+	
+	//details MissionInConstantinople = "Kingdom.CalcMissionInConstantinopleTradeIncome"
+	row MissionInConstantinople = "Kingdom.CalcMissionInConstantinopleTradeIncome"
+	{
+		text label = "Mission In Constantinople"
+		text description = "Commercial potential from mission of a {plr_kingdom.religion.titles.Cleric} in Constantinople"
+	}
+	
+	
+	// separator separator1
+	
+	// subtotal BuildingsUpkeep = (kingdom.buildings_commerce_upkeep)
+	// {
+	// 	text label = "Buildings Upkeep"
+	// 	string value_form = "penalty_dark_no_sign"
+	// }
+}

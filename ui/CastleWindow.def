@@ -1,0 +1,8 @@
+﻿def UICastleWindow
+{
+	color resource_occupied = "240,89,55" //F05937FF
+	color resource_negative_not_govern
+	color resource_negative_govern
+	color resource_positive_not_govern = "119,108,73" //776C49FF
+	color resource_positive_govern = "173,157,106" //AD9D6AFF
+}

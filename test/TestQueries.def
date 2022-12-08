@@ -1,0 +1,38 @@
+// query_syntax: "[<query_mode_prefix>_]<query_type>[_<query_mode_suffix>][?] var_name = (eval_expr) [{...}]"
+// depending on query_type, a list of potential results is generated, which are then evaluated using eval_expr as float
+// if eval_expr returns <= 0, the result is skipped
+// note that bool is equivalent to 0f or 1f, null, unknown, non-float values are equivalent of 0f
+// note that "and" and "or" can be used as ternary (?:) operators, here is what they return:
+//   A or B:  if A is true returns A otherwise B
+//   A and B: if A is true returns B otherwise A
+// possible query types can be seen in Queries.cs
+// exactly one of <query_mode_prefix> and <query_mode_suffix> should be present (whether it is prefix or suffix depends on the mode)
+// query_modes (and what the eval_expr means):
+//   random_*: eval is weight (when > 0), returns weighted random from all results which are not skipped
+//   first_*: return first result which is not skipped
+//   *_list: returns a list of all results which are not skipped
+//   *_count: returns the number of results which are not skipped
+//   best_*: eval is evaluation of how "good" the result is (bigger is better), returns best result
+// "var" is a special type (no prefixes or sufixes), directly returns the value of eval_expr
+// adding '?' at the end of the query type indicates optional variable, i.e. null or unknown queery result is not considered "failed" query
+// during the evaluation of eval_expr, the context is the currently evaluated result
+//   it can also be accessed explicitly using "obj" or the field key, e.g. "<type> some_key = (some_key.is_valid)"
+// the context of TestQueries contains single variable "kingdom", set to the selected or player kingdom
+// when performing multiple queries, the result of the prevoius queries is accessible in the rest (using their key)
+
+def TestQueries
+{
+	random_kingdom k = (GetRelationship(plr_kingdom, obj) > 0)
+	realm_list governed_realms = (obj.castle.governor != null)
+	realm_count num_governed_realms = (castle.governor != null)
+	random_realm r = (obj.castle.governor != null)
+	var governor = (r.castle.governor)
+	first_court_member? first_spy = (obj.is_spy)
+	random_court_member? spy = (obj.is_spy and (1 + obj.class_level))
+	best_court_member? best_spy = (obj.is_spy and (1 + obj.class_level))
+
+	Army_list stuck_armies = (!castle && !battle && !is_moving && kingdom.is_ai && kingdom.realms.Count > kingdom.armies.Count)
+	Army_list oscillating_armies = (is_moving && ai_oscillations)
+	Character_list imprisoned_marshals = (is_marshal && is_prisoner)
+	Kingdom_list headless_kingdoms = (is_regular && !defeated && !king)
+}

@@ -1,0 +1,37 @@
+﻿def WikiArticle
+{
+	text caption
+	text body
+	
+	text name = "{caption}"
+	
+	string default_toc_article = "TOC"
+	string default_article = "TOC_Description"
+	bool use_player_kingdom = false
+	
+	shortuct_buttons
+	{
+		sprite TOC = "Assets/UI/Elements/Wiki/Wiki_Icon_TOC.psd:Wiki_Icon_TOC#2" //GUID:dbb206b71c87f554b94a1f8f5d41f5d2
+		sprite WhatIs = "Assets/UI/Elements/Wiki/Wiki_Icon_WhatIs.psd:Wiki_Icon_WhatIs#2" //GUID:dd73c24e36b082f4a9e2d30f21ef7449
+		sprite HowTo = "Assets/UI/Elements/Wiki/Wiki_Icon_HowTo.psd:Wiki_Icon_HowTo#2" //GUID:8575cfc11c51e9b45bf42b11acb6c05f
+	}
+}
+
+
+def WikiArticleLinkTooltip : Tooltip
+{
+	//prefab = "Assets/UI/Elements/Wiki/UIP_WikiTooltip.prefab" //GUID:473b41e022fa588428f5cbab15efdaf7
+	
+	text caption = "{noparse}{link_obj.caption}{/noparse}"
+	text text = "Click the link to see more about this topic in the Royal Library."
+	
+	tooltip_vars
+	{
+		article_def = (link_obj)
+	}
+}
+
+def wiki
+{
+	// wiki article defs will register here
+}

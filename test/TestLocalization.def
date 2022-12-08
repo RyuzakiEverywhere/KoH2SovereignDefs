@@ -1,0 +1,37 @@
+def TestLocalizationMessage : OkMessage
+{
+	caption = "Test Localization"
+	body = $[
+		"{clr:gray}{u}Key:{/u}{/clr}{p}"
+		//"{p}"
+		"{org_text}{p}"
+		"{p}"
+		"{clr:gray}{u}Localized:{/u}{/clr}{p}"
+		"{p}"
+		"{localized_text}{p}"
+		"{p}"
+		"{clr:gray}{u}Raw:{/u}{/clr}{p}"
+		//"{p}"
+		"{noparse}{localized_text}{/noparse}"		
+	]
+
+	context
+	{
+		France = (game.GetKingdom("France"))
+		Germany = (game.GetKingdom("Germany"))
+		Austria = (game.GetKingdom("Austria"))
+		Paris = (game.GetCastle("Paris"))
+		Vienna = (game.GetCastle("Vienna"))
+
+		kingdom = (France)
+		src_kingdom = (France)
+		tgt_kingdom = (Austria)
+		other_kingdom = (Germany)
+
+		castle = (Vienna)
+		realm = (castle.realm)
+
+		army = (kingdom.armies[0])
+		leader = (army.leader)
+	}
+}

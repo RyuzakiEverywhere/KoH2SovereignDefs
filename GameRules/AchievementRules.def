@@ -1,0 +1,1212 @@
+// Immediately unlock an achievement
+template UnlockAchievementRule : GameRule
+{
+	string achievement = "unknown"
+
+	target { any_player_kingdom kingdom }
+
+	condition execute = true
+	cooldown = "PositiveInfinity"
+	timeout = "PositiveInfinity"
+
+	outcomes
+	{
+		also unlock_achievement = (achievement)
+	}
+}
+
+// Unlock an achievement when a counter reaches a desired value for a single game/kingdom.
+template ReachAmountAchievementRule : GameRule
+{
+	string achievement = "unknown"
+
+	target { any_player_kingdom kingdom }
+
+	var goal = 10
+	var current = 0
+
+	condition active = (current < goal)
+	cooldown = "PositiveInfinity"
+	timeout = "PositiveInfinity"
+
+	stop_outcomes
+	{
+		also unlock_achievement = (achievement)
+	}
+}
+
+// Unlock achievement when progress accumulates to a desired amount over the span of any number of games.
+template AchievementProgressRule : GameRule
+{
+	string achievement = "unknown" // only needed so that we have the name in data
+	string achievement_stat = "unknown"
+	int proggress = 1
+
+	target { any_player_kingdom kingdom }
+
+	condition execute = true
+
+	outcomes
+	{
+		also achievement_proggress = (achievement_stat)
+		{
+			amount = (proggress)
+		}
+	}
+}
+
+def PathOfGloryAchievementRule : UnlockAchievementRule
+{
+	achievement = "path_of_glory"
+	triggers { any_player_kingdom realm_added }
+}
+
+def KingslayerAchievementRule : UnlockAchievementRule
+{
+	achievement = "kingslayer"
+	condition execute = (trigger.param.is_king)
+	triggers
+	{
+		any_player_kingdom prisoner_executed
+		character murder
+	}
+}
+
+def DustAndSaltAchievementRule : ReachAmountAchievementRule
+{
+	achievement = "dust_and_salt"
+	goal = 15
+	start_triggers { any_player_kingdom pillaged_settlement }
+	stop_triggers { target DustAndSaltAchievementRule.Refresh }
+
+	rule Refresh
+	{
+		condition execute = true
+		triggers { target pillaged_settlement }
+		outcomes
+		{
+			main success
+			{
+				set_var current
+				{
+					owner = (rule.parent_rule)
+					amount = ((rule.parent_rule.current) + 1)
+				}
+			}
+		}
+	}
+}
+
+def ThereIsNoNobilityInPovertyAchievementRule : UnlockAchievementRule
+{
+	achievement = "there_is_no_nobility_in_poverty"
+	start_triggers { any_player_kingdom income_tick }
+	condition execute = ((kingdom.income.gold - kingdom.expenses.gold) >= 200)
+}
+
+def BigAppleAchievementRule : UnlockAchievementRule
+{
+	achievement = "big_apple"
+	condition execute = (trigger.param.castle.buildings_count >= 8)
+	triggers { any_player_kingdom build_finished }
+}
+
+def BringItOnAchievementRule : UnlockAchievementRule
+{
+	achievement = "bring_it_on"
+	condition execute = (trigger.sender.game.is_multiplayer)
+	triggers { any_player_kingdom game_started }
+}
+
+def HailToTheKingBabyAchievementRule : UnlockAchievementRule
+{
+	achievement = "hail_to_the_king_baby"
+	condition execute = (trigger.sender.is_max_class_level)
+	triggers { character skills_changed }
+}
+
+def FullHouseAchievementRule : UnlockAchievementRule
+{
+	achievement = "full_house"
+	triggers
+	{
+		any_player_kingdom add_court
+		{
+			condition = (sender.court_members_count >= 9)
+		}
+	}
+}
+
+def CutMeOwnThroatAchievementRule : UnlockAchievementRule
+{
+	achievement = "cut_me_own_throat"
+	condition execute = (kingdom.gold_from_trade_total >= 500)
+	triggers { any_player_kingdom income_tick }
+}
+
+def FightingWithPowerAndSteelAchievementRule : UnlockAchievementRule
+{
+	achievement = "fighting_with_power_and_steel"
+	condition execute = (kingdom.marshals_count >= 6)
+	triggers { any_player_kingdom add_court }
+}
+
+def BlackSheepWallAchievementRule : UnlockAchievementRule
+{
+	achievement = "black_sheep_wall"
+	triggers
+	{
+		any_player_kingdom update_realm_tags
+		{
+			condition = (kingdom.goods_produced["NavigationMaps"])
+		}
+	}
+}
+
+def PrisonBreakAchievementRule : UnlockAchievementRule
+{
+	achievement = "prison_break"
+	triggers
+	{
+		character dungeon_riot_instigated
+		character helped_our_prisoners_escape
+//		character helped_friendly_prisoners_escape
+	}
+}
+
+def SpartacusAchievementRule : UnlockAchievementRule
+{
+	achievement = "spartacus"
+	triggers
+	{
+		character revolt_inspired
+		// What else can make a prisoner start a revolt? 
+	}
+}
+
+def DesperateTimesAchievementRule : UnlockAchievementRule
+{
+	achievement = "desperate_times"
+	condition execute = (!trigger.sender.is_marshal && !(trigger.sender.kingdom.is_pagan && trigger.sender.is_cleric))
+	triggers { character call_to_arms }
+}
+
+def MasterOfPuppetsAchievementRule : UnlockAchievementRule
+{
+	achievement = "master_of_puppets"
+	triggers { character spy_provoke_war_success }
+}
+
+def CantTouchThisAchievementRule : UnlockAchievementRule
+{
+	achievement = "cant_touch_this"
+	triggers { any_player_kingdom player_became_leader_in_ranking }
+}
+
+def TheyGotWhatTheyDeservedAchievementRule : UnlockAchievementRule
+{
+	achievement = "they_got_what_they_deserved"
+	triggers
+	{
+		any_player_kingdom destroyed_kingdom
+	}
+}
+
+def BrutusAchievementRule : UnlockAchievementRule
+{
+	achievement = "brutus"
+
+	triggers
+	{
+		any_player_kingdom declared_war
+		{
+			condition = (HaveNAP(kingdom, param))
+		}
+	}
+}
+
+def OnTheThirdDayAchievementRule : UnlockAchievementRule
+{
+	achievement = "on_the_third_day"
+	triggers
+	{
+		character joined_battle
+		{
+			var army = (trigger.sender.army)
+			var battle = (army.battle)
+			var support_defender = (battle.defender_support == army && battle.defender_kingdom.is_player && battle.defender_kingdom != army.kingdom)
+			var support_attacker = (battle.attacker_support == army && battle.attacker_kingdom.is_player && battle.attacker_kingdom != army.kingdom)
+			condition = (support_attacker || support_defender)
+		}
+	}
+}
+
+def CallTheBoysAchievementRule : UnlockAchievementRule
+{
+	achievement = "call_the_boys"
+	triggers
+	{
+		any_player_kingdom war_supporter_joined
+		{
+			condition = (kingdom.num_war_lead_max_kingdoms >= 2) 
+		}
+	}
+}
+
+def HelpHelpAchievementRule : UnlockAchievementRule
+{
+	achievement = "help_help"
+	triggers
+	{
+		any_player_kingdom rebellion_ended
+		{
+			condition = (trigger.param.defeated_by_kingdom == kingdom)
+		}
+	}
+}
+
+def YouAreNotTheBossAchievementRule : UnlockAchievementRule
+{
+	achievement = "you_are_not_the_boss"
+	triggers { any_player_kingdom independence }
+}
+
+def BlindedByScienceAchievementRule : UnlockAchievementRule
+{
+	achievement = "blinded_by_science"
+	triggers { any_player_kingdom gained_advantage }
+}
+
+def HisNameIsKingAchievementRule : UnlockAchievementRule
+{
+	achievement = "his_name_is_king"
+	triggers { any_player_kingdom victory }
+}
+
+def PillarsOfTheEarthAchievementRule : UnlockAchievementRule
+{
+	achievement = "pillars_of_the_earth"
+	triggers
+	{
+		any_player_kingdom build_finished
+		{
+			condition = (sender.has_completed_building_Cathedral || sender.has_completed_building_GreatMosque)
+		}
+		any_player_kingdom building_upgrade_unlocked
+		{
+			condition = (sender.has_completed_building_Cathedral || sender.has_completed_building_GreatMosque)
+		}
+	}
+}
+
+def ScientiaPotentiaEsAchievementRule : UnlockAchievementRule
+{
+	achievement = "scientia_potentia_es"
+	triggers
+	{
+		any_player_kingdom build_finished
+		{
+			condition = (sender.has_completed_building_University || sender.has_completed_building_Madrasah)
+		}
+		any_player_kingdom building_upgrade_unlocked
+		{
+			condition = (sender.has_completed_building_University || sender.has_completed_building_Madrasah)
+		}
+	}
+}
+
+def AQuietPalaceAchievementRule : UnlockAchievementRule
+{
+	achievement = "a_quiet_palace"
+	triggers
+	{
+		any_player_kingdom build_finished
+		{
+			condition = (sender.has_completed_building_RoyalPalace)
+		}
+		any_player_kingdom building_upgrade_unlocked
+		{
+			condition = (sender.has_completed_building_RoyalPalace)
+		}
+	}
+}
+
+def TimeToFindIndiaAchievementRule : UnlockAchievementRule
+{
+	achievement = "time_to_find_india"
+	triggers
+	{
+		any_player_kingdom build_finished
+		{
+			condition = (sender.has_completed_building_TradePort)
+		}
+		any_player_kingdom building_upgrade_unlocked
+		{
+			condition = (sender.has_completed_building_TradePort)
+		}
+	}
+}
+
+def CrusadeInvokerAchievementRule : UnlockAchievementRule
+{
+	achievement = "crusade_invoker"
+	triggers
+	{
+		any_player_kingdom helped_by_crusade
+	}
+}
+
+def CrusaderYouKnowWhatAchievementRule : UnlockAchievementRule
+{
+	achievement = "crusader_you_know_what"
+	triggers
+	{
+		character crusade_started
+		{
+			condition = (sender.is_king)
+		}
+	}
+}
+
+def YouReapWhatYouSowAchievementRule : UnlockAchievementRule
+{
+	achievement = "you_reap_what_you_sow"
+	triggers { any_player_kingdom defeated_crusader }
+}
+
+def WheresYourCrownAchievementRule : UnlockAchievementRule
+{
+	achievement = "wheres_your_crown"
+	triggers
+	{
+		any_player_kingdom destroyed_kingdom
+		{
+			condition = (param.destroyed_kingdom.is_player)
+		}
+	}
+}
+
+def BattleOfTheFourArmiesAchievementRule : UnlockAchievementRule
+{
+	achievement = "battle_of_the_four_armies"
+	triggers
+	{
+		army battle_updated
+		{
+			var two_defenders = (param.defender_support != null && param.defender_support.kingdom != param.defender_kingdom)
+			var two_attackers = (param.attacker_support != null && param.attacker_support.kingdom != param.attacker_kingdom) 
+			condition = (two_defenders && two_attackers)
+		}
+
+	}
+}
+
+def NaughtButASeemlessVictoryAchievementRule : UnlockAchievementRule
+{
+	achievement = "naught_but_a_seamless_victory"
+	triggers
+	{
+		any_player_kingdom battle_won
+		{
+			condition = (param.realm_in.is_sea_realm)
+		}
+	}
+}
+
+def TheMagnificentNineAchievementRule : UnlockAchievementRule
+{
+	achievement = "the_magnificent_nine"
+	triggers
+	{
+		character skills_changed
+		{
+			condition = (sender.kingdom.sum_court_levels == (9 * sender.max_class_level))
+		}
+	}
+}
+
+def IllBeBackAchievementRule : UnlockAchievementRule
+{
+	achievement = "ill_be_back"
+	triggers
+	{
+		any_player_kingdom repick
+		{
+			condition = (sender.game.is_multiplayer)
+		}
+	}
+}
+
+def ProbablyJustTheWindAchievementRule : UnlockAchievementRule
+{
+	achievement = "probably_just_the_wind"
+	triggers
+	{
+		character murder
+		{
+			condition = (param.kingdom.is_player)
+		}
+	}
+}
+
+def OurArrowsAchievementRule : UnlockAchievementRule
+{
+	achievement = "our_arrows"
+	triggers
+	{
+		character player_army_update
+		{
+			condition = (sender.army.manpower >= 7000)
+		}
+	}
+}
+
+def IbnBattutaAchievementRule : UnlockAchievementRule
+{
+	achievement = "ibn_battuta"
+	triggers { character journey_ended_success }
+}
+
+def NewMinelandAchievementRule : UnlockAchievementRule
+{
+	achievement = "new_mineland"
+	triggers { character trade_colony_established }
+}
+
+def PlayersanderTheGreatAchievementRule : UnlockAchievementRule
+{
+	achievement = "playersander_the_great"
+	triggers
+	{
+		any_player_kingdom great_powers_changed
+		{
+			condition = (param)
+		}
+	}
+}
+
+def PowerOverwhelmingAchievementRule : UnlockAchievementRule
+{
+	achievement = "power_overwhelming"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings_conquest)
+		}
+	}
+}
+
+def GreedIsGoodAchievementRule : UnlockAchievementRule
+{
+	achievement = "greed_is_good"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings_wealth)
+		}
+	}
+}
+
+def WhyIsThereNoCultureAchievementRule : UnlockAchievementRule
+{
+	achievement = "why_is_there_no_culture"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings_culture)
+		}
+	}
+}
+
+def GameOfThornsAchievementRule : UnlockAchievementRule
+{
+	achievement = "game_of_thorns"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings_politics)
+		}
+	}
+}
+
+def TogetherWeStandAchievementRule : UnlockAchievementRule
+{
+	achievement = "together_we_stand"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings_society)
+		}
+	}
+}
+
+def AllTheKingsMenAchievementRule : UnlockAchievementRule
+{
+	achievement = "all_the_kings_men"
+	triggers
+	{
+		any_player_kingdom income_tick
+		{
+			condition = (kingdom.income.levy >= 100)
+		}
+	}
+}
+
+def LearnMeABookAchievementRule : UnlockAchievementRule
+{
+	achievement = "learn_me_a_book"
+	triggers
+	{
+		any_player_kingdom income_tick
+		{
+			condition = (kingdom.income.books >= 100)
+		}
+	}
+}
+
+def LetUsPrayAchievementRule : UnlockAchievementRule
+{
+	achievement = "let_us_pray"
+	triggers
+	{
+		any_player_kingdom income_tick
+		{
+			condition = (kingdom.income.piety >= 100)
+		}
+	}
+}
+
+def DinnerTimeAchievementRule : UnlockAchievementRule
+{
+	achievement = "dinner_time"
+	triggers
+	{
+		any_player_kingdom income_tick
+		{
+			condition = (kingdom.income.food >= 150)
+		}
+	}
+}
+
+def LetUsTradeAchievementRule : UnlockAchievementRule
+{
+	achievement = "let_us_trade"
+	triggers
+	{
+		any_player_kingdom income_tick
+		{
+			condition = (kingdom.income.trade >= 400)
+		}
+	}
+}
+
+def TheFinestMerchandiseAchievementRule : UnlockAchievementRule
+{
+	achievement = "the_finest_merchandise"
+	triggers { realm became_trade_center }
+}
+
+def HisHolinessAchievementRule : UnlockAchievementRule
+{
+	achievement = "his_holiness"
+	triggers
+	{
+		kingdom court_changed
+		{
+			condition = (sender.has_pope)
+		}
+	}
+}
+
+def HisAllHolinessAchievementRule : UnlockAchievementRule
+{
+	achievement = "his_all_holiness"
+	triggers
+	{
+		character became_ecumenical_patriarch
+		{
+			condition = (sender.kingdom == kingdom)
+		}
+	}
+}
+
+def PrinceAliAchievementRule : UnlockAchievementRule
+{
+	achievement = "prince_ali"
+	triggers { any_player_kingdom claimed_caliphate }
+}
+
+def YoureNotMyRealDadAchievementRule : UnlockAchievementRule
+{
+	achievement = "youre_not_my_real_dad"
+	triggers
+	{
+		kingdom autocephaly
+		{
+			condition = (!sender.is_ecumenical_patriarchate)
+		}
+	}
+}
+
+def TheAntipopeAchievementRule : UnlockAchievementRule
+{
+	achievement = "the_antipope"
+	triggers
+	{
+		any_player_kingdom destroyed_kingdom
+		{
+			condition = (param.destroyed_kingdom.is_papacy)
+		}
+	}
+}
+
+def ValhallaAwaitsMeAchievementRule : UnlockAchievementRule
+{
+	achievement = "valhalla_awaits_me"
+	triggers
+	{
+		kingdom religion_changed
+		{
+			condition = (sender.pagan_traditions_count >= 3)
+		}
+	}
+}
+
+def FromRagsToRichesAchievementRule : UnlockAchievementRule
+{
+	achievement = "from_rags_to_riches"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (kingdom.starting_realms_count == 1 && (param == "EmperorOfTheWorld" || param == "KingdomAdvantages"))
+		}
+	}
+}
+
+def UnobtaniumAchievementRule : UnlockAchievementRule
+{
+	achievement = "unobtanium"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "WarForGoods")
+		}
+	}
+}
+
+def EverythingTheLightTouchesAchievementRule : UnlockAchievementRule
+{
+	achievement = "everything_the_light_touches"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "HaveXRealms")
+		}
+	}
+}
+
+def IAmTheSenateAchievementRule : UnlockAchievementRule
+{
+	achievement = "i_am_the_senate"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "EmperorOfTheWorld")
+		}
+	}
+}
+
+def WeWantTheMoneyAchievementRule : UnlockAchievementRule
+{
+	achievement = "we_want_the_money"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "HaveXGold")
+		}
+	}
+}
+
+def RagiumQuitusAchievementRule : UnlockAchievementRule
+{
+	achievement = "ragium_quitos"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "FirstBlood")
+		}
+	}
+}
+
+def DieByMyHandAchievementRule : UnlockAchievementRule
+{
+	achievement = "die_by_my_hand"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "DestroyKingdom")
+		}
+	}
+}
+
+def RenaissanceManAchievementRule : UnlockAchievementRule
+{
+	achievement = "renaissance_man"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = (param == "KingdomAdvantages")
+		}
+	}
+}
+
+def WeAreTheChampionsAchievementRule : UnlockAchievementRule
+{
+	achievement = "we_are_the_champions"
+	triggers
+	{
+		any_player_kingdom player_leads_ranking
+		{
+			condition = (kingdom.leads_all_rankings)
+		}
+	}
+}
+
+def BlitzkriegAchievementRule : UnlockAchievementRule
+{
+	achievement = "blitz_krieg"
+	triggers
+	{
+		any_player_kingdom victory
+		{
+			condition = ((kingdom.game.time_hours < 5) && (param == "EmperorOfTheWorld" || param == "KingdomAdvantages"))
+		}
+	}
+}
+
+def LordOfTheKingsAchievementRule : UnlockAchievementRule
+{
+	achievement = "lord_of_the_kings"
+	triggers
+	{
+		any_player_kingdom realm_added
+		{
+			condition = (sender.realms_count >= 100)
+		}
+	}
+}
+
+def HolyTrinityAchievementRule : UnlockAchievementRule
+{
+	achievement = "holy_trinity"
+	triggers
+	{
+		any_player_kingdom realm_added
+		{
+			condition = (kingdom.is_constantinople_kingdom && kingdom.is_rome_kingdom && kingdom.is_mecca_kingdom)
+		}
+	}
+}
+
+def BlessedBeHisNameAchievementRule : UnlockAchievementRule
+{
+	achievement = "blessed_be_his_name"
+	triggers
+	{
+		any_player_kingdom opinion_changed
+		{
+			condition = (kingdom.opinions.ClergyOpinion.is_max && kingdom.opinions.NobilityOpinion.is_max && kingdom.opinions.MerchantsOpinion.is_max && kingdom.opinions.PeasantryOpinion.is_max && kingdom.opinions.ArmyOpinion.is_max)
+		}
+	}
+}
+
+def TwoSidesToEveryStoryAchievementRule : ReachAmountAchievementRule
+{
+	achievement = "two_sides_to_every_story"
+
+	goal = 2
+	start_triggers
+	{
+		any_player_kingdom religion_changed
+		{
+			condition = (param != null)
+		}
+	}
+	stop_triggers
+	{
+		target TwoSidesToEveryStoryAchievementRule.Refresh
+	}
+
+	rule Refresh
+	{
+		condition execute = true
+		triggers
+		{
+			target religion_changed
+			{
+				condition = (param != null)
+			}
+		}
+		outcomes
+		{
+			main success
+			{
+				set_var current
+				{
+					owner = (rule.parent_rule)
+					amount = ((rule.parent_rule.current) + 1)
+				}
+			}
+		}
+	}
+}
+
+def LibertyOrDeathAchievementRule : UnlockAchievementRule
+{
+	achievement = "liberty_or_death"
+	triggers
+	{
+		any_player_kingdom recieved_offer_declined
+		{
+			var is_peace = (param.name == "PeaceDemandTribute" || param.name = "PeaceOfferTribute" || param.name = "WhitePeaceOffer")
+			condition = (is_peace && (kingdom.realms_count == 1) && kingdom.capital_realm.castle.has_battle)
+		}
+	}
+}
+
+def ColumbusAchievementRule : UnlockAchievementRule
+{
+	achievement = "columbus"
+	triggers
+	{
+		character player_army_update
+		{
+			condition = (sender.army.pos_x < 100)
+		}
+	}
+}
+
+def HeMadeItOutAchievementRule : UnlockAchievementRule
+{
+	achievement = "he_made_it_out"
+	triggers
+	{
+		character fatal_attrition_damage
+		{
+			condition = (!param.is_prisoner)
+		}
+	}
+}
+
+def ForthEorlingasAchievementRule : UnlockAchievementRule
+{
+	achievement = "forth_eorlingas"
+	triggers
+	{
+		castle break_siege_defender
+		{
+			condition = (sender.army.leader.is_king)
+		}
+	}
+}
+
+def InOurDarkestHourAchievementRule : UnlockAchievementRule
+{
+	achievement = "in_our_darkest_hour"
+	triggers
+	{
+		any_player_kingdom recieved_offer_accepted
+		{
+			condition = (param.name == "DemandVassalage")
+		}
+		any_player_kingdom sent_offer_accepted
+		{
+			condition = (param.name == "OfferVassalage")
+		}
+	}
+}
+
+def FreeeedomAchievementRule : UnlockAchievementRule
+{
+	achievement = "freeeedom"
+	triggers
+	{
+		any_player_kingdom independence
+		{
+			condition = (kingdom.name == "Scotland")
+		}
+	}
+}
+
+def CromIHaveNeverPrayedAchievementRule : UnlockAchievementRule
+{
+	achievement = "crom_i_have_never_prayed"
+	triggers
+	{
+		any_player_kingdom religion_changed
+		{
+			condition = (kingdom.is_pagan && kingdom.has_pagan_belief_Heroes && kingdom.has_pagan_belief_Battles)
+		}
+	}
+}
+
+def RagnarokAchievementRule : UnlockAchievementRule
+{
+	achievement = "ragnarok"
+	triggers
+	{
+		any_player_kingdom religion_changed
+		{
+			condition = (kingdom.is_pagan && kingdom.has_pagan_belief_Ocean && kingdom.has_pagan_belief_Raids)
+		}
+	}
+}
+
+def ALeinsterAlwaysPaysAchievementRule : UnlockAchievementRule
+{
+	achievement = "a_leinster_always_pays"
+	triggers
+	{
+		any_player_kingdom sent_offer_accepted
+		{
+			condition = (param.from.name == "Leinster" && param.name == "OfferGold")
+		}
+	}
+}
+
+def YouDareChallengeAchievementRule : UnlockAchievementRule
+{
+	achievement = "you_dare_challenge"
+	triggers
+	{
+		any_player_kingdom declared_war
+		{
+			condition = (param.name == "Salamanca")
+		}
+	}
+}
+
+def WhatWeveGotAchievementRule : UnlockAchievementRule
+{
+	achievement = "what_weve_got"
+	triggers
+	{
+		any_player_kingdom war_started
+		{
+			condition = (param.involvement_reason == "InheritanceClaimDeclined")
+		}
+	}
+}
+
+def TisButAScratchAchievementRule : UnlockAchievementRule
+{
+	achievement = "tis_but_a_scratch"
+	triggers
+	{
+		character killed
+		{
+			condition = (sender.is_max_class_level)
+		}
+	}
+}
+
+def VladTheImpalerAchievementRule : ReachAmountAchievementRule
+{
+	achievement = "vlad_the_impaler"
+
+	goal = 10
+	start_triggers
+	{
+		any_player_kingdom prisoner_executed
+	}
+	stop_triggers
+	{
+		target VladTheImpalerAchievementRule.Refresh
+	}
+
+	rule Refresh
+	{
+		condition execute = true
+		triggers
+		{
+			target prisoner_executed
+		}
+		outcomes
+		{
+			main success
+			{
+				set_var current
+				{
+					owner = (rule.parent_rule)
+					amount = ((rule.parent_rule.current) + 1)
+				}
+			}
+		}
+	}
+}
+
+def TheMerchantOfVeniceAchievementRule : UnlockAchievementRule
+{
+	achievement = "the_merchant_of_venice"
+	triggers
+	{
+		realm trade_center_changed
+		{
+			condition = (kingdom.trade_centers_count >= 5)
+		}
+	}
+}
+
+def HowMuchForGreenlandAchievementRule : AchievementProgressRule
+{
+	achievement = "how_much_for_greenland"
+	achievement_stat = "diplomacy_realms_won"
+	triggers
+	{
+		any_player_kingdom sent_offer_accepted
+		{
+			condition = (param.name == "DemandLand")
+		}
+	}
+}
+
+def GenghisKhanAchievementRule : AchievementProgressRule
+{
+	achievement = "genghis_khan"
+	achievement_stat = "realms_conquered"
+	triggers { any_player_kingdom realm_won_by_battle }
+}
+
+def AshesToAshesAchievementRule : AchievementProgressRule
+{
+	achievement = "ashes_to_ashes"
+	achievement_stat = "settlements_pillaged"
+	triggers { kingdom pillaged_settlement }
+}
+
+def OpenYourEyesAchievementRule : AchievementProgressRule
+{
+	achievement = "open_your_eyes"
+	achievement_stat = "converted_realms"
+	triggers { character converted_realm }
+}
+
+def TheNewWorldOrderAchievementRule : AchievementProgressRule
+{
+	achievement = "the_new_world_order"
+	achievement_stat = "disorder_removed_manually_realms"
+	triggers
+	{
+		character established_order
+		character adopted_population
+	}
+}
+
+def HailAndKillAchievementRule : AchievementProgressRule
+{
+	achievement = "hail_and_kill"
+	achievement_stat = "battles_won"
+	triggers { any_player_kingdom battle_won }
+}
+
+def KingdomFallDisappearance : AchievementProgressRule
+{
+	achievement = "kingdom_fall_disappearance"
+	achievement_stat = "kingdoms_destroyed"
+	triggers { any_player_kingdom destroyed_kingdom }
+}
+
+def TheBeginningOfBeautifulFriendshipAchievementRule : AchievementProgressRule
+{
+	achievement = "the_beggining_of_a_beautiful_friendship"
+	achievement_stat = "diplomat_improved_relations"
+	triggers
+	{
+		any_player_kingdom rel_changed_diplomat
+		{
+			condition = (param.amount > 0)
+		}
+	}
+}
+
+def BuyinTheDipAchievementRule : AchievementProgressRule
+{
+	achievement = "buyin_the_dip"
+	achievement_stat = "trade_agreements"
+	triggers
+	{
+		any_player_kingdom sent_offer_accepted
+		{
+			condition = (param.name == "SignTrade")
+		}
+		any_player_kingdom recieved_offer_accepted
+		{
+			condition = (param.name == "SignTrade")
+		}
+	}
+}
+
+def JoinTheDarkSideAchievementRule : AchievementProgressRule
+{
+	achievement = "join_the_dark_side"
+	achievement_stat = "kingdoms_vassalized"
+	triggers
+	{
+		any_player_kingdom recieved_offer_accepted
+		{
+			condition = (param.name == "OfferVassalage")
+		}
+		any_player_kingdom sent_offer_accepted
+		{
+			condition = (param.name == "DemandVassalage")
+		}
+	}
+}
+
+def IGotAKnightInParisAchievementRule : AchievementProgressRule
+{
+	achievement = "i_got_a_knight_in_paris"
+	achievement_stat = "nobles_bribed"
+	triggers { character bribed_noble }
+}
+
+def ImportIsMySecondNatureAchievementRule : AchievementProgressRule
+{
+	achievement = "import_is_my_second_nature"
+	achievement_stat = "goods_imported"
+	triggers { character player_importing_good_first_time }
+}
+
+def DoYouReadAchievementRule : UnlockAchievementRule
+{
+	achievement = "do_you_read"
+	triggers
+	{
+		any_player_kingdom rebellions_changed
+		{
+			condition = (kingdom.num_rebellions >= 3)
+		}
+	}
+}
+
+def IStartedAJokeAchievementRule : UnlockAchievementRule
+{
+	achievement = "i_started_a_joke"
+	triggers
+	{
+		any_player_kingdom pretender_not_chosen_emperor_of_the_world
+	}
+}

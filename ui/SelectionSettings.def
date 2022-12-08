@@ -1,0 +1,24 @@
+﻿def SelectionSettings
+{
+	color primary_friend_color = 5,214,7 //05D607FF
+	color primary_friend_color_minimap = "61,255,63" //3DFF3FFF
+	color secondary_friend_color = "2,122,4" //037B04FF
+	color secondary_friend_color_minimap = "5,180,8" //06B409FF
+	color primary_enemy_color = 216,64,0 //D84000FF
+	color primary_enemy_color_minimap = "255,52,27" //FF341CFF
+	color secondary_enemy_color = "144,44,2" //902C02FF
+	color secondary_enemy_color_minimap = "199,20,0" //C81500FF
+	color primary_neutral_color = 182,201,211 //B7CAD4FF
+	color primary_neutral_color_minimap = "90,198,255" //5AC6FFFF
+	color secondary_neutral_color = "109,138,153" //6E8B9AFF
+	color secondary_neutral_color_minimap = "0,168,255" //00A8FFFF
+	color retreating_color = "150,150,150"
+	
+	material army_selection_material = "Assets/Misc/Selection/ArmySelection.mat" //GUID:807b09b9738f23842a8a46db0ea83a12
+	material army_relations_material = "Assets/Misc/Selection/Mat_ArmyRelation.mat" //GUID:22edc4ac9627c7046a74f5c8826d2fb4
+	material castle_selection_material = "Assets/Misc/Selection/ArmySelection.mat" //GUID:807b09b9738f23842a8a46db0ea83a12
+	material village_selection_material = "Assets/Misc/Selection/ArmySelection.mat" //GUID:807b09b9738f23842a8a46db0ea83a12
+	material squad_selection_material = "Assets/Misc/Selection/SquadSelection.mat" //GUID:76ef35f5ae8a1f3479b79302e893f486
+	material attrition_range_material = "Assets/Misc/Selection/AttritionRangeSelection.mat" //GUID:0b7a4da786c9e0348be7b53973bd5c78
+	
+}

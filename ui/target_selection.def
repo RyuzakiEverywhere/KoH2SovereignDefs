@@ -1,0 +1,221 @@
+﻿def TargetSelect
+{
+	text caption = "Select Target"
+	text text1 = "Select a target:"
+	text text2 = ""
+	text ok = "OK"
+	text cancel = "Cancel"
+	text back = "Back"
+	
+	// test data 
+	column target
+	{
+		text name = "target"
+		text tooltip = "some target releted data"
+	}
+}
+
+def CallReinforcements : TargetSelect
+{
+	caption = "Call reinforcements"
+	text1 = "Select own or ally reinforcement army:"
+}
+
+
+def GatherArmyActionTargetPicker : TargetSelect
+{
+	caption = "Call to arms"
+	text1 = "Pick a province to spawn {owner}:"
+}
+
+
+def InfiltrateKingdomActionTargetPicker : TargetSelect
+{
+	caption = "Infiltrate kingdom"
+	text1 = "Pick a kingdom to infiltrate:"
+	text2 = "{obj} will establish a covert network at the chosen destination and look for opportunities to cause all sorts of mischief."
+}
+
+def RuinRelationsActionTargetPicker : TargetSelect
+{
+	caption = "Ruin relations"
+	text1 = "Ruin the realtions of {obj.mission_kingdom} with one of its neighbors:"
+	text2 = "{obj} will work towards ruining the relations of {obj.mission_kingdom} with one of its neighboring kingdoms."
+}
+
+def TradeWithKingdomActionTargetPicker : TargetSelect
+{
+	caption = "Trade with kingdom"
+	text1 = "Pick a trade partner:"
+	text2 = "{obj} can establish a trade route with any kingdom which has signed a trade agreement with us."
+}
+
+def ImproveRelationsActionTargetPicker : TargetSelect
+{
+	caption = "Improve relations"
+	text1 = "Pick a kingdom to improve our relations with:"
+	text2 = "{obj} will focus his attention on improving our relations with a kingdom, as long as we are not at war."
+}
+
+def DiplomacySearchForSpouceActionTargetPicker : TargetSelect
+{
+	caption = "Search for spouse"
+	text1 = "Select a royal family member:"
+	text2 = "{obj} can arrange the marriage of our prince, princess or even the {kingdom.king.title} himself."
+}
+
+def DiplomacyPeaceTalksPreparationActionTargetPicker : TargetSelect
+{
+	caption = "Negotiate peace"
+	text1 = "Negotiate peace with an enemy kingdom:"
+	text2 = "{obj} will focus his efforts on making sure the chosen kingdom will be willing to sign peace."
+}
+
+def CreateDefensivePactActionTargetPicker : TargetSelect
+{
+	caption = "Create defensive pact"
+	text1 = "Create a defensive pact against a neighboring kingdom:"
+}
+
+def CreateOffensivePactActionTargetPicker : TargetSelect
+{
+	caption = "Create invasion plan"
+	text1 = "Create an invasion plan against a neighboring kingdom:"
+	text2 = "{obj} can create an invasion plan against a neighboring kingdom and begin to look for supporters."
+}
+
+def ConvertProvinceReligionActionTargetPicker : TargetSelect
+{
+	caption = "Convert religion"
+	text1 = "Select a province following a different religion:"
+	text2 = "{obj} will begin to convert the selected province and the territories around it to {kingdom.religion:ism}."
+}
+
+def AdoptPopulationActionTargetPicker : TargetSelect
+{
+	caption = "Adopt population"
+	text1 = "Select a province of ours in disorder:"
+	text2 = "{obj} will attempt to ease the situation in the selected province and lift its disorder."
+}
+
+def GovernCityActionTargetPicker : TargetSelect
+{
+	caption = "Govern"
+	text1 = "Assign {obj} as a governor to one of your provinces:"
+	text2 = "Governors convert their land to royal, giving full access to the province's production."
+}
+
+def AssignNewGovernCityActionTargetPicker : TargetSelect
+{
+	caption = "Govern a new province"
+	text1 = "Assign {obj} as a governor to one of your provinces:"
+	text2 = "Governors convert their land to royal, giving full access to the province's production."
+}
+
+def GovernorTargetPicker : TargetSelect
+{
+	caption = "Govern"
+	text1 = "Select {obj}'s governor:"
+	text2 = "Governors convert their land to royal, giving full access to the province's production."
+	
+	// not implemented 
+	// sample data 
+	column target
+	{
+		text name = "target"
+		text tooltip = "some target resslect data"
+		text cell_tooltip = "cell specific tooltip" // overrides default object toolip implementation (if any)
+	}
+	
+	column governor
+	{
+		text name = "current governor"
+		text tooltip = "governor releted data"
+	}
+	
+	column income
+	{
+		text name = "realm income"
+		text tooltip = "realm income tooltip data"
+	}
+}
+
+def KingdomTargetPicker : TargetSelect
+{
+	caption = "Select kingdom"
+	text1 = "Pick a new kingdom:"
+	text2 = "Take control of another kingdom and continue playing."
+}
+
+def DiplomacySendGiftActionArgPicker0 : TargetSelect
+{
+	caption = "Send gift"
+	text1 = "Select a sum of gold as a gift for {owner.mission_kingdom}:"
+	text2 = "Send a shipment of gold to {owner.mission_kingdom}, in order to strengthen the relationship between our kingdoms."
+}
+
+def OfferSupportInWarTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick one of their wars:"
+}
+
+def DemandSupportInWarTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick one of our wars:"
+}
+
+def DemandAttackKingdomTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick a kingdom:"
+}
+
+def MarriageOfferTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick a royal family member:"
+}
+
+def DemandLandTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick one of their provinces:"
+}
+
+def OfferLandTargetPicker : TargetSelect //!!! placeholder
+{
+	text1 = "Pick one of our provinces:"
+}
+
+// ---------- !!! PROBABLY OBSOLETE ONES BELOW -----------
+
+def AddTraditionActionArgPicker0 : TargetSelect
+{
+	caption = "Select new tradition"
+}
+
+def AddMilitaryTraditionActionArgPicker0 : TargetSelect
+{
+	caption = "Select new military tradition"
+}
+
+def AddNonMilitaryTraditionActionArgPicker0 : TargetSelect
+{
+	caption = "Select new non-military tradition"
+}
+
+def BribeNobleActionTargetPicker : TargetSelect
+{
+	caption = "Bribe noble"
+	text1 = "Select a noble to bribe:"
+	text2 = "{obj} will try to bribe the chosen noble, which will open up additional opportunities."
+}
+
+def StudySkillActionArgPicker0 : TargetSelect
+{
+	caption = "Select a skill to study"
+	// text1 = "StudySkillAction short description"
+	int max_skill_cnt = 6
+}
+
+def LearnNewSkillActionArgPicker0 : TargetSelect
+{
+	caption = "Select new skill"
+}
