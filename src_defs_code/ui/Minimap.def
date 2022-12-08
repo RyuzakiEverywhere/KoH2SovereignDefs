@@ -1,0 +1,42 @@
+﻿def Minimap
+{
+	float visible_area_max_coef = 0.55
+	float zoom_step = 1.0
+	float scroll_edge_offset = 5.0
+	
+	float worldview_update_rate = 0.2
+	
+	float worldview_units_icon_scale_min = 1
+	float worldview_units_icon_scale_max = 1
+
+	float worldview_battle_icon_scale_min = 1
+	float worldview_battle_icon_scale_max = 1
+    
+	float battleview_icon_scale_min = 2
+	float battleview_icon_scale_max = 2
+	
+	sprite primary_enemy_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Enemy_Normal.psd:Element_UI_Minimap_Primary_Enemy_Normal#2" //GUID:093013450114f2d46878ec66d81dcee8
+	sprite primary_enemy_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Enemy_Selected.psd:Element_UI_Minimap_Primary_Enemy_Selected#2" //GUID:57c573b1b43431642b0069acdc8ec7cf
+	sprite primary_friend_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Friend_Normal.psd:Element_UI_Minimap_Primary_Friend_Normal#2" //GUID:78b53d32590125d4db99c8c1dfb45a16
+	sprite primary_friend_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Friend_Selected.psd:Element_UI_Minimap_Primary_Friend_Selected#2" //GUID:0028e300ee30c63418ab69d074f46b54
+	sprite primary_neutral_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Neutral_Normal.psd:Element_UI_Minimap_Primary_Neutral_Normal#2" //GUID:ed3e82f4063e7b84d8ecacb085a06622
+	sprite primary_neutral_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Neutral_Selected.psd:Element_UI_Minimap_Primary_Neutral_Selected#2" //GUID:668f00b0cc127f04d999ad434309ac6a
+	sprite secondary_enemy_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Enemy_Normal.psd:Element_UI_Minimap_Secondary_Enemy_Normal#2" //GUID:fa84db77294002345b2261f13e2d6096
+	sprite secondary_enemy_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Enemy_Selected.psd:Element_UI_Minimap_Secondary_Enemy_Selected#2" //GUID:b5be096b5f3527749abb0658c623b2f2
+	sprite secondary_friend_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Friend_Normal.psd:Element_UI_Minimap_Secondary_Friend_Normal#2" //GUID:9961ca73d4b04b140ab9e84fbacd720e
+	sprite secondary_friend_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Friend_Selected.psd:Element_UI_Minimap_Secondary_Friend_Selected#2" //GUID:14280a71d3b5aa14ea151c0660b1bf36
+	sprite secondary_neutral_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Neutral_Normal.psd:Element_UI_Minimap_Secondary_Neutral_Normal#2" //GUID:2f0663b5bbe392f45a966916b818fdd1
+	sprite secondary_neutral_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Secondary_Neutral_Selected.psd:Element_UI_Minimap_Secondary_Neutral_Selected#2" //GUID:9569f4f4dca4fe9479e319d47612e4ce
+	
+	sprite our_army_in_castle = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Friend_InCastle.psd:Element_UI_Minimap_Primary_Friend_InCastle#2" //GUID:5352f3b131a37034bbfe73549bc2dd88
+	sprite our_army_in_castle_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Primary_Friend_InCastle_Selected.psd:Element_UI_Minimap_Primary_Friend_InCastle_Selected#2" //GUID:d1b4d88107547e743b894d4130e49a0f
+    
+	sprite battle_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Battle_Normal.psd:Element_UI_Minimap_Battle_Normal#2" //GUID:e20e50d37b328514fa82046f1deda9fb
+	sprite battle_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Battle_Selected.psd:Element_UI_Minimap_Battle_Selected#2" //GUID:4313b03e3daf7144b9ff6f4d092789b7
+	sprite battle_in_castle = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Battle_InCastle.psd:Element_UI_Minimap_Battle_InCastle#2" //GUID:dbe7c7cc48131e842a6ee93b22a208bf
+	sprite battle_in_castle_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_Battle_InCastle_Selected.psd:Element_UI_Minimap_Battle_InCastle_Selected#2" //GUID:8509a88881df1424e90b7a4f1c33a97e
+	sprite our_battle_normal = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_FriendBattle_Normal.psd:Element_UI_Minimap_FriendBattle_Normal#2" //GUID:c2700f26aaa09c546aa4ce53ed448fa9
+	sprite our_battle_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_FriendBattle_Selected.psd:Element_UI_Minimap_FriendBattle_Selected#2" //GUID:bcd705becdc327b41827175c72846c2b
+	sprite our_battle_in_castle = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_FriendBattle_InCastle.psd:Element_UI_Minimap_FriendBattle_InCastle#2" //GUID:839e79ac7213f1f42a11597b03aad783
+	sprite our_battle_in_castle_selected = "Assets/UI/MiniMap/Icons/Element_UI_Minimap_FriendBattle_InCastle_Selected.psd:Element_UI_Minimap_FriendBattle_InCastle_Selected#2" //GUID:8f0e4554b15b494478885dc6b3be8493
+}

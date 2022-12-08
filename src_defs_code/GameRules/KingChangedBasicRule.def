@@ -1,0 +1,31 @@
+// when king dies we push "non-special" foreign relations towards zero
+// this is to "garbage collect" these that are not so significant politically
+//
+// also we try to spawn some rebels
+
+def KingChangedBasicRule : GameRule
+{
+	//log = 1
+
+	target { kingdom k }
+
+	triggers { kingdom king_changed }
+
+	condition execute = true
+
+	outcomes
+	{
+		// pushing towards zero works for "non-special" cases
+		// i.e. in war, allies, trading, being excommunicated are not affected
+		main _ReduceForeignRelations
+		{
+			mul_neighbors = 0.2
+			add_for_range = 0.1
+			cap_at = 0.5
+			nullify_when_bellow = 50
+		}
+
+		option try_spawn_rebellion = 50
+
+	}
+}

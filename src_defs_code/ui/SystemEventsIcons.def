@@ -1,0 +1,33 @@
+﻿def SystemEventsIcons
+{
+	Saving
+	{
+		sprite icon = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_Saving.png:Icon_SystemEvent_Saving#2" //GUID:af371915e64adf84d96332e56616f4ae
+		text caption = "Saving"
+		text tooltip = "[{is_saving:if}Saving the campaign progress.|The campaign has been saved.]"
+	}
+	
+	ConnectionProblemsWithHost
+	{
+		sprite icon = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_NoConnection.png:Icon_SystemEvent_NoConnection#2" //GUID:5d3e2ef64406e4245bf19ddb2233485b
+		text caption = "Connection problems"
+		text tooltip = "There are problems with the connection to the campaign's host."
+	}
+	
+	ConnectionProblemsWithAnotherPlayer
+	{
+		sprite icon = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_LowConnectivity.png:Icon_SystemEvent_LowConnectivity#2" //GUID:6e1ea50cad5426b45bd7aca86faff2a3
+		text caption = "Connecton problems"
+		text tooltip = "[{player_name}|This player] has connection problems."
+	}
+	
+	GameSpeedChanged
+	{
+		sprite icon0 = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_Speed0.png:Icon_SystemEvent_Speed0#2" //GUID:2ea4345cf24316c44822f9f05811b90f
+		sprite icon1 = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_Speed1.png:Icon_SystemEvent_Speed1#2" //GUID:461cd07c5364a3e47b8beb9cbc6643a6
+		sprite icon2 = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_Speed2.psd:Icon_SystemEvent_Speed2#2" //GUID:e43995bcf81d36d479e6fec39442528b
+		sprite icon4 = "Assets/UI/Elements/SystemEvents/Icon_SystemEvent_Speed4.psd:Icon_SystemEvent_Speed4#2" //GUID:666601b81887c3e41a900c0b4060c1d1
+		text caption = "Speed changed"
+		text tooltip = "The game speed has been changed[ to {new_speed}][ by {player_name}]."
+	}
+}

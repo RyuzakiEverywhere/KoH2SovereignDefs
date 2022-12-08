@@ -1,0 +1,313 @@
+def LastHeirRecentlyDiedRumorRule : RumorRule
+{
+	target { kingdom k }
+	
+	triggers
+	{
+		character dying
+		{
+			condition = (sender.is_only_heir)
+		}
+	}
+	
+	var prince = (start_trigger.sender)
+	
+	condition execute = true
+}
+
+def NewKnightHiredRumorRule : RumorRule
+{
+	target { kingdom k }
+	
+	triggers { kingdom new_knight_hired }
+	
+	var knight = (start_trigger.param)
+	
+	condition execute = true
+}
+
+def ChangedReligionRumorRule : RumorRule
+{
+	target { kingdom k }
+	
+	triggers { kingdom religion_changed }
+	
+	var religion = (start_trigger.param)
+	
+	condition execute = true
+}
+
+def KingMarriedRumorRule : RumorRule
+{
+	target { kingdom k }
+	
+	triggers { kingdom new_queen }
+	
+	condition execute = true
+}
+
+def EnemySpyCaughtRumorRule : RumorRule
+{
+	target { mission_kingdom k }
+	
+	triggers {
+		character spy_capture_imprisoned
+		character spy_capture_killed
+	}
+	
+	condition execute = true
+}
+
+def RecentlyFailedDiplomacyRumorRule : RumorRule
+{
+	target { kingdom k }
+	
+	triggers { kingdom sent_offer_declined }
+	
+	var otherKingdom = (start_trigger.param.to)
+	
+	condition execute = true
+}
+
+
+
+def ArmyStrengthRule : RumorRule //TestRule
+{
+	target { kingdom k }
+	
+	triggers { kingdom new_knight_hired }
+	timeout = 0
+	cooldown = 300
+	var prev_strength = (GetRule(k, "ArmyStrengthRule").current_strength || k.army_strength)
+	var current_strength = (k.army_strength)
+	
+	condition execute = true
+}
+
+def ForeignSpyDetectedRule : GameRule
+{
+	target { kingdom k }
+	triggers
+	{
+		kingdom foreign_spy_succeeded
+		kingdom foreign_spy_failed_revealed = (5 + 20 * sender.num_spies)
+	}
+	
+	condition execute = true
+
+	outcomes
+	{
+		also activate_witch_hunt
+		{
+			kingdom = (k)
+		}
+	}
+}
+
+
+def RecentlyDisobeyedPapacyRule : GameRule
+{
+	target { kingdom k }
+	triggers
+	{
+		kingdom recieved_offer_declined
+		{
+			condition = (param.name == "LeadCrusadeOffer" || param.name == "DemandFundCrusade" || param.name == "OfferCourtCleric")
+		}
+	}
+	
+	timeout = 1800
+	
+	condition execute = true
+}
+
+def RecentlyAidedPapacyRule : GameRule
+{
+	target { kingdom k }
+	triggers
+	{
+		kingdom recieved_offer_accepted
+		{
+			condition = (param.name == "LeadCrusadeOffer" || param.name == "DemandFundCrusade")
+		}
+		kingdom restored_papacy
+	}
+	
+	timeout = 3600
+	
+	condition execute = true
+}
+
+
+def ChangeReligionRebelsRule : GameRule
+{
+	target { kingdom k }
+	triggers
+	{
+		kingdom religion_changed
+		{
+			condition = (param != null) // if there is a valid previous religion
+		}
+	}
+	
+	condition active = true
+	timer Timer1 = 20/60
+	{
+		max_ticks = 1
+		stop_parent = true
+		outcomes
+		{
+			main spawn_rebellion_on_change_religion = 100
+			{
+				int max_realms = (ceil(k.num_realms * 0.1))
+				float chance_crown_athoirty = [10, 5, 0]
+				float chance_neighbor_to_old_religion = 5
+				float chance_neighbor_to_split = 5 //as in neighbor that just rebeled because of same reason
+				float chance_loyalists = 20
+				old_religion = (start_trigger.param)
+			}
+			option default
+		}
+	}
+}
+
+// def ChangeReligionClergyRebellionRule : GameRule
+// {
+// 	target { kingdom k }
+// 	triggers
+// 	{
+// 		kingdom religion_changed
+// 		{
+// 			condition = (param != null) // if there is a valid previous religion
+// 		}
+// 	}
+
+// 	condition active = true
+
+// 	timer Timer1 = 5/20
+// 	{
+// 		max_ticks = 1 
+// 		stop_parent = true
+// 		outcomes
+// 		{
+// 			main change_religion_clerics = 100
+// 			option default
+// 		}
+// 	}
+// }
+
+
+def ArmiesDemoralizedRule : GameRule
+{
+	target { kingdom kingdom }
+	triggers
+	{
+		kingdom recieved_offer_declined
+		{
+			condition = ((param.name == "WhitePeaceOffer" || param.name == "PeaceOfferTribute") && param.to.ArmyOpinion < 0)
+		}
+	}
+	
+	condition execute = true
+	var offer = (start_trigger.param)
+	outcomes
+	{
+		main morale = 100
+		{
+			amount = -3
+			case src_kingdom
+			{
+				message
+				{
+					def = OpinionOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Negative.png:Icon_Message_GenericEvent_Negative#2" //GUID:f955d92cf71058746985a61f90487bb9
+					text caption = "Armies demoralized"
+					text text = "Our armies morale is lowered, as we declined {offer.from:s} peace offer. Our soldiers seriously doubt {plr_kingdom.king:s} decisions and fear that they will have to pay the price for his lack of wisdom.{p}{blt} {outcome.value:bonus} army morale"
+				}
+			}
+		}
+	}
+}
+
+def NegativeFoodRule : GameRule
+{
+	target { kingdom k }
+	triggers
+	{
+		kingdom income_tick
+	}
+	
+	condition active = (k.food < 0)
+
+	timer ArmyOpinionDecreaseTimer = 180/480
+	{
+		outcomes
+		{
+			main negative_kingdom_food_penalty = 100
+			option default
+		}
+	}
+}
+
+def LoseAutocephalyRule : GameRule
+{
+	target { kingdom kingdom }
+	triggers 
+	{ 
+		kingdom opinion_changed 
+		{
+			condition = (param.id == "ClergyOpinion" && param.last_change_amount < 0)
+		}
+		kingdom lose_autocephaly_rule_trigger
+		kingdom war_lost
+	}
+
+	condition execute = (kingdom.opinions["ClergyOpinion"] < 0 &&  kingdom.is_orthodox && kingdom.is_autocephaly)
+
+	outcomes 
+	{
+		main lose_autocephaly = (kingdom.opinions["ClergyOpinion"] * -3)
+		{
+			case src_kingdom
+			{
+				message
+				{
+					def = OpinionOutcomeMessage
+					sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_GenericEvent_Negative.png:Icon_Message_GenericEvent_Negative#2" //GUID:f955d92cf71058746985a61f90487bb9
+					text caption = "Our church has subordinated"
+					text text = "The alienation between the church and the crown has shaken the beliefs of our people. Without respect and support, our clergy couldn't sustain our autocephalous status and we are now subordinated to the Ecumenical Patriarchate of Constantinople."
+					show_warning = true
+					voice_line = "narrator_voice:our_kingdom_subordinated"
+				}
+			}
+		}
+		option default
+	}
+}
+
+def LoseAutocephalyTimedRule : GameRule
+{
+	target { kingdom kingdom }
+	triggers 
+	{ 
+		kingdom opinion_changed
+		{
+			condition = (param.id == "ClergyOpinion")
+		}
+		kingdom religion_changed
+		kingdom autocephaly
+	}
+	condition active = (kingdom.opinions["ClergyOpinion"] < 0 && kingdom.is_orthodox && kingdom.is_autocephaly)
+
+
+	timer LoseAutocephalyTimer = 600/1200
+	{
+		outcomes
+		{
+			trigger lose_autocephaly_rule_trigger
+			{
+				target = (kingdom)
+			}
+		}
+	}
+}

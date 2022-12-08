@@ -1,0 +1,127 @@
+﻿def DisorderRule : GameRule
+{
+	target { realm r }
+	
+	triggers
+	{
+		realm disorder_state_changed
+	}
+	
+	condition active = (r.is_disorder)
+	
+	timer Rebel = 360/600
+	{
+		outcomes
+		{
+			main try_spawn_rebellion = (30 + 50 * AreEnemies(r, r.majority_kingdom))
+			{
+				message
+				{
+					case src_kingdom
+					{
+						def = OkGotoOutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Rebels_Negative.png:Icon_Message_Rebels_Negative#2" //GUID:dbf11e725a52e1d429ad05300abb2f07
+						sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_RebellionSpawned.png:UI_Illustration_RebellionSpawned#2" //GUID:2f01d8026258db6459402331dd99dfe3
+						text caption = "Rebels spawned!"
+						text text = "Due to the disorder in the provice, rebels have spawned in {r}."
+					}
+				}
+			}
+		}
+	}
+	
+	rule RemoveDisorder
+	{
+		triggers
+		{
+			realm disorder_state_changed
+			kingdom stance_changed
+		}
+		
+		condition active = (!AreEnemies(r, r.majority_kingdom))
+		
+		timer Remove = 540/660
+		{
+			secondary_tick = 240/360
+			outcomes
+			{
+				main remove_disorder = (max(0, 15 + r.rs_stability / 5 + 20 * r.kingdom.has_pope))
+				{
+					message
+					{
+						case src_kingdom
+						{
+							def = OkGotoOutcomeMessage
+							goto_target = (r.castle)
+							sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Disorder_Positive.png:Icon_Message_Disorder_Positive#2" //GUID:6585b9b6b528c7e448ba64878eabbb7f
+							sprite illustration = "Assets/UI/Messages/Illustrations/UI_Illustration_ProvinceDisorderLifted.tga:UI_Illustration_ProvinceDisorderLifted#2" //GUID:2e3c56c1331ba5848a0d436143eca251
+							text caption = "Disorder ended"
+							text text = ["My lord, the people of {r} have gotten used to their ruler's ways and have fully opened the gates of their town to us[{r.kingdom.has_pope:if} undoubtedly thanks to the efforts of [{pope}|the pope]]. Thus, the province is no longer in disorder.",
+										 "Finally[{r.kingdom.has_pope:if}, after the visitation of [{pope}|the pope],] most of the people in {r} have realized that they cannot fight us and would be better off obeying our orders as long as we rule over them.",
+										 "We finally managed to establish a proper order in {r} and to make sure that all nobles that refuse to obey us are either powerless or dead.[{r.kingdom.has_pope:if}[ {pope}|The pope] undoubtedly played huge diplomatic role in our favor, calming down the local population.]"]
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+def StartDisorderRule : GameRule
+{
+	target { realm r }
+	triggers
+	{
+		realm disorder_state_changed
+		kingdom stance_changed
+	}
+	
+	condition active = (!r.is_disorder && AreEnemies(r.kingdom, r.majority_kingdom))
+	
+	timer StartDisorderTimer = 180/300
+	{
+		outcomes
+		{
+			log relationship = (GetRelationship(r.kingdom, r.majority_kingdom))
+			log authority = (r.kingdom.crown_authority)
+			log no_battle = (!r.castle.has_battle)
+			
+			main set_disorder = (no_battle && (relationship < 0) * (authority < 0) * authority * (relationship/100 - 1))
+			{
+				message
+				{
+					case src_kingdom
+					{
+						def = OutcomeMessage
+						sprite icon = "Assets/UI/Elements/msg_icons/Icon_Message_Disorder_Negative.png:Icon_Message_Disorder_Negative#2" //GUID:c2cc202fcb3f19f4f81377bb596495f8
+						text caption = "{r} is in disorder!"
+						text text = ["The people in {r} are still loyal to {r.majority_kingdom} and they refuse to obey our rulership! While our war continues and our crown authority is low, they will hardly follow any orders by us.",
+									 "Once again the people in {r} create us huge problems and refuse to follow any orders. While we fight against {r.majority_kingdom} and the authority of our kingdom is low, they are unlikely to bow before us.",
+									 "Those maggots in {r} continue to support {r.majority_kingdom} and try to help them win the war by sabotaging us. Unless the war ends or our authority rises, any order we manage to establish there will be only temporary."]
+					}
+				}
+			}
+		}
+	}
+}
+
+
+def NotableDistrictBuiltRumorRule : RumorRule
+{
+	target { realm r }
+	
+	triggers {
+		character dying
+		{
+			condition = (sender.is_spy)
+		}
+		character getting_imprisoned
+		{
+			condition = (sender.is_spy)
+		}
+	}
+	
+	condition execute = true
+}

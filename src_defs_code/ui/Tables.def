@@ -1,0 +1,1273 @@
+﻿def Table
+{
+	prefab prefab = "Assets/UI/Table/UIP_GenericTable.prefab" //GUID:81a91b1761e2ddb4f93a6337c9b826ad
+	sprite background
+	
+	text title // the header of the table
+	text tooltip // when hovering on top of the title
+	int window_height = 750 // max height (optional, otherwise dynamically resized based on max_rows)
+	int max_rows = 10 //amount of rows after whitch scrolling might occur
+	
+	bool autosave_settings = false // = true, if we want to save the window's scroll position/ordering, once it's reopened
+	column_list // {} - ordered by the way they are visualized
+	string default_sorting_column // {} - list of columns by which to sort, ordered by priority
+	bool show_header = true
+	
+	prefab row_prefab = "Assets/UI/Table/UIP_GenericTableRow.prefab" //GUID:e9e55041932149344802b495fa9ab2c4
+	
+}
+
+//...
+def TableRow
+{
+	prefab prefab = "Assets/UI/Table/UIP_GenericTableRow.prefab" //GUID:e9e55041932149344802b495fa9ab2c4
+	prefab empty_prefab = "Assets/UI/Table/UIP_GenericTableRow_Placehoder.prefab" //GUID:6cae7e21ce44f32419de81eb0ed08371
+	float horizontal_spacing = 4 // between columns
+	float vertical_spacing = 4 // between rows
+	
+	sprite odd_line_sprite
+	sprite even_line_sprite
+	
+	color odd_line_color
+	color even_line_color
+	
+	padding
+	{
+		float top = 0
+		float left = 0
+		float right = 0
+		float bottom = 0
+	}
+	
+	// rename to Formatting
+	template Formatting
+	{
+		color tint = "45,40,40,255"
+		sprite background
+	}
+	odd
+	{
+		Normal : TableRow.Formatting
+		{
+			tint = "45,0,0" //2D2828FF
+		}
+		Hover : TableRow.Formatting
+		{
+			tint = "74,66,66" //4B4343FF
+		}
+		Selected : TableRow.Formatting
+		{
+			tint = "92,82,82" //5D5353FF
+		}
+		Disbaled : TableRow.Formatting
+		{
+			tint = "14,12,12" //0E0D0DFF
+		}
+	}
+	even
+	{
+		Normal : TableRow.Formatting
+		{
+			tint = "50,50,50" //2D2828FF
+		}
+		Hover : TableRow.Formatting
+		{
+			tint = "74,66,66" //4B4343FF
+		}
+		Selected : TableRow.Formatting
+		{
+			tint = "92,82,82" //5D5353FF
+		}
+		Disbaled : TableRow.Formatting
+		{
+			tint = "14,12,12" //0E0D0DFF
+		}
+	}
+}
+
+def TableColumn
+{
+	// shared 
+	bool hide_if_empty = false
+	float width // static, always as set
+	string sort_method // ascending, descendingg
+	float update_interval = 1 //in secounds, 0 = never
+	float row_height = 36 // global 
+	float header_height = 30 // global 
+	
+	// header data 
+	text title = "Column title"
+	text header_tooltip_caption = ""
+	text header_tooltip_body = ""
+	
+	sprite icon //if we want to append a small icon to the LEFT of cell
+	sprite header_icon // if we want to append a small icon to the LEFT of column heeadwer
+	sprite header_background // override background sprite
+	sprite header_background_over
+	sprite header_background_select
+	prefab header_prefab = "Assets/UI/Table/UIP_GenericTableHeader.prefab" //GUID:9082dc3370674eb438bdb5bb83df812b
+	
+	// cell data 
+	sprite cell_icon //if we want to append a small icon to the LEFT of EVERY CELL
+	prefab cell_prefab = "Assets/UI/Table/UIP_GenericTableCell.prefab" //GUID:34a4523ac5b8bf149b6a142b45059a49
+	
+	// TODO: change to "cell_text"
+	text cell_value = "{obj}"
+	cell_icon_value = (obj)
+	{
+		float width = 0 //0 = fit in parent
+		float height = 0
+	}
+	text text = "{obj}"
+	
+	template Formatting
+	{
+		// font size ?
+		padding
+		{
+			float top = 0
+			float left = 0
+			float right = 0
+			float bottom = 0
+		}
+		
+		string alignment = "MiddleCenter" { enum { UpperLeft; UpperCenter; UpperRight; MiddleLeft; MiddleCenter; MiddleRight; LowerLeft; LowerCenter; LowerRight } }
+		
+		color tint = "255,255,255,255"
+		color text_tint = "138,132,118,255"
+		float text_size = 18
+		bool auto_sizing = true
+	}
+	
+	header_formatting
+	{
+		Normal : TableColumn.Formatting
+		Hover : TableColumn.Formatting
+		Selected : TableColumn.Formatting
+		Disbaled : TableColumn.Formatting
+	}
+	
+	cell_formatting
+	{
+		Normal : TableColumn.Formatting
+		Hover : TableColumn.Formatting
+		Selected : TableColumn.Formatting
+		Disbaled : TableColumn.Formatting
+	}
+	
+}
+
+
+def ActionTargetTable : Table
+{
+	title = "Action Target Table"
+	tooltip = "Action Target Table tooltip"
+}
+
+
+def TestActionTargetTable : Table
+{
+	title = "Action Target Table"
+	tooltip = "Action Target Table tooltip"
+	
+	column_list
+	{
+		base_data : KingodmColumn
+		{
+			title = "Kingdom"
+			header_height = 45
+			row_height = 25
+			//width = 120
+			//icon = "Assets/_DeleteMe_/ref_CharacterIcon.PNG:ref_CharacterIcon#2" //GUID:ce70d0ecf45fdda40be28e1b7ee81639
+			
+		}
+		
+		row_2 : CharacterColumn
+		{
+			title = "King"
+			cell_formatting
+			{
+				Normal
+				{
+					alignment = "MiddleLeft"
+					//color tint = "0,255,0,255"
+				}
+			}
+			cell_icon_value = (obj.king)
+			text = "[{obj.king}|No King??!!?]"
+		}
+	}
+}
+
+def GovernActionTargetTable : Table
+{
+	column_list
+	{
+		realm : RealmColumn
+		
+		governor : CharacterColumn
+		{
+			title = "Governor"
+			cell_value = ""
+			cell_icon_value = (obj.governor)
+		}
+	}
+}
+
+
+def TradeWithKingdomActionTargetTable : Table
+{
+	title = "Trade with kingdom"
+	tooltip = "Trade with kingdom Action tooltip"
+	
+	column_list
+	{
+		base_data : KingodmColumn
+		{
+			title = "Kingdom"
+		}
+		// succes chanage (int filed or Action field ?)
+		succes_chance : TableColumn
+		{
+			cell_value = "{succes_chance}"
+			cell_icon_value
+		}
+		// cost (int field)
+		action_cost : ResourcesColumn
+		{
+			cell_value = "{cost}"
+			
+		}
+		// upkeep in commarce (resource filed )
+		upkeep : ResourcesColumn
+		{
+			cell_value = "{upkeep}"
+			
+		}
+		// income (in gold ) (resource filed )
+		projected_ioncome : ResourcesColumn
+		{
+			cell_value = "{profit}"
+		}
+		target : TableColumn
+		{
+			cell_value = "{target}"
+			cell_icon_value
+		}
+		
+	}
+}
+
+
+def ActionArgumentTable : Table
+{
+	title = "Action Argument Table"
+	tooltip = "Action Argument Table tooltip"
+}
+
+
+def CharacterColumn : TableColumn
+{
+	title = "CharacterColumn"
+	title_tooltip = "CharacterColumn tootlip"
+	width = 300
+	//icon = "Assets/_DeleteMe_/ref_CharacterIcon.PNG:ref_CharacterIcon#2" //GUID:ce70d0ecf45fdda40be28e1b7ee81639
+	cell_icon_value = (obj)
+}
+
+def CharacterTitleColumn : TableColumn
+{
+	title = "CharacterTitleColumn"
+	title_tooltip = "CharacterTitleColumn tootlip"
+	width = 50
+	
+}
+
+def KingodmColumn : TableColumn
+{
+	title = "Kingodm Column"
+	title_tooltip = "Kingdom Column tootlip"
+	width = 150
+	icon_value = (obj)
+	text = "{obj}"
+}
+
+// not implemnted ( maybe custom function call?)
+def RelationColumn : TableColumn
+{
+	title = "Relation Column"
+	title_tooltip = "Kingdom Column tootlip"
+	width = 50
+	
+	// relation with player's kingodm 
+	
+}
+
+def RealmColumn : TableColumn
+{
+	title = "Realms"
+	title_tooltip = "Realms tootlip"
+	width = 120
+	cell_value = "{obj.name}"
+	cell_icon_value = (obj)
+}
+
+def ResourcesColumn : TableColumn
+{
+	title = "Resource"
+	title_tooltip = "Resource tootlip"
+	width = 120
+	cell_value = "{obj.name}"
+	cell_icon_value = null
+}
+
+def GenericValueColumn : TableColumn
+{
+	alignment = "MiddleLeft"
+	title = "Generic Value"
+	title_tooltip = "Generic Value tootlip"
+	width = 120
+	//cell_value = (obj.name)
+	cell_icon_value = "null"
+}
+
+
+
+// Province icon OR governor portrait OR disorder icon OR siege icon OR occupied icon . 
+// The province icon is only visible when there is no governor, and it is split into four separate icon variations mapped to the level of the town. 
+// Disorder icon is if the town is in disorder (make this a version of the province icon, but for now we will link one icon without variations)
+// Siege icon is if the town is beseiged by an enemy
+// Occupied icon is shown if the town is occupied by rebels, in addition to the striped visuals over the entire row (see additional functionalities below for more info).
+
+
+def ProvinceOverviewTable : Table
+{
+	title = "Province Economy"
+	tooltip = "Province selector tooltip"
+	
+	
+	row_settings : TableRow
+	{
+		horizontal_spacing = 1
+		vertical_spacing = 1
+		
+		odd
+		{
+			Normal : TableRow.Formatting
+			{
+				tint = "41,41,41" //292929FF
+			}
+			Hover : TableRow.Formatting
+			{
+				tint = "74,66,66" //4B4343FF
+			}
+			Selected : TableRow.Formatting
+			{
+				tint = "68,69,68" //444544FF
+			}
+			Disbaled : TableRow.Formatting
+			{
+				tint = "14,12,12" //0E0D0DFF
+			}
+		}
+		even
+		{
+			Normal : TableRow.Formatting
+			{
+				tint = "49,48,49" //313031FF
+			}
+			Hover : TableRow.Formatting
+			{
+				tint = "74,66,66" //4B4343FF
+			}
+			Selected : TableRow.Formatting
+			{
+				tint = "57,59,57" //393B39FF
+			}
+			Disbaled : TableRow.Formatting
+			{
+				tint = "14,12,12" //0E0D0DFF
+			}
+		}
+	}
+	
+	column_settings : TableColumn
+	{
+		header_height = 43
+		title = ""
+		header_formatting
+		{
+			Normal
+			{
+				tint = "255,255,255"
+				text_tint = "199,180,162,255"
+			}
+			Hover
+			{
+				tint = "255,255,255"
+				text_tint = "199,180,162,255"
+			}
+			Selected
+			{
+				tint = "255,255,255"
+				text_tint = "199,180,162,255"
+			}
+			Disbaled
+			{
+				tint = "255,255,255"
+				text_tint = "199,180,162,255"
+			}
+		}
+		cell_formatting
+		{
+			
+			Normal
+			{
+				tint = "0,0,0,0"
+				text_tint = "199,180,162,255"
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleRight"
+				text_alignment = "Left"
+			}
+			Hover
+			{
+				tint = "0,0,0,0"
+				text_tint = "199,180,162,255"
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleRight"
+				text_alignment = "Left"
+			}
+			Selected
+			{
+				tint = "0,0,0,0"
+				text_tint = "199,180,162,255"
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleRight"
+				text_alignment = "Left"
+			}
+			Disbaled
+			{
+				tint = "0,0,0,0"
+				text_tint = "199,180,162,255"
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleRight"
+				text_alignment = "Left"
+			}
+		}
+	}
+	
+	column_settings_right_aligned_text : column_settings
+	{
+		cell_formatting
+		{
+			Normal
+			{
+				text_alignment = "Right"
+			}
+			Hover
+			{
+				text_alignment = "Right"
+			}
+			Selected
+			{
+				text_alignment = "Right"
+			}
+			Disbaled
+			{
+				text_alignment = "Right"
+			}
+		}
+	}
+	
+	column_list
+	{
+		castle_icon : column_settings
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:castle_icon#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:castle_icon#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:castle_icon#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_1.tga:Icon_ProvinceOverviewWindow_Col_1#2" //GUID:1b4145f6c476ae241b9e9c3061e854d9
+			//title = "Province"
+			//header_tooltip_caption = "Town level/Governor"
+			header_tooltip_body = "Province state{p}{p}{i}Shows if a province is goverened, occupied, in disorder or under siege.{/i}"
+			case show_governo = (realm.castle.governor)
+			{
+				cell_icon_value = (realm.castle.governor)
+				{
+					width = 26
+					height = 28
+					variant = "compact_simple"
+				}
+			}
+			case show_realm_icon = (!realm.castle.governor)
+			{
+				cell_icon_value = (obj)
+				{
+
+					width = 28
+					height = 28
+				}
+			}
+			
+			cell_formatting
+			{
+				Normal
+				{
+					alignment = "MiddleCenter"
+					padding
+					{
+						left = 0
+						right = 0
+					}
+				}
+			}
+			cell_value = ""
+			width = 35
+			sort_value = (castle.governor != null)
+			update_interval = 5
+		}
+		
+		// Province name (+ kingdom icon, if there is foreign population majority within).
+		town_name : column_settings
+		{
+			update_interval = 5
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:town_name#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:town_name#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:town_name#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_2.tga:Icon_ProvinceOverviewWindow_Col_2#2" //GUID:71f9f9de4b0a9a14a82f1db961a5e159
+			header_tooltip_body = "Town name{p}{p}{i}Also shows if a foreign kingdom holds the population’s majority{/i}"
+			
+			cell_icon_value = (majority_kingdom)
+			{
+				variant = "compact"
+				width = 25
+				height = 31
+				show_condition = (pop_majority_foreign)
+				tooltip : ProvinceLoyalty
+			}
+			cell_formatting
+			{
+				Normal
+				{
+					alignment = "MiddleLeft"
+				}
+			}
+			width = 180
+			sort_value = "castle_name"
+		}
+		total_settlements : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			//title = "Settlements"
+			header_tooltip_body = "Total settlement count"
+			cell_value = "{obj.settlements_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_All.psd:Icon_ProvinceOverviewWindow_All#2" //GUID:70ef6c27c8856724bbb911768f285058
+			sort_value = (obj.settlements_count)
+		}
+		keeps : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_tooltip_body = "Castles"
+			cell_value = "{obj.keeps_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Keeps.psd:Icon_ProvinceOverviewWindow_Keeps#1" //GUID:531cd471bb49fcc469a297b792afabd5
+			sort_value = (obj.keeps_count)
+		}
+		villages : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_tooltip_body = "Villages"
+			cell_value = "{obj.villages_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Villages.psd:Icon_ProvinceOverviewWindow_Villages#2" //GUID:988b0aa537c1a0f41834a44758153398
+			sort_value = (obj.villages_count)
+		}
+		religious_settlements : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_tooltip_body = "Religious settlements"
+			cell_value = "{obj.religious_settlements_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Monasteries.psd:Icon_ProvinceOverviewWindow_Monasteries#2" //GUID:ed64e8822faf1434ea92b61e7061fbb6
+			sort_value = (obj.religious_settlements_count)
+		}
+		crop_farms : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_tooltip_body = "Crop Farms"
+			cell_value = "{obj.farms_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Farms.psd:Icon_ProvinceOverviewWindow_Farms#2" //GUID:01eda29fd7f6e664f9bc67e81beb4dda
+			sort_value = (obj.farms_count)
+		}
+		costal_settlements : column_settings_right_aligned_text
+		{
+			update_interval = 0
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:settlements#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:settlements#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:settlements#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_tooltip_body = "Coastal settlements"
+			cell_value = "{obj.coastal_settlements_count}"
+			cell_icon_value = ""
+			width = 52
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Coastal.psd:Icon_ProvinceOverviewWindow_Coastal#2" //GUID:390c389addf6097409ffbc7bf497f90a
+			sort_value = (obj.coastal_settlements_count)
+		}
+		
+		// Gold income (+ trade center icon, if the province is a TC.)
+		gold_income : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:gold_income#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:gold_income#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:gold_income#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			//title = "Gold Income"
+			header_tooltip_body = "Gold income{p}{p}{i}Also shows if a province is a trade center{/i}"
+			cell_value = "{obj.incomes.gold.TAXED:F1}"
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_4.png:Icon_ProvinceOverviewWindow_Col_4#2" //GUID:eff80c08161a46d4d9ed2ef82cd4904b
+			cell_icon_value = (realm)
+			{
+				width = 20
+				height = 20
+				show_condition = (realm.is_trade_center)
+				prefab prefab = "Assets/UI/ObjectIcons/UIP_TradeCenterIcon.prefab" //GUID:71c7c09e552426f4e8797129f8ae6daf
+			}
+			width = 60
+			sort_value = (obj.incomes.gold.TAXED)
+		}
+		
+		commerce : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:commerce#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:commerce#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:commerce#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_5.png:Icon_ProvinceOverviewWindow_Col_5#2" //GUID:925ed94898a3d0b47be662ca58747413
+			//title = "Commerce"
+			header_tooltip_body = "Trade"
+			cell_icon_value = ""
+			cell_value = "{obj.incomes.trade.TAXED:F1}"
+			width = 60
+			sort_value = (obj.incomes.trade.TAXED)
+		}
+		
+		// Books income
+		books_income : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:books_income#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:books_income#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:books_income#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_6.png:Icon_ProvinceOverviewWindow_Col_6#2" //GUID:f451fe45ab9b1bd419e21def8b7f21d9
+			//title = "Books Income"
+			header_tooltip_body = "Books income"
+			cell_value = "{obj.incomes.books.TAXED:F1}"
+			cell_icon_value = ""
+			width = 60
+			sort_value = (obj.incomes.books.TAXED)
+		}
+		
+		// Piety income 
+		// (+ province religion icon, if it's different than the kingdom one). Show the kingdom religion icon as the column's main icon.
+		faith_income : column_settings_right_aligned_text
+		{
+			width = 60
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:faith_income#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:faith_income#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:faith_income#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_7.png:Icon_ProvinceOverviewWindow_Col_7#2" //GUID:608e0776a56771e4a9a913ef24fedca1
+			//title = "Faith Income"
+			header_tooltip_body = "{kingdom.religion.piety} income{p}{p}{i}Also shows if a province follows a different religion than the kingdom’s one{/i}"
+			cell_value = "{obj.incomes.piety.TAXED:F1}"
+			cell_icon_value = ""
+			sort_value = (obj.incomes.piety.TAXED)
+			// cell_icon_value = (realm)
+			// {
+			// 	width = 22
+			// 	height = 22
+			// 	show_condition = (religion != kingdom.religion)
+			// 	prefab prefab = "Assets/UI/ObjectIcons/UIP_RealmReligionIcon.prefab" //GUID:c4d277213a1822f4abe90a4fef88d310
+			// }
+			
+			// cell_formatting
+			// {
+			// 	Normal
+			// 	{
+			// 		alignment = "MiddleLeft"
+			// 	}
+			// }
+		}
+		
+		// Food - show food income
+		food_production : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:food_production#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:food_production#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:food_production#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_8.png:Icon_ProvinceOverviewWindow_Col_8#2" //GUID:7a827cccfea77914591adf29e883d480
+			//title = "Food production"
+			header_tooltip_body = "Food production"
+			cell_value = "{obj.incomes.food.TAXED:F1}"
+			cell_icon_value = ""
+			sort_value = (obj.incomes.food.TAXED)
+			width = 60
+		}
+		
+		// Levies
+		levies : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:levies#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:levies#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:levies#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_11.png:Icon_ProvinceOverviewWindow_Col_11#2" //GUID:b7d7d2fe336f93b4d9f70037c924270f
+			//title = "Levies"
+			header_tooltip_body = "Levies"
+			cell_value = "{obj.incomes.levy.TAXED:F1}"
+			cell_icon_value = ""
+			sort_value = (obj.incomes.levy.TAXED)
+			width = 55
+		}
+		
+		population : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:population#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:population#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:population#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_9.png:Icon_ProvinceOverviewWindow_Col_9#2" //GUID:a357693126ee714458e37f750bff12db
+			//title = "Population"
+			header_tooltip_body = "Population"
+			//cell_value = "{obj.castle.workers}/{obj.castle.worker_slots}"
+			cell_value = "[{obj.castle.has_rebellious_population:if}{clr:red}{obj.castle.workers}{/clr}/{obj.castle.worker_slots}|{obj.castle.workers}/{obj.castle.worker_slots}]"
+			cell_icon_value = ""
+			width = 60
+			sort_value = (obj.castle.worker_slots)
+		}
+		
+		rebellion_risk : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:rebellion_risk#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:rebellion_risk#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:rebellion_risk#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_10.tga:Icon_ProvinceOverviewWindow_Col_10#2" //GUID:67d6046e290f689489dbf25bdd943c9f
+			header_tooltip_body = "Local stability{p}{p}{i}Also shows if there is hostile rebel presence in the province{/i}"
+			cell_value = "{obj.rebellion_risk:bonus}" // how to get Rebellious population?
+			cell_icon_value = ""
+			sort_value = (obj.rebellion_risk)
+			width = 60
+			icon = "Assets/UI/Elements/Rebels/Icons/Icon_RebelCrest_Normal.png:Icon_RebelCrest_Normal#2" //GUID:a4b86c86ef1940641883cbe429eeba67
+			{
+				width = 24
+				height = 28
+				show_condition = (castle.num_rebels > 0)
+				tooltip = "ProvinceOverviewRebelsTooltip"
+			}
+			cell_formatting
+			{
+				Normal
+				{
+					padding
+					{
+						left = 2
+					}
+				}
+			}
+		}
+		
+		manpower : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:manpower#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:manpower#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:manpower#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_12.png:Icon_ProvinceOverviewWindow_Col_12#2" //GUID:f91d7d76d6b3e4b4db131187f52b5774
+			header_tooltip_body = "Manpower of garrison and stationed army{p}{p}{i}Also shows there is a stationed army in town{/i}"
+			cell_value = "{obj.castle.manpower}" // how to get Rebellious population?
+			cell_icon_value = ""
+			sort_value = (obj.castle.manpower)
+			icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icon_ProviceOverview_StationedArmy.psd:Icon_ProviceOverview_StationedArmy#2" //GUID:2b0967feb1749364a8bb4918da278a02
+			{
+				width = 18
+				height = 18
+				show_condition = (castle.army != null)
+			}
+			cell_formatting
+			{
+				Normal
+				{
+					padding
+					{
+						left = 2
+						right = 3
+					}
+					alignment = "MiddleCenter"
+				}
+			}
+			width = 60
+		}
+		
+		// Siege defense (X/Y)
+		siege_defense : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:siege_defense#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:siege_defense#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:siege_defense#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_13.tga:Icon_ProvinceOverviewWindow_Col_13#2" //GUID:fd8111b4d14215049992ae0d945c12c7
+			header_tooltip_body = "Siege defense"
+			cell_value = "{obj.castle.cur_siege_defence}/{obj.castle.max_siege_defence}"
+			cell_icon_value = ""
+			width = 75
+			sort_value = (obj.castle.max_siege_defence)
+		}
+		
+		// Produced goods (amount, with number)
+		produced_goods : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:produced_goods#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:produced_goods#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:produced_goods#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_14.tga:Icon_ProvinceOverviewWindow_Col_14#2" //GUID:7a4e15cbda1866845a4ad26fe22713bc
+			header_tooltip_body = "Number of produced goods"
+			cell_value = "{obj.num_goods}"
+			cell_icon_value = ""
+			sort_value = (obj.num_goods)
+			width = 55
+		}
+		
+		// Building - if a building is under construction, show its icon with the progress. If no building is being constructed, show a number indicating how many are constructed (show a single number, and not X/Y). The number should be GREEN, if all slots are filled (currently 7).
+		buildings : column_settings_right_aligned_text
+		{
+			header_background = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background.png:buildings#1" //GUID:0da270cb7d15ce64f8486a8b68ca34b2
+			header_background_over = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Over.png:buildings#1" //GUID:14bc0c70a7ce10f48a894cde9080c6ea
+			header_background_select = "Assets/UI/Elements/ProvinceOverviewWindow/Header_Table_Icon_Background_Selected.png:buildings#1" //GUID:287c8fef01b53964cab9e7eeca30d9be
+			header_icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_16.tga:Icon_ProvinceOverviewWindow_Col_16#2" //GUID:bd86cf4b721e8af4bbe25cce24b37ef8
+			header_tooltip_body = "Current construction / Constructed buildings"
+			
+			// case show_building_progress = (realm.castle.current_build != null)
+			// {
+			// 	cell_value = ""
+			// 	cell_icon_value = (realm)
+			// 	{
+			// 		width = 50
+			// 		height = 30
+			// 		prefab prefab = "Assets/UI/Settlements/UIP_BuildingInProgressIcon.prefab" //GUID:52b28d41793ec834097d4bb41bb2426f
+			// 	}
+			// }
+			// case show_building_progress_planned = (realm.castle.has_planned)
+			// {
+			// 	cell_value = "{castle.num_buildings}/{castle.max_buildings}"
+			// 	cell_icon_value = ""
+			// 	icon = "Assets/UI/Elements/ProvinceOverviewWindow/Icons/Icon_ProvinceOverviewWindow_Col_13.tga:Icon_ProvinceOverviewWindow_Col_13#2" //GUID:fd8111b4d14215049992ae0d945c12c7
+			// 	{
+			// 		width = 30
+			// 		height = 30
+			// 	}
+			// }
+			case default
+			{
+				cell_value = "{castle.num_buildings}/{castle.max_buildings}"
+				cell_icon_value = ""
+			}
+			
+			// show icon (greeen arrow) if we have (pending wishlisted item)
+			cell_formatting
+			{
+				Normal
+				{
+					alignment = "MiddleCenter"
+					padding
+					{
+						left = 6
+						right = 6
+					}
+				}
+			}
+			width = 56
+			sort_value = (castle.num_buildings)
+		}
+		
+	}
+	
+}
+
+def TableHeaderTooltip : Tooltip
+{
+	caption = "{header_tooltip_caption}"
+	text = "{header_tooltip_body}"
+}
+
+
+//////////////////////////////////////////////////////////
+/////////////////// MULTIPLAYER BROWSER //////////////////
+
+
+def MultiplayerBrowserTable : Table
+{
+	
+	row_settings : TableRow
+	{
+		horizontal_spacing = 1
+		vertical_spacing = 1
+		
+		odd
+		{
+			Normal : TableRow.Formatting
+			{
+				tint = "41,41,41" //292929FF
+			}
+			Hover : TableRow.Formatting
+			{
+				tint = "74,66,66" //4B4343FF
+			}
+			Selected : TableRow.Formatting
+			{
+				tint = "68,69,68" //444544FF
+			}
+			Disbaled : TableRow.Formatting
+			{
+				tint = "14,12,12" //0E0D0DFF
+			}
+		}
+		even
+		{
+			Normal : TableRow.Formatting
+			{
+				tint = "49,48,49" //313031FF
+			}
+			Hover : TableRow.Formatting
+			{
+				tint = "74,66,66" //4B4343FF
+			}
+			Selected : TableRow.Formatting
+			{
+				tint = "57,59,57" //393B39FF
+			}
+			Disbaled : TableRow.Formatting
+			{
+				tint = "14,12,12" //0E0D0DFF
+			}
+		}
+	}
+	
+	column_settings : TableColumn
+	{
+		header_height = 40
+		title = ""
+		header_formatting
+		{
+			Normal
+			{
+				tint = "255,255,255"
+				text_tint = "41,40,40,255" //292828
+				text_size = 20
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				text_alignment = "Center"
+			}
+			Hover
+			{
+				tint = "255,255,255"
+				text_tint = "41,40,40,255" //292828
+				text_size = 20
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				text_alignment = "Center"
+			}
+			Selected
+			{
+				tint = "255,255,255"
+				text_tint = "41,40,40,255" //292828
+				text_size = 20
+				padding
+				{
+					left = 6
+					right = 6
+				}
+			}
+			Disbaled
+			{
+				tint = "255,255,255"
+				text_tint = "41,40,40,255" //292828
+				text_size = 20
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				text_alignment = "Center"
+			}
+		}
+		cell_formatting
+		{
+			
+			Normal
+			{
+				tint = "0,0,0,0"
+				text_tint = "207,191,148,255" //CFBF94
+				text_size = 16
+				text_min_size = 10
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleCenter"
+				text_alignment = "Center"
+			}
+			Hover
+			{
+				tint = "0,0,0,0"
+				text_tint = "207,191,148,255" //CFBF94
+				text_size = 16
+				text_min_size = 10
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleCenter" //CFBF94
+				text_alignment = "Center"
+			}
+			Selected
+			{
+				tint = "0,0,0,0"
+				text_tint = "207,191,148,255" //CFBF9
+				text_size = 16
+				text_min_size = 10
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleRight"
+				text_alignment = "Center"
+			}
+			Disbaled
+			{
+				tint = "0,0,0,0"
+				text_tint = "207,191,148,255" //CFBF94
+				text_size = 16
+				text_min_size = 10
+				padding
+				{
+					left = 6
+					right = 6
+				}
+				alignment = "MiddleCenter"
+				text_alignment = "Center"
+			}
+		}
+	}
+	
+	column_list
+	{
+		
+		// game mode icon 
+		// campaign name 
+		// game mode name 
+		// team mode
+		
+		game_mode_icon : column_settings
+		{
+			header_tooltip_caption = "Victory rules"
+			header_tooltip_body = "Goals that the players need to achieve to win the campaign."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Left#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			header_icon = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Campaign.psd:Element_GamesBrowser_TableHeader_Campaign#2" //GUID:d8753c44634afa34cad39710c4ef2d2b
+			{
+				width = 28
+				height = 28
+			}
+			cell_icon_value = (minor_victory)
+			{
+				width = 30
+				height = 30
+				prefab prefab = "Assets/UI/Title/Multiplayer/Campaigns/UIP_CampaignIcon.prefab" //GUID:6f732cc253ddb1e44b496513513e9926
+			}
+			cell_formatting
+			{
+				Normal
+				{
+					alignment = "MiddleCenter"
+					padding
+					{
+						left = 0
+						right = 0
+					}
+				}
+			}
+			cell_value = ""
+			width = 48
+			sort_value = (main_goal_index)
+		}
+		
+		game_mode : column_settings
+		{
+			header_tooltip_caption = "Victory rules"
+			header_tooltip_body = "Goals that the players need to achieve to win the campaign."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{main_goal}"
+			cell_icon_value = ""
+			width = 172
+			title = "Game mode"
+			sort_value = "cell_value"
+		}
+		
+		campaign_name : column_settings
+		{
+			header_tooltip_caption = "Campaign name"
+			header_tooltip_body = "Name of the campaign, given by its creator."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "[{custom_campaign_name}|{owner_name}'s campaign]"
+			width = 276
+			title = "Campaign name"
+			cell_icon_value = (client_version)
+			{
+				width = 22
+				height = 22
+				prefab prefab = "Assets/UI/Misc/UIP_VersonCompatibilityIcon.prefab" //GUID:d886f249f0ca4fa438593e73d6d53041
+			}
+			sort_value = "cell_value"
+		}
+		
+		team_mode : column_settings
+		{
+			header_tooltip_caption = "Team mode"
+			header_tooltip_body = "Possible player to player interactions and whether they try together to complete a common goal, or fight against each other.{p}Games can be 'free for all', 'cooperative' and 'team'."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{team_size}"
+			cell_icon_value = ""
+			width = 127
+			title = "Team mode"
+			sort_value = (team_size_index)
+		}
+		
+		players : column_settings
+		{
+			header_tooltip_caption = "Number of players"
+			header_tooltip_body = "The first number indicates number of players that have already joined and the second - total number of players, that are allowed in the campaign."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{player_cnt}/{max_players}"
+			cell_icon_value = ""
+			width = 123
+			title = "Players"
+			sort_value = (player_cnt)
+		}
+		
+		period : column_settings
+		{
+			header_tooltip_caption = "Starting period"
+			header_tooltip_body = "Starting period determines which kingdoms exist initially, as well as their size, religion and other parameters."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{start_period}"
+			cell_icon_value = ""
+			width = 142
+			title = "Period"
+			sort_value = (start_period_index)
+		}
+		
+		pick : column_settings
+		{
+			header_tooltip_caption = "Kingdom pick"
+			header_tooltip_body = "This setting determines whether players can pick kingdoms or provinces, or will get random ones."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{pick_kingdom}"
+			cell_icon_value = ""
+			width = 161
+			title = "Picks"
+			sort_value = (pick_kingdom_index)
+		}
+		
+		kingdom_size : column_settings
+		{
+			header_tooltip_caption = "Kingdom size"
+			header_tooltip_body = "Number of provinces to which each player's kingdom will be set in the beginning of the campaign."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{kingdom_size}"
+			cell_icon_value = ""
+			width = 116
+			title = "Size"
+			sort_value = (kingdom_size_index)
+		}
+		
+		difficulty : column_settings
+		{
+			header_tooltip_caption = "Difficulty"
+			header_tooltip_body = "Most of all AI kingdoms' power and aggression towards players are determined by this setting."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{ai_difficulty}"
+			cell_icon_value = ""
+			width = 142
+			title = "Difficulty"
+			sort_value = (ai_difficulty_index)
+		}
+		
+		time_limit : column_settings
+		{
+			header_tooltip_caption = "Time limit"
+			header_tooltip_body = "In campaigns with time or generation limit, players have a limited amount of time (or kings' generations) to achieve victory. If no player achieves victory in the given period, all players lose."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Normal#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			cell_value = "{time_limit}"
+			cell_icon_value = ""
+			width = 175
+			title = "Time limit"
+			sort_value = (time_limit_index)
+		}
+		
+		mod_compability : column_settings
+		{
+			header_tooltip_caption = "Mods"
+			header_tooltip_body = "Modifications of the game (if any), chosen for this campaign."
+			header_background = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Backgraund.png:Right#1" //GUID:5876fd1c09bf09c4c8300d50ff99898c
+			header_icon = "Assets/UI/Elements/Title/Element_GamesBrowser_TableHeader_Mod.psd:Element_GamesBrowser_TableHeader_Mod#2" //GUID:cb4aa8570b6ef54409fe0fefb9695f2d
+			cell_value = ""
+			//cell_icon_value = ""
+			width = 48
+			title = ""
+			cell_icon_value = (mod_id)
+			{
+				width = 30
+				height = 30
+				prefab prefab = "Assets/UI/Mods/UIP_ModCompatibilityIcon.prefab" //GUID:261c42664703d994b8acb771f2616709
+			}
+		}
+	}
+	
+}

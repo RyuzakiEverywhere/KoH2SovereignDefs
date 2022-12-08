@@ -1,0 +1,178 @@
+﻿def Quest
+{
+	
+	//texts
+	text name
+	text tooltip
+	text short_description
+	text long_description
+	sprite icon
+	
+	string category //primary or secondary ? do we need this
+	string owner_type
+	string target_type
+	bool auto_complete = false
+	float activation_delay = 0
+	
+	complete_conditions
+	outcome
+
+	
+	// relevant events 
+	evaluate_activate_events // = ["add_courte_member"]
+	evaluate_complete_events // = ["realm_changed", "add_courte_member"]
+	
+	float ai_chance = 0
+}
+
+template UnionQuest : Quest
+{
+	owner_type = "Kingdom"
+	target_type = "Kingdom"
+
+	tooltip = "{short_description}{p}Your coat of arms and kingdom name will be permanently changed.{p}{p}{i}Click to decide what to do{/i}"
+
+	ai_chance = 100
+	complete_conditions
+	{
+		 no_existing_kingdom = (outcome.unlock_union)
+	}
+    outcome
+	{
+		rel_change_with_eligible = "rel_unite_kingdom_to_other_eligible"
+		crown_authority = 2
+		fame = 500
+	}
+
+}
+
+UnionQuests
+
+def RestoreQuest : Quest
+{
+	name = "Restore Quest"
+	tooltip = "Gain control over realms historic to your kingdom"
+	short_description "Free realms historical to your kingdom"
+	long_description = "Realms which we have rightful claims over are suffering under foreign rule! We must free them, as our claims over them dictate."
+	
+	owner_type = "Kingdom"
+	target_type = "Kingdom"
+	
+	// as this condistions are set in stoe we can ommit them 
+	activate_conditions
+	{
+		own_historical_provinces
+	}
+	
+	complete_conditions
+	{
+		own_historical_provinces
+	}
+	
+	outcome
+	{
+		// stuff
+	}
+	
+	evaluate_activate_events = ["realm_changed","new_game"]
+	evaluate_complete_events = ["realm_changed"]
+}
+
+
+def ExpansionQuest : Quest
+{
+	name = "Expansion Quest"
+	tooltip = "Gain control over realms historic to your kingdom"
+	short_description "Free realms historical to your kingdom"
+	long_description = "Realms which we have rightful claims over are suffering under foreign rule! We must free them, as our claims over them dictate."
+	
+	category = "Secondary"
+	
+	owner_type = "Kingdom"
+	target_type = "Kingdom"
+	
+	activate_conditions
+	{
+		less_or_equal active_quests_for_categroy = 0 // 0 active quest from the same category
+		less_or_equal own_realms = 5 // less that 5 provinces 
+		less_or_equal num_wars = 1 // less that 1 war
+		equal own_trade_center = 1
+		more_or_equal own_marshals = 4
+		
+	}
+	
+	complete_conditions
+	{
+		equal conquered_realms = 100 //percentage. or a bool value, instead of equal?
+		{
+			text message = "Conquer all provinces"
+		}
+	}
+	
+	fail_conditions
+	{
+		//you are defeated. aka none!
+	}
+	
+	// rework as outcome !!
+	outcome
+	{
+		objective_base = 30
+		objective_add = 5
+	}
+	
+	evaluate_activate_events = ["realm_changed"]
+	evaluate_complete_events = ["realm_changed"]
+}
+
+
+//SECONDARY QUESTS (in separate def?)
+
+def CommerceQuest : Quest
+{
+	name = "Trade monopoly"
+	tooltip = "Achieve trade monopoly by controlling trade centers"
+	short_description "Achieve trade monopoly by controlling trade centers"
+	long_description = "Become the wealthiest kingdom by controlling the most trade centers."
+	
+	category = "Secondary"
+	
+	owner_type = "Kingdom"
+	target_type = "Kingdom"
+	
+	activate_conditions
+	{
+		more_or_equal num_realms = 1
+		equal has_idea = "some_idea"
+		more_or_equal gold_income = 1000
+		more_or_equal inflation = -30
+		//more_or_equal has_alliance = 2
+	}
+	
+	complete_conditions
+	{
+		more_or_equal own_trade_center = 1
+	}
+	
+	rewards
+	{
+		objective_base = 30
+		objective_add = 5
+	}
+	
+	evaluate_activate_events = ["timer"]
+	evaluate_complete_events = ["trade_center_change"]
+}
+
+def UnionKingdom
+{
+	color map_color
+	color primary_color = 0,0,255 //0000FFFF
+	color secondary_color = 255,255,0 //FFFF00FF
+	Religion religion
+	string culture
+	Nobility nobility_key
+	string nobility_level = "Kingdom" { enum { Duchy; Kingdom; Empire } }
+	Names names_key
+	coat_of_arms_index = 0
+}

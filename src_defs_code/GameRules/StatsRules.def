@@ -1,0 +1,45 @@
+template StatsRule : GameRule
+{
+	target { object obj }
+	condition execute = false	
+}
+
+def WarStatsRule : StatsRule
+{
+	triggers 
+	{ 
+		war started
+		war supporter_joined
+		war supporter_left
+		war war_concluded
+
+		kingdom war_draw
+		kingdom war_won
+		any_kingdom war_lost
+		any_kingdom defeat
+	} 
+}
+
+def DefensivePactStatsRule : StatsRule
+{
+	triggers 
+	{ 
+		defensive_pact started
+		defensive_pact supporter_joined
+		defensive_pact supporter_left
+		defensive_pact dissolved
+		defensive_pact activated
+	} 
+}
+
+def OffensivePactStatsRule : StatsRule
+{
+	triggers 
+	{ 
+		offensive_pact started
+		offensive_pact supporter_joined
+		offensive_pact supporter_left
+		offensive_pact dissolved
+		offensive_pact activated
+	} 
+}
